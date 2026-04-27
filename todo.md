@@ -1,0 +1,27 @@
+# Project TODO
+
+- [x] Configure theme colors (heritage green/sandstone palette)
+- [x] Install react-native-maps and expo-location
+- [x] Create landmark data with geocoordinates (50+ landmarks)
+- [x] Create BAHA walking tour data with routes
+- [x] Build Map screen with interactive markers
+- [x] Build marker category filtering (civic, residential, religious, commercial, educational)
+- [x] Build bottom sheet for landmark preview on marker tap
+- [x] Build Tours tab with tour list
+- [x] Build Tour Detail screen with stops list
+- [x] Build Landmarks tab with searchable/filterable list
+- [x] Build Landmark Detail screen with full property info
+- [x] Add tour route polylines on map
+- [x] Add tab bar with Map, Tours, Landmarks tabs
+- [x] Add icon mappings for tab bar icons
+- [x] Generate app icon and branding
+- [x] Polish UI and interactions
+- [x] Add web-compatible map fallback for browser preview
+- [ ] Add landmark photos (Wikimedia/public domain images for each property)
+- [ ] Build favorites system with AsyncStorage persistence
+- [ ] Build visited tracking with AsyncStorage persistence
+- [ ] Add tour progress tracking (visited stops count per tour)
+- [ ] Add Favorites tab or section to browse saved landmarks
+- [ ] Expand landmark dataset to 100+ landmarks
+- [ ] Expand walking tours to 12+ tours from BAHA catalog
+- [ ] Update tests for expanded data and new features
