@@ -5,7 +5,6 @@ import { ScreenContainer } from "@/components/screen-container";
 import { useColors } from "@/hooks/use-colors";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { tours } from "@/data/tours";
-import { landmarks } from "@/data/landmarks";
 import type { Tour } from "@/data/tours";
 
 function TourCard({ tour }: { tour: Tour }) {
@@ -13,7 +12,6 @@ function TourCard({ tour }: { tour: Tour }) {
   const colors = useColors();
 
   const stopCount = tour.stops.length;
-  const firstLandmark = landmarks.find((l) => l.id === tour.stops[0]?.landmarkId);
 
   return (
     <Pressable
@@ -76,7 +74,7 @@ export default function ToursScreen() {
       <View style={styles.screenHeader}>
         <Text style={[styles.screenTitle, { color: colors.foreground }]}>Walking Tours</Text>
         <Text style={[styles.screenSubtitle, { color: colors.muted }]}>
-          Explore Berkeley's architectural heritage with BAHA-inspired walking tours
+          Explore Berkeley&apos;s architectural heritage with BAHA-inspired walking tours
         </Text>
       </View>
       <FlatList
