@@ -1,6 +1,7 @@
 import React from "react";
-import { Text, View, FlatList, Pressable, StyleSheet } from "react-native";
+import { Text, View, FlatList, Pressable, StyleSheet, Platform } from "react-native";
 import { useRouter } from "expo-router";
+import { LinearGradient } from "expo-linear-gradient";
 import { ScreenContainer } from "@/components/screen-container";
 import { useColors } from "@/hooks/use-colors";
 import { IconSymbol } from "@/components/ui/icon-symbol";
@@ -20,13 +21,27 @@ function TourCard({ tour }: { tour: Tour }) {
         styles.tourCard,
         {
           backgroundColor: colors.surface,
-          borderColor: colors.border,
-          opacity: pressed ? 0.8 : 1,
+          opacity: pressed ? 0.85 : 1,
+          ...Platform.select({
+            ios: {
+              shadowColor: "#000",
+              shadowOffset: { width: 0, height: 2 },
+              shadowOpacity: 0.08,
+              shadowRadius: 8,
+            },
+            android: { elevation: 2 },
+            web: { boxShadow: "0 2px 8px rgba(0,0,0,0.08)" },
+          }),
         },
       ]}
     >
-      {/* Color accent bar */}
-      <View style={[styles.accentBar, { backgroundColor: tour.color }]} />
+      {/* Gradient accent bar */}
+      <LinearGradient
+        colors={[tour.color, tour.color + 'AA']}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 0 }}
+        style={styles.accentBar}
+      />
 
       <View style={styles.cardContent}>
         <View style={styles.cardHeader}>
@@ -96,29 +111,28 @@ const styles = StyleSheet.create({
     paddingBottom: 16,
   },
   screenTitle: {
-    fontSize: 32,
+    fontSize: 34,
     fontWeight: "800",
     letterSpacing: -0.5,
   },
   screenSubtitle: {
     fontSize: 15,
     lineHeight: 22,
-    marginTop: 4,
+    marginTop: 2,
   },
   listContent: {
     paddingHorizontal: 16,
     paddingBottom: 100,
   },
   tourCard: {
-    borderRadius: 16,
-    borderWidth: 1,
+    borderRadius: 20,
     overflow: "hidden",
   },
   accentBar: {
     height: 4,
   },
   cardContent: {
-    padding: 16,
+    padding: 18,
   },
   cardHeader: {
     flexDirection: "row",
@@ -129,7 +143,7 @@ const styles = StyleSheet.create({
   tourIcon: {
     width: 44,
     height: 44,
-    borderRadius: 12,
+    borderRadius: 14,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -149,7 +163,7 @@ const styles = StyleSheet.create({
   tourDescription: {
     fontSize: 14,
     lineHeight: 20,
-    marginBottom: 12,
+    marginBottom: 14,
   },
   cardFooter: {
     flexDirection: "row",
