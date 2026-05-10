@@ -39,7 +39,7 @@ interface MapViewWrapperProps {
 }
 
 export function MapMarker(props: MarkerProps) {
-  return <Marker {...props} />;
+  return <Marker {...props} title={undefined} description={undefined} />;
 }
 
 export function MapPolyline(props: PolylineProps) {
