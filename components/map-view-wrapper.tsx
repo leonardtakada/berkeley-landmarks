@@ -39,7 +39,9 @@ interface MapViewWrapperProps {
 }
 
 export function MapMarker(props: MarkerProps) {
-  return <Marker {...props} title={undefined} description={undefined} />;
+  // Use empty title/description to suppress the native callout popup
+  // while keeping onPress functional on iOS (undefined breaks it)
+  return <Marker {...props} title=" " description=" " />;
 }
 
 export function MapPolyline(props: PolylineProps) {
