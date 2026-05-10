@@ -22,16 +22,6 @@ function TourCard({ tour }: { tour: Tour }) {
         {
           backgroundColor: colors.surface,
           opacity: pressed ? 0.85 : 1,
-          ...Platform.select({
-            ios: {
-              shadowColor: "#000",
-              shadowOffset: { width: 0, height: 2 },
-              shadowOpacity: 0.08,
-              shadowRadius: 8,
-            },
-            android: { elevation: 2 },
-            web: { boxShadow: "0 2px 8px rgba(0,0,0,0.08)" },
-          }),
         },
       ]}
     >
@@ -111,9 +101,10 @@ const styles = StyleSheet.create({
     paddingBottom: 16,
   },
   screenTitle: {
-    fontSize: 34,
+    fontSize: 36,
     fontWeight: "800",
     letterSpacing: -0.5,
+    lineHeight: 42,
   },
   screenSubtitle: {
     fontSize: 15,
@@ -125,8 +116,18 @@ const styles = StyleSheet.create({
     paddingBottom: 100,
   },
   tourCard: {
-    borderRadius: 20,
+    borderRadius: 16,
     overflow: "hidden",
+    ...Platform.select({
+      ios: {
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.05,
+        shadowRadius: 4,
+      },
+      android: { elevation: 1 },
+      web: { boxShadow: "0 1px 4px rgba(0,0,0,0.05)" },
+    }),
   },
   accentBar: {
     height: 4,

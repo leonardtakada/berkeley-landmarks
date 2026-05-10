@@ -179,7 +179,7 @@ export default function MapScreen() {
       {activeTour && (
         <View style={[styles.tourBanner, { top: insets.top + 12 }]}>
           <LinearGradient
-            colors={[activeTour.color, activeTour.color + 'DD']}
+            colors={[activeTour.color + 'F0', activeTour.color + 'D0']}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
             style={styles.tourBannerGradient}
@@ -285,7 +285,7 @@ export default function MapScreen() {
               ]}
             >
               <LinearGradient
-                colors={['#30A14E', '#28994A']}
+                colors={['#7B8B6F', '#6B7B5F']}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 0 }}
                 style={styles.detailButtonGradient}
@@ -327,12 +327,12 @@ const styles = StyleSheet.create({
     ...Platform.select({
       ios: {
         shadowColor: "#000",
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.08,
-        shadowRadius: 8,
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.04,
+        shadowRadius: 4,
       },
-      android: { elevation: 3 },
-      web: { boxShadow: "0 2px 8px rgba(0,0,0,0.08)" },
+      android: { elevation: 1 },
+      web: { boxShadow: "0 1px 4px rgba(0,0,0,0.04)" },
     }),
   },
   chipDot: {
@@ -348,18 +348,18 @@ const styles = StyleSheet.create({
     position: "absolute",
     left: 16,
     right: 16,
-    borderRadius: 16,
+    borderRadius: 14,
     zIndex: 10,
     overflow: "hidden",
     ...Platform.select({
       ios: {
         shadowColor: "#000",
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.15,
-        shadowRadius: 12,
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.08,
+        shadowRadius: 8,
       },
-      android: { elevation: 4 },
-      web: { boxShadow: "0 4px 12px rgba(0,0,0,0.15)" },
+      android: { elevation: 3 },
+      web: { boxShadow: "0 2px 8px rgba(0,0,0,0.08)" },
     }),
   },
   tourBannerGradient: {
@@ -392,17 +392,17 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
     ...Platform.select({
       ios: {
         shadowColor: "#000",
-        shadowOffset: { width: 0, height: -6 },
-        shadowOpacity: 0.12,
-        shadowRadius: 16,
+        shadowOffset: { width: 0, height: -2 },
+        shadowOpacity: 0.06,
+        shadowRadius: 12,
       },
-      android: { elevation: 8 },
-      web: { boxShadow: "0 -6px 16px rgba(0,0,0,0.12)" },
+      android: { elevation: 4 },
+      web: { boxShadow: "0 -2px 12px rgba(0,0,0,0.06)" },
     }),
   },
   sheetHandle: {
@@ -456,9 +456,10 @@ const styles = StyleSheet.create({
     borderRadius: 6,
   },
   sheetName: {
-    fontSize: 19,
+    fontSize: 20,
     fontWeight: "700",
-    lineHeight: 24,
+    lineHeight: 26,
+    letterSpacing: -0.2,
     flex: 1,
   },
   sheetClose: {
@@ -490,7 +491,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 3,
-    backgroundColor: "#FF950022",
+    backgroundColor: '#C4956A22',
     paddingHorizontal: 8,
     paddingVertical: 2,
     borderRadius: 8,
@@ -498,11 +499,11 @@ const styles = StyleSheet.create({
   nrText: {
     fontSize: 11,
     fontWeight: "700",
-    color: "#FF9500",
+    color: '#C4956A',
   },
   detailButton: {
     marginTop: 14,
-    borderRadius: 14,
+    borderRadius: 12,
     overflow: "hidden",
   },
   detailButtonGradient: {

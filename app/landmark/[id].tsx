@@ -81,9 +81,9 @@ export default function LandmarkDetailScreen() {
         {/* Status Badges */}
         <View style={styles.badgeRow}>
           {landmark.nationalRegister && (
-            <View style={[styles.statusBadge, { backgroundColor: '#30A14E22' }]}>
-              <IconSymbol name="star.fill" size={14} color="#30A14E" />
-              <Text style={[styles.statusText, { color: '#30A14E' }]}>National Register</Text>
+            <View style={[styles.statusBadge, { backgroundColor: '#7B8B6F22' }]}>
+              <IconSymbol name="star.fill" size={14} color="#7B8B6F" />
+              <Text style={[styles.statusText, { color: '#7B8B6F' }]}>National Register</Text>
             </View>
           )}
           <View style={[styles.statusBadge, { backgroundColor: catColor + '22' }]}>
@@ -196,9 +196,9 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
   heroName: {
-    fontSize: 28,
+    fontSize: 30,
     fontWeight: "800",
-    lineHeight: 34,
+    lineHeight: 36,
     letterSpacing: -0.3,
     marginBottom: 8,
   },
@@ -221,7 +221,9 @@ const styles = StyleSheet.create({
   infoCard: {
     width: "47%",
     padding: 14,
-    borderRadius: 16,
+    borderRadius: 14,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: '#E5E0DB',
   },
   infoLabel: {
     fontSize: 11,
@@ -258,7 +260,9 @@ const styles = StyleSheet.create({
     marginHorizontal: 16,
     marginTop: 16,
     padding: 18,
-    borderRadius: 18,
+    borderRadius: 16,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: '#E5E0DB',
   },
   sectionTitle: {
     fontSize: 18,
