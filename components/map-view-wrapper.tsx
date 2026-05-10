@@ -17,6 +17,8 @@ interface MarkerProps {
   description?: string;
   onPress?: () => void;
   pinColor?: string;
+  tracksViewChanges?: boolean;
+  tracksInfoWindowChanges?: boolean;
   children?: React.ReactNode;
 }
 

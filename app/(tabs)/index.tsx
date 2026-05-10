@@ -113,6 +113,8 @@ export default function MapScreen() {
             description={landmark.address}
             onPress={() => handleMarkerPress(landmark)}
             pinColor={CATEGORY_COLORS[landmark.category]}
+            tracksViewChanges={false}
+            tracksInfoWindowChanges={false}
           />
         ))}
 
