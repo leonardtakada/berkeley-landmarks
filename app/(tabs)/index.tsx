@@ -13,6 +13,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
 import { useColors } from "@/hooks/use-colors";
 import { IconSymbol } from "@/components/ui/icon-symbol";
+import { CategoryPlaceholder } from "@/components/category-placeholder";
 import MapViewWrapper, { MapMarker, MapPolyline, MapPolygon } from "@/components/map-view-wrapper";
 import {
   landmarks,
@@ -250,9 +251,12 @@ export default function MapScreen() {
                 resizeMode="cover"
               />
             ) : (
-              <View style={[styles.sheetPhotoPlaceholder, { backgroundColor: colors.background }]}>
-                <IconSymbol name="building.2.fill" size={28} color={colors.muted} />
-              </View>
+              <CategoryPlaceholder
+                category={selectedLandmark.category}
+                color={CATEGORY_COLORS[selectedLandmark.category]}
+                size={120}
+                style={styles.sheetPhotoPlaceholder}
+              />
             )}
             <View style={styles.sheetHeader}>
               <View style={styles.sheetTitleRow}>
