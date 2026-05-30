@@ -25,4 +25,19 @@ export const users = mysqlTable("users", {
 export type User = typeof users.$inferSelect;
 export type InsertUser = typeof users.$inferInsert;
 
+export const photos = mysqlTable("photos", {
+  id: int("id").autoincrement().primaryKey(),
+  landmarkId: varchar("landmark_id", { length: 128 }).notNull(),
+  userId: varchar("user_id", { length: 64 }).notNull(),
+  photoUrl: varchar("photo_url", { length: 512 }).notNull(),
+  caption: text("caption"),
+  status: mysqlEnum("status", ["pending", "approved", "rejected"]).default("pending").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  reviewedAt: timestamp("reviewed_at"),
+  reviewedBy: varchar("reviewed_by", { length: 64 }),
+});
+
+export type Photo = typeof photos.$inferSelect;
+export type InsertPhoto = typeof photos.$inferInsert;
+
 // TODO: Add your tables here
