@@ -206,6 +206,7 @@ export const landmarks: Landmark[] = [
     style: 'Spanish Colonial Revival',
     nationalRegister: true,
     neighborhood: 'West Berkeley',
+    photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/76/Berkeley_Day_Nursery_%28Berkeley%2C_CA%29.jpg/800px-Berkeley_Day_Nursery_%28Berkeley%2C_CA%29.jpg',
     designationType: 'Landmark',
   },
   {
@@ -357,6 +358,7 @@ export const landmarks: Landmark[] = [
     style: 'Commercial Vernacular',
     nationalRegister: true,
     neighborhood: 'Downtown',
+    photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4e/Studio_Building_%28Berkeley%2C_CA%29.JPG/800px-Studio_Building_%28Berkeley%2C_CA%29.JPG',
     designationType: 'Landmark',
   },
   {
@@ -5066,6 +5068,7 @@ export const landmarks: Landmark[] = [
     style: 'Arts & Crafts',
     nationalRegister: false,
     neighborhood: 'Berkeley',
+    photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b6/State_Institution_for_the_Deaf_and_Dumb%2C_and_Blind%3B_Berkeley%2C_looking_north_%28NYPL_b11707279-G89F342_009F%29.tiff/lossy-page1-800px-State_Institution_for_the_Deaf_and_Dumb%2C_and_Blind%3B_Berkeley%2C_looking_north_%28NYPL_b11707279-G89F342_009F%29.tiff.jpg',
     designationType: 'Landmark',
   },
   {
@@ -5098,6 +5101,7 @@ export const landmarks: Landmark[] = [
     style: 'Beaux-Arts',
     nationalRegister: true,
     neighborhood: 'UC Campus',
+    photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1c/Wheeler_Hall%2C_University_of_California%2C_Berkeley.jpg/800px-Wheeler_Hall%2C_University_of_California%2C_Berkeley.jpg',
     designationType: 'Landmark',
   },
   {
@@ -5130,6 +5134,7 @@ export const landmarks: Landmark[] = [
     style: 'Beaux-Arts',
     nationalRegister: true,
     neighborhood: 'UC Campus',
+    photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/1/14/Hilgard_Hall%2C_Berkeley%2C_California%2C_c._1924.png',
     designationType: 'Landmark',
   },
   {
