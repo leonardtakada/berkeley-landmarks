@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Berkeley Landmarks — Photo Review</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #F5F0EB; color: #1A1A1A; min-height: 100vh; }
+  
+  .header { background: #1A1A1A; color: white; padding: 20px 32px; display: flex; align-items: center; justify-content: space-between; }
+  .header h1 { font-size: 20px; font-weight: 700; }
+  .header .count { background: #7B8B6F; color: white; padding: 4px 12px; border-radius: 12px; font-size: 14px; font-weight: 600; }
+  
+  .container { max-width: 960px; margin: 0 auto; padding: 24px 16px; }
+  
+  .empty { text-align: center; padding: 80px 20px; color: #6B6B6B; }
+  .empty .icon { font-size: 48px; margin-bottom: 16px; }
+  .empty p { font-size: 16px; }
+  
+  .photo-card { background: white; border-radius: 16px; overflow: hidden; margin-bottom: 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); display: flex; }
+  .photo-card img { width: 200px; height: 200px; object-fit: cover; flex-shrink: 0; cursor: pointer; }
+  .photo-info { flex: 1; padding: 20px; display: flex; flex-direction: column; justify-content: space-between; }
+  .photo-info .landmark { font-size: 18px; font-weight: 700; margin-bottom: 4px; }
+  .photo-info .address { font-size: 14px; color: #6B6B6B; margin-bottom: 8px; }
+  .photo-info .meta { font-size: 12px; color: #999; margin-bottom: 4px; }
+  .photo-info .caption { font-size: 14px; color: #444; font-style: italic; margin-top: 8px; }
+  .actions { display: flex; gap: 8px; margin-top: 12px; }
+  .btn { padding: 8px 20px; border: none; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; transition: opacity 0.15s; }
+  .btn:hover { opacity: 0.85; }
+  .btn-approve { background: #7B8B6F; color: white; }
+  .btn-reject { background: #E5E0DB; color: #1A1A1A; }
+  .btn-loading { opacity: 0.5; pointer-events: none; }
+  
+  .stats { display: flex; gap: 16px; margin-bottom: 24px; }
+  .stat { background: white; padding: 16px 24px; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+  .stat .label { font-size: 12px; color: #999; text-transform: uppercase; letter-spacing: 0.5px; }
+  .stat .value { font-size: 28px; font-weight: 800; color: #1A1A1A; }
+  
+  .tabs { display: flex; gap: 4px; margin-bottom: 20px; }
+  .tab { padding: 8px 16px; border-radius: 10px; border: none; background: transparent; font-size: 14px; font-weight: 600; cursor: pointer; color: #6B6B6B; }
+  .tab.active { background: white; color: #1A1A1A; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+
+  .lightbox { position: fixed; inset: 0; background: rgba(0,0,0,0.9); display: flex; align-items: center; justify-content: center; z-index: 1000; cursor: pointer; }
+  .lightbox img { max-width: 90vw; max-height: 90vh; object-fit: contain; border-radius: 8px; }
+
+  @media (max-width: 640px) {
+    .photo-card { flex-direction: column; }
+    .photo-card img { width: 100%; height: 200px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>🏛️ Berkeley Landmarks — Photo Review</h1>
+  <span class="count" id="pendingCount">—</span>
+</div>
+
+<div class="container">
+  <div class="tabs">
+    <button class="tab active" onclick="showTab('pending')">Pending</button>
+    <button class="tab" onclick="showTab('approved')">Approved</button>
+    <button class="tab" onclick="showTab('rejected')">Rejected</button>
+  </div>
+  <div id="content"></div>
+</div>
+
+<div id="lightbox" class="lightbox" style="display:none" onclick="this.style.display='none'">
+  <img id="lightbox-img" />
+</div>
+
+<script>
+const API = window.location.origin + '/api';
+
+let currentTab = 'pending';
+let landmarksMap = {};
+
+// Fetch landmarks data
+async function loadLandmarks() {
+  try {
+    const res = await fetch('/landmarks.json');
+    const data = await res.json();
+    data.forEach(l => { landmarksMap[l.id] = l; });
+  } catch {}
+}
+
+async function fetchPhotos(status) {
+  try {
+    const res = await fetch(`${API}/photos?status=${status}`);
+    if (!res.ok) throw new Error('Not authenticated');
+    return await res.json();
+  } catch (e) {
+    return null;
+  }
+}
+
+async function approvePhoto(id) {
+  const btn = document.querySelector(`[data-approve="${id}"]`);
+  btn.textContent = 'Approving...'; btn.classList.add('btn-loading');
+  await fetch(`${API}/photos/${id}/approve`, { method: 'POST' });
+  load();
+}
+
+async function rejectPhoto(id) {
+  const btn = document.querySelector(`[data-reject="${id}"]`);
+  btn.textContent = 'Rejecting...'; btn.classList.add('btn-loading');
+  await fetch(`${API}/photos/${id}/reject`, { method: 'POST' });
+  load();
+}
+
+function showLightbox(url) {
+  document.getElementById('lightbox-img').src = url;
+  document.getElementById('lightbox').style.display = 'flex';
+}
+
+function showTab(tab) {
+  currentTab = tab;
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  event.target.classList.add('active');
+  load();
+}
+
+async function load() {
+  const photos = await fetchPhotos(currentTab);
+  const content = document.getElementById('content');
+  
+  if (!photos) {
+    content.innerHTML = '<div class="empty"><div class="icon">🔒</div><p>Authentication required. Log in via the app first.</p></div>';
+    return;
+  }
+
+  const pendingPhotos = await fetchPhotos('pending');
+  document.getElementById('pendingCount').textContent = `${pendingPhotos ? pendingPhotos.length : 0} pending`;
+
+  if (photos.length === 0) {
+    content.innerHTML = `<div class="empty"><div class="icon">${currentTab === 'pending' ? '✅' : currentTab === 'approved' ? '📸' : '🗑️'}</div><p>No ${currentTab} photos</p></div>`;
+    return;
+  }
+
+  content.innerHTML = photos.map(p => {
+    const lm = landmarksMap[p.landmarkId] || {};
+    const imgUrl = p.photoUrl.startsWith('http') ? p.photoUrl : window.location.origin + p.photoUrl;
+    return `
+      <div class="photo-card">
+        <img src="${imgUrl}" onclick="showLightbox('${imgUrl}')" />
+        <div class="photo-info">
+          <div>
+            <div class="landmark">${lm.name || p.landmarkId}</div>
+            <div class="address">${lm.address || ''}${lm.address ? ', Berkeley, CA' : ''}</div>
+            <div class="meta">Submitted ${new Date(p.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' })}</div>
+            ${p.caption ? `<div class="caption">"${p.caption}"</div>` : ''}
+          </div>
+          ${currentTab === 'pending' ? `
+          <div class="actions">
+            <button class="btn btn-approve" data-approve="${p.id}" onclick="approvePhoto(${p.id})">✓ Approve</button>
+            <button class="btn btn-reject" data-reject="${p.id}" onclick="rejectPhoto(${p.id})">✕ Reject</button>
+          </div>` : ''}
+          ${currentTab === 'approved' ? `<div class="meta">Approved ${p.reviewedAt ? new Date(p.reviewedAt).toLocaleDateString() : ''}</div>` : ''}
+          ${currentTab === 'rejected' ? `
+          <div class="actions">
+            <button class="btn btn-approve" data-approve="${p.id}" onclick="approvePhoto(${p.id})">↩ Reapprove</button>
+          </div>` : ''}
+        </div>
+      </div>`;
+  }).join('');
+}
+
+loadLandmarks().then(load);
+</script>
+</body>
+</html>
