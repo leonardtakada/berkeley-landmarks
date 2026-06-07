@@ -121,7 +121,7 @@ export const landmarks: Landmark[] = [
     description: 'Known as the "Little Castle," this Julia Morgan masterpiece was originally the Berkeley Women\'s City Club. The building features Moorish and Gothic architectural details with vaulted ceilings, carved archways, and leaded glass windows. It is a California Historical Landmark and listed on the National Register of Historic Places.',
     style: 'Moorish / Gothic Revival',
     nationalRegister: true,
-    neighborhood: 'Downtown',
+    neighborhood: 'Southside',
     photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5a/Berkeley_Women%27s_City_Club_%28Berkeley%2C_CA%29.JPG/800px-Berkeley_Women%27s_City_Club_%28Berkeley%2C_CA%29.JPG',
     designationType: 'Landmark',
   },
@@ -171,7 +171,7 @@ export const landmarks: Landmark[] = [
     description: 'One of only five "ultimate bungalows" designed by the renowned firm Greene & Greene. Built for lumber baron William Thorsen, this American Craftsman masterpiece features tropical woods, leaded art glass, and mother of pearl accents. Now home to the Sigma Phi Society, it is listed on the National Register of Historic Places.',
     style: 'American Craftsman',
     nationalRegister: true,
-    neighborhood: 'Northside',
+    neighborhood: 'Southside',
     photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5f/Thorsen_House.jpg/800px-Thorsen_House.jpg',
     designationType: 'Landmark',
   },
@@ -1100,7 +1100,7 @@ export const landmarks: Landmark[] = [
     description: 'Located at 1124 Addison Street and built in 1891, this Downtown property was designated a Berkeley landmark for its architectural and historical significance to the neighborhood. The building exemplifies Queen Anne design principles as applied in the Berkeley context. The property contributes to the historic character of downtown Berkeley.',
     style: 'Queen Anne',
     nationalRegister: false,
-    neighborhood: 'Downtown',
+    neighborhood: 'West Berkeley',
     designationType: 'Landmark',
   },
   {
@@ -1116,7 +1116,7 @@ export const landmarks: Landmark[] = [
     description: 'Located at 1250 Addison Street, designed by Walter Crapo / Ben Pearson and built in 1912, this Downtown property was designated a Berkeley landmark for its architectural and historical significance to the neighborhood. The building exemplifies Arts & Crafts design principles as applied in the Berkeley context. The property contributes to the historic character of downtown Berkeley.',
     style: 'Arts & Crafts',
     nationalRegister: false,
-    neighborhood: 'Downtown',
+    neighborhood: 'West Berkeley',
     designationType: 'Landmark',
   },
   {
@@ -1132,7 +1132,7 @@ export const landmarks: Landmark[] = [
     description: 'Located at 1640 Addison Street, designed by Shea & Lofquist, this Downtown property was designated a Berkeley landmark for its architectural and historical significance to the neighborhood. The property contributes to the historic character of downtown Berkeley.',
     style: 'Arts & Crafts',
     nationalRegister: false,
-    neighborhood: 'Downtown',
+    neighborhood: 'West Berkeley',
     designationType: 'Landmark',
   },
   {
@@ -1292,7 +1292,7 @@ export const landmarks: Landmark[] = [
     description: 'Located at 1326 Allston Way, designed by Walter H. Ratcliff Jr. and built in 1913, this Downtown property was designated a Berkeley landmark for its architectural and historical significance to the neighborhood. The building exemplifies Period Revival design principles as applied in the Berkeley context. The property contributes to the historic character of downtown Berkeley.',
     style: 'Period Revival',
     nationalRegister: false,
-    neighborhood: 'Downtown',
+    neighborhood: 'West Berkeley',
     designationType: 'Landmark',
   },
   {
@@ -3298,7 +3298,7 @@ export const landmarks: Landmark[] = [
     description: 'Located at 1645 Milvia Street, designed by Dragon, Officer, Hardman, Schmidts and built in 1939, this Berkeley property was designated a Berkeley landmark for its architectural and historical significance to the neighborhood. The building exemplifies Art Deco design principles as applied in the Berkeley context. The property contributes to the architectural heritage of Berkeley.',
     style: 'Art Deco',
     nationalRegister: false,
-    neighborhood: 'Downtown',
+    neighborhood: 'North Berkeley',
     designationType: 'Landmark',
   },
   {
@@ -3362,7 +3362,7 @@ export const landmarks: Landmark[] = [
     description: 'Located at 45 Oak Ridge Road, designed by Walter H. Ratcliff, Jr. and built in 1909, this Berkeley Hills property was designated a Berkeley landmark for its architectural and historical significance to the neighborhood. The building exemplifies Period Revival design principles as applied in the Berkeley context. The property contributes to the architectural heritage of Berkeley Hills.',
     style: 'Period Revival',
     nationalRegister: false,
-    neighborhood: 'Berkeley Hills',
+    neighborhood: 'Claremont',
     designationType: 'Landmark',
   },
   {
@@ -3410,7 +3410,7 @@ export const landmarks: Landmark[] = [
     description: 'Located at 1301 Oxford Street and built in 1868, this Downtown property was designated a Berkeley landmark for its architectural and historical significance to the neighborhood. The building exemplifies Victorian design principles as applied in the Berkeley context. The property contributes to the historic character of downtown Berkeley.',
     style: 'Victorian',
     nationalRegister: false,
-    neighborhood: 'Downtown',
+    neighborhood: 'Northside',
     designationType: 'Landmark',
   },
   {
@@ -3730,7 +3730,7 @@ export const landmarks: Landmark[] = [
     description: 'Located at 920 Shattuck Avenue, designed by Walter H. Ratcliff, Jr. and built in 1909, this Downtown property was designated a Berkeley landmark for its architectural and historical significance to the neighborhood. The building exemplifies Period Revival design principles as applied in the Berkeley context. The property contributes to the historic character of downtown Berkeley.',
     style: 'Period Revival',
     nationalRegister: false,
-    neighborhood: 'Downtown',
+    neighborhood: 'Northbrae',
     designationType: 'Landmark',
   },
   {
@@ -3746,7 +3746,7 @@ export const landmarks: Landmark[] = [
     description: 'Located at 1317 Shattuck Avenue, designed by John Hudson Thomas and built in 1870, this Downtown property was designated a Berkeley landmark for its architectural and historical significance to the neighborhood. The building exemplifies Victorian design principles as applied in the Berkeley context. The property contributes to the historic character of downtown Berkeley.',
     style: 'Victorian',
     nationalRegister: false,
-    neighborhood: 'Downtown',
+    neighborhood: 'Northside',
     designationType: 'Landmark',
   },
   {
