@@ -106,6 +106,12 @@ export default function MapScreen() {
         showsCompass
         showsScale
         mapType="standard"
+        clusterMarkers={filteredLandmarks.map((landmark) => ({
+          id: landmark.id,
+          coordinate: { latitude: landmark.latitude, longitude: landmark.longitude },
+          pinColor: CATEGORY_COLORS[landmark.category],
+          onPress: () => handleMarkerPress(landmark),
+        }))}
       >
         {/* Berkeley city boundary outline */}
         <MapPolygon
@@ -129,22 +135,6 @@ export default function MapScreen() {
           strokeWidth={0}
           fillColor="rgba(26, 26, 26, 0.35)"
         />
-
-        {filteredLandmarks.map((landmark) => (
-          <MapMarker
-            key={landmark.id}
-            coordinate={{
-              latitude: landmark.latitude,
-              longitude: landmark.longitude,
-            }}
-            title={landmark.name}
-            description={landmark.address}
-            onPress={() => handleMarkerPress(landmark)}
-            pinColor={CATEGORY_COLORS[landmark.category]}
-            tracksViewChanges={false}
-            tracksInfoWindowChanges={false}
-          />
-        ))}
 
         {activeTour && activeTour.routeCoordinates.length > 1 && (
           <MapPolyline
