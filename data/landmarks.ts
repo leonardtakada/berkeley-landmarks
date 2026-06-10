@@ -1393,7 +1393,7 @@ export const landmarks: Landmark[] = [
   },
   {
     id: 'lm-125',
-    name: 'The Webb Block aka Hudson\'s Antiques',
+    name: 'Webb Block (Hudson's Antiques)s Antiques',
     address: '1985 Ashby Avenue',
     latitude: 37.8545593,
     longitude: -122.269812,
@@ -2052,7 +2052,7 @@ export const landmarks: Landmark[] = [
   },
   {
     id: 'lm-166',
-    name: 'The Bevatron',
+    name: 'Bevatron (Building 51)',
     address: '1 Cyclotron Road',
     latitude: 37.8743429,
     longitude: -122.2523379,
@@ -2148,7 +2148,7 @@ export const landmarks: Landmark[] = [
   },
   {
     id: 'lm-172',
-    name: 'The Cambridge Appartments',
+    name: 'Cambridge Apartments',
     address: '2500 Durant Avenue',
     latitude: 37.867763,
     longitude: -122.258805,
@@ -2164,7 +2164,7 @@ export const landmarks: Landmark[] = [
   },
   {
     id: 'lm-173',
-    name: 'The Brasfield',
+    name: 'Brasfield Hotel',
     address: '2520 Durant Avenue',
     latitude: 37.8676932,
     longitude: -122.2579054,
@@ -3142,7 +3142,7 @@ export const landmarks: Landmark[] = [
   },
   {
     id: 'lm-234',
-    name: 'The Whittemore/Woodw',
+    name: 'Whittemore-Woodward House',
     address: '2043 Lincoln Street',
     latitude: 37.8776575,
     longitude: -122.2694205,
@@ -3864,7 +3864,7 @@ export const landmarks: Landmark[] = [
   },
   {
     id: 'lm-279',
-    name: 'Brooks Apartment Bldg',
+    name: 'Amherst Apartments',
     address: '2231 Shattuck Avenue',
     latitude: 37.8687348,
     longitude: -122.267493,
@@ -3880,7 +3880,7 @@ export const landmarks: Landmark[] = [
   },
   {
     id: 'lm-280',
-    name: 'The Hezlett\'s Silk Store Building',
+    name: 'Hezlett Silk Store Building',
     address: '2277 Shattuck Avenue',
     latitude: 37.8680675,
     longitude: -122.2673963,
@@ -3912,7 +3912,7 @@ export const landmarks: Landmark[] = [
   },
   {
     id: 'lm-282',
-    name: 'Corder Bldg',
+    name: 'Corder Building',
     address: '2300 Shattuck Avenue',
     latitude: 37.867409,
     longitude: -122.268089,
@@ -4803,7 +4803,7 @@ export const landmarks: Landmark[] = [
   },
   {
     id: 'lm-350',
-    name: 'no common name',
+    name: 'Berkeley Hardware Co. Building',
     address: '2154 University Avenue',
     latitude: 37.8720598,
     longitude: -122.2670507,
@@ -5209,7 +5209,7 @@ export const landmarks: Landmark[] = [
   },
   {
     id: 'lm-83',
-    name: 'g. Paul Bishop Studio',
+    name: 'G. Paul Bishop Studio',
     address: '2125 Durant Avenue',
     latitude: 37.8676,
     longitude: -122.2620,
@@ -5900,7 +5900,7 @@ export const landmarks: Landmark[] = [
   },
   {
     id: 'lm-376',
-    name: 'and Storefronts',
+    name: 'A.H. Broad House',
     address: '2117 Kittredge Street',
     latitude: 37.8687984,
     longitude: -122.2668983,
