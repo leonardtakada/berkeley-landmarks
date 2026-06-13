@@ -14,7 +14,7 @@ export interface Landmark {
   style: string;
   nationalRegister: boolean;
   neighborhood: string;
-  designationType?: 'Landmark' | 'Structure of Merit' | 'Historic District';
+  designationType?: 'Landmark' | 'Structure of Merit' | 'Historic District' | 'Notable';
   photoUrl?: string;
 }
 
@@ -6361,6 +6361,22 @@ export const landmarks: Landmark[] = [
     nationalRegister: false,
     neighborhood: 'Southside',
     designationType: 'Structure of Merit',
+  },
+  {
+    id: 'lm-2753bv',
+    name: 'John S. Thomas House',
+    address: '2753 Buena Vista Way',
+    latitude: 37.88144,
+    longitude: -122.2568,
+    architect: 'William Charles Hays',
+    yearBuilt: '1914',
+    category: 'residential',
+    landmarkNumber: '',
+    description: `Built in 1914 by UC Berkeley Professor of Architecture William Charles Hays for client John S. Thomas, this brown shingle "palazzo" blends the Berkeley brown-shingle tradition with Italian Renaissance farmhouse influences. Hays, who also designed Doe Library on the UC Berkeley campus, created one of his finest residential works here — an elegant yet understated composition of redwood shingles, high coved and beamed ceilings, and a covered loggia with panoramic Bay and bridge views.\n\nThe house survived the devastating 1923 Berkeley Hills fire that destroyed much of the surrounding neighborhood. In 1984, noted architect William Turnbull Jr. — of the celebrated Sea Ranch community — completed an award-winning restoration, adding dutch doors and French doors that enhanced the indoor-outdoor living experience the Bay Area is known for. In 2004, UCB architecture student David Trachtenberg designed a sympathetic arched breezeway addition with a primary suite and guest suite, deliberately matching the original character.\n\nThe house sits in the La Loma Park area of North Berkeley, documented in the Pacific Coast Architecture Database (PCAD #25855). It has been featured in Sunset Magazine.`,
+    style: 'Brown Shingle / Italian Renaissance',
+    nationalRegister: false,
+    neighborhood: 'La Loma Historic District',
+    designationType: 'Notable',
   }
 ];
 
