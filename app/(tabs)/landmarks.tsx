@@ -183,32 +183,23 @@ export default function LandmarksScreen() {
       />
 
       <View style={styles.sortRow}>
-        <Text style={[styles.sortLabel, { color: colors.muted }]}>Sort by:</Text>
-        {(["name", "year", "architect", "neighborhood"] as SortOption[]).map((opt) => (
-          <Pressable
-            key={opt}
-            onPress={() => setSortBy(opt)}
-            style={({ pressed }) => [
-              styles.sortChip,
-              {
-                backgroundColor: sortBy === opt ? colors.primary + '18' : "transparent",
-                opacity: pressed ? 0.7 : 1,
-              },
-            ]}
-          >
-            <Text
-              style={[
-                styles.sortChipText,
-                { color: sortBy === opt ? colors.primary : colors.muted },
-              ]}
-            >
-              {opt.charAt(0).toUpperCase() + opt.slice(1)}
-            </Text>
-          </Pressable>
-        ))}
-      </View>
-
-      <View style={styles.resultsRow}>
+        <Pressable
+          onPress={() => {
+            const opts: SortOption[] = ["name", "year", "architect", "neighborhood"];
+            const idx = opts.indexOf(sortBy);
+            setSortBy(opts[(idx + 1) % opts.length]);
+          }}
+          style={({ pressed }) => [
+            styles.sortChip,
+            { backgroundColor: colors.primary + '15', opacity: pressed ? 0.7 : 1 },
+          ]}
+        >
+          <IconSymbol name="arrow.up.arrow.down" size={12} color={colors.primary} />
+          <Text style={[styles.sortChipText, { color: colors.primary }]}>
+            {sortBy.charAt(0).toUpperCase() + sortBy.slice(1)}
+          </Text>
+        </Pressable>
+        <View style={{ flex: 1 }} />
         <Text style={[styles.resultsText, { color: colors.muted }]}>
           {filteredLandmarks.length} landmark{filteredLandmarks.length !== 1 ? "s" : ""}
         </Text>
@@ -289,18 +280,15 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 16,
-    gap: 4,
     marginBottom: 8,
   },
-  sortLabel: {
-    fontSize: 12,
-    fontWeight: "600",
-    marginRight: 4,
-  },
-  sortChip: {
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 10,
+    sortChip: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 16,
+    gap: 4,
   },
   sortChipText: {
     fontSize: 12,
