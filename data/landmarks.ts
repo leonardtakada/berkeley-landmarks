@@ -427,7 +427,8 @@ export const landmarks: Landmark[] = [
     nationalRegister: false,
     neighborhood: 'Southside',
     designationType: 'Landmark',
-  },
+      photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/36/Banner_at_City_hall_%2836490644160%29.jpg/960px-Banner_at_City_hall_%2836490644160%29.jpg',
+},
   {
     id: 'lm-24',
     name: 'Veterans Memorial Building',
@@ -492,7 +493,8 @@ export const landmarks: Landmark[] = [
     nationalRegister: true,
     neighborhood: 'Northside',
     designationType: 'Landmark',
-  },
+      photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/04/Hillside_School_%28Berkeley%2C_CA%29.JPG/960px-Hillside_School_%28Berkeley%2C_CA%29.JPG',
+},
   {
     id: 'lm-28',
     name: 'United States Post Office',
@@ -557,7 +559,8 @@ export const landmarks: Landmark[] = [
     nationalRegister: false,
     neighborhood: 'Downtown',
     designationType: 'Landmark',
-  },
+      photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/a/a4/Kressberkeley.jpg',
+},
   {
     id: 'lm-32',
     name: 'Anna Head School',
@@ -758,7 +761,8 @@ export const landmarks: Landmark[] = [
     nationalRegister: true,
     neighborhood: 'West Berkeley',
     designationType: 'Landmark',
-  },
+      photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6b/Toveri_Tupa_%28Berkeley%2C_CA%29.JPG/960px-Toveri_Tupa_%28Berkeley%2C_CA%29.JPG',
+},
   {
     id: 'lm-44',
     name: 'Fidelity Building',
@@ -806,7 +810,8 @@ export const landmarks: Landmark[] = [
     nationalRegister: true,
     neighborhood: 'Downtown',
     designationType: 'Landmark',
-  },
+      photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/48/Corder_Building_%28Berkeley%2C_CA%29.JPG/960px-Corder_Building_%28Berkeley%2C_CA%29.JPG',
+},
   {
     id: 'lm-47',
     name: 'Fred Turner Building',
@@ -1438,7 +1443,8 @@ export const landmarks: Landmark[] = [
     nationalRegister: false,
     neighborhood: 'Southside',
     designationType: 'Landmark',
-  },
+      photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3e/ICW_Bancroft.JPG/960px-ICW_Bancroft.JPG',
+},
   {
     id: 'lm-128',
     name: 'The Broad House & Broad Apartment',
@@ -1727,7 +1733,8 @@ export const landmarks: Landmark[] = [
     nationalRegister: false,
     neighborhood: 'Southside',
     designationType: 'Landmark',
-  },
+      photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/69/Anna_Head_School_for_Girls_%28Berkeley%2C_CA%29.JPG/960px-Anna_Head_School_for_Girls_%28Berkeley%2C_CA%29.JPG',
+},
   {
     id: 'lm-146',
     name: 'Tuft\'s House #3',
@@ -2129,7 +2136,8 @@ export const landmarks: Landmark[] = [
     nationalRegister: false,
     neighborhood: 'Southside',
     designationType: 'Landmark',
-  },
+      photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e7/Boone%27s_University_School_%28Berkeley%2C_CA%29.JPG/960px-Boone%27s_University_School_%28Berkeley%2C_CA%29.JPG',
+},
   {
     id: 'lm-171',
     name: 'Howard Automobile Co. Showroom',
@@ -2337,7 +2345,8 @@ export const landmarks: Landmark[] = [
     nationalRegister: false,
     neighborhood: 'South Berkeley',
     designationType: 'Landmark',
-  },
+      photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f4/FRONT_OF_DAVIS-BYRNE_BUILDING_FROM_ACROSS_DWIGHT_WAY%2C_LOOKING_SOUTH._-_Davis-Byrne_Building%2C_2134-2140_Dwight_Way%2C_Berkeley%2C_Alameda_County%2C_CA_HABS_CAL%2C1-BERK%2C3-2.tif/lossy-page1-960px-thumbnail.tif.jpg',
+},
   {
     id: 'lm-184',
     name: 'Standard Die & Specialty Company',
@@ -2466,7 +2475,8 @@ export const landmarks: Landmark[] = [
     nationalRegister: false,
     neighborhood: 'West Berkeley',
     designationType: 'Landmark',
-  },
+      photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/ce/Spengers_Fish_Grotto.jpg/960px-Spengers_Fish_Grotto.jpg',
+},
   {
     id: 'lm-192',
     name: 'Shellmound',
@@ -2690,7 +2700,8 @@ export const landmarks: Landmark[] = [
     nationalRegister: false,
     neighborhood: 'Southside',
     designationType: 'Landmark',
-  },
+      photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c6/Berkeley_Public_Library_%28Kittredge_St.%2C_Berkeley%2C_CA%29.JPG/960px-Berkeley_Public_Library_%28Kittredge_St.%2C_Berkeley%2C_CA%29.JPG',
+},
   {
     id: 'lm-206',
     name: 'Bicentennial Mural',
@@ -2866,7 +2877,8 @@ export const landmarks: Landmark[] = [
     nationalRegister: false,
     neighborhood: 'West Berkeley',
     designationType: 'Landmark',
-  },
+      photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/46/Church_of_the_Good_Shepherd_%28Berkeley%2C_CA%29.JPG/960px-Church_of_the_Good_Shepherd_%28Berkeley%2C_CA%29.JPG',
+},
   {
     id: 'lm-217',
     name: 'Stocker-Ding House',
@@ -3059,7 +3071,8 @@ export const landmarks: Landmark[] = [
     nationalRegister: false,
     neighborhood: 'La Loma Historic District',
     designationType: 'Landmark',
-  },
+      photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/fa/Kingman_Hall_-_Theta_Xi.png/960px-Kingman_Hall_-_Theta_Xi.png',
+},
   {
     id: 'lm-229',
     name: 'Phi Kappa Psi House',
@@ -3139,7 +3152,8 @@ export const landmarks: Landmark[] = [
     nationalRegister: false,
     neighborhood: 'North Berkeley',
     designationType: 'Landmark',
-  },
+      photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/Rose_Walk%2C_Berkeley%2C_California.png/960px-Rose_Walk%2C_Berkeley%2C_California.png',
+},
   {
     id: 'lm-234',
     name: 'Whittemore-Woodward House',
@@ -3268,7 +3282,8 @@ export const landmarks: Landmark[] = [
     nationalRegister: false,
     neighborhood: 'Civic Center Historic District',
     designationType: 'Landmark',
-  },
+      photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/2/26/Berkeley_Community_Theater.jpg',
+},
   {
     id: 'lm-242',
     name: 'Maybeck Cottage',
@@ -3332,7 +3347,8 @@ export const landmarks: Landmark[] = [
     nationalRegister: false,
     neighborhood: 'Southside',
     designationType: 'Landmark',
-  },
+      photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/dd/UC_Theatre%2CBerkeley.jpg/960px-UC_Theatre%2CBerkeley.jpg',
+},
   {
     id: 'lm-246',
     name: 'The Steilberg House and Cottages',
@@ -3556,7 +3572,8 @@ export const landmarks: Landmark[] = [
     nationalRegister: false,
     neighborhood: 'Northside',
     designationType: 'Landmark',
-  },
+      photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/Rose_Walk%2C_Berkeley%2C_California.png/960px-Rose_Walk%2C_Berkeley%2C_California.png',
+},
   {
     id: 'lm-260',
     name: 'Rose Walk',
@@ -3572,7 +3589,8 @@ export const landmarks: Landmark[] = [
     nationalRegister: false,
     neighborhood: 'Northside',
     designationType: 'Landmark',
-  },
+      photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/Rose_Walk%2C_Berkeley%2C_California.png/960px-Rose_Walk%2C_Berkeley%2C_California.png',
+},
   {
     id: 'lm-261',
     name: 'Rose Walk',
@@ -3588,7 +3606,8 @@ export const landmarks: Landmark[] = [
     nationalRegister: false,
     neighborhood: 'Northside',
     designationType: 'Landmark',
-  },
+      photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/Rose_Walk%2C_Berkeley%2C_California.png/960px-Rose_Walk%2C_Berkeley%2C_California.png',
+},
   {
     id: 'lm-262',
     name: 'Rose Walk',
@@ -3604,7 +3623,8 @@ export const landmarks: Landmark[] = [
     nationalRegister: false,
     neighborhood: 'Northside',
     designationType: 'Landmark',
-  },
+      photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/Rose_Walk%2C_Berkeley%2C_California.png/960px-Rose_Walk%2C_Berkeley%2C_California.png',
+},
   {
     id: 'lm-263',
     name: 'Judah Magnes Memorial Museum',
@@ -3652,7 +3672,8 @@ export const landmarks: Landmark[] = [
     nationalRegister: false,
     neighborhood: 'North Berkeley',
     designationType: 'Landmark',
-  },
+      photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e8/Donald_and_Helen_Olsen_House.jpg/960px-Donald_and_Helen_Olsen_House.jpg',
+},
   {
     id: 'lm-266',
     name: 'Franklin Market Building',
@@ -3668,7 +3689,8 @@ export const landmarks: Landmark[] = [
     nationalRegister: false,
     neighborhood: 'West Berkeley',
     designationType: 'Landmark',
-  },
+      photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/81/Hillside_Club%2C_Berkeley_exterior_2.JPG/960px-Hillside_Club%2C_Berkeley_exterior_2.JPG',
+},
   {
     id: 'lm-267',
     name: 'Borg Building',
@@ -3909,7 +3931,8 @@ export const landmarks: Landmark[] = [
     nationalRegister: false,
     neighborhood: 'Downtown',
     designationType: 'Landmark',
-  },
+      photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/6/64/Masonic_Temple_%28Berkeley%2C_CA%29.JPG',
+},
   {
     id: 'lm-282',
     name: 'Corder Building',
@@ -3925,7 +3948,8 @@ export const landmarks: Landmark[] = [
     nationalRegister: false,
     neighborhood: 'Downtown',
     designationType: 'Landmark',
-  },
+      photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/48/Corder_Building_%28Berkeley%2C_CA%29.JPG/960px-Corder_Building_%28Berkeley%2C_CA%29.JPG',
+},
   {
     id: 'lm-283',
     name: 'Morrill Apartments',
@@ -4070,7 +4094,8 @@ export const landmarks: Landmark[] = [
     nationalRegister: false,
     neighborhood: 'West Berkeley',
     designationType: 'Landmark',
-  },
+      photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/cc/USA-Berkeley-1614_Sixth_Street.jpg/960px-USA-Berkeley-1614_Sixth_Street.jpg',
+},
   {
     id: 'lm-292',
     name: 'Andrews House',
@@ -4542,7 +4567,8 @@ export const landmarks: Landmark[] = [
     nationalRegister: false,
     neighborhood: 'UC Campus',
     designationType: 'Landmark',
-  },
+      photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e9/Senior_Hall_%28Berkeley%2C_CA%29.JPG/960px-Senior_Hall_%28Berkeley%2C_CA%29.JPG',
+},
   {
     id: 'lm-331',
     name: 'Room 307, Gilman Hall',
@@ -4592,7 +4618,8 @@ export const landmarks: Landmark[] = [
     nationalRegister: false,
     neighborhood: 'UC Campus',
     designationType: 'Landmark',
-  },
+      photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a4/Haas_Pavilion_Exterior.jpg/960px-Haas_Pavilion_Exterior.jpg',
+},
   {
     id: 'lm-336',
     name: 'Landscape Features',
@@ -4640,7 +4667,8 @@ export const landmarks: Landmark[] = [
     nationalRegister: false,
     neighborhood: 'West Berkeley',
     designationType: 'Landmark',
-  },
+      photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4f/Berkeley_station_building%2C_June_2018.JPG/960px-Berkeley_station_building%2C_June_2018.JPG',
+},
   {
     id: 'lm-339',
     name: 'Suendermann Plumbing Company',
@@ -4688,7 +4716,8 @@ export const landmarks: Landmark[] = [
     nationalRegister: false,
     neighborhood: 'West Berkeley',
     designationType: 'Landmark',
-  },
+      photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b4/Berkeley_ATSF_station%2C_June_2018.JPG/960px-Berkeley_ATSF_station%2C_June_2018.JPG',
+},
   {
     id: 'lm-343',
     name: 'Fox Commons',
@@ -4704,7 +4733,8 @@ export const landmarks: Landmark[] = [
     nationalRegister: false,
     neighborhood: 'Downtown',
     designationType: 'Landmark',
-  },
+      photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/33/Fox_Court_%28Berkeley%2C_CA%29.JPG/960px-Fox_Court_%28Berkeley%2C_CA%29.JPG',
+},
   {
     id: 'lm-344',
     name: 'Bonita Apartments',
@@ -4932,7 +4962,8 @@ export const landmarks: Landmark[] = [
     nationalRegister: true,
     neighborhood: 'UC Campus',
     designationType: 'Landmark',
-  },
+      photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/71/Faculty_Club_%28Berkeley%2C_CA%29.jpg/960px-Faculty_Club_%28Berkeley%2C_CA%29.jpg',
+},
   {
     id: 'lm-66',
     name: 'Hilgard Hall',
@@ -4997,7 +5028,8 @@ export const landmarks: Landmark[] = [
     nationalRegister: true,
     neighborhood: 'Piedmont',
     designationType: 'Landmark',
-  },
+      photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/8/8c/Piedmont_Ave1915.jpg',
+},
   {
     id: 'lm-70',
     name: 'Sigma Pi Chapter House',
@@ -5045,7 +5077,8 @@ export const landmarks: Landmark[] = [
     nationalRegister: false,
     neighborhood: 'South Berkeley',
     designationType: 'Landmark',
-  },
+      photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/de/Kala_Art_Institute.jpg/960px-Kala_Art_Institute.jpg',
+},
   {
     id: 'lm-73',
     name: 'Hotel Durant',
@@ -5061,7 +5094,8 @@ export const landmarks: Landmark[] = [
     nationalRegister: false,
     neighborhood: 'Southside',
     designationType: 'Landmark',
-  },
+      photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/49/Hotel_Durant_in_Berkeley.jpg/960px-Hotel_Durant_in_Berkeley.jpg',
+},
   {
     id: 'lm-74',
     name: 'Northbrae Public Improvements',
@@ -5110,7 +5144,8 @@ export const landmarks: Landmark[] = [
     nationalRegister: false,
     neighborhood: 'Downtown',
     designationType: 'Landmark',
-  },
+      photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/2/26/Berkeley_Community_Theater.jpg',
+},
   {
     id: 'lm-77',
     name: 'Cooper Woodworking Building',
@@ -5142,7 +5177,8 @@ export const landmarks: Landmark[] = [
     nationalRegister: false,
     neighborhood: 'West Berkeley',
     designationType: 'Landmark',
-  },
+      photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2e/Manasse-Block-001.JPG/960px-Manasse-Block-001.JPG',
+},
   {
     id: 'lm-79',
     name: 'Old Jefferson Elementary School',
@@ -5302,7 +5338,8 @@ export const landmarks: Landmark[] = [
     nationalRegister: false,
     neighborhood: 'UC Campus',
     designationType: 'Landmark',
-  },
+      photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/95/Edwards_Stadium.jpg/960px-Edwards_Stadium.jpg',
+},
   {
     id: 'lm-89',
     name: 'Giannini Hall',
@@ -5318,7 +5355,8 @@ export const landmarks: Landmark[] = [
     nationalRegister: true,
     neighborhood: 'UC Campus',
     designationType: 'Landmark',
-  },
+      photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/41/Giannini_Hall_%28Berkeley%2C_CA%29.JPG/960px-Giannini_Hall_%28Berkeley%2C_CA%29.JPG',
+},
   {
     id: 'lm-90',
     name: 'University House',
@@ -5334,7 +5372,8 @@ export const landmarks: Landmark[] = [
     nationalRegister: true,
     neighborhood: 'UC Campus',
     designationType: 'Landmark',
-  },
+      photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/9b/University_House_%28Berkeley%2C_CA%29.JPG/960px-University_House_%28Berkeley%2C_CA%29.JPG',
+},
   {
     id: 'lm-91',
     name: 'Wellman Hall',
@@ -5350,7 +5389,8 @@ export const landmarks: Landmark[] = [
     nationalRegister: true,
     neighborhood: 'UC Campus',
     designationType: 'Landmark',
-  },
+      photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/26/Wellman_Hall_%28Berkeley%2C_CA%29.JPG/960px-Wellman_Hall_%28Berkeley%2C_CA%29.JPG',
+},
   {
     id: 'lm-92',
     name: 'Hearst Gymnasium for Women',
@@ -5366,7 +5406,8 @@ export const landmarks: Landmark[] = [
     nationalRegister: true,
     neighborhood: 'UC Campus',
     designationType: 'Landmark',
-  },
+      photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/7d/Cal%2C_Hearst_Gym_-_52784031981.jpg/960px-Cal%2C_Hearst_Gym_-_52784031981.jpg',
+},
   {
     id: 'lm-93',
     name: 'Rose Garden Inn',
@@ -5528,7 +5569,8 @@ export const landmarks: Landmark[] = [
     nationalRegister: false,
     neighborhood: 'Southside',
     designationType: 'Landmark',
-  },
+    photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f4/FRONT_OF_DAVIS-BYRNE_BUILDING_FROM_ACROSS_DWIGHT_WAY%2C_LOOKING_SOUTH._-_Davis-Byrne_Building%2C_2134-2140_Dwight_Way%2C_Berkeley%2C_Alameda_County%2C_CA_HABS_CAL%2C1-BERK%2C3-2.tif/lossy-page1-960px-thumbnail.tif.jpg',
+    },
   {
     id: 'lm-103',
     name: 'Francis Kittredge Shattuck Building',
@@ -5849,7 +5891,8 @@ export const landmarks: Landmark[] = [
     nationalRegister: false,
     neighborhood: 'West Berkeley',
     designationType: 'Historic District',
-  },
+    photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d7/Delaware_Street_Historic_District.jpg/960px-Delaware_Street_Historic_District.jpg',
+    },
   {
     id: 'lm-373',
     name: 'Hill, Anita Jeffress House',
