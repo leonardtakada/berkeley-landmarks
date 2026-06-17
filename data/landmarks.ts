@@ -543,7 +543,8 @@ export const landmarks: Landmark[] = [
     nationalRegister: false,
     neighborhood: 'Downtown',
     designationType: 'Landmark',
-  },
+      photoUrl: 'https://berkeleyplaques.org/wp-content/uploads/2014/01/Barker_03.jpg',
+},
   {
     id: 'lm-31',
     name: 'S. H. Kress & Co. Building',
@@ -627,7 +628,8 @@ export const landmarks: Landmark[] = [
     nationalRegister: false,
     neighborhood: 'Lorin',
     designationType: 'Landmark',
-  },
+      photoUrl: 'https://berkeleyplaques.org/wp-content/uploads/2014/01/SouthBerkeleyBank_01.jpg',
+},
   {
     id: 'lm-36',
     name: 'Claremont Hotel',
@@ -745,7 +747,8 @@ export const landmarks: Landmark[] = [
     nationalRegister: false,
     neighborhood: 'Downtown',
     designationType: 'Landmark',
-  },
+      photoUrl: 'https://berkeleyplaques.org/wp-content/uploads/2014/01/Morse_01.jpg',
+},
   {
     id: 'lm-43',
     name: 'Finnish Hall (Toverii Tuppa)',
@@ -794,7 +797,8 @@ export const landmarks: Landmark[] = [
     nationalRegister: false,
     neighborhood: 'Claremont',
     designationType: 'Landmark',
-  },
+      photoUrl: 'https://berkeleyplaques.org/wp-content/uploads/2014/01/JohnMuir_01.jpg',
+},
   {
     id: 'lm-46',
     name: 'Corder Building',
@@ -827,7 +831,8 @@ export const landmarks: Landmark[] = [
     nationalRegister: false,
     neighborhood: 'Southside',
     designationType: 'Landmark',
-  },
+      photoUrl: 'https://berkeleyplaques.org/wp-content/uploads/2023/11/Fred-Trrner-Building-2004-photo-Daniella-Thompson-BAHA.jpg',
+},
   {
     id: 'lm-48',
     name: 'Elmwood Theater',
@@ -843,7 +848,8 @@ export const landmarks: Landmark[] = [
     nationalRegister: false,
     neighborhood: 'Elmwood',
     designationType: 'Landmark',
-  },
+      photoUrl: 'https://berkeleyplaques.org/wp-content/uploads/2014/01/StrandTheater_plaque1.jpg',
+},
   {
     id: 'lm-49',
     name: 'Captain Boudrow House',
@@ -892,7 +898,8 @@ export const landmarks: Landmark[] = [
     nationalRegister: false,
     neighborhood: 'Northside',
     designationType: 'Landmark',
-  },
+      photoUrl: 'https://berkeleyplaques.org/wp-content/uploads/2014/01/Wheeler_01.jpg',
+},
   {
     id: 'lm-52',
     name: 'Kennedy-Nixon House (Maybeck Studio)',
@@ -924,7 +931,8 @@ export const landmarks: Landmark[] = [
     nationalRegister: false,
     neighborhood: 'Northside',
     designationType: 'Landmark',
-  },
+      photoUrl: 'https://berkeleyplaques.org/wp-content/uploads/2014/01/AllenokeManor_01.jpg',
+},
   {
     id: 'lm-54',
     name: 'Ernest L. Loring House',
@@ -1006,7 +1014,8 @@ export const landmarks: Landmark[] = [
     nationalRegister: false,
     neighborhood: 'Buena Vista',
     designationType: 'Landmark',
-  },
+      photoUrl: 'https://berkeleyplaques.org/wp-content/uploads/2014/01/AnnieBernardMaybeck_03.jpg',
+},
   {
     id: 'lm-59',
     name: 'Downtown YMCA',
@@ -1155,7 +1164,8 @@ export const landmarks: Landmark[] = [
     nationalRegister: false,
     neighborhood: 'Downtown',
     designationType: 'Landmark',
-  },
+      photoUrl: 'https://berkeleyplaques.org/wp-content/uploads/2014/01/FramatLodge_01.jpg',
+},
   {
     id: 'lm-110',
     name: 'Armstrong Building',
@@ -1251,7 +1261,8 @@ export const landmarks: Landmark[] = [
     nationalRegister: false,
     neighborhood: 'South Berkeley',
     designationType: 'Landmark',
-  },
+      photoUrl: 'https://berkeleyplaques.org/wp-content/uploads/2014/01/LorinTheater_01.jpg',
+},
   {
     id: 'lm-116',
     name: 'Hull Undertaking Company Complex',
@@ -1315,7 +1326,8 @@ export const landmarks: Landmark[] = [
     nationalRegister: false,
     neighborhood: 'Downtown',
     designationType: 'Landmark',
-  },
+      photoUrl: 'https://berkeleyplaques.org/wp-content/uploads/2014/01/ElksClub_01.jpg',
+},
   {
     id: 'lm-120',
     name: 'YWCA',
@@ -1363,7 +1375,8 @@ export const landmarks: Landmark[] = [
     nationalRegister: false,
     neighborhood: 'Northside',
     designationType: 'Landmark',
-  },
+      photoUrl: 'https://berkeleyplaques.org/wp-content/uploads/2025/01/BerkeleyOval-SchneiderKroeber-Plaque.jpg',
+},
   {
     id: 'lm-123',
     name: 'The Wallace-Sauer House',
@@ -1782,7 +1795,8 @@ export const landmarks: Landmark[] = [
     nationalRegister: false,
     neighborhood: 'Southside',
     designationType: 'Landmark',
-  },
+      photoUrl: 'https://berkeleyplaques.org/wp-content/uploads/2014/01/Woodward_01.jpg',
+},
   {
     id: 'lm-149',
     name: 'Grace North Church',
@@ -1798,7 +1812,8 @@ export const landmarks: Landmark[] = [
     nationalRegister: false,
     neighborhood: 'North Berkeley',
     designationType: 'Landmark',
-  },
+      photoUrl: 'https://berkeleyplaques.org/wp-content/uploads/2014/01/NorthBerkCongrChurch_01.jpg',
+},
   {
     id: 'lm-150',
     name: 'Hillside Club',
@@ -1847,7 +1862,8 @@ export const landmarks: Landmark[] = [
     nationalRegister: false,
     neighborhood: 'Downtown',
     designationType: 'Landmark',
-  },
+      photoUrl: 'https://berkeleyplaques.org/wp-content/uploads/2014/01/Ennors_01.jpg',
+},
   {
     id: 'lm-153',
     name: 'Niehaus House',
@@ -1959,7 +1975,8 @@ export const landmarks: Landmark[] = [
     nationalRegister: false,
     neighborhood: 'Elmwood',
     designationType: 'Landmark',
-  },
+      photoUrl: 'https://berkeleyplaques.org/wp-content/uploads/2014/01/ClaremontCourtGates_04.jpg',
+},
   {
     id: 'lm-160',
     name: 'Rose Walk',
@@ -2056,7 +2073,8 @@ export const landmarks: Landmark[] = [
     nationalRegister: false,
     neighborhood: 'North Berkeley',
     designationType: 'Landmark',
-  },
+      photoUrl: 'https://berkeleyplaques.org/wp-content/uploads/2014/01/ThousandOaksSchool_02.jpg',
+},
   {
     id: 'lm-166',
     name: 'Bevatron (Building 51)',
@@ -2120,7 +2138,8 @@ export const landmarks: Landmark[] = [
     nationalRegister: false,
     neighborhood: 'South Berkeley',
     designationType: 'Landmark',
-  },
+      photoUrl: 'https://berkeleyplaques.org/wp-content/uploads/2014/01/Longfellow_02.jpg',
+},
   {
     id: 'lm-170',
     name: 'Boone\'s University School',
@@ -2153,7 +2172,8 @@ export const landmarks: Landmark[] = [
     nationalRegister: false,
     neighborhood: 'Southside',
     designationType: 'Landmark',
-  },
+      photoUrl: 'https://berkeleyplaques.org/wp-content/uploads/2014/01/HowardAuto_01.jpg',
+},
   {
     id: 'lm-172',
     name: 'Cambridge Apartments',
@@ -2265,7 +2285,8 @@ export const landmarks: Landmark[] = [
     nationalRegister: false,
     neighborhood: 'Southside',
     designationType: 'Landmark',
-  },
+      photoUrl: 'https://berkeleyplaques.org/wp-content/uploads/2014/01/MrsEPKing_01.jpg',
+},
   {
     id: 'lm-179',
     name: 'Stuart House',
@@ -2297,7 +2318,8 @@ export const landmarks: Landmark[] = [
     nationalRegister: false,
     neighborhood: 'Southside',
     designationType: 'Landmark',
-  },
+      photoUrl: 'https://berkeleyplaques.org/wp-content/uploads/2014/01/GeorgeEdwards_01.jpg',
+},
   {
     id: 'lm-181',
     name: 'Hobart Hall',
@@ -2684,7 +2706,8 @@ export const landmarks: Landmark[] = [
     nationalRegister: false,
     neighborhood: 'Downtown',
     designationType: 'Landmark',
-  },
+      photoUrl: 'https://berkeleyplaques.org/wp-content/uploads/2014/01/Armstrong_01.jpg',
+},
   {
     id: 'lm-205',
     name: 'McKinley School',
@@ -2781,7 +2804,8 @@ export const landmarks: Landmark[] = [
     nationalRegister: false,
     neighborhood: 'Southside',
     designationType: 'Landmark',
-  },
+      photoUrl: 'https://berkeleyplaques.org/wp-content/uploads/2013/12/Piano-Club-entry-photo-2014-R.-Kehlmann.jpg',
+},
   {
     id: 'lm-211',
     name: 'David Brower Houses & David',
@@ -3055,7 +3079,8 @@ export const landmarks: Landmark[] = [
     nationalRegister: false,
     neighborhood: 'La Loma Historic District',
     designationType: 'Landmark',
-  },
+      photoUrl: 'https://berkeleyplaques.org/wp-content/uploads/2014/01/Jensen_01.jpg',
+},
   {
     id: 'lm-228',
     name: 'Kingman Hall',
@@ -3169,7 +3194,8 @@ export const landmarks: Landmark[] = [
     nationalRegister: false,
     neighborhood: 'Northside',
     designationType: 'Landmark',
-  },
+      photoUrl: 'https://berkeleyplaques.org/wp-content/uploads/2026/03/2043-Lincoln-e1774900241907.jpg',
+},
   {
     id: 'lm-235',
     name: 'Goldsmith House',
@@ -3299,7 +3325,8 @@ export const landmarks: Landmark[] = [
     nationalRegister: false,
     neighborhood: 'Berkeley Hills',
     designationType: 'Landmark',
-  },
+      photoUrl: 'https://berkeleyplaques.org/wp-content/uploads/2018/03/Maybeck-Cottage-plaque.jpg',
+},
   {
     id: 'lm-243',
     name: 'Whittier School',
@@ -3315,7 +3342,8 @@ export const landmarks: Landmark[] = [
     nationalRegister: false,
     neighborhood: 'North Berkeley',
     designationType: 'Landmark',
-  },
+      photoUrl: 'https://berkeleyplaques.org/wp-content/uploads/2023/11/Whittier-School-Plaque.jpg',
+},
   {
     id: 'lm-244',
     name: 'MLK Civic Center Building',
@@ -3428,7 +3456,8 @@ export const landmarks: Landmark[] = [
     nationalRegister: false,
     neighborhood: 'Northside',
     designationType: 'Landmark',
-  },
+      photoUrl: 'https://berkeleyplaques.org/wp-content/uploads/2014/01/NapoleonBonaparteByrne_01.jpg',
+},
   {
     id: 'lm-251',
     name: 'Richfield Oil Co. Station',
@@ -3834,7 +3863,8 @@ export const landmarks: Landmark[] = [
     nationalRegister: false,
     neighborhood: 'Downtown',
     designationType: 'Landmark',
-  },
+      photoUrl: 'https://berkeleyplaques.org/wp-content/uploads/2014/01/Heywood_01.jpg',
+},
   {
     id: 'lm-276',
     name: 'Francis K. Shattuck Building',
@@ -4046,7 +4076,8 @@ export const landmarks: Landmark[] = [
     nationalRegister: false,
     neighborhood: 'Downtown',
     designationType: 'Landmark',
-  },
+      photoUrl: 'https://berkeleyplaques.org/wp-content/uploads/2014/01/ShattuckSq_01.jpg',
+},
   {
     id: 'lm-289',
     name: 'Roos Bros. Building',
@@ -4062,7 +4093,8 @@ export const landmarks: Landmark[] = [
     nationalRegister: false,
     neighborhood: 'Downtown',
     designationType: 'Landmark',
-  },
+      photoUrl: 'https://berkeleyplaques.org/wp-content/uploads/2014/01/RoosBros_01.jpg',
+},
   {
     id: 'lm-290',
     name: 'Shattuck Square',
@@ -4321,7 +4353,8 @@ export const landmarks: Landmark[] = [
     nationalRegister: false,
     neighborhood: 'Southside',
     designationType: 'Landmark',
-  },
+      photoUrl: 'https://berkeleyplaques.org/wp-content/uploads/2014/01/JGorman_02.jpg',
+},
   {
     id: 'lm-306',
     name: 'Marshall Mansion',
@@ -4401,7 +4434,8 @@ export const landmarks: Landmark[] = [
     nationalRegister: false,
     neighborhood: 'North Berkeley',
     designationType: 'Landmark',
-  },
+      photoUrl: 'https://berkeleyplaques.org/wp-content/uploads/2014/01/Glass_plaque.jpg',
+},
   {
     id: 'lm-311',
     name: 'Naval Architecture Building - Drawing',
@@ -4996,7 +5030,8 @@ export const landmarks: Landmark[] = [
     nationalRegister: true,
     neighborhood: 'Downtown',
     designationType: 'Landmark',
-  },
+      photoUrl: 'https://berkeleyplaques.org/wp-content/uploads/2014/01/CityHallAnnex_01.jpg',
+},
   {
     id: 'lm-68',
     name: 'Berkeley Tennis Club',
@@ -5111,7 +5146,8 @@ export const landmarks: Landmark[] = [
     nationalRegister: false,
     neighborhood: 'Northbrae',
     designationType: 'Landmark',
-  },
+      photoUrl: 'https://berkeleyplaques.org/wp-content/uploads/2014/01/Northbrae_06.jpg',
+},
   {
     id: 'lm-75',
     name: 'Ashkenaz Music & Dance Center',
@@ -5258,7 +5294,8 @@ export const landmarks: Landmark[] = [
     nationalRegister: false,
     neighborhood: 'Southside',
     designationType: 'Landmark',
-  },
+      photoUrl: 'https://berkeleyplaques.org/wp-content/uploads/2023/11/Bishop-Studio.jpg',
+},
   {
     id: 'lm-84',
     name: 'McCreary-Greer House',
@@ -5274,7 +5311,8 @@ export const landmarks: Landmark[] = [
     nationalRegister: false,
     neighborhood: 'Southside',
     designationType: 'Landmark',
-  },
+      photoUrl: 'https://berkeleyplaques.org/wp-content/uploads/2014/01/McCrearyGreer_01.jpg',
+},
   {
     id: 'lm-85',
     name: 'Maria Marsh House',
@@ -6020,7 +6058,8 @@ export const landmarks: Landmark[] = [
     nationalRegister: false,
     neighborhood: 'Civic Center Historic District',
     designationType: 'Historic District',
-  },
+      photoUrl: 'https://berkeleyplaques.org/wp-content/uploads/2014/01/FedLandBank_01.jpg',
+},
   {
     id: 'lm-382',
     name: 'Laboratories',
@@ -6132,7 +6171,8 @@ export const landmarks: Landmark[] = [
     nationalRegister: false,
     neighborhood: 'Northside',
     designationType: 'Structure of Merit',
-  },
+      photoUrl: 'https://berkeleyplaques.org/wp-content/uploads/2014/01/HundrickGrocery_011.jpg',
+},
   {
     id: 'lm-389',
     name: 'Church By The Side Of The Road',
@@ -6196,7 +6236,8 @@ export const landmarks: Landmark[] = [
     nationalRegister: false,
     neighborhood: 'Downtown',
     designationType: 'Structure of Merit',
-  },
+      photoUrl: 'https://berkeleyplaques.org/wp-content/uploads/2018/03/Webp.net-resizeimage-3.jpg',
+},
   {
     id: 'lm-393',
     name: 'Mattern/Berkeley',
