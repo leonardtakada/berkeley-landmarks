@@ -67,9 +67,9 @@ function WebMapFallback({
 
   return (
     <View style={[styles.container, style]}>
-      <View style={[styles.mapPlaceholder, { backgroundColor: '#E8E4D8' }]}>
+      <View style={[styles.mapPlaceholder, { backgroundColor: '#F7F3EC' }]}>
         <View style={styles.mapContent}>
-          <View style={[styles.mapHeader, { backgroundColor: colors.primary }]}>
+          <View style={[styles.mapHeader, { backgroundColor: '#3D6B5C' }]}>
             <IconSymbol name="map.fill" size={20} color="#FFFFFF" />
             <Text style={styles.mapHeaderText}>Berkeley, California</Text>
           </View>

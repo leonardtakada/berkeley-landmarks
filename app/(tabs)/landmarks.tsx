@@ -42,8 +42,8 @@ const LandmarkRow = React.memo(function LandmarkRow({ landmark, colors }: { land
     alignItems: "center" as const,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.04,
-    shadowRadius: 3,
+    shadowOpacity: 0.02,
+    shadowRadius: 2,
   }), [colors.surface]);
 
   return (
@@ -237,9 +237,9 @@ const styles = StyleSheet.create({
   },
   screenTitle: {
     fontSize: 36,
-    fontWeight: "800",
+    fontWeight: "600",
     fontFamily: Platform.select({ ios: "ui-serif", default: "serif" }),
-    letterSpacing: -0.5,
+    letterSpacing: -0.3,
     lineHeight: 42,
   },
   screenSubtitle: {
@@ -270,7 +270,7 @@ const styles = StyleSheet.create({
   catChip: {
     paddingHorizontal: 14,
     paddingVertical: 7,
-    borderRadius: 20,
+    borderRadius: 4,
   },
   catChipText: {
     fontSize: 13,
@@ -287,7 +287,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingHorizontal: 12,
     paddingVertical: 8,
-    borderRadius: 16,
+    borderRadius: 4,
     gap: 4,
   },
   sortChipText: {
@@ -309,17 +309,17 @@ const styles = StyleSheet.create({
   landmarkRow: {
     flexDirection: "row",
     alignItems: "center",
-    borderRadius: 14,
+    borderRadius: 6,
     overflow: "hidden",
     ...Platform.select({
       ios: {
         shadowColor: "#000",
         shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.04,
-        shadowRadius: 3,
+        shadowOpacity: 0.02,
+        shadowRadius: 2,
       },
       android: { elevation: 1 },
-      web: { boxShadow: "0 1px 3px rgba(0,0,0,0.04)" },
+      web: { boxShadow: "0 1px 2px rgba(0,0,0,0.02)" },
     }),
   },
   catIndicator: {
@@ -361,7 +361,7 @@ const styles = StyleSheet.create({
     width: 20,
     height: 20,
     borderRadius: 10,
-    backgroundColor: '#C4956A22',
+    backgroundColor: '#8B6D4A15',
     alignItems: "center",
     justifyContent: "center",
   },

@@ -130,7 +130,7 @@ export const tours: Tour[] = [
       { latitude: 37.869187, longitude: -122.268926 },
       { latitude: 37.869269, longitude: -122.268294 }
     ],
-    color: '#2563EB',
+    color: '#3D6B5C',
   },
   {
     id: 'tour-southside',
@@ -207,7 +207,7 @@ export const tours: Tour[] = [
       { latitude: 37.868632, longitude: -122.252601 },
       { latitude: 37.868605, longitude: -122.252734 }
     ],
-    color: '#16A34A',
+    color: '#5A8B6F',
   },
   {
     id: 'tour-northside',
@@ -317,7 +317,7 @@ export const tours: Tour[] = [
       { latitude: 37.881023, longitude: -122.252036 },
       { latitude: 37.881009, longitude: -122.251959 }
     ],
-    color: '#9333EA',
+    color: '#6B5B7D',
   },
   {
     id: 'tour-campus',
@@ -408,7 +408,7 @@ export const tours: Tour[] = [
       { latitude: 37.874227, longitude: -122.254215 },
       { latitude: 37.874227, longitude: -122.254215 }
     ],
-    color: '#0891B2',
+    color: '#4A7C7C',
   },
   {
     id: 'tour-west-berkeley',
@@ -520,7 +520,7 @@ export const tours: Tour[] = [
       { latitude: 37.872528, longitude: -122.285774 },
       { latitude: 37.871788, longitude: -122.285669 }
     ],
-    color: '#EA580C',
+    color: '#9B5D3A',
   },
   {
     id: 'tour-elmwood',
@@ -618,7 +618,7 @@ export const tours: Tour[] = [
       { latitude: 37.858377, longitude: -122.241550 },
       { latitude: 37.858544, longitude: -122.241149 }
     ],
-    color: '#DC2626',
+    color: '#9B4D3A',
   },
   {
     id: 'tour-historic-landmarks',
@@ -741,7 +741,7 @@ export const tours: Tour[] = [
       { latitude: 37.871782, longitude: -122.260836 },
       { latitude: 37.871820, longitude: -122.260889 }
     ],
-    color: '#D4A373',
+    color: '#B8956A',
   },
   {
     id: 'tour-maybeck',
@@ -849,7 +849,7 @@ export const tours: Tour[] = [
       { latitude: 37.880792, longitude: -122.252722 },
       { latitude: 37.880766, longitude: -122.252899 }
     ],
-    color: '#B45309',
+    color: '#8B6D4A',
   },
   {
     id: 'tour-julia-morgan',
@@ -963,7 +963,7 @@ export const tours: Tour[] = [
       { latitude: 37.870941, longitude: -122.257246 },
       { latitude: 37.871045, longitude: -122.257087 }
     ],
-    color: '#DB2777',
+    color: '#7A4A5A',
   },
   {
     id: 'tour-buena-vista',
@@ -1053,7 +1053,7 @@ export const tours: Tour[] = [
       { latitude: 37.881080, longitude: -122.252157 },
       { latitude: 37.881009, longitude: -122.251959 }
     ],
-    color: '#7C3AED',
+    color: '#5A5B7D',
   },
   {
     id: 'tour-industrial',
@@ -1167,7 +1167,7 @@ export const tours: Tour[] = [
       { latitude: 37.857441, longitude: -122.283704 },
       { latitude: 37.857531, longitude: -122.283007 }
     ],
-    color: '#78716C',
+    color: '#7A7168',
   },
   {
     id: 'tour-piedmont',
@@ -1191,6 +1191,6 @@ export const tours: Tour[] = [
       { latitude: 37.8752, longitude: -122.2536 },
       { latitude: 37.8745, longitude: -122.2505 },
     ],
-    color: '#059669',
+    color: '#3D8B6B',
   },
 ];

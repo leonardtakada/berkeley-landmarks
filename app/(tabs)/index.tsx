@@ -291,18 +291,15 @@ export default function MapScreen() {
               }}
               style={({ pressed }) => [
                 styles.detailButton,
-                { opacity: pressed ? 0.9 : 1 },
+                {
+                  borderColor: '#3D6B5C',
+                  borderWidth: 1,
+                  opacity: pressed ? 0.7 : 1,
+                },
               ]}
             >
-              <LinearGradient
-                colors={['#7B8B6F', '#6B7B5F']}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 0 }}
-                style={styles.detailButtonGradient}
-              >
-                <Text style={styles.detailButtonText}>View Details</Text>
-                <IconSymbol name="chevron.right" size={14} color="#FFFFFF" />
-              </LinearGradient>
+              <Text style={[styles.detailButtonText, { color: '#3D6B5C' }]}>View Details</Text>
+              <IconSymbol name="chevron.right" size={14} color="#3D6B5C" />
             </Pressable>
           </View>
         </View>
@@ -331,7 +328,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingHorizontal: 14,
     paddingVertical: 8,
-    borderRadius: 20,
+    borderRadius: 4,
     borderWidth: 1,
     gap: 6,
     ...Platform.select({
@@ -342,7 +339,7 @@ const styles = StyleSheet.create({
         shadowRadius: 4,
       },
       android: { elevation: 1 },
-      web: { boxShadow: "0 1px 4px rgba(0,0,0,0.04)" },
+      web: { boxShadow: "0 1px 2px rgba(0,0,0,0.02)" },
     }),
   },
   chipDot: {
@@ -358,7 +355,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     left: 16,
     right: 16,
-    borderRadius: 14,
+    borderRadius: 6,
     zIndex: 10,
     overflow: "hidden",
     ...Platform.select({
@@ -502,30 +499,26 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 3,
-    backgroundColor: '#C4956A22',
+    backgroundColor: '#8B6D4A15',
     paddingHorizontal: 8,
     paddingVertical: 2,
-    borderRadius: 8,
+    borderRadius: 4,
   },
   nrText: {
     fontSize: 11,
     fontWeight: "700",
-    color: '#C4956A',
+    color: '#8B6D4A',
   },
   detailButton: {
     marginTop: 14,
-    borderRadius: 12,
-    overflow: "hidden",
-  },
-  detailButtonGradient: {
+    paddingVertical: 12,
+    borderRadius: 6,
     flexDirection: "row",
+    gap: 6,
     alignItems: "center",
     justifyContent: "center",
-    paddingVertical: 14,
-    gap: 6,
   },
   detailButtonText: {
-    color: "#FFFFFF",
     fontSize: 15,
     fontWeight: "700",
   },

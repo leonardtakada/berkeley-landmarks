@@ -63,3 +63,4 @@ Thumbs.db
 
 # Webdv artifacts (checkpoint zips, migrations, etc.)
 .webdev/
+._*

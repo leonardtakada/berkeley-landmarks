@@ -103,9 +103,9 @@ const styles = StyleSheet.create({
   },
   screenTitle: {
     fontSize: 36,
-    fontWeight: "800",
+    fontWeight: "600",
     fontFamily: Platform.select({ ios: "ui-serif", default: "serif" }),
-    letterSpacing: -0.5,
+    letterSpacing: -0.3,
     lineHeight: 42,
   },
   screenSubtitle: {
@@ -118,17 +118,17 @@ const styles = StyleSheet.create({
     paddingBottom: 100,
   },
   tourCard: {
-    borderRadius: 14,
+    borderRadius: 6,
     overflow: "hidden",
     ...Platform.select({
       ios: {
         shadowColor: "#000",
         shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.05,
-        shadowRadius: 4,
+        shadowOpacity: 0.02,
+        shadowRadius: 2,
       },
       android: { elevation: 1 },
-      web: { boxShadow: "0 1px 4px rgba(0,0,0,0.05)" },
+      web: { boxShadow: "0 1px 2px rgba(0,0,0,0.02)" },
     }),
   },
   accentBar: {
@@ -146,7 +146,7 @@ const styles = StyleSheet.create({
   tourIcon: {
     width: 44,
     height: 44,
-    borderRadius: 12,
+    borderRadius: 6,
     alignItems: "center",
     justifyContent: "center",
   },
