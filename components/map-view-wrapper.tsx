@@ -1,7 +1,8 @@
 import React, { forwardRef, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Platform, Text, View, StyleSheet } from "react-native";
-import MapView, { Marker, Polyline, Polygon, Region } from "react-native-maps";
+import MapView, { Marker, Polyline, Polygon, Region, UrlTile } from "react-native-maps";
 import SuperCluster from "supercluster";
+import { useColors } from "@/hooks/use-colors";
 
 interface Coordinate {
   latitude: number;
@@ -85,6 +86,17 @@ function regionToZoom(region: RegionLike): number {
   return Math.round(Math.log2(360 / region.latitudeDelta));
 }
 
+/**
+ * Warm "aged paper" treatment to match the web map's sepia tiles.
+ * UrlTile swaps the base layer to OSM; the tint veil sits above the map
+ * (but is ignored by touches) like a light varnish on a printed sheet.
+ */
+function PaperTintOverlay() {
+  const colors = useColors();
+  const tint = colors.background === "#1C1B19" ? "rgba(28,27,25,0.22)" : "rgba(247,243,236,0.16)";
+  return <View pointerEvents="none" style={[styles.paperTint, { backgroundColor: tint }]} />;
+}
+
 const MapViewWrapper = forwardRef<any, MapViewWrapperProps>(
   ({ children, clusterMarkers, clusterRadius = 50, clusterMaxZoom = 17, ...props }, ref) => {
     const [currentRegion, setCurrentRegion] = useState<RegionLike | null>(null);
@@ -137,12 +149,18 @@ const MapViewWrapper = forwardRef<any, MapViewWrapperProps>(
     // If clustering is enabled and markers are provided, render clustered view
     if (clusterMarkers && clusterMarkers.length > 0) {
       return (
-        <MapView
-          ref={ref}
-          {...props}
-          onRegionChangeComplete={handleRegionChangeComplete}
-        >
-          {/* Non-marker children (polygons, polylines) */}
+        <View style={styles.mapShell}>
+          <MapView
+            ref={ref}
+            {...props}
+            onRegionChangeComplete={handleRegionChangeComplete}
+          >
+            <UrlTile
+              urlTemplate="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
+              maximumZ={19}
+              zIndex={-1}
+            />
+            {/* Non-marker children (polygons, polylines) */}
           {React.Children.toArray(children).filter((child) => {
             if (!React.isValidElement(child)) return false;
             // Pass through everything except MapMarker
@@ -182,16 +200,26 @@ const MapViewWrapper = forwardRef<any, MapViewWrapperProps>(
                 onSelect={cluster.properties.onPress}
               />
             );
-          })}
-        </MapView>
+            })}
+          </MapView>
+          <PaperTintOverlay />
+        </View>
       );
     }
 
     // Default: pass through children as-is (no clustering)
     return (
-      <MapView ref={ref} {...props}>
-        {children}
-      </MapView>
+      <View style={styles.mapShell}>
+        <MapView ref={ref} {...props}>
+          <UrlTile
+            urlTemplate="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
+            maximumZ={19}
+            zIndex={-1}
+          />
+          {children}
+        </MapView>
+        <PaperTintOverlay />
+      </View>
     );
   }
 );
@@ -201,6 +229,8 @@ MapViewWrapper.displayName = "MapViewWrapper";
 export default MapViewWrapper;
 
 const styles = StyleSheet.create({
+  mapShell: { flex: 1 },
+  paperTint: { ...StyleSheet.absoluteFillObject },
   clusterBubble: {
     justifyContent: "center",
     alignItems: "center",
