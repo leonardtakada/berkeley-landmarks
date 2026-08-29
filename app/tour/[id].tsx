@@ -55,29 +55,21 @@ export default function TourDetailScreen() {
           <Text style={[styles.heroNeighborhood, { color: colors.muted }]}>{tour.neighborhood}</Text>
         </View>
 
-        {/* Tour Stats */}
-        <View style={styles.statsRow}>
-          <View style={[styles.statCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-            <IconSymbol name="ruler.fill" size={18} color={tour.color} />
-            <Text style={[styles.statValue, { color: colors.foreground }]}>{tour.distance}</Text>
-            <Text style={[styles.statLabel, { color: colors.muted }]}>Distance</Text>
-          </View>
-          <View style={[styles.statCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-            <IconSymbol name="clock.fill" size={18} color={tour.color} />
-            <Text style={[styles.statValue, { color: colors.foreground }]}>{tour.duration}</Text>
-            <Text style={[styles.statLabel, { color: colors.muted }]}>Duration</Text>
-          </View>
-          <View style={[styles.statCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-            <IconSymbol name="mappin.and.ellipse" size={18} color={tour.color} />
-            <Text style={[styles.statValue, { color: colors.foreground }]}>{tour.stops.length}</Text>
-            <Text style={[styles.statLabel, { color: colors.muted }]}>Stops</Text>
-          </View>
+        {/* Tour Stats — catalog line */}
+        <View style={styles.statsRule}>
+          <Text style={[styles.statLine, { color: colors.muted }]}>
+            {tour.distance.toUpperCase()} · {tour.duration.toUpperCase()} · {tour.stops.length} STOPS
+          </Text>
+          <View style={[styles.statsRuleLine, { backgroundColor: colors.border }]} />
         </View>
 
         {/* Description */}
         <View style={[styles.section, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-          <Text style={[styles.sectionTitle, { color: colors.foreground }]}>About This Tour</Text>
-          <Text style={[styles.description, { color: colors.foreground }]}>{tour.description}</Text>
+          <Text style={[styles.sectionTitle, { color: colors.muted }]}>About This Tour</Text>
+          <Text style={[styles.description, { color: colors.foreground }]}>
+            <Text style={[styles.dropCap, { color: tour.color }]}>{tour.description.charAt(0)}</Text>
+            {tour.description.slice(1)}
+          </Text>
           <Text style={[styles.author, { color: colors.muted }]}>Guide by {tour.author}</Text>
         </View>
 
@@ -191,29 +183,29 @@ const styles = StyleSheet.create({
     fontSize: 15,
     lineHeight: 20,
   },
-  statsRow: {
-    flexDirection: "row",
-    paddingHorizontal: 16,
-    gap: 10,
-    marginTop: 16,
-  },
-  statCard: {
-    flex: 1,
+  statsRule: {
     alignItems: "center",
-    padding: 14,
-    borderRadius: 6,
-    borderWidth: 1,
-    gap: 4,
+    gap: 8,
+    marginHorizontal: 20,
+    marginTop: 18,
+    marginBottom: 4,
   },
-  statValue: {
-    fontSize: 17,
-    fontWeight: "700",
+  statLine: {
+    fontSize: 12,
+    fontWeight: "600",
+    letterSpacing: 1.6,
   },
-  statLabel: {
-    fontSize: 11,
-    fontWeight: "500",
-    textTransform: "uppercase",
-    letterSpacing: 0.5,
+  statsRuleLine: {
+    marginTop: 2,
+    alignSelf: "stretch",
+    height: StyleSheet.hairlineWidth,
+  },
+  dropCap: {
+    fontSize: 44,
+    lineHeight: 38,
+    fontWeight: "600",
+    fontFamily: Platform.select({ ios: "ui-serif", default: "serif" }),
+    paddingRight: 6,
   },
   section: {
     marginHorizontal: 16,

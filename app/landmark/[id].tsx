@@ -225,8 +225,11 @@ export default function LandmarkDetailScreen() {
 
         {/* Description */}
         <View style={[styles.section, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-          <Text style={[styles.sectionTitle, { color: colors.foreground }]}>About</Text>
-          <Text style={[styles.description, { color: colors.foreground }]}>{landmark.description}</Text>
+          <Text style={[styles.sectionTitle, { color: colors.muted }]}>About</Text>
+          <Text style={[styles.description, { color: colors.foreground }]}>
+            <Text style={[styles.dropCap, { color: catColor }]}>{landmark.description.charAt(0)}</Text>
+            {landmark.description.slice(1)}
+          </Text>
         </View>
 
         {/* Nearby Landmarks */}
@@ -396,6 +399,13 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     fontFamily: Platform.select({ ios: "ui-serif", default: "serif" }),
     marginBottom: 10,
+  },
+  dropCap: {
+    fontSize: 44,
+    lineHeight: 38,
+    fontWeight: "600",
+    fontFamily: Platform.select({ ios: "ui-serif", default: "serif" }),
+    paddingRight: 6,
   },
   description: {
     fontSize: 15,

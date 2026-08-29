@@ -250,7 +250,7 @@ const WebMap = forwardRef<any, MapViewWrapperProps>(function WebMap(
         weight: poly.strokeWidth ?? 3,
         opacity: 0.85,
         // Dotted trail marking when a dash pattern is requested
-        dashArray: dashed ? "1 9" : undefined,
+        dashArray: dashed ? poly.lineDashPattern!.join(" ") : undefined,
         lineCap: dashed ? "round" : "round",
         lineJoin: "round",
         interactive: false,
