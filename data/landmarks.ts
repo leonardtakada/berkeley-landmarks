@@ -6025,6 +6025,7 @@ export const landmarks: Landmark[] = [
   {
     id: 'lm-378',
     name: 'Civic Center Park and Fountain',
+    photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b7/Civic_Center_Park.jpg/800px-Civic_Center_Park.jpg',
     address: '2100 Martin Luther King Jr Way',
     latitude: 37.870176,
     longitude: -122.2733364,
