@@ -25,6 +25,8 @@ import {
 } from "@/data/landmarks";
 import { BERKELEY_BOUNDARY } from "@/data/berkeley-boundary";
 import { tours } from "@/data/tours";
+import { useTourFollow } from "@/hooks/use-tour-follow";
+import { TourFollowCard } from "@/components/tour-follow-card";
 
 const ALL_CATEGORIES: LandmarkCategory[] = [
   "civic",
@@ -54,6 +56,7 @@ export default function MapScreen() {
     () => (activeTourId ? tours.find((t) => t.id === activeTourId) : null),
     [activeTourId]
   );
+  const tourFollow = useTourFollow(activeTour ?? null);
 
   const tourStopIds = useMemo(
     () => new Set(activeTour?.stops.map((s) => s.landmarkId) ?? []),
@@ -213,6 +216,11 @@ export default function MapScreen() {
             </Pressable>
           </LinearGradient>
         </View>
+      )}
+
+      {/* Follow-along tour card */}
+      {activeTour && !selectedLandmark && (
+        <TourFollowCard tour={activeTour} follow={tourFollow} />
       )}
 
       {/* Bottom Sheet - Landmark Preview */}
