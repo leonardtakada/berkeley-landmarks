@@ -4,6 +4,7 @@ import MapView, { Marker, Polyline, Polygon, Region, UrlTile } from "react-nativ
 import SuperCluster from "supercluster";
 import { useColors } from "@/hooks/use-colors";
 import { prefetchBerkeleyTiles, cachedTileTemplate } from "@/lib/tile-cache";
+import { MID_RECT } from "@/lib/tiles-manifest.generated";
 
 interface Coordinate {
   latitude: number;
@@ -36,6 +37,7 @@ interface PolylineProps {
 
 interface PolygonProps {
   coordinates: Coordinate[];
+  holes?: Coordinate[][];
   strokeColor?: string;
   strokeWidth?: number;
   fillColor?: string;
@@ -79,7 +81,41 @@ export function MapPolyline(props: PolylineProps) {
 }
 
 export function MapPolygon(props: PolygonProps) {
-  return <Polygon coordinates={props.coordinates} strokeColor={props.strokeColor} strokeWidth={props.strokeWidth} fillColor={props.fillColor} />;
+  const { holes, ...rest } = props;
+  // react-native-maps requires `holes` on iOS; cast to satisfy its types.
+  return <Polygon {...(rest as any)} holes={holes as any} />;
+}
+
+/**
+ * The baked tile set carries the theme out to MID_RECT with a progressive
+ * blur; beyond that this solid overlay (theme background, MID_RECT as a hole)
+ * hides Apple's default map entirely — no hard edge anywhere.
+ */
+function FarRingOverlay() {
+  const colors = useColors();
+  const pad = 1.2; // generous outer bounds; the hole edge is what matters
+  const outer: Coordinate[] = [
+    { latitude: MID_RECT.minLat - pad, longitude: MID_RECT.minLon - pad * 1.3 },
+    { latitude: MID_RECT.minLat - pad, longitude: MID_RECT.maxLon + pad * 1.3 },
+    { latitude: MID_RECT.maxLat + pad, longitude: MID_RECT.maxLon + pad * 1.3 },
+    { latitude: MID_RECT.maxLat + pad, longitude: MID_RECT.minLon - pad * 1.3 },
+  ];
+  const inner: Coordinate[] = [
+    { latitude: MID_RECT.minLat, longitude: MID_RECT.minLon },
+    { latitude: MID_RECT.minLat, longitude: MID_RECT.maxLon },
+    { latitude: MID_RECT.maxLat, longitude: MID_RECT.maxLon },
+    { latitude: MID_RECT.maxLat, longitude: MID_RECT.minLon },
+  ];
+  return (
+    <Polygon
+      coordinates={outer as any}
+      holes={[inner] as any}
+      fillColor={colors.background}
+      strokeColor="transparent"
+      strokeWidth={0}
+      tappable={false}
+    />
+  );
 }
 
 /** Convert map latitudeDelta to integer zoom level (approximate) */
@@ -94,7 +130,7 @@ function regionToZoom(region: RegionLike): number {
  */
 function PaperTintOverlay() {
   const colors = useColors();
-  const tint = colors.background === "#1C1B19" ? "rgba(28,27,25,0.22)" : "rgba(247,243,236,0.16)";
+  const tint = colors.background === "#1C1B19" ? "rgba(28,27,25,0.22)" : "rgba(0,0,0,0)";
   return <View pointerEvents="none" style={[styles.paperTint, { backgroundColor: tint }]} />;
 }
 
@@ -176,9 +212,10 @@ const MapViewWrapper = forwardRef<any, MapViewWrapperProps>(
           >
             <UrlTile
               urlTemplate={tileTemplate}
-              maximumZ={19}
+              maximumZ={16}
               zIndex={-1}
             />
+            <FarRingOverlay />
             {/* Non-marker children (polygons, polylines) */}
           {React.Children.toArray(children).filter((child) => {
             if (!React.isValidElement(child)) return false;
@@ -232,9 +269,10 @@ const MapViewWrapper = forwardRef<any, MapViewWrapperProps>(
         <MapView ref={ref} {...props}>
           <UrlTile
             urlTemplate={tileTemplate}
-            maximumZ={19}
+            maximumZ={16}
             zIndex={-1}
           />
+          <FarRingOverlay />
           {children}
         </MapView>
         <PaperTintOverlay />
