@@ -14,7 +14,11 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useColors } from "@/hooks/use-colors";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { CategoryPlaceholder } from "@/components/category-placeholder";
-import MapViewWrapper, { MapMarker, MapPolyline, MapPolygon } from "@/components/map-view-wrapper";
+import MapViewWrapper, { MapPolyline, MapPolygon } from "@/components/map-view-wrapper";
+import MapLibreMapView, {
+  MapPolyline as VectorMapPolyline,
+} from "@/components/maplibre-view";
+import { useMapEngine } from "@/constants/map-engine";
 import {
   landmarks,
   BERKELEY_CENTER,
@@ -43,6 +47,7 @@ export default function MapScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const mapRef = useRef<any>(null);
+  const { isMapLibre, toggleEngine, ready: engineReady } = useMapEngine();
 
   const [selectedLandmark, setSelectedLandmark] = useState<Landmark | null>(null);
   const [activeCategories, setActiveCategories] = useState<Set<LandmarkCategory>>(
@@ -97,7 +102,35 @@ export default function MapScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <MapViewWrapper
+      {isMapLibre ? (
+        <MapLibreMapView
+        ref={mapRef}
+        style={styles.map}
+        initialRegion={BERKELEY_CENTER}
+        minZoomLevel={12}
+        maxZoomLevel={17}
+        onPress={handleMapPress}
+        showsUserLocation
+        clusterMarkers={filteredLandmarks.map((landmark) => ({
+          id: landmark.id,
+          coordinate: { latitude: landmark.latitude, longitude: landmark.longitude },
+          pinColor: CATEGORY_COLORS[landmark.category],
+          onPress: () => handleMarkerPress(landmark),
+        }))}
+      >
+        {/* The vector style draws the city boundary natively; only the tour
+            route polyline is needed as an overlay. */}
+        {activeTour && activeTour.routeCoordinates.length > 1 && (
+          <VectorMapPolyline
+            coordinates={activeTour.routeCoordinates}
+            strokeColor={activeTour.color}
+            strokeWidth={3.5}
+            lineDashPattern={[6, 7]}
+          />
+        )}
+      </MapLibreMapView>
+      ) : (
+        <MapViewWrapper
         ref={mapRef}
         style={styles.map}
         initialRegion={BERKELEY_CENTER}
@@ -148,12 +181,15 @@ export default function MapScreen() {
           />
         )}
       </MapViewWrapper>
+      )}
 
-      {/* SPIKE (maplibre-spike branch): debug toggle to the MapLibre proof-of-concept */}
-      {__DEV__ && (
+      {/* Map engine toggle: MapLibre vector map ⇄ raster fallback */}
+      {engineReady && (
         <Pressable
-          accessibilityLabel="Open MapLibre spike"
-          onPress={() => router.push("/maplibre-spike")}
+          accessibilityLabel={
+            isMapLibre ? "Switch to raster map" : "Switch to vector map"
+          }
+          onPress={toggleEngine}
           style={[
             styles.spikeButton,
             {
@@ -163,7 +199,14 @@ export default function MapScreen() {
             },
           ]}
         >
-          <Text style={{ color: colors.text, fontSize: 11 }}>ML spike</Text>
+          <IconSymbol
+            name="map.fill"
+            size={12}
+            color={colors.text}
+          />
+          <Text style={{ color: colors.text, fontSize: 11 }}>
+            {isMapLibre ? "Vector" : "Raster"}
+          </Text>
         </Pressable>
       )}
 
@@ -343,6 +386,9 @@ const styles = StyleSheet.create({
   spikeButton: {
     position: "absolute" as const,
     right: 12,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
     paddingHorizontal: 8,
     paddingVertical: 6,
     borderRadius: 8,

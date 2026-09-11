@@ -2,7 +2,7 @@ import React from "react";
 import { Text, View, FlatList, Pressable, StyleSheet, Platform } from "react-native";
 // Platform already imported
 import { useRouter } from "expo-router";
-import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
+import { useBottomTabBarHeight } from "expo-router/build/react-navigation/bottom-tabs";
 import { ScreenContainer } from "@/components/screen-container";
 import { useColors } from "@/hooks/use-colors";
 import { IconSymbol } from "@/components/ui/icon-symbol";
@@ -43,7 +43,7 @@ function TourCard({ tour, tourIndex }: { tour: Tour; tourIndex: number }) {
               [ {tour.neighborhood.toUpperCase()} ]
             </Text>
           </View>
-          <Text style={[styles.plateNo, { color: colors.border }]}>No. {String(tourIndex + 1).padStart(2, "0")}</Text>
+          <Text style={[styles.plateNo, { color: colors.muted }]}>No. {String(tourIndex + 1).padStart(2, "0")}</Text>
         </View>
 
         <Text style={[styles.tourDescription, { color: colors.muted }]} numberOfLines={2}>

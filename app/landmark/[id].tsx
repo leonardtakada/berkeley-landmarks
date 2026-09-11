@@ -25,6 +25,7 @@ export default function LandmarkDetailScreen() {
   const submitMutation = trpc.photos.submit.useMutation();
 
   const [uploading, setUploading] = useState(false);
+  const [scrolledPastHero, setScrolledPastHero] = useState(false);
   const [uploadSuccess, setUploadSuccess] = useState(false);
   const [viewerUri, setViewerUri] = useState<string | null>(null);
 
@@ -42,7 +43,6 @@ export default function LandmarkDetailScreen() {
 
       const mime = asset.mimeType === "image/png" ? "image/png" : "image/jpeg";
 
-      Alert.prompt
       setUploading(true);
       setUploadSuccess(false);
 
@@ -100,14 +100,23 @@ export default function LandmarkDetailScreen() {
           >
             <IconSymbol name="arrow.left" size={20} color="#FFFFFF" />
           </Pressable>
-          <Text style={styles.headerTitle} numberOfLines={1}>
+          <Text style={[styles.headerTitle, { opacity: scrolledPastHero ? 1 : 0 }]} numberOfLines={1}>
             {landmark.name}
           </Text>
           <View style={{ width: 40 }} />
         </View>
       </LinearGradient>
 
-      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+        scrollEventThrottle={16}
+        onScroll={(e) => {
+          const y = e.nativeEvent.contentOffset.y;
+          const past = y > 150;
+          if (past !== scrolledPastHero) setScrolledPastHero(past);
+        }}
+      >
         {/* Hero Banner */}
         <View style={styles.heroBanner}>
           <LinearGradient
@@ -116,7 +125,17 @@ export default function LandmarkDetailScreen() {
             end={{ x: 0, y: 1 }}
             style={styles.heroGradient}
           >
-            {!landmark.photoUrl && (
+            {landmark.photoUrl ? (
+              <Image
+                source={{
+                  uri: landmark.photoUrl.startsWith("http")
+                    ? landmark.photoUrl
+                    : `${getApiBaseUrl()}${landmark.photoUrl}`,
+                }}
+                style={styles.heroImage}
+                resizeMode="cover"
+              />
+            ) : (
               <CategoryPlaceholder
                 category={landmark.category}
                 color={catColor}
@@ -300,6 +319,14 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     alignItems: 'center',
   },
+  heroImage: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    width: "100%",
+    height: 240,
+  },
   heroPlaceholder: {
     marginBottom: 16,
   },
@@ -402,7 +429,7 @@ const styles = StyleSheet.create({
   },
   dropCap: {
     fontSize: 44,
-    lineHeight: 38,
+    lineHeight: 48,
     fontWeight: "600",
     fontFamily: Platform.select({ ios: "ui-serif", default: "serif" }),
     paddingRight: 6,

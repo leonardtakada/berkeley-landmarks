@@ -29,14 +29,33 @@ const MID = {
   minLon: CORE.minLon - MID_PAD_LON,
   maxLon: CORE.maxLon + MID_PAD_LON,
 };
-const BG = "#F7F3EC"; // theme background (light)
+const DARK = process.env.TILES_MODE === "dark";
+const BG = DARK ? "#1C1B19" : "#F7F3EC"; // theme background
 const Z_MIN = 11;
 const Z_MAX = 16;
 const REAL_Z_MAX = 13; // beyond this, virtual tiles are cut from z13 parents
-const TILE_URL = (z, x, y) => `https://tile.openstreetmap.org/${z}/${x}/${y}.png`;
+const TILE_URL_BASE = (z, x, y) =>
+  DARK
+    ? `https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/${z}/${y}/${x}`
+    : `https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/${z}/${y}/${x}`;
+const TILE_URL_REF = (z, x, y) =>
+  DARK
+    ? `https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Reference/MapServer/tile/${z}/${y}/${x}`
+    : `https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Reference/MapServer/tile/${z}/${y}/${x}`;
+// ESRI Gray Canvas — minimal geometry + optional labels overlay
 const DL_CACHE = path.join(import.meta.dirname, "..", ".tile-cache");
-const OUT_BIN = path.join(import.meta.dirname, "..", "assets", "tiles.bin");
-const OUT_INDEX = path.join(import.meta.dirname, "..", "assets", "tiles-index.json");
+const OUT_BIN = path.join(
+  import.meta.dirname,
+  "..",
+  "assets",
+  DARK ? "tiles-dark.bin" : "tiles.bin"
+);
+const OUT_INDEX = path.join(
+  import.meta.dirname,
+  "..",
+  "assets",
+  DARK ? "tiles-dark-index.json" : "tiles-index.json"
+);
 const OUT_MANIFEST = path.join(import.meta.dirname, "..", "lib", "tiles-manifest.generated.ts");
 
 // ── Filter chain (CSS-equivalent matrix, folded into one 3x3) ──
@@ -45,10 +64,10 @@ const SEP = [
   [0.349, 0.686, 0.168],
   [0.272, 0.534, 0.131],
 ];
-const SEP_STRENGTH = 0.32;
-const SATURATION = 0.55;
-const BRIGHTNESS = 1.06;
-const CONTRAST = 0.92;
+const SEP_STRENGTH = DARK ? 0.22 : 0.32;
+const SATURATION = DARK ? 0.6 : 0.6;
+const BRIGHTNESS = DARK ? 1.0 : 0.97;
+const CONTRAST = DARK ? 1.25 : 1.12;
 const LUMA = [0.2126, 0.7152, 0.0722];
 
 // ── Geo helpers ──
@@ -79,8 +98,8 @@ const overlapsCore = (t) => intersects(t, CORE);
 const overlapsMid = (t) => intersects(t, MID);
 
 // ── Blur / fade ramps (zoom-independent, geo distance based) ──
-const blurSigma = (dKm) => Math.min(7, Math.max(0, (dKm - 0.5) * 0.35));
-const bgBlend = (dKm) => Math.min(0.8, Math.max(0, (dKm - 1.2) / 5));
+const blurSigma = (dKm) => Math.min(7, Math.max(0, (dKm - 0.5) * 0.22));
+const bgBlend = (dKm) => Math.min(0.8, Math.max(0, (dKm - 1.0) / 6));
 
 function hexToRgb(hex) {
   const n = parseInt(hex.slice(1), 16);
@@ -88,9 +107,153 @@ function hexToRgb(hex) {
 }
 const BG_RGB = hexToRgb(BG);
 
-/** Apply the CSS-equivalent filter chain to raw RGBA pixels, stage by stage
- *  (sepia → saturate → brightness → contrast → bg blend), clamping between
- *  stages exactly like CSS filters do. */
+/** Point-to-rect distance in km. */
+function pointDistKm(lat, lon, b) {
+  const dy = Math.max(b.minLat - lat, 0, lat - b.maxLat) * 111;
+  const dx = Math.max(b.minLon - lon, 0, lon - b.maxLon) * 111 * Math.cos((37.87 * Math.PI) / 180);
+  return Math.hypot(dx, dy);
+}
+
+/** Decode tile → raw RGBA buffer (no theme applied). */
+async function rawRGBA(buf) {
+  return sharp(buf).ensureAlpha(1).toColourspace("srgb").resize(256, 256, { fit: "fill" })
+    .raw().toBuffer();
+}
+
+/**
+ * Process a tile with gradient-feathered blur/fade: instead of one constant
+ * sigma per tile (visible tile-sized steps), compute ramp values at the
+ * nearest and farthest corners and blend the two processed versions with a
+ * linear gradient mask oriented away from the Berkeley core.
+ */
+async function processTileSmooth(buf, b, zoom = 15) {
+  const orig = await rawRGBA(buf);
+  const corners = [
+    [b.minLat, b.minLon], [b.minLat, b.maxLon],
+    [b.maxLat, b.minLon], [b.maxLat, b.maxLon],
+  ];
+  const ds = corners.map(([la, lo]) => pointDistKm(la, lo, CORE));
+  const dNear = Math.min(...ds);
+  const dFar = Math.max(...ds);
+  const sLo = blurSigma(dNear), sHi = blurSigma(dFar);
+  const bLo = bgBlend(dNear), bHi = bgBlend(dFar);
+
+  // render one variant: theme+bg blend, then blur OR ink strokes
+  const make = async (sigma, blend) => {
+    const themed = applyTheme(Buffer.from(orig), Math.max(blend, 0));
+    let out = sharp(themed, { raw: { width: 256, height: 256, channels: 4 } });
+    if (sigma > 0.3) return out.blur(sigma).jpeg({ quality: 72, mozjpeg: true }).toBuffer();
+    const baseJpeg = await out.jpeg({ quality: 90, mozjpeg: true }).toBuffer();
+    const ink = await inkLayer(orig, zoom);
+    return sharp(baseJpeg)
+      .composite([{ input: ink, blend: "over" }])
+      .jpeg({ quality: 86, mozjpeg: true })
+      .toBuffer();
+  };
+
+  if (sHi - sLo < 0.6 && Math.abs(bHi - bLo) < 0.05) {
+    return make(sLo, bLo);
+  }
+
+  // direction from tile center toward nearest point of core bbox
+  const clat = (b.minLat + b.maxLat) / 2, clon = (b.minLon + b.maxLon) / 2;
+  const px = Math.min(Math.max(clon, CORE.minLon), CORE.maxLon);
+  const py = Math.min(Math.max(clat, CORE.minLat), CORE.maxLat);
+  const kmPerLon = 111 * Math.cos((37.87 * Math.PI) / 180);
+  let vx = (px - clon) * kmPerLon, vy = (py - clat) * 111;
+  const vlen = Math.hypot(vx, vy) || 1;
+  vx /= vlen; vy /= vlen;
+  // gradient runs from the core-facing edge (alpha 0 → keep lo) to the far edge (alpha 1 → hi)
+  const cx = 128, cy = 128, r = 190;
+  const x1 = cx - vx * r, y1 = cy - vy * r, x2 = cx + vx * r, y2 = cy + vy * r;
+  const mask = Buffer.from(
+    `<svg width="256" height="256">
+      <defs><linearGradient id="g" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" gradientUnits="userSpaceOnUse">
+        <stop offset="0.1" stop-color="#fff" stop-opacity="0"/>
+        <stop offset="0.9" stop-color="#fff" stop-opacity="1"/>
+      </linearGradient></defs>
+      <rect width="256" height="256" fill="url(#g)"/>
+    </svg>`
+  );
+  const hiMasked = await make(sHi, bHi);
+  const lo = await make(sLo, bLo);
+  const hi = await sharp(hiMasked)
+    .ensureAlpha()
+    .composite([{ input: await sharp(mask).png().toBuffer(), blend: "dest-in" }])
+    .png()
+    .toBuffer();
+  return sharp(lo)
+    .composite([{ input: hi, blend: "over" }])
+    .jpeg({ quality: 72, mozjpeg: true })
+    .toBuffer();
+}
+
+/** Decode + theme (sepia etc.) once → raw RGBA buffer. */
+async function themeRaw(buf) {
+  const img = sharp(buf).ensureAlpha(1).toColourspace("srgb").resize(256, 256, { fit: "fill" });
+  const { data } = await img.raw().toBuffer({ resolveWithObject: true });
+  applyTheme(data, 0);
+  return data;
+}
+
+const INK = DARK ? [240, 231, 212] : [46, 33, 22]; // ink stroke colour
+// Ink strength per zoom: thin 1px lines at low zoom need a bigger boost.
+const EDGE_GAIN_BY_Z = { 11: 2.6, 12: 2.6, 13: 2.4, 14: 1.6, 15: 1.0, 16: 0.8 };
+const EDGE_THRESHOLD = 6; // ignore faint noise
+
+/** Detect edges (street lines, boundaries, labels) → RGBA ink layer.
+ *  Laplacian computed manually — sharp's convolve clamps negative responses.
+ *  Uses FIXED global levels (no per-tile normalisation) so every tile renders
+ *  with identical tone and weight — no patchwork effect. */
+async function inkLayer(raw, zoom = 15) {
+  const W = 256;
+  const lum = new Float32Array(W * W);
+  for (let i = 0; i < W * W; i++)
+    lum[i] = 0.299 * raw[i * 4] + 0.587 * raw[i * 4 + 1] + 0.114 * raw[i * 4 + 2];
+
+  const edge = new Float32Array(W * W);
+  for (let y = 1; y < W - 1; y++) {
+    for (let x = 1; x < W - 1; x++) {
+      const i = y * W + x;
+      edge[i] = Math.max(
+        0,
+        4 * lum[i] - lum[i - 1] - lum[i + 1] - lum[i - W] - lum[i + W]
+      );
+    }
+  }
+
+  const gain = (EDGE_GAIN_BY_Z[zoom] ?? 1) * (DARK ? 1.15 : 1);
+  const ink = Buffer.alloc(W * W * 4);
+  for (let i = 0; i < W * W; i++) {
+    const v = edge[i];
+    const a = v > EDGE_THRESHOLD ? Math.min(230, (v - EDGE_THRESHOLD) * gain * 3) : 0;
+    ink[i * 4] = INK[0];
+    ink[i * 4 + 1] = INK[1];
+    ink[i * 4 + 2] = INK[2];
+    ink[i * 4 + 3] = a;
+  }
+  return sharp(ink, { raw: { width: W, height: W, channels: 4 } })
+    .png()
+    .toBuffer();
+}
+
+/** Blur + fade a raw RGBA buffer and encode. */
+function finishRaw(raw, sigma, blend) {
+  return (async () => {
+    let out = sharp(raw, { raw: { width: 256, height: 256, channels: 4 } });
+    if (sigma > 0.3) {
+      out = out.blur(sigma);
+      return out.jpeg({ quality: 72, mozjpeg: true }).toBuffer();
+    }
+    // Sharp tile: paper base + synthetic ink strokes (architectural style)
+    const baseJpeg = await out.jpeg({ quality: 90, mozjpeg: true }).toBuffer();
+    const ink = await inkLayer(raw);
+    return sharp(baseJpeg)
+      .composite([{ input: ink, blend: "over" }])
+      .jpeg({ quality: 86, mozjpeg: true })
+      .toBuffer();
+  })();
+}
 const CLAMP = (v) => (v < 0 ? 0 : v > 255 ? 255 : v);
 function applyTheme(raw, blend) {
   for (let i = 0; i < raw.length; i += 4) {
@@ -129,20 +292,19 @@ async function processTile(buf, { sigma, blend }) {
 }
 
 // ── Download with disk cache ──
-async function downloadTile(z, x, y) {
-  const f = path.join(DL_CACHE, `${z}-${x}-${y}.png`);
+async function fetchUrl(url, dest) {
   try {
-    return await fs.readFile(f);
+    return await fs.readFile(dest);
   } catch {}
   for (let attempt = 0; attempt < 3; attempt++) {
     try {
-      const res = await fetch(TILE_URL(z, x, y), {
+      const res = await fetch(url, {
         headers: { "User-Agent": "berkeley-tours-tile-baker/1.0 (dev)" },
       });
       if (res.ok) {
         const buf = Buffer.from(await res.arrayBuffer());
         await fs.mkdir(DL_CACHE, { recursive: true });
-        await fs.writeFile(f, buf);
+        await fs.writeFile(dest, buf);
         return buf;
       }
     } catch {}
@@ -151,18 +313,48 @@ async function downloadTile(z, x, y) {
   return null;
 }
 
+/** Base + labels overlay composited into one tile (labels optional per tile). */
+async function downloadTile(z, x, y) {
+  const base = await fetchUrl(TILE_URL_BASE(z, x, y), path.join(DL_CACHE, `b-${z}-${x}-${y}.jpg`));
+  if (!base) return null;
+  const ref = await fetchUrl(TILE_URL_REF(z, x, y), path.join(DL_CACHE, `r-${z}-${x}-${y}.png`));
+  if (!ref) return base;
+  // Reference layer is a transparent PNG with labels; blank tiles are possible
+  const refMeta = await sharp(ref).metadata().catch(() => null);
+  if (!refMeta || !refMeta.hasAlpha) return base;
+  try {
+    return await sharp(base)
+      .composite([{ input: ref, blend: "over" }])
+      .jpeg({ quality: 92 })
+      .toBuffer();
+  } catch {
+    return base;
+  }
+}
+
 // ── Enumerate tiles ──
+// Zooms ≤ 13 are baked over a slightly larger rect than MID: at those zooms
+// the viewport can extend a few hundred metres past MID's edge, and Apple's
+// base map must never show through.
+const VIEW_RECT = {
+  minLat: MID.minLat - 0.08,
+  maxLat: MID.maxLat + 0.08,
+  minLon: MID.minLon - 0.1,
+  maxLon: MID.maxLon + 0.1,
+};
+const intersectsRect = (t, r) => intersects(t, r);
 function enumerate() {
   const real = []; // {z,x,y}
   for (let z = Z_MIN; z <= Z_MAX; z++) {
-    const x0 = Math.floor(lonToX(MID.minLon, z));
-    const x1 = Math.floor(lonToX(MID.maxLon, z));
-    const y0 = Math.floor(latToY(MID.maxLat, z));
-    const y1 = Math.floor(latToY(MID.minLat, z));
+    const R = z <= REAL_Z_MAX ? VIEW_RECT : MID;
+    const x0 = Math.floor(lonToX(R.minLon, z));
+    const x1 = Math.floor(lonToX(R.maxLon, z));
+    const y0 = Math.floor(latToY(R.maxLat, z));
+    const y1 = Math.floor(latToY(R.minLat, z));
     for (let x = x0; x <= x1; x++) {
       for (let y = y0; y <= y1; y++) {
         const b = tileBounds(z, x, y);
-        if (!overlapsMid(b)) continue;
+        if (!intersectsRect(b, R)) continue;
         const isReal =
           z <= REAL_Z_MAX ||
           overlapsCore(b) ||
@@ -196,7 +388,7 @@ async function main() {
         continue;
       }
       try {
-        processed.set(key, await processTile(raw, { sigma: blurSigma(dKm), blend: bgBlend(dKm) }));
+        processed.set(key, await processTileSmooth(raw, b, z));
       } catch (e) {
         console.warn(`  ✗ processing ${key}: ${e.message}`);
       }
@@ -231,14 +423,14 @@ async function main() {
         const size = 256 / 2 ** shift; // 128 / 64 / 32
         const left = (x - (ax << shift)) * size;
         const top = (y - (ay << shift)) * size;
-        const dKm = rectDistKm(b, CORE);
-        const data = await processTile(
+        const data = await processTileSmooth(
           await sharp(parent)
             .extract({ left, top, width: size, height: size })
             .resize(256, 256, { kernel: "cubic" })
             .png()
             .toBuffer(),
-          { sigma: blurSigma(dKm), blend: bgBlend(dKm) }
+          b,
+          z
         );
         processed.set(key, data);
         virtualCount++;
@@ -265,7 +457,7 @@ async function main() {
   await fs.writeFile(OUT_BIN, all);
   await fs.writeFile(
     OUT_INDEX,
-    JSON.stringify({ version: 2, tileCount: blobs.length, byteLength: all.length, tiles: header })
+    JSON.stringify({ version: 3, tileCount: blobs.length, byteLength: all.length, tiles: header })
   );
   await fs.writeFile(
     OUT_MANIFEST,
@@ -274,7 +466,11 @@ async function main() {
 export const CORE_BBOX = { minLat: ${CORE.minLat}, maxLat: ${CORE.maxLat}, minLon: ${CORE.minLon}, maxLon: ${CORE.maxLon} } as const;
 /** Themed-tile coverage: inside this rect tiles are baked; outside it the map fades to the theme background. */
 export const MID_RECT = { minLat: ${MID.minLat.toFixed(5)}, maxLat: ${MID.maxLat.toFixed(5)}, minLon: ${MID.minLon.toFixed(5)}, maxLon: ${MID.maxLon.toFixed(5)} } as const;
-export const TILES_VERSION = 2;
+export const TILES_VERSION = 3;
+/** Berkeley city boundary (OSM relation, lat/lon ring) — drawn as an accent line. */
+export const BERKELEY_BOUNDARY: [number, number][] = ${JSON.stringify(
+    JSON.parse(await fs.readFile(new URL("../data/berkeley-boundary.json", import.meta.url), "utf8")).map(([lo, la]) => [la, lo])
+  )};
 `
   );
   const mb = (all.length / 1e6).toFixed(1);

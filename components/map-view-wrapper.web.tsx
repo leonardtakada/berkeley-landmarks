@@ -118,11 +118,15 @@ function darken(hex: string, amount = 0.45): string {
  * Tile layer that reads/writes an IndexedDB cache: cached tiles render from
  * blob URLs (offline-friendly), fresh tiles are stored after first view.
  */
-function makeCachedTileLayer(L: typeof import("leaflet")): any {
-  return (L.TileLayer as any).extend({
-    createTile(this: any, coords: { x: number; y: number; z: number }, done: (err?: unknown, tile?: HTMLElement) => void) {
+function makeCachedTileLayer(L: typeof import("leaflet")) {
+  // NOTE: extending L.TileLayer via .extend() breaks under Metro's web bundler
+  // ("Cannot convert undefined or null to object" in Leaflet setOptions).
+  // Patch createTile on a plain instance instead.
+  return (url: string, opts: any) => {
+    const layer = L.tileLayer(url, opts);
+    (layer as any).createTile = function (this: any, coords: { x: number; y: number; z: number }, done: (err?: unknown, tile?: HTMLElement) => void) {
       const tile = document.createElement("img");
-      const url: string = this.getTileUrl(coords);
+      const tileUrl: string = this.getTileUrl(coords);
       getCachedTile(coords.z, coords.x, coords.y).then((blob) => {
         if (blob) {
           tile.src = URL.createObjectURL(blob);
@@ -131,7 +135,7 @@ function makeCachedTileLayer(L: typeof import("leaflet")): any {
         }
         tile.onload = () => {
           done(null, tile);
-          fetch(url)
+          fetch(tileUrl)
             .then((r) => (r.ok ? r.blob() : null))
             .then((b) => {
               if (b) putCachedTile(coords.z, coords.x, coords.y, b);
@@ -139,11 +143,12 @@ function makeCachedTileLayer(L: typeof import("leaflet")): any {
             .catch(() => {});
         };
         tile.onerror = (e) => done(e, tile);
-        tile.src = url;
+        tile.src = tileUrl;
       });
       return tile;
-    },
-  });
+    };
+    return layer;
+  };
 }
 
 const WebMap = forwardRef<any, MapViewWrapperProps>(function WebMap(
@@ -195,6 +200,7 @@ const WebMap = forwardRef<any, MapViewWrapperProps>(function WebMap(
 
   // Init map once
   useEffect(() => {
+    try {
     if (!containerRef.current || mapRef.current) return;
     const L = getLeaflet();
     const map = L.map(containerRef.current, {
@@ -236,6 +242,9 @@ const WebMap = forwardRef<any, MapViewWrapperProps>(function WebMap(
       map.remove();
       mapRef.current = null;
     };
+    } catch (e: any) {
+      console.error("[WebMap init failed]", e && e.stack ? e.stack : e);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

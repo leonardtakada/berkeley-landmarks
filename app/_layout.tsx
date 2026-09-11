@@ -25,6 +25,7 @@ import {
 import type { EdgeInsets, Metrics, Rect } from "react-native-safe-area-context";
 
 import { initManusRuntime, subscribeSafeAreaInsets } from "@/lib/_core/manus-runtime";
+import { startProximityNotifications, stopProximityNotifications } from "@/lib/landmark-notifications";
 
 const DEFAULT_WEB_INSETS: EdgeInsets = { top: 0, right: 0, bottom: 0, left: 0 };
 const DEFAULT_WEB_FRAME: Rect = { x: 0, y: 0, width: 0, height: 0 };
@@ -45,6 +46,17 @@ export default function RootLayout() {
     initManusRuntime();
   }, []);
 
+  // Proximity landmark notifications (native only, best effort in Expo Go)
+  useEffect(() => {
+    if (Platform.OS === "web") return;
+    let stopped = false;
+    startProximityNotifications().catch(() => {});
+    return () => {
+      stopped = true;
+      stopProximityNotifications();
+    };
+  }, []);
+
   const handleSafeAreaUpdate = useCallback((metrics: Metrics) => {
     setInsets(metrics.insets);
     setFrame(metrics.frame);
@@ -58,7 +70,7 @@ export default function RootLayout() {
 
   // Create clients once and reuse them
   const [queryClient] = useState(() => new QueryClient());
-  useFonts({
+  const [fontsLoaded] = useFonts({
     SourceSerif4_400Regular,
     SourceSerif4_500Medium,
     SourceSerif4_600SemiBold,
@@ -106,6 +118,12 @@ export default function RootLayout() {
   );
 
   const shouldOverrideSafeArea = Platform.OS === "web";
+
+  // Don't render until custom fonts are live — text laid out before the font
+  // loads renders as tofu boxes (landmarks category chips).
+  if (!shouldOverrideSafeArea && !fontsLoaded) {
+    return null;
+  }
 
   if (shouldOverrideSafeArea) {
     return (

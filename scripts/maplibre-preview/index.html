@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8"/>
+<title>MapLibre preview — berkeley paper</title>
+<script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+<link href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" rel="stylesheet"/>
+<script src="https://unpkg.com/pmtiles@3.0.7/dist/pmtiles.js"></script>
+<script>
+window.__glyphFetches = [];
+const _fetch = window.fetch;
+window.fetch = function(u, o) {
+  const us = String(u);
+  if (us.includes('glyphs/')) {
+    window.__glyphFetches.push(us.replace(/\?.*$/, ''));
+    return _fetch.apply(this, arguments).then(r => { if (!r.ok) window.__glyphFetches.push('ERR ' + r.status + ' ' + us); return r; });
+  }
+  return _fetch.apply(this, arguments);
+};
+</script>
+<style>html,body{margin:0;height:100%}#map{position:absolute;inset:0}</style>
+</head>
+<body>
+<div id="map"></div>
+<script>
+const params = new URLSearchParams(location.search);
+const theme = params.get('theme') || 'light';
+const z = parseFloat(params.get('z') || '13');
+const clat = parseFloat(params.get('lat') || '37.8716');
+const clon = parseFloat(params.get('lon') || '-122.2727');
+const protocol = new pmtiles.Protocol();
+maplibregl.addProtocol('pmtiles', protocol.tile);
+fetch(`paper-${theme}.json`).then(r => r.json()).then(style => {
+  style.sources.berkeley = { type: 'vector', url: 'pmtiles://berkeley.pmtiles' };
+  if (params.get('demofonts')) style.glyphs = 'https://demotiles.maplibre.org/font/{fontstack}/{range}.pbf';
+  else if (!params.get('noglyphs')) style.glyphs = (params.get('gbase') || 'glyphs') + '/{fontstack}/{range}.pbf?v=' + Date.now();
+  else { style.layers = style.layers.filter(l => l.type !== 'symbol'); }
+  const map = new maplibregl.Map({
+    container: 'map', style, center: [clon, clat], zoom: z,
+    attributionControl: false, preserveDrawingBuffer: true,
+  });
+  window.__map = map;
+  window.__mapErrors = [];
+  map.on('error', (e) => { window.__mapErrors.push(JSON.stringify({msg: e.error && e.error.message, src: e.sourceId, tile: e.tileId, coord: e.coord && [e.coord.z, e.coord.x, e.coord.y]})); });
+  map.on('idle', () => { document.title = 'READY'; });
+});
+</script>
+</body>
+</html>
