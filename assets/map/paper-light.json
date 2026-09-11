@@ -1,0 +1,198 @@
+{
+  "version": 8,
+  "name": "Paper Light (Berkeley aged-paper)",
+  "glyphs": "https://fonts.openmaptiles.org/{fontstack}/{range}.pbf",
+  "sources": {
+    "berkeley": {
+      "type": "vector",
+      "url": "pmtiles://https://example.invalid/berkeley.pmtiles"
+    }
+  },
+  "layers": [
+    { "id": "background", "type": "background", "paint": { "background-color": "#F7F3EC" } },
+    {
+      "id": "wood",
+      "type": "fill",
+      "source": "berkeley",
+      "source-layer": "landcover",
+      "filter": ["==", ["get", "class"], "wood"],
+      "paint": { "fill-color": "#E3DECE" }
+    },
+    {
+      "id": "grass",
+      "type": "fill",
+      "source": "berkeley",
+      "source-layer": "landcover",
+      "filter": ["in", ["get", "class"], ["literal", ["grass", "park"]]],
+      "paint": { "fill-color": "#E7E7D6" }
+    },
+    {
+      "id": "landuse",
+      "type": "fill",
+      "source": "berkeley",
+      "source-layer": "landuse",
+      "paint": { "fill-color": "#EFEAE0" }
+    },
+    {
+      "id": "park",
+      "type": "fill",
+      "source": "berkeley",
+      "source-layer": "park",
+      "paint": { "fill-color": "#E4E8D5" }
+    },
+    {
+      "id": "water",
+      "type": "fill",
+      "source": "berkeley",
+      "source-layer": "water",
+      "paint": { "fill-color": "#C7D8D8" }
+    },
+    {
+      "id": "waterway",
+      "type": "line",
+      "source": "berkeley",
+      "source-layer": "waterway",
+      "paint": { "line-color": "#C7D8D8", "line-width": ["interpolate", ["linear"], ["zoom"], 12, 0.5, 17, 3] }
+    },
+    {
+      "id": "building",
+      "type": "fill",
+      "source": "berkeley",
+      "source-layer": "building",
+      "minzoom": 14,
+      "paint": { "fill-color": "#E2DACA", "fill-outline-color": "#CFC5AF" }
+    },
+    {
+      "id": "tunnel-casing",
+      "type": "line",
+      "source": "berkeley",
+      "source-layer": "transportation",
+      "filter": ["all", ["==", ["get", "brunnel"], "tunnel"]],
+      "paint": { "line-color": "#C9BFA8", "line-width": ["interpolate", ["linear"], ["zoom"], 13, 0.5, 17, 4], "line-dasharray": [3, 2] }
+    },
+    {
+      "id": "road-minor-casing",
+      "type": "line",
+      "source": "berkeley",
+      "source-layer": "transportation",
+      "filter": ["in", ["get", "class"], ["literal", ["minor", "service"]]],
+      "minzoom": 13,
+      "paint": { "line-color": "#D8CFBA", "line-width": ["interpolate", ["linear"], ["zoom"], 13, 0.5, 17, 6] }
+    },
+    {
+      "id": "road-minor",
+      "type": "line",
+      "source": "berkeley",
+      "source-layer": "transportation",
+      "filter": ["in", ["get", "class"], ["literal", ["minor", "service"]]],
+      "minzoom": 13,
+      "paint": { "line-color": "#FBF8F0", "line-width": ["interpolate", ["linear"], ["zoom"], 13, 0.5, 17, 5] }
+    },
+    {
+      "id": "road-mid-casing",
+      "type": "line",
+      "source": "berkeley",
+      "source-layer": "transportation",
+      "filter": ["in", ["get", "class"], ["literal", ["secondary", "tertiary"]]],
+      "paint": { "line-color": "#CFC4AA", "line-width": ["interpolate", ["linear"], ["zoom"], 11, 0.7, 17, 9] }
+    },
+    {
+      "id": "road-mid",
+      "type": "line",
+      "source": "berkeley",
+      "source-layer": "transportation",
+      "filter": ["in", ["get", "class"], ["literal", ["secondary", "tertiary"]]],
+      "paint": { "line-color": "#F8F1DF", "line-width": ["interpolate", ["linear"], ["zoom"], 11, 0.5, 17, 7.5] }
+    },
+    {
+      "id": "road-major-casing",
+      "type": "line",
+      "source": "berkeley",
+      "source-layer": "transportation",
+      "filter": ["in", ["get", "class"], ["literal", ["primary", "trunk"]]],
+      "paint": { "line-color": "#BFB293", "line-width": ["interpolate", ["linear"], ["zoom"], 10, 0.9, 17, 13] }
+    },
+    {
+      "id": "road-major",
+      "type": "line",
+      "source": "berkeley",
+      "source-layer": "transportation",
+      "filter": ["in", ["get", "class"], ["literal", ["primary", "trunk"]]],
+      "paint": { "line-color": "#F3E8CC", "line-width": ["interpolate", ["linear"], ["zoom"], 10, 0.6, 17, 11] }
+    },
+    {
+      "id": "road-motorway-casing",
+      "type": "line",
+      "source": "berkeley",
+      "source-layer": "transportation",
+      "filter": ["==", ["get", "class"], "motorway"],
+      "paint": { "line-color": "#A99A76", "line-width": ["interpolate", ["linear"], ["zoom"], 8, 1, 17, 15] }
+    },
+    {
+      "id": "road-motorway",
+      "type": "line",
+      "source": "berkeley",
+      "source-layer": "transportation",
+      "filter": ["==", ["get", "class"], "motorway"],
+      "paint": { "line-color": "#EDDCB4", "line-width": ["interpolate", ["linear"], ["zoom"], 8, 0.7, 17, 13] }
+    },
+    {
+      "id": "path",
+      "type": "line",
+      "source": "berkeley",
+      "source-layer": "transportation",
+      "filter": ["in", ["get", "class"], ["literal", ["path", "footway"]]],
+      "minzoom": 14,
+      "paint": { "line-color": "#CBBFA6", "line-width": ["interpolate", ["linear"], ["zoom"], 14, 0.4, 17, 2], "line-dasharray": [2, 2] }
+    },
+    {
+      "id": "boundary",
+      "type": "line",
+      "source": "berkeley",
+      "source-layer": "boundary",
+      "filter": ["<=", ["get", "admin_level"], 8],
+      "paint": { "line-color": "#B3A382", "line-width": 0.8, "line-dasharray": [4, 3] }
+    },
+    {
+      "id": "road-label",
+      "type": "symbol",
+      "source": "berkeley",
+      "source-layer": "transportation_name",
+      "minzoom": 13,
+      "layout": {
+        "symbol-placement": "line",
+        "text-field": ["get", "name"],
+        "text-font": ["Open Sans Regular"],
+        "text-size": ["interpolate", ["linear"], ["zoom"], 13, 9, 17, 13]
+      },
+      "paint": { "text-color": "#6B604B", "text-halo-color": "#F7F3EC", "text-halo-width": 1.2 }
+    },
+    {
+      "id": "place-city",
+      "type": "symbol",
+      "source": "berkeley",
+      "source-layer": "place",
+      "filter": ["in", ["get", "class"], ["literal", ["city", "town"]]],
+      "layout": {
+        "text-field": ["get", "name"],
+        "text-font": ["Open Sans Semibold"],
+        "text-size": ["interpolate", ["linear"], ["zoom"], 6, 12, 12, 16]
+      },
+      "paint": { "text-color": "#4A4232", "text-halo-color": "#F7F3EC", "text-halo-width": 1.4 }
+    },
+    {
+      "id": "place-small",
+      "type": "symbol",
+      "source": "berkeley",
+      "source-layer": "place",
+      "filter": ["in", ["get", "class"], ["literal", ["village", "neighbourhood", "suburb"]]],
+      "minzoom": 12,
+      "layout": {
+        "text-field": ["get", "name"],
+        "text-font": ["Open Sans Regular"],
+        "text-size": ["interpolate", ["linear"], ["zoom"], 12, 10, 17, 13]
+      },
+      "paint": { "text-color": "#6B604B", "text-halo-color": "#F7F3EC", "text-halo-width": 1.2 }
+    }
+  ]
+}

@@ -102,7 +102,7 @@ export default function MapScreen() {
         style={styles.map}
         initialRegion={BERKELEY_CENTER}
         minZoomLevel={12}
-        maxZoomLevel={20}
+        maxZoomLevel={16}
         region={undefined}
         onPress={handleMapPress}
         showsUserLocation
@@ -148,6 +148,24 @@ export default function MapScreen() {
           />
         )}
       </MapViewWrapper>
+
+      {/* SPIKE (maplibre-spike branch): debug toggle to the MapLibre proof-of-concept */}
+      {__DEV__ && (
+        <Pressable
+          accessibilityLabel="Open MapLibre spike"
+          onPress={() => router.push("/maplibre-spike")}
+          style={[
+            styles.spikeButton,
+            {
+              top: insets.top + 12,
+              backgroundColor: colors.background,
+              borderColor: colors.border,
+            },
+          ]}
+        >
+          <Text style={{ color: colors.text, fontSize: 11 }}>ML spike</Text>
+        </Pressable>
+      )}
 
       {/* Filter Chips - only show when no tour active */}
       {!activeTour && (
@@ -230,9 +248,9 @@ export default function MapScreen() {
             styles.bottomSheet,
             {
               backgroundColor: Platform.select({
-                ios: 'rgba(255,255,255,0.88)',
+                ios: colors.surface + 'E0',
                 android: colors.surface,
-                default: 'rgba(255,255,255,0.88)',
+                default: colors.surface + 'E0',
               }),
               paddingBottom: Math.max(insets.bottom, 16) + 60,
             },
@@ -286,9 +304,9 @@ export default function MapScreen() {
                 {selectedLandmark.architect} · {selectedLandmark.yearBuilt}
               </Text>
               {selectedLandmark.nationalRegister && (
-                <View style={styles.nrBadge}>
+                <View style={[styles.nrBadge, { backgroundColor: colors.accent + '22' }]}>
                   <IconSymbol name="star.fill" size={10} color="#FF9500" />
-                  <Text style={styles.nrText}>NR</Text>
+                  <Text style={[styles.nrText, { color: colors.accent }]}>NR</Text>
                 </View>
               )}
             </View>
@@ -300,14 +318,14 @@ export default function MapScreen() {
               style={({ pressed }) => [
                 styles.detailButton,
                 {
-                  borderColor: '#3D6B5C',
+                  borderColor: colors.primary,
                   borderWidth: 1,
                   opacity: pressed ? 0.7 : 1,
                 },
               ]}
             >
-              <Text style={[styles.detailButtonText, { color: '#3D6B5C' }]}>View Details</Text>
-              <IconSymbol name="chevron.right" size={14} color="#3D6B5C" />
+              <Text style={[styles.detailButtonText, { color: colors.primary }]}>View Details</Text>
+              <IconSymbol name="chevron.right" size={14} color={colors.primary} />
             </Pressable>
           </View>
         </View>
@@ -319,7 +337,16 @@ export default function MapScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1 },
   map: {
-    ...StyleSheet.absoluteFillObject,
+    position: "absolute" as const,
+    top: 0, left: 0, right: 0, bottom: 0,
+  },
+  spikeButton: {
+    position: "absolute" as const,
+    right: 12,
+    paddingHorizontal: 8,
+    paddingVertical: 6,
+    borderRadius: 8,
+    borderWidth: 1,
   },
   filterContainer: {
     position: "absolute",
@@ -507,7 +534,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 3,
-    backgroundColor: '#8B6D4A15',
     paddingHorizontal: 8,
     paddingVertical: 2,
     borderRadius: 4,
@@ -515,7 +541,6 @@ const styles = StyleSheet.create({
   nrText: {
     fontSize: 11,
     fontWeight: "700",
-    color: '#8B6D4A',
   },
   detailButton: {
     marginTop: 14,
