@@ -30,17 +30,19 @@ const P = DARK
       label: "#E4DAC6",
     }
   : {
-      paper: "#F3EDDF",
-      green: "#D9E0C6",
-      water: "#B9CCC9",
-      building: "#E3D9C4",
-      ink: "#4A3A28",
-      inkSoft: "#6B5A42",
-      boundary: "#8B6D4A",
-      label: "#3A2E20",
+      // Showa Modern palette (per Sep 2026 rework): cream paper, cobalt ink,
+      // chalky cornflower water, emerald parks, vermilion boundary accent.
+      paper: "#EFE9DC",
+      green: "#93B894",
+      water: "#A5BFD9",
+      building: "#E2DAC6",
+      ink: "#3B55A2",
+      inkSoft: "#7484AD",
+      boundary: "#E85A1F",
+      label: "#423F3B",
     };
 
-const BG = DARK ? "#1C1B19" : "#F7F3EC";
+const BG = DARK ? "#1C1B19" : "#EFE9DC";
 
 // ── Geo rects (same as bake_tiles) ──
 const CORE = { minLat: 37.85, maxLat: 37.9, minLon: -122.32, maxLon: -122.24 };

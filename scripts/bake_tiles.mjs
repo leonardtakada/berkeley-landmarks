@@ -58,6 +58,9 @@ const OUT_INDEX = path.join(
 );
 const OUT_MANIFEST = path.join(import.meta.dirname, "..", "lib", "tiles-manifest.generated.ts");
 
+// ── Paper/print texture: subtle grain overlay on sharp (non-blurred) tiles ──
+const PAPER_TEX = await fs.readFile(path.join(import.meta.dirname, "paper-texture.png"));
+
 // ── Filter chain (CSS-equivalent matrix, folded into one 3x3) ──
 const SEP = [
   [0.393, 0.769, 0.189],
@@ -146,7 +149,7 @@ async function processTileSmooth(buf, b, zoom = 15) {
     const baseJpeg = await out.jpeg({ quality: 90, mozjpeg: true }).toBuffer();
     const ink = await inkLayer(orig, zoom);
     return sharp(baseJpeg)
-      .composite([{ input: ink, blend: "over" }])
+      .composite([{ input: ink, blend: "over" }, { input: PAPER_TEX, blend: "over" }])
       .jpeg({ quality: 86, mozjpeg: true })
       .toBuffer();
   };
@@ -249,7 +252,7 @@ function finishRaw(raw, sigma, blend) {
     const baseJpeg = await out.jpeg({ quality: 90, mozjpeg: true }).toBuffer();
     const ink = await inkLayer(raw);
     return sharp(baseJpeg)
-      .composite([{ input: ink, blend: "over" }])
+      .composite([{ input: ink, blend: "over" }, { input: PAPER_TEX, blend: "over" }])
       .jpeg({ quality: 86, mozjpeg: true })
       .toBuffer();
   })();
@@ -288,7 +291,8 @@ async function processTile(buf, { sigma, blend }) {
   if (sigma > 0.3) out = out.blur(sigma);
   // sharp tiles show jpeg artifacts; blurred ones hide them — tune quality
   const quality = sigma > 0.3 ? 72 : 88;
-  return out.jpeg({ quality, mozjpeg: true }).toBuffer();
+  if (sigma > 0.3) return out.jpeg({ quality, mozjpeg: true }).toBuffer();
+  return out.composite([{ input: PAPER_TEX, blend: "over" }]).jpeg({ quality, mozjpeg: true }).toBuffer();
 }
 
 // ── Download with disk cache ──
