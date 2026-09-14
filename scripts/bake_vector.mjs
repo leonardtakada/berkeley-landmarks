@@ -56,6 +56,9 @@ const Z_MIN = 11;
 const Z_MAX = 16;
 const REAL_Z_MAX = 13;
 const W = 256;
+// Render padding: labels/strokes crossing tile edges are drawn into this
+// margin on every tile they span, then cropped — prevents mid-word clipping.
+const PAD = 0;
 
 const OUT_BIN = path.join(import.meta.dirname, "..", "assets", DARK ? "tiles-dark.bin" : "tiles.bin");
 const OUT_INDEX = path.join(import.meta.dirname, "..", "assets", DARK ? "tiles-dark-index.json" : "tiles-index.json");
@@ -279,13 +282,13 @@ function esc(s) {
 }
 function renderTile(z, x, y, data, grids, coastlinePoly) {
   const bb = tileBounds(z, x, y);
-  const px = (lon) => lonPx(lon, z) - x * W;
-  const py = (lat) => latPx(lat, z) - y * W;
+  const px = (lon) => lonPx(lon, z) - x * W + PAD;
+  const py = (lat) => latPx(lat, z) - y * W + PAD;
   const path = (pts, close = false) =>
     pts.map(([lon, lat], i) => `${i ? "L" : "M"}${px(lon).toFixed(1)} ${py(lat).toFixed(1)}`).join("") + (close ? "Z" : "");
 
   const s = [];
-  s.push(`<rect width="${W}" height="${W}" fill="${P.paper}"/>`);
+  s.push(`<rect width="${W + 2 * PAD}" height="${W + 2 * PAD}" fill="${P.paper}"/>`);
 
   // bay water (coastline polygon closed far west)
   if (coastlinePoly.length > 2) {
@@ -320,8 +323,12 @@ function renderTile(z, x, y, data, grids, coastlinePoly) {
       if (z < minZ) continue;
       if (L.mlen * pxPerDeg < 34) continue; // too cramped at this zoom
       const lx = px(L.lon), ly = py(L.lat);
-      if (lx < -70 || lx > W + 70 || ly < -20 || ly > W + 20) continue;
       const size = minZ === 13 ? 12.5 : minZ === 14 ? 11.5 : 10.5;
+      const hw = L.text.length * size * 0.3 + 4; // approx half-width, serif
+      // rotated bounding box so diagonal labels never clip at tile edges
+      const a = (L.angle * Math.PI) / 180, ca = Math.abs(Math.cos(a)), sa = Math.abs(Math.sin(a));
+      const ex = hw * ca + (size / 2) * sa, ey = hw * sa + (size / 2) * ca;
+      if (lx < ex || lx > W - ex || ly < ey || ly > W - ey) continue;
       s.push(
         `<text x="${lx.toFixed(1)}" y="${ly.toFixed(1)}" transform="rotate(${L.angle.toFixed(1)} ${lx.toFixed(1)} ${ly.toFixed(1)})" font-family="Georgia, 'Times New Roman', serif" font-size="${size}" fill="${P.label}" stroke="${P.paper}" stroke-width="2.6" stroke-opacity="0.9" paint-order="stroke" stroke-linejoin="round" text-anchor="middle" opacity="0.92" letter-spacing="0.2">${esc(L.text)}</text>`
       );
@@ -350,8 +357,10 @@ function renderTile(z, x, y, data, grids, coastlinePoly) {
       if (z < L.z) continue;
       const lx = px(L.lon), ly = py(L.lat);
       // generous margin so a label near a tile edge is drawn (fully) on every tile it spans
-      const m = L.size * 12 + 40;
-      if (lx < -m || lx > W + m || ly < -20 || ly > W + 20) continue;
+      // Area labels span seams: draw generously into the margin on every tile
+      // they touch (absolute coords) — fragments complement across the seam.
+      const m = 230; // ≥ widest spaced label half-width (~195px for BERKELEY)
+      if (lx < -m || lx > W + m || ly < -40 || ly > W + 40) continue;
       s.push(
         `<text x="${lx.toFixed(1)}" y="${ly.toFixed(1)}" font-family="Georgia, 'Times New Roman', serif" font-size="${L.size}"` +
           `${L.italic ? ' font-style="italic"' : ""} letter-spacing="${L.spacing ?? 0.5}" fill="${P.label}"` +
@@ -360,7 +369,7 @@ function renderTile(z, x, y, data, grids, coastlinePoly) {
     }
   }
 
-  return Buffer.from(`<svg width="${W}" height="${W}" xmlns="http://www.w3.org/2000/svg">${s.join("")}</svg>`);
+  return Buffer.from(`<svg width="${W + 2 * PAD}" height="${W + 2 * PAD}" xmlns="http://www.w3.org/2000/svg">${s.join("")}</svg>`);
 }
 
 // ── Blur / fade finish (gradient-feathered, from bake_tiles) ──
@@ -509,7 +518,9 @@ async function main() {
         // Tiles render flat; blank fill matches P.paper so everything blends.
         processed.set(
           key,
-          await sharp(svg, { density: 96 }).jpeg({ quality: 58, mozjpeg: true }).toBuffer()
+          await sharp(svg, { density: 96 })
+            .extract({ left: PAD, top: PAD, width: W, height: W })
+            .jpeg({ quality: 58, mozjpeg: true }).toBuffer()
         );
       } catch (e) {
         console.warn(`  ✗ ${key}: ${e.message}`);
@@ -667,7 +678,7 @@ async function main() {
   await fs.writeFile(OUT_BIN, all);
   await fs.writeFile(
     OUT_INDEX,
-    JSON.stringify({ version: 12, tileCount: Object.keys(header).length, byteLength: all.length, tiles: header })
+    JSON.stringify({ version: 13, tileCount: Object.keys(header).length, byteLength: all.length, tiles: header })
   );
   await fs.writeFile(
     OUT_MANIFEST,
@@ -676,7 +687,7 @@ async function main() {
 export const CORE_BBOX = { minLat: ${CORE.minLat}, maxLat: ${CORE.maxLat}, minLon: ${CORE.minLon}, maxLon: ${CORE.maxLon} } as const;
 /** Themed-tile coverage: inside this rect tiles are baked; outside it the map fades to the theme background. */
 export const MID_RECT = { minLat: ${MID.minLat.toFixed(5)}, maxLat: ${MID.maxLat.toFixed(5)}, minLon: ${MID.minLon.toFixed(5)}, maxLon: ${MID.maxLon.toFixed(5)} } as const;
-export const TILES_VERSION = 5;
+export const TILES_VERSION = 6;
 /** Berkeley city boundary (OSM relation, lat/lon ring) — drawn as an accent line. */
 export const BERKELEY_BOUNDARY: [number, number][] = ${JSON.stringify(data.boundary.map(([lo, la]) => [la, lo]))};
 `

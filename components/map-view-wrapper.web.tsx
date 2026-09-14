@@ -196,6 +196,7 @@ const WebMap = forwardRef<any, MapViewWrapperProps>(function WebMap(
   );
 
   const pressRef = useRef(onPress);
+  // eslint-disable-next-line react-hooks/refs -- keep latest callback without re-binding handlers
   pressRef.current = onPress;
 
   // Init map once

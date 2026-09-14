@@ -1,4 +1,4 @@
-import React, { forwardRef, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react";
 import { Platform, Text, View, StyleSheet } from "react-native";
 import MapView, { Marker, Polyline, Polygon, Region, UrlTile } from "react-native-maps";
 import SuperCluster from "supercluster";
@@ -148,6 +148,27 @@ const MapViewWrapper = forwardRef<any, MapViewWrapperProps>(
     const systemScheme = useColorScheme();
     const scheme: TileScheme = systemScheme === "dark" ? "dark" : "light";
     const mapRef = useRef<any>(null);
+    // Wrap the inner MapView ref with a common camera API (matching the
+    // MapLibre wrapper) plus all native MapView methods.
+    useImperativeHandle(
+      ref as any,
+      () => {
+        const inner = mapRef.current ?? {};
+        const merged: any = { ...inner };
+        merged.flyToCoord = (coord: { latitude: number; longitude: number }) =>
+          mapRef.current?.animateToRegion(
+            { ...coord, latitudeDelta: 0.004, longitudeDelta: 0.004 },
+            500
+          );
+        merged.fitCoords = (coords: Array<{ latitude: number; longitude: number }>) =>
+          mapRef.current?.fitBounds(coords, {
+            edgePadding: { top: 80, right: 40, bottom: 200, left: 40 },
+            animated: true,
+          });
+        return merged;
+      },
+      []
+    );
     const setRefs = useCallback(
       (r: any) => {
         mapRef.current = r;
@@ -225,6 +246,7 @@ const MapViewWrapper = forwardRef<any, MapViewWrapperProps>(
         latitude + longitudeDelta,
       ];
       const zoom = regionToZoom(currentRegion);
+      // eslint-disable-next-line react-hooks/refs -- ref holds a stable engine instance; safe to read here
       return clusterEngine.current.getClusters(bounds, zoom);
     }, [currentRegion, points]);
 
@@ -406,5 +428,8 @@ const styles = StyleSheet.create({
     color: "#FFFFFF",
     fontWeight: "700",
     fontSize: 13,
+    lineHeight: 15,
+    textAlign: "center",
+    includeFontPadding: false,
   },
 });

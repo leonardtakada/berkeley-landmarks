@@ -1,4 +1,4 @@
-import React, { useRef, useState, useCallback, useMemo } from "react";
+import React, { useRef, useState, useCallback, useEffect, useMemo } from "react";
 import {
   Text,
   View,
@@ -57,11 +57,57 @@ export default function MapScreen() {
     params.tourId ?? null
   );
 
+  // Tabs stay mounted, so a fresh "View Route on Map" push arrives as a
+  // param change on an already-mounted screen — sync it.
+  useEffect(() => {
+    if (params.tourId !== undefined) {
+      setActiveTourId(params.tourId as string);
+      setSelectedLandmark(null);
+    }
+  }, [params.tourId]);
+
   const activeTour = useMemo(
     () => (activeTourId ? tours.find((t) => t.id === activeTourId) : null),
     [activeTourId]
   );
   const tourFollow = useTourFollow(activeTour ?? null);
+
+  // Focus the whole tour route when a tour becomes active on the map.
+  const tourIdForFocus = activeTour?.id;
+  useEffect(() => {
+    if (!activeTour || !mapRef.current?.fitCoords) return;
+    const coords = activeTour.routeCoordinates.length
+      ? activeTour.routeCoordinates
+      : activeTour.stops.map((s) => {
+          const l = landmarks.find((lm) => lm.id === s.landmarkId);
+          return { latitude: l!.latitude, longitude: l!.longitude };
+        });
+    if (coords.length < 2) return;
+    // Small delay: the MapLibre view may still be (re)mounting when the
+    // tab first opens, and camera calls before mount are dropped.
+    const t = setTimeout(() => mapRef.current?.fitCoords?.(coords), 350);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- refocus only when the tour changes
+  }, [tourIdForFocus]);
+
+  // Follow the current stop as the user cycles through landmarks.
+  const currentStopIndex = tourFollow.currentStopIndex;
+  useEffect(() => {
+    if (!activeTour) return;
+    const stop = tourFollow.stops[currentStopIndex];
+    if (!stop) return;
+    const t = setTimeout(() => {
+      mapRef.current?.flyToCoord?.(
+        {
+          latitude: stop.landmark.latitude,
+          longitude: stop.landmark.longitude,
+        },
+        16
+      );
+    }, 150);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- camera command, values read fresh
+  }, [activeTour?.id, currentStopIndex]);
 
   const tourStopIds = useMemo(
     () => new Set(activeTour?.stops.map((s) => s.landmarkId) ?? []),
@@ -121,12 +167,25 @@ export default function MapScreen() {
         {/* The vector style draws the city boundary natively; only the tour
             route polyline is needed as an overlay. */}
         {activeTour && activeTour.routeCoordinates.length > 1 && (
-          <VectorMapPolyline
-            coordinates={activeTour.routeCoordinates}
-            strokeColor={activeTour.color}
-            strokeWidth={3.5}
-            lineDashPattern={[6, 7]}
-          />
+          <>
+            {/* Soft casing under the route for contrast against the map */}
+            <VectorMapPolyline
+              coordinates={activeTour.routeCoordinates}
+              strokeColor={activeTour.color + "55"}
+              strokeWidth={7}
+            />
+            <VectorMapPolyline
+              coordinates={activeTour.routeCoordinates}
+              strokeColor="#FFFFFF"
+              strokeWidth={4.5}
+            />
+            <VectorMapPolyline
+              coordinates={activeTour.routeCoordinates}
+              strokeColor={activeTour.color}
+              strokeWidth={3}
+              lineDashPattern={[6, 7]}
+            />
+          </>
         )}
       </MapLibreMapView>
       ) : (
@@ -173,12 +232,24 @@ export default function MapScreen() {
         />
 
         {activeTour && activeTour.routeCoordinates.length > 1 && (
-          <MapPolyline
-            coordinates={activeTour.routeCoordinates}
-            strokeColor={activeTour.color}
-            strokeWidth={3.5}
-            lineDashPattern={[6, 7]}
-          />
+          <>
+            <MapPolyline
+              coordinates={activeTour.routeCoordinates}
+              strokeColor={activeTour.color + "55"}
+              strokeWidth={7}
+            />
+            <MapPolyline
+              coordinates={activeTour.routeCoordinates}
+              strokeColor="#FFFFFF"
+              strokeWidth={4.5}
+            />
+            <MapPolyline
+              coordinates={activeTour.routeCoordinates}
+              strokeColor={activeTour.color}
+              strokeWidth={3}
+              lineDashPattern={[6, 7]}
+            />
+          </>
         )}
       </MapViewWrapper>
       )}

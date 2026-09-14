@@ -101,7 +101,7 @@ async function main() {
     if (!ok) throw new Error(`failed to register ${f.file}`);
     const dir = path.join(OUT, f.out);
     await fs.mkdir(dir, { recursive: true });
-    const sdf = new TinySDF(FONT_SIZE, BUFFER, RADIUS, CUTOFF, `"${f.family}"`);
+    const sdf = new TinySDF({ fontSize: FONT_SIZE, buffer: BUFFER, radius: RADIUS, cutoff: CUTOFF, fontFamily: f.family });
     for (let lo = 0; lo < 8192; lo += 256) {
       if (!rangeWanted(lo)) continue;
       const glyphs = [];
@@ -121,7 +121,7 @@ async function main() {
         }
         if (g.data.length < (gw + 6) * (gh + 6)) continue;
         const buf = Buffer.from(g.data.subarray(0, (gw + 6) * (gh + 6)));
-        const gl = Math.round(g.glyphLeft), gt = -Math.round(g.glyphTop);
+        const gl = Math.round(g.glyphLeft), gt = Math.round(g.glyphTop);
         const gm = { id: cp, bitmap: buf, advance: Math.round(g.glyphAdvance) };
         // omit zero-valued fields (proto2 convention; maplibre's generic reader
         // treats absent as 0 but present-0 breaks its bitmap size check)

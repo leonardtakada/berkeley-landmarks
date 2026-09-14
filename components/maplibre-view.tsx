@@ -20,7 +20,7 @@
  * Uses the new @maplibre/maplibre-react-native v11 API (Map / Camera /
  * GeoJSONSource / Layer components — no default export).
  */
-import React, { forwardRef, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react";
 import { Platform, StyleSheet, Text, View } from "react-native";
 import { useColorScheme } from "react-native";
 import {
@@ -209,6 +209,32 @@ const MapLibreMapView = forwardRef<MapRef | null, MapLibreViewProps>(
       [ref]
     );
 
+    // Common camera API (shared with the raster wrapper) so screens can
+    // focus tours / stops without caring which engine is mounted.
+    useImperativeHandle(
+      ref as any,
+      () => ({
+        flyToCoord: (coord: { latitude: number; longitude: number }, zoom = 16) =>
+          cameraRef.current?.flyTo({
+            center: [coord.longitude, coord.latitude],
+            zoom,
+          }),
+        fitCoords: (coords: Array<{ latitude: number; longitude: number }>) => {
+          if (coords.length < 2) return;
+          const lats = coords.map((c) => c.latitude);
+          const lngs = coords.map((c) => c.longitude);
+          cameraRef.current?.fitBounds(
+            [Math.min(...lngs), Math.min(...lats), Math.max(...lngs), Math.max(...lats)],
+            {
+              padding: { top: 80, right: 48, bottom: 200, left: 48 },
+              duration: 800,
+            }
+          );
+        },
+      }),
+      []
+    );
+
     // onPress callbacks by landmark id (layer features can't hold functions).
     const pressById = useMemo(() => {
       const m = new Map<string, () => void>();
@@ -236,7 +262,8 @@ const MapLibreMapView = forwardRef<MapRef | null, MapLibreViewProps>(
     // the boundary, and the map ends at the baked bbox.
     const polylines = useMemo(() => {
       const polys: PolylineProps[] = [];
-      React.Children.forEach(children, (child) => {
+      // toArray flattens fragments so wrapped polyline groups are picked up.
+      React.Children.toArray(children).forEach((child) => {
         if (React.isValidElement(child) && child.type === MapPolyline) {
           polys.push(child.props as PolylineProps);
         }
@@ -385,6 +412,13 @@ const MapLibreMapView = forwardRef<MapRef | null, MapLibreViewProps>(
                   "text-field": ["get", "point_count_abbreviated"] as any,
                   "text-font": ["Noto Sans Bold"],
                   "text-size": 13,
+                  "text-anchor": "center",
+                  "text-justify": "center",
+                  "text-pitch-alignment": "viewport",
+                  "text-rotation-alignment": "viewport",
+                  "text-allow-overlap": true,
+                  "text-ignore-placement": true,
+                  "text-offset": [0, 0.35],
                 }}
                 paint={{ "text-color": "#FFFFFF" }}
               />
