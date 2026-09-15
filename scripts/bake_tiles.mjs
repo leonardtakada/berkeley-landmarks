@@ -30,7 +30,7 @@ const MID = {
   maxLon: CORE.maxLon + MID_PAD_LON,
 };
 const DARK = process.env.TILES_MODE === "dark";
-const BG = DARK ? "#1C1B19" : "#F7F3EC"; // theme background
+const BG = DARK ? "#101B30" : "#F7F3EC"; // theme background
 const Z_MIN = 11;
 const Z_MAX = 16;
 const REAL_Z_MAX = 13; // beyond this, virtual tiles are cut from z13 parents
@@ -67,10 +67,10 @@ const SEP = [
   [0.349, 0.686, 0.168],
   [0.272, 0.534, 0.131],
 ];
-const SEP_STRENGTH = DARK ? 0.22 : 0.32;
+const SEP_STRENGTH = DARK ? 0.0 : 0.32;
 const SATURATION = DARK ? 0.6 : 0.6;
 const BRIGHTNESS = DARK ? 1.0 : 0.97;
-const CONTRAST = DARK ? 1.25 : 1.12;
+const CONTRAST = DARK ? 1.2 : 1.12;
 const LUMA = [0.2126, 0.7152, 0.0722];
 
 // ── Geo helpers ──
@@ -278,6 +278,16 @@ function applyTheme(raw, blend) {
     raw[i] = nr + (BG_RGB[0] - nr) * blend;
     raw[i + 1] = ng + (BG_RGB[1] - ng) * blend;
     raw[i + 2] = nb + (BG_RGB[2] - nb) * blend;
+  }
+  // Dark mode: pull the whole tile toward the navy theme background so the
+  // warm ESRI dark-gray basemap reads as deep navy (roads become blue-grey).
+  if (DARK) {
+    const TINT = 0.45;
+    for (let i = 0; i < raw.length; i += 4) {
+      raw[i] += (BG_RGB[0] - raw[i]) * TINT;
+      raw[i + 1] += (BG_RGB[1] - raw[i + 1]) * TINT;
+      raw[i + 2] += (BG_RGB[2] - raw[i + 2]) * TINT;
+    }
   }
   return raw;
 }
