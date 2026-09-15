@@ -422,7 +422,7 @@ const MapLibreMapView = forwardRef<MapRef | null, MapLibreViewProps>(
                   "text-rotation-alignment": "viewport",
                   "text-allow-overlap": true,
                   "text-ignore-placement": true,
-                  "text-offset": [0.05, 0.6],
+                  "text-offset": [0.05, 1.1],
                 }}
                 paint={{ "text-color": "#423F3B" }}
               />

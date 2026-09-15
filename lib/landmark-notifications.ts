@@ -44,9 +44,8 @@ function haversineMeters(
 async function ensurePermissions(): Promise<boolean> {
   const { status: locStatus } = await Location.requestForegroundPermissionsAsync();
   if (locStatus !== "granted") return false;
-  const { status: notifStatus } =
-    await Notifications.requestPermissionsAsync();
-  return notifStatus === "granted";
+  // TEMP: skip notification prompt (debug screenshot sessions)
+  return true;
 }
 
 async function maybeNotify(location: Location.LocationObject) {
