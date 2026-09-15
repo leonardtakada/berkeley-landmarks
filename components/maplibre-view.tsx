@@ -384,23 +384,27 @@ const MapLibreMapView = forwardRef<MapRef | null, MapLibreViewProps>(
                   "circle-radius": [
                     "step",
                     ["get", "point_count"],
-                    17,
-                    10,
-                    21,
-                    50,
-                    25,
+                    15,
+                    5,
+                    19,
+                    15,
+                    24,
+                    40,
+                    30,
+                    100,
+                    37,
                   ] as any,
                   "circle-color": [
                     "step",
                     ["get", "point_count"],
-                    "#7B8B6F",
+                    "#F7F3EA",
                     10,
-                    "#5D6B52",
+                    "#F7F3EA",
                     50,
-                    "#3F4B36",
+                    "#F7F3EA",
                   ] as any,
-                  "circle-stroke-width": 2,
-                  "circle-stroke-color": "#FFFFFF",
+                  "circle-stroke-width": ["step", ["get", "point_count"], 2.5, 15, 3, 40, 3.5, 100, 4] as any,
+                  "circle-stroke-color": "#0032A0",
                 }}
               />
               {/* Cluster count */}
@@ -418,9 +422,9 @@ const MapLibreMapView = forwardRef<MapRef | null, MapLibreViewProps>(
                   "text-rotation-alignment": "viewport",
                   "text-allow-overlap": true,
                   "text-ignore-placement": true,
-                  "text-offset": [0, 0.35],
+                  "text-offset": [0, 0],
                 }}
-                paint={{ "text-color": "#FFFFFF" }}
+                paint={{ "text-color": "#423F3B" }}
               />
             </GeoJSONSource>
           )}
