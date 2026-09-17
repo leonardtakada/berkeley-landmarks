@@ -5309,11 +5309,11 @@ export const landmarks: Landmark[] = [
     address: 'UC Berkeley Campus',
     latitude: 37.8738,
     longitude: -122.2620,
-    architect: 'John Galen Howard',
+    architect: 'William Charles Hays',
     yearBuilt: '1930',
     category: 'educational',
     landmarkNumber: 'UC',
-    description: 'Named for Amadeo Peter Giannini (1870–1949), founder of the Bank of America, this building was designed by John Galen Howard as part of the Hearst Plan campus expansion. Giannini revolutionized American banking by extending services to working-class immigrants and was a major benefactor of the university. The building houses the College of Natural Resources and continues the Beaux-Arts tradition of the campus master plan with its classical detailing and symmetrical composition.';
+    description: 'Built in 1930 as the gift of A.P. Giannini, founder of the Bank of Italy (later Bank of America), who endowed the Giannini Foundation of Agricultural Economics in 1928. Designed by faculty architect William Charles Hays, the C-shaped reinforced concrete building features a modernized Classical style with Art Deco influences. Cast concrete figures on the east facade hold symbols of agriculture designed by the architect\'s wife, Ellah Hays. Together with Hilgard and Wellman Halls, it completed the Agricultural Complex envisioned by John Galen Howard as a Tuscan farm courtyard, landscaped with stone pines grown from seeds Howard brought from Italy.';
     style: 'Beaux-Arts',
     nationalRegister: true,
     neighborhood: 'UC Campus',
@@ -5329,7 +5329,7 @@ export const landmarks: Landmark[] = [
     yearBuilt: '1902',
     category: 'educational',
     landmarkNumber: 'UC',
-    description: 'The official residence of the UC Berkeley Chancellor, designed by Albert Pissis. The grand house sits in a landscaped setting on the eastern edge of campus and has hosted dignitaries and university events for over a century.',
+    description: 'Designed by Albert Pissis in 1908, University House is the official residence of the UC Berkeley Chancellor and the only private residence on the central campus. Pissis, a Beaux-Arts trained architect also responsible for the Emporium department store in San Francisco, designed the Classical Revival mansion set within landscaped grounds. Over the decades it has hosted visiting heads of state, Nobel laureates, and university events. The house survived the 1923 Berkeley fire that destroyed much of the surrounding Northside neighborhood.'
     style: 'Colonial Revival',
     nationalRegister: true,
     neighborhood: 'UC Campus',
