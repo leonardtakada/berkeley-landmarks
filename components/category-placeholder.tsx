@@ -3,7 +3,7 @@ import { View, StyleSheet } from "react-native";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import type { LandmarkCategory } from "@/data/landmarks";
 
-const CATEGORY_ICONS: Record<LandmarkCategory, string> = {
+const CATEGORY_ICONS = {
   civic: "building.2.fill",
   residential: "house.fill",
   religious: "building.columns.fill",
@@ -11,8 +11,8 @@ const CATEGORY_ICONS: Record<LandmarkCategory, string> = {
   educational: "graduationcap.fill",
   cultural: "theatermasks.fill",
   historic_district: "building.2.crop.circle.fill",
-  structure_of_merit: "monument.fill",
-};
+  structure_of_merit: "flag.fill",
+} as const;
 
 interface CategoryPlaceholderProps {
   category: LandmarkCategory;
