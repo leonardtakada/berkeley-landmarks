@@ -1,12 +1,15 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
-import React, { useMemo } from "react";
-import { ScrollView, Text, View, Pressable, StyleSheet } from "react-native";
+import React, { useMemo, useState, useCallback } from "react";
+import { ScrollView, Text, View, Pressable, StyleSheet, ActivityIndicator, Image, Modal, TextInput, Alert, FlatList } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
+import * as ImagePicker from "expo-image-picker";
 import { landmarks, CATEGORY_COLORS, CATEGORY_LABELS } from "@/data/landmarks";
 import { useColors } from "@/hooks/use-colors";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { CategoryPlaceholder } from "@/components/category-placeholder";
+import { trpc } from "@/lib/trpc";
+import { getApiBaseUrl } from "@/constants/oauth";
 
 export default function LandmarkDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -14,6 +17,50 @@ export default function LandmarkDetailScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const landmark = landmarks.find((l) => l.id === id);
+
+  const { data: approvedPhotos } = trpc.photos.getForLandmark.useQuery(
+    { landmarkId: id },
+    { enabled: !!id }
+  );
+  const submitMutation = trpc.photos.submit.useMutation();
+
+  const [uploading, setUploading] = useState(false);
+  const [uploadSuccess, setUploadSuccess] = useState(false);
+  const [viewerUri, setViewerUri] = useState<string | null>(null);
+
+  const pickAndSubmit = useCallback(async () => {
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ["images"],
+        quality: 0.8,
+        base64: true,
+      });
+      if (result.canceled || !result.assets[0]) return;
+
+      const asset = result.assets[0];
+      if (!asset.base64) return;
+
+      const mime = asset.mimeType === "image/png" ? "image/png" : "image/jpeg";
+
+      Alert.prompt
+      setUploading(true);
+      setUploadSuccess(false);
+
+      await submitMutation.mutateAsync({
+        landmarkId: id,
+        photoBase64: asset.base64,
+        mimeType: mime,
+        caption: undefined,
+      });
+
+      setUploadSuccess(true);
+      setTimeout(() => setUploadSuccess(false), 3000);
+    } catch (e: any) {
+      Alert.alert("Upload failed", e.message ?? "Something went wrong");
+    } finally {
+      setUploading(false);
+    }
+  }, [id, submitMutation]);
 
   const nearbyLandmarks = useMemo(() => {
     if (!landmark) return [];
@@ -117,6 +164,58 @@ export default function LandmarkDetailScreen() {
             <Text style={[styles.statusText, { color: catColor }]}>{landmark.neighborhood}</Text>
           </View>
         </View>
+
+        {/* Photo Gallery */}
+        {(approvedPhotos && approvedPhotos.length > 0) && (
+          <View style={[styles.section, { backgroundColor: colors.surface }]}>
+            <Text style={[styles.sectionTitle, { color: colors.foreground }]}>Community Photos</Text>
+            <FlatList
+              horizontal
+              data={approvedPhotos}
+              keyExtractor={(p) => String(p.id)}
+              showsHorizontalScrollIndicator={false}
+              renderItem={({ item }) => {
+                const baseUrl = getApiBaseUrl();
+                const uri = item.photoUrl.startsWith("http") ? item.photoUrl : `${baseUrl}${item.photoUrl}`;
+                return (
+                  <Pressable onPress={() => setViewerUri(uri)}>
+                    <Image source={{ uri }} style={styles.photoThumb} />
+                  </Pressable>
+                );
+              }}
+              ItemSeparatorComponent={() => <View style={{ width: 8 }} />}
+            />
+          </View>
+        )}
+
+        {/* Add Photo Button */}
+        <View style={{ paddingHorizontal: 16, marginTop: 16 }}>
+          {uploadSuccess ? (
+            <View style={[styles.addPhotoBtn, { backgroundColor: '#4CAF5022' }]}>
+              <Text style={{ color: '#4CAF50', fontWeight: '600' }}>✓ Thank you! Your photo is pending review.</Text>
+            </View>
+          ) : uploading ? (
+            <View style={[styles.addPhotoBtn, { backgroundColor: colors.surface }]}>
+              <ActivityIndicator size="small" color={colors.foreground} />
+              <Text style={{ marginLeft: 8, color: colors.muted }}>Uploading…</Text>
+            </View>
+          ) : (
+            <Pressable
+              onPress={pickAndSubmit}
+              style={({ pressed }) => [styles.addPhotoBtn, { backgroundColor: colors.surface, opacity: pressed ? 0.7 : 1 }]}
+            >
+              <IconSymbol name="camera.fill" size={18} color={colors.foreground} />
+              <Text style={{ marginLeft: 8, color: colors.foreground, fontWeight: '600' }}>Add a Photo</Text>
+            </Pressable>
+          )}
+        </View>
+
+        {/* Photo Viewer Modal */}
+        <Modal visible={!!viewerUri} transparent animationType="fade">
+          <Pressable style={styles.viewerOverlay} onPress={() => setViewerUri(null)}>
+            {viewerUri && <Image source={{ uri: viewerUri }} style={styles.viewerImage} resizeMode="contain" />}
+          </Pressable>
+        </Modal>
 
         {/* Description */}
         <View style={[styles.section, { backgroundColor: colors.surface }]}>
@@ -315,5 +414,31 @@ const styles = StyleSheet.create({
     fontSize: 13,
     lineHeight: 18,
     marginTop: 2,
+  },
+  photoThumb: {
+    width: 100,
+    height: 100,
+    borderRadius: 10,
+    backgroundColor: '#eee',
+  },
+  addPhotoBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 14,
+    borderRadius: 14,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: '#E5E0DB',
+  },
+  viewerOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.9)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  viewerImage: {
+    width: '90%',
+    height: '80%',
+    borderRadius: 12,
   },
 });
