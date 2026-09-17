@@ -13,7 +13,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
 import { useColors } from "@/hooks/use-colors";
 import { IconSymbol } from "@/components/ui/icon-symbol";
-import MapViewWrapper, { MapMarker, MapPolyline } from "@/components/map-view-wrapper";
+import MapViewWrapper, { MapMarker, MapPolyline, MapPolygon } from "@/components/map-view-wrapper";
 import {
   landmarks,
   BERKELEY_CENTER,
@@ -22,6 +22,7 @@ import {
   type LandmarkCategory,
   type Landmark,
 } from "@/data/landmarks";
+import { BERKELEY_BOUNDARY } from "@/data/berkeley-boundary";
 import { tours } from "@/data/tours";
 
 const ALL_CATEGORIES: LandmarkCategory[] = [
@@ -105,6 +106,29 @@ export default function MapScreen() {
         showsScale
         mapType="standard"
       >
+        {/* Berkeley city boundary outline */}
+        <MapPolygon
+          coordinates={BERKELEY_BOUNDARY}
+          strokeColor="#7B8B6F"
+          strokeWidth={2.5}
+          fillColor="rgba(123, 139, 111, 0.06)"
+        />
+        {/* Dimming overlay outside Berkeley (large rect with boundary as inner ring) */}
+        <MapPolygon
+          coordinates={[
+            // Outer rectangle (clockwise) — huge bounding box
+            { latitude: 38, longitude: -123 },
+            { latitude: 38, longitude: -121 },
+            { latitude: 37, longitude: -121 },
+            { latitude: 37, longitude: -123 },
+            // Inner hole: Berkeley boundary reversed (counter-clockwise)
+            ...[...BERKELEY_BOUNDARY].reverse(),
+          ]}
+          strokeColor="transparent"
+          strokeWidth={0}
+          fillColor="rgba(26, 26, 26, 0.35)"
+        />
+
         {filteredLandmarks.map((landmark) => (
           <MapMarker
             key={landmark.id}

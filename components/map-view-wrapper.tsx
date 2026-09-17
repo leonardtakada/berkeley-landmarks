@@ -1,5 +1,5 @@
 import React, { forwardRef } from "react";
-import MapView, { Marker, Polyline } from "react-native-maps";
+import MapView, { Marker, Polyline, Polygon } from "react-native-maps";
 
 interface Coordinate {
   latitude: number;
@@ -32,6 +32,9 @@ interface PolylineProps {
 interface MapViewWrapperProps {
   style?: any;
   initialRegion?: Region;
+  minZoomLevel?: number;
+  maxZoomLevel?: number;
+  region?: Region | undefined;
   onPress?: () => void;
   showsUserLocation?: boolean;
   showsCompass?: boolean;
@@ -48,6 +51,17 @@ export function MapMarker(props: MarkerProps) {
 
 export function MapPolyline(props: PolylineProps) {
   return <Polyline {...props} />;
+}
+
+interface PolygonProps {
+  coordinates: Coordinate[];
+  strokeColor?: string;
+  strokeWidth?: number;
+  fillColor?: string;
+}
+
+export function MapPolygon(props: PolygonProps) {
+  return <Polygon coordinates={props.coordinates} strokeColor={props.strokeColor} strokeWidth={props.strokeWidth} fillColor={props.fillColor} />;
 }
 
 const MapViewWrapper = forwardRef<any, MapViewWrapperProps>(
