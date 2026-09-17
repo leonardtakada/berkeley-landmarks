@@ -37,7 +37,7 @@ export default function LandmarkDetailScreen() {
       }))
       .sort((a, b) => a.dist - b.dist)
       .slice(0, 4);
-  }, [landmark.id]);
+  }, [landmark?.id]);
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
