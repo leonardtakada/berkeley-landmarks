@@ -6,6 +6,7 @@ import {
   StyleSheet,
   ScrollView,
   Platform,
+  Image,
 } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -213,6 +214,17 @@ export default function MapScreen() {
             <View style={[styles.handleBar, { backgroundColor: colors.muted + '40' }]} />
           </View>
           <View style={styles.sheetContent}>
+            {selectedLandmark.photoUrl ? (
+              <Image
+                source={{ uri: selectedLandmark.photoUrl }}
+                style={styles.sheetPhoto}
+                resizeMode="cover"
+              />
+            ) : (
+              <View style={[styles.sheetPhotoPlaceholder, { backgroundColor: colors.background }]}>
+                <IconSymbol name="building.2.fill" size={28} color={colors.muted} />
+              </View>
+            )}
             <View style={styles.sheetHeader}>
               <View style={styles.sheetTitleRow}>
                 <View
@@ -249,6 +261,14 @@ export default function MapScreen() {
                 </View>
               )}
             </View>
+            {selectedLandmark.description && (
+              <Text
+                style={[styles.sheetDescription, { color: colors.muted }]}
+                numberOfLines={2}
+              >
+                {selectedLandmark.description}
+              </Text>
+            )}
             <Pressable
               onPress={() => {
                 setSelectedLandmark(null);
@@ -393,6 +413,26 @@ const styles = StyleSheet.create({
   sheetContent: {
     paddingHorizontal: 20,
     paddingBottom: 8,
+  },
+  sheetPhoto: {
+    width: '100%',
+    height: 140,
+    borderRadius: 12,
+    marginBottom: 12,
+  },
+  sheetPhotoPlaceholder: {
+    width: '100%',
+    height: 80,
+    borderRadius: 12,
+    marginBottom: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  sheetDescription: {
+    fontSize: 13,
+    lineHeight: 18,
+    marginTop: 6,
+    marginBottom: 8,
   },
   sheetHeader: {
     flexDirection: "row",
