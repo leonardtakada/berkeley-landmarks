@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useCallback } from "react";
 import {
   Text,
   View,
@@ -31,30 +31,27 @@ const ALL_CATEGORIES: LandmarkCategory[] = [
 
 type SortOption = "name" | "year" | "architect" | "neighborhood";
 
-function LandmarkRow({ landmark }: { landmark: Landmark }) {
+const LandmarkRow = React.memo(function LandmarkRow({ landmark, colors }: { landmark: Landmark; colors: ReturnType<typeof useColors> }) {
   const router = useRouter();
-  const colors = useColors();
   const catColor = CATEGORY_COLORS[landmark.category];
+  const rowStyle = useMemo(() => ({
+    backgroundColor: colors.surface,
+    borderRadius: 14,
+    overflow: "hidden" as const,
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.04,
+    shadowRadius: 3,
+  }), [colors.surface]);
 
   return (
     <Pressable
       onPress={() => router.push(`/landmark/${landmark.id}`)}
       style={({ pressed }) => [
-        styles.landmarkRow,
-        {
-          backgroundColor: colors.surface,
-          opacity: pressed ? 0.85 : 1,
-          ...Platform.select({
-            ios: {
-              shadowColor: "#000",
-              shadowOffset: { width: 0, height: 1 },
-              shadowOpacity: 0.06,
-              shadowRadius: 4,
-            },
-            android: { elevation: 1 },
-            web: { boxShadow: "0 1px 4px rgba(0,0,0,0.06)" },
-          }),
-        },
+        rowStyle,
+        { opacity: pressed ? 0.85 : 1 },
       ]}
     >
       <View style={[styles.catIndicator, { backgroundColor: catColor }]} />
@@ -81,7 +78,7 @@ function LandmarkRow({ landmark }: { landmark: Landmark }) {
       </View>
     </Pressable>
   );
-}
+});
 
 export default function LandmarksScreen() {
   const colors = useColors();
@@ -220,7 +217,11 @@ export default function LandmarksScreen() {
       <FlatList
         data={filteredLandmarks}
         keyExtractor={(item) => item.id}
-        renderItem={({ item }) => <LandmarkRow landmark={item} />}
+        renderItem={({ item }) => <LandmarkRow landmark={item} colors={colors} />}
+        initialNumToRender={20}
+        maxToRenderPerBatch={10}
+        windowSize={5}
+        removeClippedSubviews={true}
         contentContainerStyle={styles.listContent}
         showsVerticalScrollIndicator={false}
         ItemSeparatorComponent={() => <View style={{ height: 8 }} />}
