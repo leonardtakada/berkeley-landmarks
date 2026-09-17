@@ -1084,7 +1084,7 @@ export const landmarks: Landmark[] = [
     neighborhood: 'UC Campus',
     photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Wheeler_Hall_%28Berkeley%2C_CA%29.JPG/800px-Wheeler_Hall_%28Berkeley%2C_CA%29.JPG',
     designationType: 'Landmark',
-  },,
+  },
   {
     id: 'lm-106',
     name: 'John Brennan House',
