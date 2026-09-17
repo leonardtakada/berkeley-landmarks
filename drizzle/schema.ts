@@ -40,4 +40,21 @@ export const photos = mysqlTable("photos", {
 export type Photo = typeof photos.$inferSelect;
 export type InsertPhoto = typeof photos.$inferInsert;
 
+/**
+ * Email OTP login codes. One active code per email; prior unconsumed codes
+ * are invalidated when a new one is requested. Codes are stored hashed.
+ */
+export const loginCodes = mysqlTable("login_codes", {
+  id: int("id").autoincrement().primaryKey(),
+  email: varchar("email", { length: 320 }).notNull(),
+  codeHash: varchar("code_hash", { length: 128 }).notNull(),
+  expiresAt: timestamp("expires_at").notNull(),
+  consumedAt: timestamp("consumed_at"),
+  attempts: int("attempts").default(0).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export type LoginCode = typeof loginCodes.$inferSelect;
+export type InsertLoginCode = typeof loginCodes.$inferInsert;
+
 // TODO: Add your tables here

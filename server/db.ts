@@ -18,6 +18,12 @@ export async function getDb() {
   return _db;
 }
 
+function isOwnerEmail(user: InsertUser): boolean {
+  const ownerEmail = ENV.ownerEmail.trim().toLowerCase();
+  if (!ownerEmail) return false;
+  return user.email?.trim().toLowerCase() === ownerEmail;
+}
+
 export async function upsertUser(user: InsertUser): Promise<void> {
   if (!user.openId) {
     throw new Error("User openId is required for upsert");
@@ -55,7 +61,7 @@ export async function upsertUser(user: InsertUser): Promise<void> {
     if (user.role !== undefined) {
       values.role = user.role;
       updateSet.role = user.role;
-    } else if (user.openId === ENV.ownerOpenId) {
+    } else if (user.openId === ENV.ownerOpenId || isOwnerEmail(user)) {
       values.role = "admin";
       updateSet.role = "admin";
     }

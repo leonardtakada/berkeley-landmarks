@@ -1,5 +1,5 @@
 import { Platform } from "react-native";
-import { getApiBaseUrl } from "@/constants/oauth";
+import { getApiBaseUrl } from "@/constants/api";
 import * as Auth from "./auth";
 
 export async function apiCall<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
@@ -50,28 +50,6 @@ export async function apiCall<T>(endpoint: string, options: RequestInit = {}): P
     if (error instanceof Error) throw error;
     throw new Error("Unknown error occurred");
   }
-}
-
-interface OAuthUser {
-  id: number;
-  openId?: string;
-  name?: string;
-  email?: string;
-  loginMethod?: string;
-  lastSignedIn?: string;
-  [key: string]: unknown;
-}
-
-interface OAuthResult {
-  sessionToken: string;
-  user: OAuthUser;
-}
-
-export async function exchangeOAuthCode(code: string, state: string): Promise<OAuthResult> {
-  const params = new URLSearchParams({ code, state });
-  const endpoint = `/api/oauth/mobile?${params.toString()}`;
-  const result = await apiCall<{ app_session_id: string; user: OAuthResult["user"] }>(endpoint);
-  return { sessionToken: result.app_session_id, user: result.user };
 }
 
 export async function logout(): Promise<void> {
