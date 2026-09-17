@@ -240,13 +240,14 @@ export default function LandmarksScreen() {
 
 const styles = StyleSheet.create({
   screenHeader: {
-    paddingHorizontal: 20,
+    paddingHorizontal: 16,
     paddingTop: 8,
     paddingBottom: 12,
   },
   screenTitle: {
     fontSize: 36,
     fontWeight: "800",
+    fontFamily: Platform.select({ ios: "ui-serif", default: "serif" }),
     letterSpacing: -0.5,
     lineHeight: 42,
   },
@@ -306,7 +307,7 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
   resultsRow: {
-    paddingHorizontal: 20,
+    paddingHorizontal: 16,
     paddingBottom: 8,
   },
   resultsText: {
@@ -339,7 +340,7 @@ const styles = StyleSheet.create({
   },
   rowContent: {
     flex: 1,
-    paddingVertical: 14,
+    paddingVertical: 16,
     paddingHorizontal: 14,
   },
   rowName: {

@@ -1,5 +1,6 @@
 import React from "react";
 import { Text, View, FlatList, Pressable, StyleSheet, Platform } from "react-native";
+// Platform already imported
 import { useRouter } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
 import { ScreenContainer } from "@/components/screen-container";
@@ -96,13 +97,14 @@ export default function ToursScreen() {
 
 const styles = StyleSheet.create({
   screenHeader: {
-    paddingHorizontal: 20,
+    paddingHorizontal: 16,
     paddingTop: 8,
     paddingBottom: 16,
   },
   screenTitle: {
     fontSize: 36,
     fontWeight: "800",
+    fontFamily: Platform.select({ ios: "ui-serif", default: "serif" }),
     letterSpacing: -0.5,
     lineHeight: 42,
   },
@@ -116,7 +118,7 @@ const styles = StyleSheet.create({
     paddingBottom: 100,
   },
   tourCard: {
-    borderRadius: 16,
+    borderRadius: 14,
     overflow: "hidden",
     ...Platform.select({
       ios: {
@@ -144,7 +146,7 @@ const styles = StyleSheet.create({
   tourIcon: {
     width: 44,
     height: 44,
-    borderRadius: 14,
+    borderRadius: 12,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -154,6 +156,7 @@ const styles = StyleSheet.create({
   tourName: {
     fontSize: 17,
     fontWeight: "700",
+    fontFamily: Platform.select({ ios: "ui-serif", default: "serif" }),
     lineHeight: 22,
   },
   tourNeighborhood: {

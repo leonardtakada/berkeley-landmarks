@@ -284,14 +284,6 @@ export default function MapScreen() {
                 </View>
               )}
             </View>
-            {selectedLandmark.description && (
-              <Text
-                style={[styles.sheetDescription, { color: colors.muted }]}
-                numberOfLines={2}
-              >
-                {selectedLandmark.description}
-              </Text>
-            )}
             <Pressable
               onPress={() => {
                 setSelectedLandmark(null);
@@ -439,7 +431,7 @@ const styles = StyleSheet.create({
   },
   sheetPhoto: {
     width: '100%',
-    height: 140,
+    height: 120,
     borderRadius: 12,
     marginBottom: 12,
   },
@@ -476,6 +468,7 @@ const styles = StyleSheet.create({
   sheetName: {
     fontSize: 20,
     fontWeight: "700",
+    fontFamily: Platform.select({ ios: "ui-serif", default: "serif" }),
     lineHeight: 26,
     letterSpacing: -0.2,
     flex: 1,

@@ -1,6 +1,6 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useMemo, useState, useCallback } from "react";
-import { ScrollView, Text, View, Pressable, StyleSheet, ActivityIndicator, Image, Modal, TextInput, Alert, FlatList } from "react-native";
+import { ScrollView, Text, View, Pressable, StyleSheet, ActivityIndicator, Image, Modal, TextInput, Alert, FlatList, Platform } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
 import * as ImagePicker from "expo-image-picker";
@@ -120,7 +120,7 @@ export default function LandmarkDetailScreen() {
               <CategoryPlaceholder
                 category={landmark.category}
                 color={catColor}
-                size={100}
+                size={140}
                 iconSize={36}
                 style={styles.heroPlaceholder}
               />
@@ -167,7 +167,7 @@ export default function LandmarkDetailScreen() {
 
         {/* Photo Gallery */}
         {(approvedPhotos && approvedPhotos.length > 0) && (
-          <View style={[styles.section, { backgroundColor: colors.surface }]}>
+          <View style={[styles.section, { backgroundColor: colors.surface, borderColor: colors.border }]}>
             <Text style={[styles.sectionTitle, { color: colors.foreground }]}>Community Photos</Text>
             <FlatList
               horizontal
@@ -202,7 +202,7 @@ export default function LandmarkDetailScreen() {
           ) : (
             <Pressable
               onPress={pickAndSubmit}
-              style={({ pressed }) => [styles.addPhotoBtn, { backgroundColor: colors.surface, opacity: pressed ? 0.7 : 1 }]}
+              style={({ pressed }) => [styles.addPhotoBtn, { backgroundColor: colors.surface, borderColor: colors.border, opacity: pressed ? 0.7 : 1 }]}
             >
               <IconSymbol name="camera.fill" size={18} color={colors.foreground} />
               <Text style={{ marginLeft: 8, color: colors.foreground, fontWeight: '600' }}>Add a Photo</Text>
@@ -218,13 +218,13 @@ export default function LandmarkDetailScreen() {
         </Modal>
 
         {/* Description */}
-        <View style={[styles.section, { backgroundColor: colors.surface }]}>
+        <View style={[styles.section, { backgroundColor: colors.surface, borderColor: colors.border }]}>
           <Text style={[styles.sectionTitle, { color: colors.foreground }]}>About</Text>
           <Text style={[styles.description, { color: colors.foreground }]}>{landmark.description}</Text>
         </View>
 
         {/* Nearby Landmarks */}
-        <View style={[styles.section, { backgroundColor: colors.surface }]}>
+        <View style={[styles.section, { backgroundColor: colors.surface, borderColor: colors.border }]}>
           <Text style={[styles.sectionTitle, { color: colors.foreground }]}>Nearby Landmarks</Text>
           {nearbyLandmarks.map((nearby) => (
               <Pressable
@@ -297,6 +297,9 @@ const styles = StyleSheet.create({
   heroGradient: {
     padding: 24,
     paddingTop: 60,
+    paddingBottom: 32,
+    minHeight: 240,
+    justifyContent: 'center',
   },
   categoryBadge: {
     alignSelf: "flex-start",
@@ -315,6 +318,7 @@ const styles = StyleSheet.create({
   heroName: {
     fontSize: 30,
     fontWeight: "800",
+    fontFamily: Platform.select({ ios: "ui-serif", default: "serif" }),
     lineHeight: 36,
     letterSpacing: -0.3,
     marginBottom: 8,
@@ -340,7 +344,7 @@ const styles = StyleSheet.create({
     padding: 14,
     borderRadius: 14,
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: '#E5E0DB',
+    // borderColor set dynamically
   },
   infoLabel: {
     fontSize: 11,
@@ -379,7 +383,7 @@ const styles = StyleSheet.create({
     padding: 18,
     borderRadius: 16,
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: '#E5E0DB',
+    // borderColor set dynamically
   },
   sectionTitle: {
     fontSize: 18,
@@ -428,7 +432,7 @@ const styles = StyleSheet.create({
     padding: 14,
     borderRadius: 14,
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: '#E5E0DB',
+    // borderColor set dynamically
   },
   viewerOverlay: {
     flex: 1,
