@@ -164,7 +164,7 @@ export default function LandmarksScreen() {
               style={({ pressed }) => [
                 styles.catChip,
                 {
-                  backgroundColor: isActive ? chipColor : Platform.select({ ios: 'rgba(142,142,147,0.12)', default: colors.surface }),
+                  borderColor: isActive ? chipColor : colors.border,
                   opacity: pressed ? 0.8 : 1,
                 },
               ]}
@@ -172,10 +172,10 @@ export default function LandmarksScreen() {
               <Text
                 style={[
                   styles.catChipText,
-                  { color: isActive ? "#FFFFFF" : colors.foreground },
+                  { color: isActive ? colors.foreground : colors.muted },
                 ]}
               >
-                {cat ? CATEGORY_LABELS[cat] : "All"}
+                {cat ? CATEGORY_LABELS[cat].toUpperCase() : "ALL"}
               </Text>
             </Pressable>
           );
@@ -191,7 +191,7 @@ export default function LandmarksScreen() {
           }}
           style={({ pressed }) => [
             styles.sortChip,
-            { backgroundColor: colors.primary + '15', opacity: pressed ? 0.7 : 1 },
+            { borderColor: colors.border, opacity: pressed ? 0.7 : 1 },
           ]}
         >
           <IconSymbol name="arrow.up.arrow.down" size={12} color={colors.primary} />
@@ -216,6 +216,7 @@ export default function LandmarksScreen() {
         contentContainerStyle={[styles.listContent, { paddingBottom: tabBarHeight + 24 }]}
         showsVerticalScrollIndicator={false}
         ItemSeparatorComponent={() => <View style={{ height: 8 }} />}
+        ListFooterComponent={<FolioFooter />}
         ListEmptyComponent={
           <View style={styles.emptyState}>
             <IconSymbol name="magnifyingglass" size={40} color={colors.muted} />
@@ -229,7 +230,34 @@ export default function LandmarksScreen() {
   );
 }
 
+function FolioFooter() {
+  const colors = useColors();
+  return (
+    <View style={styles.folio}>
+      <View style={[styles.folioRule, { backgroundColor: colors.border }]} />
+      <Text style={[styles.folioText, { color: colors.border }]}>
+        THE REGISTRY · BERKELEY · CALIFORNIA
+      </Text>
+    </View>
+  );
+}
+
 const styles = StyleSheet.create({
+  folio: {
+    alignItems: "center",
+    marginTop: 28,
+    gap: 8,
+  },
+  folioRule: {
+    width: 48,
+    height: StyleSheet.hairlineWidth,
+  },
+  folioText: {
+    fontSize: 9,
+    fontWeight: "600",
+    letterSpacing: 2,
+  },
+
   screenHeader: {
     paddingHorizontal: 16,
     paddingTop: 8,
@@ -268,9 +296,11 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   catChip: {
-    paddingHorizontal: 14,
+    paddingHorizontal: 12,
     paddingVertical: 7,
-    borderRadius: 4,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderRadius: 3,
+    marginRight: 8,
   },
   catChipText: {
     fontSize: 11,
@@ -288,8 +318,9 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 4,
+    paddingVertical: 7,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderRadius: 3,
     gap: 4,
   },
   sortChipText: {

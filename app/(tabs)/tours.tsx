@@ -9,7 +9,7 @@ import { IconSymbol } from "@/components/ui/icon-symbol";
 import { tours } from "@/data/tours";
 import type { Tour } from "@/data/tours";
 
-function TourCard({ tour }: { tour: Tour }) {
+function TourCard({ tour, tourIndex }: { tour: Tour; tourIndex: number }) {
   const router = useRouter();
   const colors = useColors();
 
@@ -40,9 +40,10 @@ function TourCard({ tour }: { tour: Tour }) {
               {tour.name}
             </Text>
             <Text style={[styles.tourNeighborhood, { color: colors.muted }]}>
-              {tour.neighborhood}
+              [ {tour.neighborhood.toUpperCase()} ]
             </Text>
           </View>
+          <Text style={[styles.plateNo, { color: colors.border }]}>No. {String(tourIndex + 1).padStart(2, "0")}</Text>
         </View>
 
         <Text style={[styles.tourDescription, { color: colors.muted }]} numberOfLines={2}>
@@ -83,12 +84,25 @@ export default function ToursScreen() {
       <FlatList
         data={tours}
         keyExtractor={(item) => item.id}
-        renderItem={({ item }) => <TourCard tour={item} />}
+        renderItem={({ item, index }) => <TourCard tour={item} tourIndex={index} />}
         contentContainerStyle={[styles.listContent, { paddingBottom: tabBarHeight + 24 }]}
         showsVerticalScrollIndicator={false}
         ItemSeparatorComponent={() => <View style={{ height: 12 }} />}
+        ListFooterComponent={<FolioFooter />}
       />
     </ScreenContainer>
+  );
+}
+
+function FolioFooter() {
+  const colors = useColors();
+  return (
+    <View style={styles.folio}>
+      <View style={[styles.folioRule, { backgroundColor: colors.border }]} />
+      <Text style={[styles.folioText, { color: colors.border }]}>
+        BERKELEY ARCHITECTURAL HERITAGE · FIELD FOLIO · 2026
+      </Text>
+    </View>
   );
 }
 
@@ -109,6 +123,20 @@ const styles = StyleSheet.create({
     fontSize: 15,
     lineHeight: 22,
     marginTop: 2,
+  },
+  folio: {
+    alignItems: "center",
+    marginTop: 28,
+    gap: 8,
+  },
+  folioRule: {
+    width: 48,
+    height: StyleSheet.hairlineWidth,
+  },
+  folioText: {
+    fontSize: 9,
+    fontWeight: "600",
+    letterSpacing: 2,
   },
   listContent: {
     paddingHorizontal: 16,
@@ -154,6 +182,12 @@ const styles = StyleSheet.create({
     textTransform: "uppercase",
     letterSpacing: 1.5,
     fontWeight: "500",
+  },
+  plateNo: {
+    fontSize: 11,
+    fontStyle: "italic",
+    fontFamily: Platform.select({ ios: "ui-serif", default: "serif" }),
+    letterSpacing: 0.5,
   },
   tourDescription: {
     fontSize: 14,

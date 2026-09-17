@@ -140,8 +140,8 @@ export default function MapScreen() {
           <MapPolyline
             coordinates={activeTour.routeCoordinates}
             strokeColor={activeTour.color}
-            strokeWidth={4}
-            lineDashPattern={[0]}
+            strokeWidth={3.5}
+            lineDashPattern={[6, 7]}
           />
         )}
       </MapViewWrapper>
