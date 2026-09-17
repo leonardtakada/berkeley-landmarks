@@ -2,6 +2,7 @@ import React, { forwardRef, useEffect, useMemo, useRef } from "react";
 import type * as LeafletNS from "leaflet";
 import "leaflet/dist/leaflet.css";
 import SuperCluster from "supercluster";
+import { getCachedTile, putCachedTile, prefetchBerkeleyTiles } from "@/lib/tile-cache.web";
 
 // Leaflet touches `window` at import time — lazy-require inside effects so static rendering works.
 const getLeaflet = (): typeof import("leaflet") => require("leaflet");
@@ -113,6 +114,38 @@ function darken(hex: string, amount = 0.45): string {
   return `rgb(${f(r)},${f(g)},${f(b)})`;
 }
 
+/**
+ * Tile layer that reads/writes an IndexedDB cache: cached tiles render from
+ * blob URLs (offline-friendly), fresh tiles are stored after first view.
+ */
+function makeCachedTileLayer(L: typeof import("leaflet")): any {
+  return (L.TileLayer as any).extend({
+    createTile(this: any, coords: { x: number; y: number; z: number }, done: (err?: unknown, tile?: HTMLElement) => void) {
+      const tile = document.createElement("img");
+      const url: string = this.getTileUrl(coords);
+      getCachedTile(coords.z, coords.x, coords.y).then((blob) => {
+        if (blob) {
+          tile.src = URL.createObjectURL(blob);
+          done(null, tile);
+          return;
+        }
+        tile.onload = () => {
+          done(null, tile);
+          fetch(url)
+            .then((r) => (r.ok ? r.blob() : null))
+            .then((b) => {
+              if (b) putCachedTile(coords.z, coords.x, coords.y, b);
+            })
+            .catch(() => {});
+        };
+        tile.onerror = (e) => done(e, tile);
+        tile.src = url;
+      });
+      return tile;
+    },
+  });
+}
+
 const WebMap = forwardRef<any, MapViewWrapperProps>(function WebMap(
   {
     style,
@@ -173,10 +206,15 @@ const WebMap = forwardRef<any, MapViewWrapperProps>(function WebMap(
     });
     mapRef.current = map;
 
-    L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    makeCachedTileLayer(L)("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
       maxZoom: 19,
     }).addTo(map);
+
+    // Warm the offline cache for the Berkeley bbox (low zooms, gentle pace).
+    setTimeout(() => {
+      prefetchBerkeleyTiles();
+    }, 2000);
 
     // Warm, printed-map tint — subtle sepia on the tile pane only
     const tilePane = map.getPane("tilePane");

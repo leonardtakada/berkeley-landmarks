@@ -3,6 +3,7 @@ import { Platform, Text, View, StyleSheet } from "react-native";
 import MapView, { Marker, Polyline, Polygon, Region, UrlTile } from "react-native-maps";
 import SuperCluster from "supercluster";
 import { useColors } from "@/hooks/use-colors";
+import { prefetchBerkeleyTiles, cachedTileTemplate } from "@/lib/tile-cache";
 
 interface Coordinate {
   latitude: number;
@@ -100,6 +101,24 @@ function PaperTintOverlay() {
 const MapViewWrapper = forwardRef<any, MapViewWrapperProps>(
   ({ children, clusterMarkers, clusterRadius = 50, clusterMaxZoom = 17, ...props }, ref) => {
     const [currentRegion, setCurrentRegion] = useState<RegionLike | null>(null);
+    // On-disk tile cache: after the Berkeley prefetch completes, serve tiles
+    // from the filesystem so the map keeps rendering offline.
+    const [tileTemplate, setTileTemplate] = useState(
+      "https://tile.openstreetmap.org/{z}/{x}/{y}.png"
+    );
+    useEffect(() => {
+      if (Platform.OS === "web") return;
+      let cancelled = false;
+      prefetchBerkeleyTiles()
+        .then(() => cachedTileTemplate())
+        .then((template) => {
+          if (!cancelled) setTileTemplate(template);
+        })
+        .catch(() => {});
+      return () => {
+        cancelled = true;
+      };
+    }, []);
     const clusterEngine = useRef<SuperCluster>(
       new SuperCluster({ radius: clusterRadius, maxZoom: clusterMaxZoom })
     );
@@ -156,7 +175,7 @@ const MapViewWrapper = forwardRef<any, MapViewWrapperProps>(
             onRegionChangeComplete={handleRegionChangeComplete}
           >
             <UrlTile
-              urlTemplate="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
+              urlTemplate={tileTemplate}
               maximumZ={19}
               zIndex={-1}
             />
@@ -212,7 +231,7 @@ const MapViewWrapper = forwardRef<any, MapViewWrapperProps>(
       <View style={styles.mapShell}>
         <MapView ref={ref} {...props}>
           <UrlTile
-            urlTemplate="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
+            urlTemplate={tileTemplate}
             maximumZ={19}
             zIndex={-1}
           />
