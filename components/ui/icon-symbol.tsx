@@ -34,6 +34,7 @@ const MAPPING = {
   "flag.fill": "flag",
   "rosette": "workspace-premium",
   "camera.fill": "photo-camera",
+  "pencil": "edit",
   "arrow.up.arrow.down": "sort",
 } satisfies IconMapping;
 

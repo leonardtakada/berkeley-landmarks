@@ -6,6 +6,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import * as ImagePicker from "expo-image-picker";
 import { landmarks, CATEGORY_COLORS, CATEGORY_LABELS } from "@/data/landmarks";
 import { useColors } from "@/hooks/use-colors";
+import { useAuth } from "@/hooks/use-auth";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { CategoryPlaceholder } from "@/components/category-placeholder";
 import { trpc } from "@/lib/trpc";
@@ -23,10 +24,74 @@ export default function LandmarkDetailScreen() {
     { enabled: !!id }
   );
   const submitMutation = trpc.photos.submit.useMutation();
+  const submitEditMutation = trpc.submissions.submit.useMutation();
+  const { user: authUser } = useAuth({ autoFetch: true });
 
   const [uploading, setUploading] = useState(false);
   const [uploadSuccess, setUploadSuccess] = useState(false);
   const [viewerUri, setViewerUri] = useState<string | null>(null);
+
+  // --- Suggest an Edit state ---
+  const [editModalVisible, setEditModalVisible] = useState(false);
+  const [editFields, setEditFields] = useState<Record<string, string>>({});
+  const [editNote, setEditNote] = useState("");
+  const [editSuccess, setEditSuccess] = useState(false);
+  const [editSubmitting, setEditSubmitting] = useState(false);
+
+  const EDITABLE_FIELDS: { key: string; label: string; multiline?: boolean }[] = [
+    { key: "name", label: "Name" },
+    { key: "address", label: "Address" },
+    { key: "architect", label: "Architect" },
+    { key: "yearBuilt", label: "Year Built" },
+    { key: "style", label: "Style" },
+    { key: "neighborhood", label: "Neighborhood" },
+    { key: "description", label: "Description", multiline: true },
+  ];
+
+  const openEditModal = useCallback(() => {
+    if (!authUser) {
+      Alert.alert("Sign in required", "Please log in with your email to suggest edits.", [
+        { text: "Cancel", style: "cancel" },
+        { text: "Log in", onPress: () => router.push("/login") },
+      ]);
+      return;
+    }
+    setEditFields({});
+    setEditNote("");
+    setEditSuccess(false);
+    setEditModalVisible(true);
+  }, [authUser, router]);
+
+  const submitEdit = useCallback(async () => {
+    if (!landmark) return;
+    // Only submit fields the user actually filled in.
+    const payload: Record<string, string> = {};
+    for (const [key, value] of Object.entries(editFields)) {
+      if (value.trim().length > 0) payload[key] = value.trim();
+    }
+    if (Object.keys(payload).length === 0) {
+      Alert.alert("No changes", "Fill in at least one field you'd like to correct.");
+      return;
+    }
+    setEditSubmitting(true);
+    try {
+      await submitEditMutation.mutateAsync({
+        landmarkId: landmark.id,
+        type: "correction",
+        payload,
+        note: editNote.trim() || undefined,
+      });
+      setEditSuccess(true);
+      setTimeout(() => {
+        setEditModalVisible(false);
+        setEditSuccess(false);
+      }, 1800);
+    } catch (e: any) {
+      Alert.alert("Submission failed", e.message ?? "Something went wrong");
+    } finally {
+      setEditSubmitting(false);
+    }
+  }, [landmark, editFields, editNote, submitEditMutation]);
 
   const pickAndSubmit = useCallback(async () => {
     try {
@@ -216,6 +281,83 @@ export default function LandmarkDetailScreen() {
           )}
         </View>
 
+        {/* Suggest an Edit Button */}
+        <View style={{ paddingHorizontal: 16, marginTop: 12 }}>
+          {editSuccess ? (
+            <View style={[styles.addPhotoBtn, { backgroundColor: '#4CAF5022' }]}>
+              <Text style={{ color: '#4CAF50', fontWeight: '600' }}>✓ Thank you! Your edit is pending review.</Text>
+            </View>
+          ) : (
+            <Pressable
+              onPress={openEditModal}
+              style={({ pressed }) => [styles.addPhotoBtn, { backgroundColor: colors.surface, borderColor: colors.border, opacity: pressed ? 0.7 : 1 }]}
+            >
+              <IconSymbol name="pencil" size={18} color={colors.foreground} />
+              <Text style={{ marginLeft: 8, color: colors.foreground, fontWeight: '600' }}>Suggest an Edit</Text>
+            </Pressable>
+          )}
+        </View>
+
+        {/* Suggest an Edit Modal */}
+        <Modal visible={editModalVisible} transparent animationType="slide" onRequestClose={() => setEditModalVisible(false)}>
+          <View style={styles.editModalOverlay}>
+            <View style={[styles.editModalCard, { backgroundColor: colors.background }]}>
+              <Text style={[styles.editModalTitle, { color: colors.foreground }]}>Suggest an Edit</Text>
+              <Text style={[styles.editModalSubtitle, { color: colors.muted }]}>
+                Leave a field blank to keep the current value. Changes are reviewed before going live.
+              </Text>
+              <ScrollView style={{ width: '100%' }} keyboardShouldPersistTaps="handled">
+                {EDITABLE_FIELDS.map((f) => (
+                  <View key={f.key} style={styles.editFieldGroup}>
+                    <Text style={[styles.editFieldLabel, { color: colors.muted }]}>
+                      {f.label}
+                      {landmark && landmark[f.key as keyof typeof landmark] ? '' : ''}
+                    </Text>
+                    <TextInput
+                      style={[styles.editInput, { borderColor: colors.border, color: colors.foreground }, f.multiline && styles.editInputMultiline]}
+                      placeholder={landmark ? String(landmark[f.key as keyof typeof landmark] ?? '') : ''}
+                      placeholderTextColor={colors.muted}
+                      value={editFields[f.key] ?? ""}
+                      onChangeText={(t) => setEditFields((prev) => ({ ...prev, [f.key]: t }))}
+                      multiline={f.multiline}
+                    />
+                  </View>
+                ))}
+                <View style={styles.editFieldGroup}>
+                  <Text style={[styles.editFieldLabel, { color: colors.muted }]}>Why this change? (optional)</Text>
+                  <TextInput
+                    style={[styles.editInput, { borderColor: colors.border, color: colors.foreground }]}
+                    placeholder="e.g. Found a typo in the architect name"
+                    placeholderTextColor={colors.muted}
+                    value={editNote}
+                    onChangeText={setEditNote}
+                  />
+                </View>
+              </ScrollView>
+              <View style={styles.editModalActions}>
+                <Pressable
+                  style={[styles.editModalBtn, styles.editModalBtnSecondary, { borderColor: colors.border }]}
+                  onPress={() => setEditModalVisible(false)}
+                  disabled={editSubmitting}
+                >
+                  <Text style={{ color: colors.foreground, fontWeight: '600' }}>Cancel</Text>
+                </Pressable>
+                <Pressable
+                  style={[styles.editModalBtn, styles.editModalBtnPrimary, editSubmitting && { opacity: 0.6 }]}
+                  onPress={submitEdit}
+                  disabled={editSubmitting}
+                >
+                  {editSubmitting ? (
+                    <ActivityIndicator size="small" color="#FFFFFF" />
+                  ) : (
+                    <Text style={{ color: '#FFFFFF', fontWeight: '600' }}>Submit for Review</Text>
+                  )}
+                </Pressable>
+              </View>
+            </View>
+          </View>
+        </Modal>
+
         {/* Photo Viewer Modal */}
         <Modal visible={!!viewerUri} transparent animationType="fade">
           <Pressable style={styles.viewerOverlay} onPress={() => setViewerUri(null)}>
@@ -265,6 +407,69 @@ export default function LandmarkDetailScreen() {
 }
 
 const styles = StyleSheet.create({
+  editModalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.55)',
+    justifyContent: 'flex-end',
+  },
+  editModalCard: {
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    paddingTop: 20,
+    paddingHorizontal: 20,
+    paddingBottom: 32,
+    maxHeight: '85%',
+  },
+  editModalTitle: {
+    fontSize: 22,
+    fontWeight: '800',
+    fontFamily: Platform.select({ ios: 'ui-serif', default: 'serif' }),
+    marginBottom: 6,
+  },
+  editModalSubtitle: {
+    fontSize: 13,
+    lineHeight: 18,
+    marginBottom: 16,
+  },
+  editFieldGroup: {
+    marginBottom: 12,
+  },
+  editFieldLabel: {
+    fontSize: 11,
+    fontWeight: '600',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+    marginBottom: 6,
+  },
+  editInput: {
+    borderWidth: StyleSheet.hairlineWidth,
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    fontSize: 15,
+  },
+  editInputMultiline: {
+    minHeight: 90,
+    textAlignVertical: 'top',
+  },
+  editModalActions: {
+    flexDirection: 'row',
+    gap: 10,
+    marginTop: 8,
+  },
+  editModalBtn: {
+    flex: 1,
+    height: 48,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  editModalBtnSecondary: {
+    borderWidth: StyleSheet.hairlineWidth,
+  },
+  editModalBtnPrimary: {
+    backgroundColor: '#3D6B5C',
+  },
   container: { flex: 1 },
   headerOverlay: {
     position: 'absolute',
