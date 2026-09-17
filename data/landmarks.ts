@@ -965,7 +965,8 @@ export const landmarks: Landmark[] = [
     nationalRegister: false,
     neighborhood: 'Northside',
     designationType: 'Landmark',
-  },
+      photoUrl: 'https://calisphere.org/crop/800x800/7526/eaa6e4d3939de178ca046f416d31c910',
+},
   {
     id: 'lm-56',
     name: 'Greenwood Common',
@@ -1294,7 +1295,8 @@ export const landmarks: Landmark[] = [
     nationalRegister: false,
     neighborhood: 'Downtown',
     designationType: 'Landmark',
-  },
+      photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8f/Old_Berkeley_High_School_%28Berkeley%2C_CA%29.JPG/960px-Old_Berkeley_High_School_%28Berkeley%2C_CA%29.JPG',
+},
   {
     id: 'lm-118',
     name: 'Allston Square Building',
@@ -1538,7 +1540,8 @@ export const landmarks: Landmark[] = [
     nationalRegister: false,
     neighborhood: 'Southside',
     designationType: 'Landmark',
-  },
+      photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d0/Interior_view_-_Berkeley_Art_Museum_and_Pacific_Film_Archive_-_DSC03956.JPG/960px-Interior_view_-_Berkeley_Art_Museum_and_Pacific_Film_Archive_-_DSC03956.JPG',
+},
   {
     id: 'lm-133',
     name: 'Jennie C. Smith House',
@@ -2025,7 +2028,8 @@ export const landmarks: Landmark[] = [
     nationalRegister: false,
     neighborhood: 'Elmwood',
     designationType: 'Landmark',
-  },
+      photoUrl: 'https://calisphere.org/crop/800x800/27289/78759b33a3abe9a69eb924bb5c9d20fa',
+},
   {
     id: 'lm-163',
     name: 'Claremont Hardware',
@@ -2090,7 +2094,8 @@ export const landmarks: Landmark[] = [
     nationalRegister: false,
     neighborhood: 'UC Campus',
     designationType: 'Landmark',
-  },
+      photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b3/Bevatron_interior_%284675235347%29.jpg/960px-Bevatron_interior_%284675235347%29.jpg',
+},
   {
     id: 'lm-167',
     name: 'Alphonso House',
@@ -3359,7 +3364,8 @@ export const landmarks: Landmark[] = [
     nationalRegister: false,
     neighborhood: 'Civic Center Historic District',
     designationType: 'Landmark',
-  },
+      photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0e/Martin_Luther_King_Jr_Civic_Center_%28Berkeley%2C_CA%29.JPG/960px-Martin_Luther_King_Jr_Civic_Center_%28Berkeley%2C_CA%29.JPG',
+},
   {
     id: 'lm-245',
     name: 'Berkeley Iceland',
@@ -4418,7 +4424,8 @@ export const landmarks: Landmark[] = [
     nationalRegister: false,
     neighborhood: 'North Berkeley',
     designationType: 'Landmark',
-  },
+      photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/54/North_Branch_Library.jpg/960px-North_Branch_Library.jpg',
+},
   {
     id: 'lm-310',
     name: 'Everett Glass House',
@@ -4451,7 +4458,8 @@ export const landmarks: Landmark[] = [
     nationalRegister: false,
     neighborhood: 'UC Campus',
     designationType: 'Landmark',
-  },
+      photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e6/UC_Berkeley_Naval_Architecture_Building_-_back_-_2015-07-25.JPG/960px-UC_Berkeley_Naval_Architecture_Building_-_back_-_2015-07-25.JPG',
+},
   {
     id: 'lm-312',
     name: 'Northgate Hall',
@@ -4467,7 +4475,8 @@ export const landmarks: Landmark[] = [
     nationalRegister: false,
     neighborhood: 'UC Campus',
     designationType: 'Landmark',
-  },
+      photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/7c/North_Gate_Hall%2C_UC_Berkeley.jpg/960px-North_Gate_Hall%2C_UC_Berkeley.jpg',
+},
   {
     id: 'lm-313',
     name: 'Haviland Hall',
@@ -5080,7 +5089,8 @@ export const landmarks: Landmark[] = [
     nationalRegister: false,
     neighborhood: 'Piedmont',
     designationType: 'Landmark',
-  },
+      photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/10/Sigma_PI_House_in_Piedmont.jpg/960px-Sigma_PI_House_in_Piedmont.jpg',
+},
   {
     id: 'lm-71',
     name: 'Weltevreden (Tellefsen Hall)',
@@ -5096,7 +5106,8 @@ export const landmarks: Landmark[] = [
     nationalRegister: false,
     neighborhood: 'Northside',
     designationType: 'Landmark',
-  },
+      photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/27/Weltevreden_postcard_%28front%29.jpg/960px-Weltevreden_postcard_%28front%29.jpg',
+},
   {
     id: 'lm-72',
     name: 'H.J. Heinz Co. Factory',
