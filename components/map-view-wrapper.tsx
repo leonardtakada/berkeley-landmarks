@@ -16,6 +16,7 @@ interface MarkerProps {
   title?: string;
   description?: string;
   onPress?: () => void;
+  onSelect?: () => void;
   pinColor?: string;
   tracksViewChanges?: boolean;
   tracksInfoWindowChanges?: boolean;
@@ -44,9 +45,15 @@ interface MapViewWrapperProps {
 }
 
 export function MapMarker(props: MarkerProps) {
-  // Use empty title/description to suppress the native callout popup
-  // while keeping onPress functional on iOS (undefined breaks it)
-  return <Marker {...props} title=" " description=" " />;
+  // Omit title/description to prevent native callout.
+  // Keep onPress — on iOS it works without title in react-native-maps 1.27+
+  const { title: _t, description: _d, ...rest } = props;
+  return (
+    <Marker
+      {...rest}
+      onSelect={props.onPress}
+    />
+  );
 }
 
 export function MapPolyline(props: PolylineProps) {
