@@ -2,6 +2,7 @@ import React from "react";
 import { Text, View, FlatList, Pressable, StyleSheet, Platform } from "react-native";
 // Platform already imported
 import { useRouter } from "expo-router";
+import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { LinearGradient } from "expo-linear-gradient";
 import { ScreenContainer } from "@/components/screen-container";
 import { useColors } from "@/hooks/use-colors";
@@ -74,6 +75,7 @@ function TourCard({ tour }: { tour: Tour }) {
 
 export default function ToursScreen() {
   const colors = useColors();
+  const tabBarHeight = useBottomTabBarHeight();
 
   return (
     <ScreenContainer>
@@ -87,7 +89,7 @@ export default function ToursScreen() {
         data={tours}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => <TourCard tour={item} />}
-        contentContainerStyle={styles.listContent}
+        contentContainerStyle={[styles.listContent, { paddingBottom: tabBarHeight + 24 }]}
         showsVerticalScrollIndicator={false}
         ItemSeparatorComponent={() => <View style={{ height: 12 }} />}
       />
