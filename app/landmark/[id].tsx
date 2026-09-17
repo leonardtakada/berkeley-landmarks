@@ -6,6 +6,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { landmarks, CATEGORY_COLORS, CATEGORY_LABELS } from "@/data/landmarks";
 import { useColors } from "@/hooks/use-colors";
 import { IconSymbol } from "@/components/ui/icon-symbol";
+import { CategoryPlaceholder } from "@/components/category-placeholder";
 
 export default function LandmarkDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -68,6 +69,15 @@ export default function LandmarkDetailScreen() {
             end={{ x: 0, y: 1 }}
             style={styles.heroGradient}
           >
+            {!landmark.photoUrl && (
+              <CategoryPlaceholder
+                category={landmark.category}
+                color={catColor}
+                size={100}
+                iconSize={36}
+                style={styles.heroPlaceholder}
+              />
+            )}
             <View style={[styles.categoryBadge, { backgroundColor: catColor }]}>
               <Text style={styles.categoryText}>{CATEGORY_LABELS[landmark.category]}</Text>
             </View>
@@ -180,6 +190,10 @@ const styles = StyleSheet.create({
   scrollContent: { paddingBottom: 20 },
   heroBanner: {
     overflow: 'hidden',
+    alignItems: 'center',
+  },
+  heroPlaceholder: {
+    marginBottom: 16,
   },
   heroGradient: {
     padding: 24,
