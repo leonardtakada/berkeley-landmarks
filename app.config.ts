@@ -88,13 +88,6 @@ const config: ExpoConfig = {
     "expo-router",
     "expo-updates",
     [
-      "expo-video",
-      {
-        supportsBackgroundPlayback: true,
-        supportsPictureInPicture: true,
-      },
-    ],
-    [
       "expo-location",
       {
         locationWhenInUsePermission: "Allow $(PRODUCT_NAME) to show your location on the map.",
