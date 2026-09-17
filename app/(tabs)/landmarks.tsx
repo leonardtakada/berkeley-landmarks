@@ -244,9 +244,10 @@ const styles = StyleSheet.create({
     paddingBottom: 12,
   },
   screenTitle: {
-    fontSize: 34,
+    fontSize: 36,
     fontWeight: "800",
     letterSpacing: -0.5,
+    lineHeight: 42,
   },
   screenSubtitle: {
     fontSize: 15,
@@ -318,8 +319,18 @@ const styles = StyleSheet.create({
   landmarkRow: {
     flexDirection: "row",
     alignItems: "center",
-    borderRadius: 16,
+    borderRadius: 14,
     overflow: "hidden",
+    ...Platform.select({
+      ios: {
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.04,
+        shadowRadius: 3,
+      },
+      android: { elevation: 1 },
+      web: { boxShadow: "0 1px 3px rgba(0,0,0,0.04)" },
+    }),
   },
   catIndicator: {
     width: 4,
@@ -360,7 +371,7 @@ const styles = StyleSheet.create({
     width: 20,
     height: 20,
     borderRadius: 10,
-    backgroundColor: "#FF950022",
+    backgroundColor: '#C4956A22',
     alignItems: "center",
     justifyContent: "center",
   },
