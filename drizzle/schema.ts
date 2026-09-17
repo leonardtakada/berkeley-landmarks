@@ -1,4 +1,4 @@
-import { int, mysqlEnum, mysqlTable, text, timestamp, varchar } from "drizzle-orm/mysql-core";
+import { int, json, mysqlEnum, mysqlTable, text, timestamp, varchar } from "drizzle-orm/mysql-core";
 
 /**
  * Core user table backing auth flow.
@@ -56,5 +56,36 @@ export const loginCodes = mysqlTable("login_codes", {
 
 export type LoginCode = typeof loginCodes.$inferSelect;
 export type InsertLoginCode = typeof loginCodes.$inferInsert;
+
+/**
+ * Community-suggested landmark edits. Users propose field changes for a
+ * landmark; admins (with advisory AI first-pass scoring) review them.
+ * `userId` is the users.openId identity (e.g. `email:<address>`).
+ */
+export const submissions = mysqlTable("submissions", {
+  id: int("id").autoincrement().primaryKey(),
+  landmarkId: varchar("landmark_id", { length: 128 }).notNull(),
+  userId: varchar("user_id", { length: 64 }).notNull(),
+  /** edit = field changes; correction = factual fix; photo_suggestion = new/updated photo URL. */
+  type: mysqlEnum("type", ["edit", "correction", "photo_suggestion"]).default("edit").notNull(),
+  /** JSON object of proposed field changes: { field: newValue, ... }. */
+  payload: json("payload").notNull(),
+  /** Optional free-text note from the submitter explaining the change. */
+  note: text("note"),
+  status: mysqlEnum("status", ["pending", "approved", "rejected"]).default("pending").notNull(),
+  /** Advisory AI first-pass review: 0-100 risk score (higher = more likely bad). Null = not yet scored. */
+  aiScore: int("ai_score"),
+  /** Advisory AI flags, e.g. ["duplicate", "nonsensical", "spam"]. */
+  aiFlags: json("ai_flags"),
+  /** Short AI explanation for the score. */
+  aiNote: text("ai_note"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  reviewedAt: timestamp("reviewed_at"),
+  reviewedBy: varchar("reviewed_by", { length: 64 }),
+  reviewerNote: text("reviewer_note"),
+});
+
+export type Submission = typeof submissions.$inferSelect;
+export type InsertSubmission = typeof submissions.$inferInsert;
 
 // TODO: Add your tables here

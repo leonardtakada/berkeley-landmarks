@@ -119,6 +119,50 @@ async function startServer() {
     }
   });
 
+  // Submission moderation API (REST, mirrors the tRPC submissions router for the admin dashboard)
+  app.get("/api/submissions", async (req, res) => {
+    const status = req.query.status || 'pending';
+    try {
+      const { getDb } = require('../server/db');
+      const { submissions } = require('../drizzle/schema');
+      const { eq, desc } = require('drizzle-orm');
+      const db = await getDb();
+      if (!db) return res.json([]);
+      const result = await db.select().from(submissions).where(eq(submissions.status, status)).orderBy(desc(submissions.createdAt));
+      res.json(result);
+    } catch (e: any) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  app.post("/api/submissions/:id/approve", async (req, res) => {
+    try {
+      const { getDb } = require('../server/db');
+      const { submissions } = require('../drizzle/schema');
+      const { eq } = require('drizzle-orm');
+      const db = await getDb();
+      if (!db) throw new Error('No DB');
+      await db.update(submissions).set({ status: 'approved', reviewedAt: new Date() }).where(eq(submissions.id, parseInt(req.params.id)));
+      res.json({ success: true });
+    } catch (e: any) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  app.post("/api/submissions/:id/reject", async (req, res) => {
+    try {
+      const { getDb } = require('../server/db');
+      const { submissions } = require('../drizzle/schema');
+      const { eq } = require('drizzle-orm');
+      const db = await getDb();
+      if (!db) throw new Error('No DB');
+      await db.update(submissions).set({ status: 'rejected', reviewedAt: new Date() }).where(eq(submissions.id, parseInt(req.params.id)));
+      res.json({ success: true });
+    } catch (e: any) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
   registerEmailAuthRoutes(app);
 
   app.get("/api/health", (_req, res) => {

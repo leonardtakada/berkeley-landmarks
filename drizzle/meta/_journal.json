@@ -15,6 +15,13 @@
       "when": 1789535164005,
       "tag": "0001_illegal_famine",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1789585608463,
+      "tag": "0002_quick_banshee",
+      "breakpoints": true
     }
   ]
 }
