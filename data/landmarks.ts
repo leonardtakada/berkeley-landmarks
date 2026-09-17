@@ -1626,7 +1626,7 @@ export const landmarks: Landmark[] = [
     yearBuilt: '1878',
     category: 'residential',
     landmarkNumber: '#59',
-    description: 'Built in 1878, the Joseph Clapp Cottage at 2007 Berkeley Way is one of Berkeley\'s oldest surviving residences. Clapp was among the earliest settlers who built homes near the College of California campus before Berkeley was incorporated in 1900. The cottage predates streetcar lines, paved roads, and most civic infrastructure, representing the pioneer era when Berkeley was still largely rural. Its survival through over 140 years of intensive urban development is remarkable given the surrounding Southside neighborhood\'s transformation.', ',
+    description: 'Built in 1878, the Joseph Clapp Cottage at 2007 Berkeley Way is one of Berkeley\'s oldest surviving residences. Clapp was among the earliest settlers who built homes near the College of California campus before Berkeley was incorporated in 1900. The cottage predates streetcar lines, paved roads, and most civic infrastructure, representing the pioneer era when Berkeley was still largely rural. Its survival through over 140 years of intensive urban development is remarkable given the surrounding Southside neighborhood\'s transformation.'
     style: 'Victorian',
     nationalRegister: false,
     neighborhood: 'Downtown',
@@ -3663,7 +3663,7 @@ export const landmarks: Landmark[] = [
     yearBuilt: '1907',
     category: 'commercial',
     landmarkNumber: '#296',
-    description: 'Built in 1907, the Franklin Market Building at 1531 San Pablo Avenue is an early 20th-century commercial structure in West Berkeley. The building reflects the mixed industrial and residential character of the San Pablo Avenue corridor.', ',
+    description: 'Built in 1907 at 1531 San Pablo Avenue, the Franklin Market Building is an early 20th-century commercial structure in West Berkeley that operated as a neighborhood grocery for decades. San Pablo Avenue was Berkeley\'s main north-south commercial corridor before the rise of automobile-oriented shopping, and buildings like this served the dense residential neighborhoods of West Berkeley. The building\'s modest scale and commercial ground floor with residential space above typify the mixed-use pattern common along the avenue.'
     style: 'Arts & Crafts',
     nationalRegister: false,
     neighborhood: 'West Berkeley',
@@ -6292,7 +6292,7 @@ export const landmarks: Landmark[] = [
     yearBuilt: '1922',
     category: 'structure_of_merit',
     landmarkNumber: '#364',
-    description: 'The Farley House at 147 Tunnel Road, designed by Walter H. Ratcliff Jr. in 1922. This residence sits in the Claremont district near the Berkeley-Oakland border, demonstrating Ratcliff\u2019s versatility across Berkeley\u2019s varied topography and neighborhoods.',
+    description: `The Farley House at 147 Tunnel Road was designed by Walter H. Ratcliff Jr. in 1922 in the Claremont district near the Berkeley-Oakland border. Tunnel Road takes its name from the former Contra Costa Toll Road tunnel through the hills, the primary route between Berkeley and Orinda before the Caldecott Tunnel opened in 1937. Ratcliff designed homes throughout Berkeley's varied neighborhoods, from the flatlands to the hills, adapting his Period Revival vocabulary to each setting.`,
     style: 'Period Revival',
     nationalRegister: false,
     neighborhood: 'Claremont',
