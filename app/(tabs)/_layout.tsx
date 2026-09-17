@@ -22,9 +22,21 @@ export default function TabLayout() {
           paddingTop: 8,
           paddingBottom: bottomPadding,
           height: tabBarHeight,
-          backgroundColor: colors.background,
-          borderTopColor: colors.border,
+          backgroundColor: Platform.select({
+            ios: 'rgba(255,255,255,0.72)',
+            android: colors.background,
+            default: 'rgba(255,255,255,0.72)',
+          }),
+          borderTopColor: Platform.select({
+            ios: 'rgba(0,0,0,0.06)',
+            android: colors.border,
+            default: 'rgba(0,0,0,0.06)',
+          }),
           borderTopWidth: 0.5,
+          position: 'absolute',
+          left: 0,
+          right: 0,
+          bottom: 0,
         },
       }}
     >

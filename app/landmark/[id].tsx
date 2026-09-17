@@ -1,6 +1,7 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { ScrollView, Text, View, Pressable, StyleSheet } from "react-native";
+import { ScrollView, Text, View, Pressable, StyleSheet, Platform } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { LinearGradient } from "expo-linear-gradient";
 import { landmarks, CATEGORY_COLORS, CATEGORY_LABELS } from "@/data/landmarks";
 import { useColors } from "@/hooks/use-colors";
 import { IconSymbol } from "@/components/ui/icon-symbol";
@@ -24,58 +25,65 @@ export default function LandmarkDetailScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <View style={[styles.header, { paddingTop: insets.top + 8, backgroundColor: colors.background, borderBottomColor: colors.border }]}>
-        <Pressable
-          onPress={() => router.back()}
-          style={({ pressed }) => [styles.backButton, { backgroundColor: colors.surface, opacity: pressed ? 0.7 : 1 }]}
-        >
-          <IconSymbol name="arrow.left" size={20} color={colors.foreground} />
-        </Pressable>
-        <Text style={[styles.headerTitle, { color: colors.foreground }]} numberOfLines={1}>
-          {landmark.name}
-        </Text>
-        <View style={{ width: 40 }} />
-      </View>
+      <LinearGradient
+        colors={['rgba(0,0,0,0.5)', 'transparent']}
+        style={[styles.headerOverlay, { paddingTop: insets.top + 8 }]}
+      >
+        <View style={styles.header}>
+          <Pressable
+            onPress={() => router.back()}
+            style={({ pressed }) => [styles.backButton, { opacity: pressed ? 0.7 : 1 }]}
+          >
+            <IconSymbol name="arrow.left" size={20} color="#FFFFFF" />
+          </Pressable>
+          <Text style={styles.headerTitle} numberOfLines={1}>
+            {landmark.name}
+          </Text>
+          <View style={{ width: 40 }} />
+        </View>
+      </LinearGradient>
 
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         {/* Hero Banner */}
-        <View style={[styles.heroBanner, { backgroundColor: catColor + '18' }]}>
-          <View style={[styles.categoryBadge, { backgroundColor: catColor }]}>
-            <Text style={styles.categoryText}>{CATEGORY_LABELS[landmark.category]}</Text>
-          </View>
-          <Text style={[styles.heroName, { color: colors.foreground }]}>{landmark.name}</Text>
-          <View style={styles.heroMeta}>
-            <IconSymbol name="mappin.and.ellipse" size={14} color={colors.muted} />
-            <Text style={[styles.heroAddress, { color: colors.muted }]}>{landmark.address}, Berkeley, CA</Text>
-          </View>
+        <View style={styles.heroBanner}>
+          <LinearGradient
+            colors={[catColor + '30', catColor + '08']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 0, y: 1 }}
+            style={styles.heroGradient}
+          >
+            <View style={[styles.categoryBadge, { backgroundColor: catColor }]}>
+              <Text style={styles.categoryText}>{CATEGORY_LABELS[landmark.category]}</Text>
+            </View>
+            <Text style={[styles.heroName, { color: colors.foreground }]}>{landmark.name}</Text>
+            <View style={styles.heroMeta}>
+              <IconSymbol name="mappin.and.ellipse" size={14} color={colors.muted} />
+              <Text style={[styles.heroAddress, { color: colors.muted }]}>{landmark.address}, Berkeley, CA</Text>
+            </View>
+          </LinearGradient>
         </View>
 
         {/* Quick Info Cards */}
         <View style={styles.infoGrid}>
-          <View style={[styles.infoCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-            <Text style={[styles.infoLabel, { color: colors.muted }]}>Architect</Text>
-            <Text style={[styles.infoValue, { color: colors.foreground }]}>{landmark.architect}</Text>
-          </View>
-          <View style={[styles.infoCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-            <Text style={[styles.infoLabel, { color: colors.muted }]}>Year Built</Text>
-            <Text style={[styles.infoValue, { color: colors.foreground }]}>{landmark.yearBuilt}</Text>
-          </View>
-          <View style={[styles.infoCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-            <Text style={[styles.infoLabel, { color: colors.muted }]}>Style</Text>
-            <Text style={[styles.infoValue, { color: colors.foreground }]}>{landmark.style}</Text>
-          </View>
-          <View style={[styles.infoCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-            <Text style={[styles.infoLabel, { color: colors.muted }]}>Landmark #</Text>
-            <Text style={[styles.infoValue, { color: colors.foreground }]}>{landmark.landmarkNumber}</Text>
-          </View>
+          {[
+            { label: 'Architect', value: landmark.architect },
+            { label: 'Year Built', value: landmark.yearBuilt },
+            { label: 'Style', value: landmark.style },
+            { label: 'Landmark #', value: landmark.landmarkNumber },
+          ].map((info) => (
+            <View key={info.label} style={[styles.infoCard, { backgroundColor: colors.surface }]}>
+              <Text style={[styles.infoLabel, { color: colors.muted }]}>{info.label}</Text>
+              <Text style={[styles.infoValue, { color: colors.foreground }]}>{info.value}</Text>
+            </View>
+          ))}
         </View>
 
         {/* Status Badges */}
         <View style={styles.badgeRow}>
           {landmark.nationalRegister && (
-            <View style={[styles.statusBadge, { backgroundColor: '#2D6A4F22' }]}>
-              <IconSymbol name="star.fill" size={14} color="#2D6A4F" />
-              <Text style={[styles.statusText, { color: '#2D6A4F' }]}>National Register</Text>
+            <View style={[styles.statusBadge, { backgroundColor: '#30A14E22' }]}>
+              <IconSymbol name="star.fill" size={14} color="#30A14E" />
+              <Text style={[styles.statusText, { color: '#30A14E' }]}>National Register</Text>
             </View>
           )}
           <View style={[styles.statusBadge, { backgroundColor: catColor + '22' }]}>
@@ -85,13 +93,13 @@ export default function LandmarkDetailScreen() {
         </View>
 
         {/* Description */}
-        <View style={[styles.section, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+        <View style={[styles.section, { backgroundColor: colors.surface }]}>
           <Text style={[styles.sectionTitle, { color: colors.foreground }]}>About</Text>
           <Text style={[styles.description, { color: colors.foreground }]}>{landmark.description}</Text>
         </View>
 
         {/* Nearby Landmarks */}
-        <View style={[styles.section, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+        <View style={[styles.section, { backgroundColor: colors.surface }]}>
           <Text style={[styles.sectionTitle, { color: colors.foreground }]}>Nearby Landmarks</Text>
           {landmarks
             .filter((l) => l.id !== landmark.id)
@@ -136,17 +144,24 @@ export default function LandmarkDetailScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
+  headerOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    zIndex: 10,
+  },
   header: {
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 16,
     paddingBottom: 12,
-    borderBottomWidth: 0.5,
   },
   backButton: {
     width: 40,
     height: 40,
     borderRadius: 20,
+    backgroundColor: 'rgba(0,0,0,0.3)',
     alignItems: "center",
     justifyContent: "center",
   },
@@ -156,16 +171,20 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     textAlign: "center",
     marginHorizontal: 8,
+    color: "#FFFFFF",
   },
   scrollContent: { paddingBottom: 20 },
   heroBanner: {
+    overflow: 'hidden',
+  },
+  heroGradient: {
     padding: 24,
-    paddingTop: 20,
+    paddingTop: 60,
   },
   categoryBadge: {
     alignSelf: "flex-start",
     paddingHorizontal: 12,
-    paddingVertical: 4,
+    paddingVertical: 5,
     borderRadius: 12,
     marginBottom: 12,
   },
@@ -177,9 +196,10 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
   heroName: {
-    fontSize: 26,
+    fontSize: 28,
     fontWeight: "800",
-    lineHeight: 32,
+    lineHeight: 34,
+    letterSpacing: -0.3,
     marginBottom: 8,
   },
   heroMeta: {
@@ -201,8 +221,7 @@ const styles = StyleSheet.create({
   infoCard: {
     width: "47%",
     padding: 14,
-    borderRadius: 12,
-    borderWidth: 1,
+    borderRadius: 16,
   },
   infoLabel: {
     fontSize: 11,
@@ -238,9 +257,8 @@ const styles = StyleSheet.create({
   section: {
     marginHorizontal: 16,
     marginTop: 16,
-    padding: 16,
-    borderRadius: 14,
-    borderWidth: 1,
+    padding: 18,
+    borderRadius: 18,
   },
   sectionTitle: {
     fontSize: 18,

@@ -9,6 +9,7 @@ import {
 } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { LinearGradient } from "expo-linear-gradient";
 import { useColors } from "@/hooks/use-colors";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import MapViewWrapper, { MapMarker, MapPolyline } from "@/components/map-view-wrapper";
@@ -170,19 +171,26 @@ export default function MapScreen() {
 
       {/* Tour Banner */}
       {activeTour && (
-        <View style={[styles.tourBanner, { top: insets.top + 12, backgroundColor: activeTour.color }]}>
-          <View style={styles.tourBannerContent}>
-            <IconSymbol name="figure.walk" size={16} color="#FFFFFF" />
-            <Text style={styles.tourBannerText} numberOfLines={1}>
-              {activeTour.name}
-            </Text>
-          </View>
-          <Pressable
-            onPress={clearTour}
-            style={({ pressed }) => [styles.tourBannerClose, { opacity: pressed ? 0.7 : 1 }]}
+        <View style={[styles.tourBanner, { top: insets.top + 12 }]}>
+          <LinearGradient
+            colors={[activeTour.color, activeTour.color + 'DD']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.tourBannerGradient}
           >
-            <IconSymbol name="xmark" size={16} color="#FFFFFF" />
-          </Pressable>
+            <View style={styles.tourBannerContent}>
+              <IconSymbol name="figure.walk" size={16} color="#FFFFFF" />
+              <Text style={styles.tourBannerText} numberOfLines={1}>
+                {activeTour.name}
+              </Text>
+            </View>
+            <Pressable
+              onPress={clearTour}
+              style={({ pressed }) => [styles.tourBannerClose, { opacity: pressed ? 0.7 : 1 }]}
+            >
+              <IconSymbol name="xmark" size={16} color="#FFFFFF" />
+            </Pressable>
+          </LinearGradient>
         </View>
       )}
 
@@ -192,9 +200,12 @@ export default function MapScreen() {
           style={[
             styles.bottomSheet,
             {
-              backgroundColor: colors.surface,
+              backgroundColor: Platform.select({
+                ios: 'rgba(255,255,255,0.88)',
+                android: colors.surface,
+                default: 'rgba(255,255,255,0.88)',
+              }),
               paddingBottom: Math.max(insets.bottom, 16) + 60,
-              borderColor: colors.border,
             },
           ]}
         >
@@ -233,7 +244,7 @@ export default function MapScreen() {
               </Text>
               {selectedLandmark.nationalRegister && (
                 <View style={styles.nrBadge}>
-                  <IconSymbol name="star.fill" size={10} color="#D4A373" />
+                  <IconSymbol name="star.fill" size={10} color="#FF9500" />
                   <Text style={styles.nrText}>NR</Text>
                 </View>
               )}
@@ -245,11 +256,18 @@ export default function MapScreen() {
               }}
               style={({ pressed }) => [
                 styles.detailButton,
-                { backgroundColor: colors.primary, opacity: pressed ? 0.9 : 1 },
+                { opacity: pressed ? 0.9 : 1 },
               ]}
             >
-              <Text style={styles.detailButtonText}>View Details</Text>
-              <IconSymbol name="chevron.right" size={14} color="#FFFFFF" />
+              <LinearGradient
+                colors={['#30A14E', '#28994A']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+                style={styles.detailButtonGradient}
+              >
+                <Text style={styles.detailButtonText}>View Details</Text>
+                <IconSymbol name="chevron.right" size={14} color="#FFFFFF" />
+              </LinearGradient>
             </Pressable>
           </View>
         </View>
@@ -285,11 +303,11 @@ const styles = StyleSheet.create({
       ios: {
         shadowColor: "#000",
         shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
+        shadowOpacity: 0.08,
+        shadowRadius: 8,
       },
       android: { elevation: 3 },
-      web: { boxShadow: "0 2px 4px rgba(0,0,0,0.1)" },
+      web: { boxShadow: "0 2px 8px rgba(0,0,0,0.08)" },
     }),
   },
   chipDot: {
@@ -305,22 +323,25 @@ const styles = StyleSheet.create({
     position: "absolute",
     left: 16,
     right: 16,
+    borderRadius: 16,
+    zIndex: 10,
+    overflow: "hidden",
+    ...Platform.select({
+      ios: {
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.15,
+        shadowRadius: 12,
+      },
+      android: { elevation: 4 },
+      web: { boxShadow: "0 4px 12px rgba(0,0,0,0.15)" },
+    }),
+  },
+  tourBannerGradient: {
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 16,
     paddingVertical: 12,
-    borderRadius: 14,
-    zIndex: 10,
-    ...Platform.select({
-      ios: {
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.2,
-        shadowRadius: 6,
-      },
-      android: { elevation: 4 },
-      web: { boxShadow: "0 2px 6px rgba(0,0,0,0.2)" },
-    }),
   },
   tourBannerContent: {
     flex: 1,
@@ -346,18 +367,17 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    borderTopWidth: 0.5,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
     ...Platform.select({
       ios: {
         shadowColor: "#000",
-        shadowOffset: { width: 0, height: -4 },
-        shadowOpacity: 0.15,
-        shadowRadius: 12,
+        shadowOffset: { width: 0, height: -6 },
+        shadowOpacity: 0.12,
+        shadowRadius: 16,
       },
       android: { elevation: 8 },
-      web: { boxShadow: "0 -4px 12px rgba(0,0,0,0.15)" },
+      web: { boxShadow: "0 -6px 16px rgba(0,0,0,0.12)" },
     }),
   },
   sheetHandle: {
@@ -425,7 +445,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 3,
-    backgroundColor: "#D4A37322",
+    backgroundColor: "#FF950022",
     paddingHorizontal: 8,
     paddingVertical: 2,
     borderRadius: 8,
@@ -433,15 +453,18 @@ const styles = StyleSheet.create({
   nrText: {
     fontSize: 11,
     fontWeight: "700",
-    color: "#D4A373",
+    color: "#FF9500",
   },
   detailButton: {
+    marginTop: 14,
+    borderRadius: 14,
+    overflow: "hidden",
+  },
+  detailButtonGradient: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    marginTop: 14,
-    paddingVertical: 12,
-    borderRadius: 12,
+    paddingVertical: 14,
     gap: 6,
   },
   detailButtonText: {

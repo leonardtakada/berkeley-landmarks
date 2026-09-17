@@ -6,6 +6,7 @@ import {
   Pressable,
   TextInput,
   StyleSheet,
+  Platform,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { ScreenContainer } from "@/components/screen-container";
@@ -42,8 +43,17 @@ function LandmarkRow({ landmark }: { landmark: Landmark }) {
         styles.landmarkRow,
         {
           backgroundColor: colors.surface,
-          borderColor: colors.border,
-          opacity: pressed ? 0.8 : 1,
+          opacity: pressed ? 0.85 : 1,
+          ...Platform.select({
+            ios: {
+              shadowColor: "#000",
+              shadowOffset: { width: 0, height: 1 },
+              shadowOpacity: 0.06,
+              shadowRadius: 4,
+            },
+            android: { elevation: 1 },
+            web: { boxShadow: "0 1px 4px rgba(0,0,0,0.06)" },
+          }),
         },
       ]}
     >
@@ -64,7 +74,7 @@ function LandmarkRow({ landmark }: { landmark: Landmark }) {
       <View style={styles.rowRight}>
         {landmark.nationalRegister && (
           <View style={styles.nrBadge}>
-            <IconSymbol name="star.fill" size={10} color="#D4A373" />
+            <IconSymbol name="star.fill" size={10} color="#FF9500" />
           </View>
         )}
         <IconSymbol name="chevron.right" size={14} color={colors.muted} />
@@ -125,7 +135,7 @@ export default function LandmarksScreen() {
         </Text>
       </View>
 
-      <View style={[styles.searchBar, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+      <View style={[styles.searchBar, { backgroundColor: Platform.select({ ios: 'rgba(142,142,147,0.12)', default: colors.surface }) }]}>
         <IconSymbol name="magnifyingglass" size={18} color={colors.muted} />
         <TextInput
           style={[styles.searchInput, { color: colors.foreground }]}
@@ -157,8 +167,7 @@ export default function LandmarksScreen() {
               style={({ pressed }) => [
                 styles.catChip,
                 {
-                  backgroundColor: isActive ? chipColor : colors.surface,
-                  borderColor: isActive ? chipColor : colors.border,
+                  backgroundColor: isActive ? chipColor : Platform.select({ ios: 'rgba(142,142,147,0.12)', default: colors.surface }),
                   opacity: pressed ? 0.8 : 1,
                 },
               ]}
@@ -235,14 +244,14 @@ const styles = StyleSheet.create({
     paddingBottom: 12,
   },
   screenTitle: {
-    fontSize: 32,
+    fontSize: 34,
     fontWeight: "800",
     letterSpacing: -0.5,
   },
   screenSubtitle: {
     fontSize: 15,
     lineHeight: 22,
-    marginTop: 4,
+    marginTop: 2,
   },
   searchBar: {
     flexDirection: "row",
@@ -250,13 +259,12 @@ const styles = StyleSheet.create({
     marginHorizontal: 16,
     paddingHorizontal: 14,
     paddingVertical: 10,
-    borderRadius: 12,
-    borderWidth: 1,
+    borderRadius: 14,
     gap: 10,
   },
   searchInput: {
     flex: 1,
-    fontSize: 15,
+    fontSize: 16,
     lineHeight: 20,
     padding: 0,
   },
@@ -268,8 +276,7 @@ const styles = StyleSheet.create({
   catChip: {
     paddingHorizontal: 14,
     paddingVertical: 7,
-    borderRadius: 16,
-    borderWidth: 1,
+    borderRadius: 20,
   },
   catChipText: {
     fontSize: 13,
@@ -311,8 +318,7 @@ const styles = StyleSheet.create({
   landmarkRow: {
     flexDirection: "row",
     alignItems: "center",
-    borderRadius: 14,
-    borderWidth: 1,
+    borderRadius: 16,
     overflow: "hidden",
   },
   catIndicator: {
@@ -321,16 +327,16 @@ const styles = StyleSheet.create({
   },
   rowContent: {
     flex: 1,
-    paddingVertical: 12,
+    paddingVertical: 14,
     paddingHorizontal: 14,
   },
   rowName: {
-    fontSize: 15,
-    fontWeight: "700",
-    lineHeight: 20,
+    fontSize: 16,
+    fontWeight: "600",
+    lineHeight: 22,
   },
   rowAddress: {
-    fontSize: 13,
+    fontSize: 14,
     lineHeight: 18,
     marginTop: 2,
   },
@@ -341,7 +347,7 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   rowMetaText: {
-    fontSize: 12,
+    fontSize: 13,
     lineHeight: 16,
   },
   rowRight: {
@@ -354,7 +360,7 @@ const styles = StyleSheet.create({
     width: 20,
     height: 20,
     borderRadius: 10,
-    backgroundColor: "#D4A37322",
+    backgroundColor: "#FF950022",
     alignItems: "center",
     justifyContent: "center",
   },
