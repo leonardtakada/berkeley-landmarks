@@ -19,12 +19,17 @@ export default function TabLayout() {
         headerShown: false,
         tabBarButton: HapticTab,
         tabBarStyle: {
-          paddingTop: 8,
+          paddingTop: 6,
           paddingBottom: bottomPadding,
           height: tabBarHeight,
           backgroundColor: colors.background,
           borderTopColor: colors.border,
           borderTopWidth: StyleSheet.hairlineWidth,
+        },
+        tabBarLabelStyle: {
+          fontSize: 11,
+          fontWeight: "600",
+          marginTop: 2,
         },
       }}
     >
@@ -32,14 +37,14 @@ export default function TabLayout() {
         name="index"
         options={{
           title: "Map",
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="map.fill" color={color} />,
+          tabBarIcon: ({ color }) => <IconSymbol size={26} name="map.fill" color={color} weight="semibold" />,
         }}
       />
       <Tabs.Screen
         name="tours"
         options={{
           title: "Tours",
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="figure.walk" color={color} />,
+          tabBarIcon: ({ color }) => <IconSymbol size={26} name="figure.walk" color={color} weight="semibold" />,
         }}
       />
       <Tabs.Screen
@@ -47,7 +52,7 @@ export default function TabLayout() {
         options={{
           title: "Landmarks",
           tabBarIcon: ({ color }) => (
-            <IconSymbol size={28} name="building.columns.fill" color={color} />
+            <IconSymbol size={26} name="building.columns.fill" color={color} weight="semibold" />
           ),
         }}
       />

@@ -142,7 +142,7 @@ export default function LandmarkDetailScreen() {
             { label: 'Architect', value: landmark.architect },
             { label: 'Year Built', value: landmark.yearBuilt },
             { label: 'Style', value: landmark.style },
-            { label: 'Landmark #', value: landmark.landmarkNumber },
+            ...(landmark.landmarkNumber ? [{ label: 'Landmark #', value: landmark.landmarkNumber }] : []),
           ].map((info) => (
             <View key={info.label} style={[styles.infoCard, { backgroundColor: colors.surface }]}>
               <Text style={[styles.infoLabel, { color: colors.muted }]}>{info.label}</Text>
@@ -153,6 +153,12 @@ export default function LandmarkDetailScreen() {
 
         {/* Status Badges */}
         <View style={styles.badgeRow}>
+          {landmark.designationType && landmark.designationType !== 'Landmark' && (
+            <View style={[styles.statusBadge, { backgroundColor: colors.primary + '22' }]}>
+              <IconSymbol name="rosette" size={14} color={colors.primary} />
+              <Text style={[styles.statusText, { color: colors.primary }]}>{landmark.designationType}</Text>
+            </View>
+          )}
           {landmark.nationalRegister && (
             <View style={[styles.statusBadge, { backgroundColor: '#7B8B6F22' }]}>
               <IconSymbol name="star.fill" size={14} color="#7B8B6F" />
