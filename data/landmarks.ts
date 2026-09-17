@@ -20,13 +20,13 @@ export interface Landmark {
 
 export const CATEGORY_COLORS: Record<LandmarkCategory, string> = {
   civic: '#4A5568',
-  residential: '#7B8B6F',
-  religious: '#7B6B8D',
-  commercial: '#B8785C',
-  educational: '#5E8B8B',
-  cultural: '#8B4A5A',
+  residential: '#3D6B5C',
+  religious: '#6B5B7D',
+  commercial: '#8B6D4A',
+  educational: '#4A7C7C',
+  cultural: '#7A4A5A',
   historic_district: '#A0825A',
-  structure_of_merit: '#6B7B8D',
+  structure_of_merit: '#5A6B7D',
 };
 
 export const CATEGORY_LABELS: Record<LandmarkCategory, string> = {

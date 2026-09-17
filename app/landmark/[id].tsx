@@ -160,9 +160,9 @@ export default function LandmarkDetailScreen() {
             </View>
           )}
           {landmark.nationalRegister && (
-            <View style={[styles.statusBadge, { backgroundColor: '#7B8B6F22' }]}>
-              <IconSymbol name="star.fill" size={14} color="#7B8B6F" />
-              <Text style={[styles.statusText, { color: '#7B8B6F' }]}>National Register</Text>
+            <View style={[styles.statusBadge, { backgroundColor: '#3D6B5C22' }]}>
+              <IconSymbol name="star.fill" size={14} color="#3D6B5C" />
+              <Text style={[styles.statusText, { color: '#3D6B5C' }]}>National Register</Text>
             </View>
           )}
           <View style={[styles.statusBadge, { backgroundColor: catColor + '22' }]}>
@@ -311,7 +311,7 @@ const styles = StyleSheet.create({
     alignSelf: "flex-start",
     paddingHorizontal: 12,
     paddingVertical: 5,
-    borderRadius: 12,
+    borderRadius: 4,
     marginBottom: 12,
   },
   categoryText: {
@@ -348,7 +348,7 @@ const styles = StyleSheet.create({
   infoCard: {
     width: "47%",
     padding: 14,
-    borderRadius: 14,
+    borderRadius: 6,
     borderWidth: StyleSheet.hairlineWidth,
     // borderColor set dynamically
   },
@@ -387,13 +387,14 @@ const styles = StyleSheet.create({
     marginHorizontal: 16,
     marginTop: 16,
     padding: 18,
-    borderRadius: 16,
+    borderRadius: 6,
     borderWidth: StyleSheet.hairlineWidth,
     // borderColor set dynamically
   },
   sectionTitle: {
     fontSize: 18,
     fontWeight: "700",
+    fontFamily: Platform.select({ ios: "ui-serif", default: "serif" }),
     marginBottom: 10,
   },
   description: {
@@ -436,7 +437,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     padding: 14,
-    borderRadius: 14,
+    borderRadius: 6,
     borderWidth: StyleSheet.hairlineWidth,
     // borderColor set dynamically
   },

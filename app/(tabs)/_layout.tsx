@@ -27,8 +27,9 @@ export default function TabLayout() {
           borderTopWidth: StyleSheet.hairlineWidth,
         },
         tabBarLabelStyle: {
-          fontSize: 11,
-          fontWeight: "600",
+          fontSize: 10,
+          fontWeight: "500",
+          letterSpacing: 1.5,
           marginTop: 2,
         },
       }}

@@ -39,7 +39,7 @@ export function CategoryPlaceholder({
           borderColor: color + "30",
           width: size,
           height: size,
-          borderRadius: size * 0.12,
+          borderRadius: 6,
         },
         style,
       ]}

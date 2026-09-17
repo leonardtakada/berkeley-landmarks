@@ -1,5 +1,5 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { ScrollView, Text, View, Pressable, StyleSheet } from "react-native";
+import { ScrollView, Text, View, Pressable, StyleSheet, Platform } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { tours } from "@/data/tours";
 import { landmarks, CATEGORY_COLORS } from "@/data/landmarks";
@@ -171,7 +171,7 @@ const styles = StyleSheet.create({
     gap: 6,
     paddingHorizontal: 12,
     paddingVertical: 5,
-    borderRadius: 12,
+    borderRadius: 4,
     marginBottom: 12,
   },
   tourBadgeText: {
@@ -183,7 +183,7 @@ const styles = StyleSheet.create({
   },
   heroName: {
     fontSize: 26,
-    fontWeight: "800",
+    fontWeight: "600",
     lineHeight: 32,
     marginBottom: 4,
   },
@@ -201,7 +201,7 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: "center",
     padding: 14,
-    borderRadius: 12,
+    borderRadius: 6,
     borderWidth: 1,
     gap: 4,
   },
@@ -219,12 +219,13 @@ const styles = StyleSheet.create({
     marginHorizontal: 16,
     marginTop: 16,
     padding: 16,
-    borderRadius: 14,
+    borderRadius: 6,
     borderWidth: 1,
   },
   sectionTitle: {
     fontSize: 18,
     fontWeight: "700",
+    fontFamily: Platform.select({ ios: "ui-serif", default: "serif" }),
     marginBottom: 10,
   },
   description: {
@@ -243,7 +244,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 16,
     marginTop: 16,
     paddingVertical: 14,
-    borderRadius: 14,
+    borderRadius: 6,
     gap: 8,
   },
   mapButtonText: {
