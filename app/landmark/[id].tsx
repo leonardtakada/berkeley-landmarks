@@ -9,7 +9,7 @@ import { useColors } from "@/hooks/use-colors";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { CategoryPlaceholder } from "@/components/category-placeholder";
 import { trpc } from "@/lib/trpc";
-import { getApiBaseUrl } from "@/constants/oauth";
+import { getApiBaseUrl } from "@/constants/api";
 
 export default function LandmarkDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
