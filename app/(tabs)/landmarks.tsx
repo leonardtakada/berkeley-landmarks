@@ -37,15 +37,13 @@ const LandmarkRow = React.memo(function LandmarkRow({ landmark, colors }: { land
   const catColor = CATEGORY_COLORS[landmark.category];
   const rowStyle = useMemo(() => ({
     backgroundColor: colors.surface,
-    borderRadius: 14,
+    borderRadius: 6,
     overflow: "hidden" as const,
     flexDirection: "row" as const,
     alignItems: "center" as const,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.02,
-    shadowRadius: 2,
-  }), [colors.surface]);
+    borderWidth: 1,
+    borderColor: colors.border,
+  }), [colors.surface, colors.border]);
 
   return (
     <Pressable
@@ -72,7 +70,7 @@ const LandmarkRow = React.memo(function LandmarkRow({ landmark, colors }: { land
       <View style={styles.rowRight}>
         {landmark.nationalRegister && (
           <View style={styles.nrBadge}>
-            <IconSymbol name="star.fill" size={10} color="#FF9500" />
+            <IconSymbol name="star.fill" size={10} color="#8B6D4A" />
           </View>
         )}
         <IconSymbol name="chevron.right" size={14} color={colors.muted} />
@@ -240,7 +238,7 @@ const styles = StyleSheet.create({
   screenTitle: {
     fontSize: 36,
     fontWeight: "600",
-    fontFamily: Platform.select({ ios: "ui-serif", default: "serif" }),
+    fontFamily: "SourceSerif4_600SemiBold",
     letterSpacing: -0.3,
     lineHeight: 42,
   },
@@ -275,8 +273,10 @@ const styles = StyleSheet.create({
     borderRadius: 4,
   },
   catChipText: {
-    fontSize: 13,
-    fontWeight: "600",
+    fontSize: 11,
+    fontWeight: "500",
+    textTransform: "uppercase",
+    letterSpacing: 1,
   },
   sortRow: {
     flexDirection: "row",
@@ -293,16 +293,20 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   sortChipText: {
-    fontSize: 12,
-    fontWeight: "600",
+    fontSize: 11,
+    fontWeight: "500",
+    textTransform: "uppercase",
+    letterSpacing: 1,
   },
   resultsRow: {
     paddingHorizontal: 16,
     paddingBottom: 8,
   },
   resultsText: {
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: "500",
+    textTransform: "uppercase",
+    letterSpacing: 1,
   },
   listContent: {
     paddingHorizontal: 16,
@@ -336,6 +340,7 @@ const styles = StyleSheet.create({
   rowName: {
     fontSize: 16,
     fontWeight: "600",
+    fontFamily: "SourceSerif4_600SemiBold",
     lineHeight: 22,
   },
   rowAddress: {
@@ -350,8 +355,11 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   rowMetaText: {
-    fontSize: 13,
-    lineHeight: 16,
+    fontSize: 11,
+    lineHeight: 14,
+    textTransform: "uppercase",
+    letterSpacing: 1,
+    fontWeight: "500",
   },
   rowRight: {
     flexDirection: "row",

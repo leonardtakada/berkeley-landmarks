@@ -11,6 +11,12 @@ import { ThemeProvider } from "@/lib/theme-provider";
 import { FavoritesProvider } from "@/lib/favorites-context";
 import { trpc, createTRPCClient } from "@/lib/trpc";
 import {
+  SourceSerif4_400Regular,
+  SourceSerif4_500Medium,
+  SourceSerif4_600SemiBold,
+} from "@expo-google-fonts/source-serif-4";
+import { useFonts } from "expo-font";
+import {
   SafeAreaFrameContext,
   SafeAreaInsetsContext,
   SafeAreaProvider,
@@ -52,6 +58,11 @@ export default function RootLayout() {
 
   // Create clients once and reuse them
   const [queryClient] = useState(() => new QueryClient());
+  useFonts({
+    SourceSerif4_400Regular,
+    SourceSerif4_500Medium,
+    SourceSerif4_600SemiBold,
+  });
   const [trpcClient] = useState(() => createTRPCClient());
 
   // Ensure minimum 8px padding for top and bottom on mobile

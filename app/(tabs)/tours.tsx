@@ -3,7 +3,6 @@ import { Text, View, FlatList, Pressable, StyleSheet, Platform } from "react-nat
 // Platform already imported
 import { useRouter } from "expo-router";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
-import { LinearGradient } from "expo-linear-gradient";
 import { ScreenContainer } from "@/components/screen-container";
 import { useColors } from "@/hooks/use-colors";
 import { IconSymbol } from "@/components/ui/icon-symbol";
@@ -23,17 +22,13 @@ function TourCard({ tour }: { tour: Tour }) {
         styles.tourCard,
         {
           backgroundColor: colors.surface,
+          borderColor: colors.border,
           opacity: pressed ? 0.85 : 1,
         },
       ]}
     >
-      {/* Gradient accent bar */}
-      <LinearGradient
-        colors={[tour.color, tour.color + 'AA']}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 0 }}
-        style={styles.accentBar}
-      />
+      {/* Thin accent rule — like a pencil underline */}
+      <View style={[styles.accentBar, { backgroundColor: tour.color + '66' }]} />
 
       <View style={styles.cardContent}>
         <View style={styles.cardHeader}>
@@ -106,7 +101,7 @@ const styles = StyleSheet.create({
   screenTitle: {
     fontSize: 36,
     fontWeight: "600",
-    fontFamily: Platform.select({ ios: "ui-serif", default: "serif" }),
+    fontFamily: "SourceSerif4_600SemiBold",
     letterSpacing: -0.3,
     lineHeight: 42,
   },
@@ -122,19 +117,10 @@ const styles = StyleSheet.create({
   tourCard: {
     borderRadius: 6,
     overflow: "hidden",
-    ...Platform.select({
-      ios: {
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.02,
-        shadowRadius: 2,
-      },
-      android: { elevation: 1 },
-      web: { boxShadow: "0 1px 2px rgba(0,0,0,0.02)" },
-    }),
+    borderWidth: 1,
   },
   accentBar: {
-    height: 4,
+    height: 2,
   },
   cardContent: {
     padding: 18,
@@ -157,14 +143,17 @@ const styles = StyleSheet.create({
   },
   tourName: {
     fontSize: 17,
-    fontWeight: "700",
-    fontFamily: Platform.select({ ios: "ui-serif", default: "serif" }),
+    fontWeight: "600",
+    fontFamily: "SourceSerif4_600SemiBold",
     lineHeight: 22,
   },
   tourNeighborhood: {
-    fontSize: 13,
-    lineHeight: 18,
+    fontSize: 11,
+    lineHeight: 16,
     marginTop: 2,
+    textTransform: "uppercase",
+    letterSpacing: 1.5,
+    fontWeight: "500",
   },
   tourDescription: {
     fontSize: 14,
@@ -181,7 +170,9 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   statText: {
-    fontSize: 12,
-    fontWeight: "600",
+    fontSize: 11,
+    fontWeight: "500",
+    textTransform: "uppercase",
+    letterSpacing: 1,
   },
 });
