@@ -96,6 +96,9 @@ export default function MapScreen() {
         ref={mapRef}
         style={styles.map}
         initialRegion={BERKELEY_CENTER}
+        minZoomLevel={12}
+        maxZoomLevel={20}
+        region={undefined}
         onPress={handleMapPress}
         showsUserLocation
         showsCompass
