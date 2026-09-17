@@ -64,3 +64,5 @@ Thumbs.db
 # Webdv artifacts (checkpoint zips, migrations, etc.)
 .webdev/
 ._*
+.tile-cache/
+expo-qr-code.png

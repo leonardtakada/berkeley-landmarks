@@ -9,6 +9,9 @@ config.resolver.blockList = [
   new RegExp(path.resolve(__dirname, "server") + "/.*"),
 ];
 
+// Bundled themed-tile container (see scripts/bake_tiles.mjs)
+config.resolver.assetExts.push("bin");
+
 module.exports = withNativeWind(config, {
   input: "./global.css",
   // Force write CSS to file system instead of virtual modules
