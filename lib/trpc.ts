@@ -7,34 +7,31 @@ import * as Auth from "@/lib/_core/auth";
 
 /**
  * tRPC React client for type-safe API calls.
- *
- * IMPORTANT (tRPC v11): The `transformer` must be inside `httpBatchLink`,
- * NOT at the root createClient level. This ensures client and server
- * use the same serialization format (superjson).
+ * Works in standalone mode — requests fail gracefully if no server is running.
  */
 export const trpc = createTRPCReact<AppRouter>();
 
 /**
- * Creates the tRPC client with proper configuration.
- * Call this once in your app's root layout.
+ * Creates the tRPC client.
+ * Safe to call even when no server is running — requests will fail gracefully.
  */
 export function createTRPCClient() {
+  const baseUrl = getApiBaseUrl();
   return trpc.createClient({
     links: [
       httpBatchLink({
-        url: `${getApiBaseUrl()}/api/trpc`,
-        // tRPC v11: transformer MUST be inside httpBatchLink, not at root
+        url: baseUrl ? `${baseUrl}/api/trpc` : "http://localhost:0/api/trpc",
         transformer: superjson,
         async headers() {
-          const token = await Auth.getSessionToken();
-          return token ? { Authorization: `Bearer ${token}` } : {};
+          try {
+            const token = await Auth.getSessionToken();
+            return token ? { Authorization: `Bearer ${token}` } : {};
+          } catch {
+            return {};
+          }
         },
-        // Custom fetch to include credentials for cookie-based auth
         fetch(url, options) {
-          return fetch(url, {
-            ...options,
-            credentials: "include",
-          });
+          return fetch(url, { ...options, credentials: "include" });
         },
       }),
     ],
