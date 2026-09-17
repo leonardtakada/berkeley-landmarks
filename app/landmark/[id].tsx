@@ -14,16 +14,6 @@ export default function LandmarkDetailScreen() {
   const insets = useSafeAreaInsets();
   const landmark = landmarks.find((l) => l.id === id);
 
-  if (!landmark) {
-    return (
-      <View style={[styles.container, { backgroundColor: colors.background, paddingTop: insets.top }]}>
-        <Text style={{ color: colors.foreground }}>Landmark not found</Text>
-      </View>
-    );
-  }
-
-  const catColor = CATEGORY_COLORS[landmark.category];
-
   const nearbyLandmarks = useMemo(() => {
     if (!landmark) return [];
     return landmarks
@@ -37,7 +27,17 @@ export default function LandmarkDetailScreen() {
       }))
       .sort((a, b) => a.dist - b.dist)
       .slice(0, 4);
-  }, [landmark?.id]);
+  }, [id]);
+
+  if (!landmark) {
+    return (
+      <View style={[styles.container, { backgroundColor: colors.background, paddingTop: insets.top }]}>
+        <Text style={{ color: colors.foreground }}>Landmark not found</Text>
+      </View>
+    );
+  }
+
+  const catColor = CATEGORY_COLORS[landmark.category];
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
