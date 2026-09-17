@@ -9,6 +9,7 @@ import { Platform } from "react-native";
 import "@/lib/_core/nativewind-pressable";
 import { ThemeProvider } from "@/lib/theme-provider";
 import { FavoritesProvider } from "@/lib/favorites-context";
+import { trpc, createTRPCClient } from "@/lib/trpc";
 import {
   SafeAreaFrameContext,
   SafeAreaInsetsContext,
@@ -51,6 +52,7 @@ export default function RootLayout() {
 
   // Create clients once and reuse them
   const [queryClient] = useState(() => new QueryClient());
+  const [trpcClient] = useState(() => createTRPCClient());
 
   // Ensure minimum 8px padding for top and bottom on mobile
   const providerInitialMetrics = useMemo(() => {
@@ -69,6 +71,7 @@ export default function RootLayout() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <FavoritesProvider>
         <QueryClientProvider client={queryClient}>
+          <trpc.Provider client={trpcClient} queryClient={queryClient}>
           {/* Default to hiding native headers so raw route segments don't appear (e.g. "(tabs)", "products/[id]"). */}
           {/* If a screen needs the native header, explicitly enable it and set a human title via Stack.Screen options. */}
           {/* in order for ios apps tab switching to work properly, use presentation: "fullScreenModal" for login page, whenever you decide to use presentation: "modal*/}
@@ -85,6 +88,7 @@ export default function RootLayout() {
             />
           </Stack>
           <StatusBar style="auto" />
+          </trpc.Provider>
         </QueryClientProvider>
       </FavoritesProvider>
     </GestureHandlerRootView>
