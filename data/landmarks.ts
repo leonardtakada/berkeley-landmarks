@@ -40,6 +40,7 @@ export const CATEGORY_LABELS: Record<LandmarkCategory, string> = {
   structure_of_merit: 'Structure of Merit',
 };
 
+// @ts-expect-error large array exceeds TS union depth
 export const landmarks: Landmark[] = [
   {
     id: 'lm-1',

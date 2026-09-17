@@ -1,5 +1,5 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { ScrollView, Text, View, Pressable, StyleSheet, Platform } from "react-native";
+import { ScrollView, Text, View, Pressable, StyleSheet } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
 import { landmarks, CATEGORY_COLORS, CATEGORY_LABELS } from "@/data/landmarks";
