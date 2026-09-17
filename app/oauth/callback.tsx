@@ -197,11 +197,11 @@ export default function OAuthCallback() {
             console.log("[OAuth] User data received:", result.user);
             const userInfo: Auth.User = {
               id: result.user.id,
-              openId: result.user.openId,
-              name: result.user.name,
-              email: result.user.email,
-              loginMethod: result.user.loginMethod,
-              lastSignedIn: new Date(result.user.lastSignedIn || Date.now()),
+              openId: result.user.openId ?? "",
+              name: result.user.name ?? null,
+              email: result.user.email ?? null,
+              loginMethod: result.user.loginMethod ?? null,
+              lastSignedIn: new Date(result.user.lastSignedIn ?? Date.now()),
             };
             await Auth.setUserInfo(userInfo);
             console.log("[OAuth] User info stored:", userInfo);
