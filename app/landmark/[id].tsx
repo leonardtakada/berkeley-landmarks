@@ -1,4 +1,5 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
+import React, { useMemo } from "react";
 import { ScrollView, Text, View, Pressable, StyleSheet } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
@@ -22,6 +23,21 @@ export default function LandmarkDetailScreen() {
   }
 
   const catColor = CATEGORY_COLORS[landmark.category];
+
+  const nearbyLandmarks = useMemo(() => {
+    if (!landmark) return [];
+    return landmarks
+      .filter((l) => l.id !== landmark.id)
+      .map((l) => ({
+        id: l.id,
+        name: l.name,
+        address: l.address,
+        category: l.category,
+        dist: Math.abs(l.latitude - landmark.latitude) + Math.abs(l.longitude - landmark.longitude),
+      }))
+      .sort((a, b) => a.dist - b.dist)
+      .slice(0, 4);
+  }, [landmark.id]);
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
@@ -101,19 +117,7 @@ export default function LandmarkDetailScreen() {
         {/* Nearby Landmarks */}
         <View style={[styles.section, { backgroundColor: colors.surface }]}>
           <Text style={[styles.sectionTitle, { color: colors.foreground }]}>Nearby Landmarks</Text>
-          {landmarks
-            .filter((l) => l.id !== landmark.id)
-            .sort((a, b) => {
-              const distA = Math.sqrt(
-                Math.pow(a.latitude - landmark.latitude, 2) + Math.pow(a.longitude - landmark.longitude, 2)
-              );
-              const distB = Math.sqrt(
-                Math.pow(b.latitude - landmark.latitude, 2) + Math.pow(b.longitude - landmark.longitude, 2)
-              );
-              return distA - distB;
-            })
-            .slice(0, 4)
-            .map((nearby) => (
+          {nearbyLandmarks.map((nearby) => (
               <Pressable
                 key={nearby.id}
                 onPress={() => router.push(`/landmark/${nearby.id}`)}
