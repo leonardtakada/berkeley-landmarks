@@ -298,8 +298,9 @@ export default function MapScreen() {
                   style={({ pressed }) => [
                     styles.filterChip,
                     {
-                      backgroundColor: isActive ? CATEGORY_COLORS[cat] : colors.surface,
+                      backgroundColor: colors.surface,
                       borderColor: isActive ? CATEGORY_COLORS[cat] : colors.border,
+                      borderWidth: isActive ? 2 : 1,
                       opacity: pressed ? 0.8 : 1,
                     },
                   ]}
@@ -307,13 +308,13 @@ export default function MapScreen() {
                   <View
                     style={[
                       styles.chipDot,
-                      { backgroundColor: isActive ? "#FFFFFF" : CATEGORY_COLORS[cat] },
+                      { backgroundColor: CATEGORY_COLORS[cat] },
                     ]}
                   />
                   <Text
                     style={[
                       styles.chipText,
-                      { color: isActive ? "#FFFFFF" : colors.foreground },
+                      { color: isActive ? colors.foreground : colors.muted },
                     ]}
                   >
                     {CATEGORY_LABELS[cat]}
@@ -322,6 +323,17 @@ export default function MapScreen() {
               );
             })}
           </ScrollView>
+          {/* Edge fades: signals the row scrolls */}
+          <LinearGradient
+            pointerEvents="none"
+            colors={[colors.background + "F0", colors.background + "00"]}
+            style={styles.chipFadeLeft}
+          />
+          <LinearGradient
+            pointerEvents="none"
+            colors={[colors.background + "00", colors.background + "F0"]}
+            style={styles.chipFadeRight}
+          />
         </View>
       )}
 
@@ -473,7 +485,22 @@ const styles = StyleSheet.create({
   },
   filterScroll: {
     paddingHorizontal: 16,
+    paddingRight: 40,
     gap: 8,
+  },
+  chipFadeLeft: {
+    position: "absolute",
+    left: 0,
+    top: 0,
+    bottom: 0,
+    width: 20,
+  },
+  chipFadeRight: {
+    position: "absolute",
+    right: 0,
+    top: 0,
+    bottom: 0,
+    width: 20,
   },
   filterChip: {
     flexDirection: "row",

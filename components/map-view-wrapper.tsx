@@ -161,7 +161,7 @@ const MapViewWrapper = forwardRef<any, MapViewWrapperProps>(
             500
           );
         merged.fitCoords = (coords: Array<{ latitude: number; longitude: number }>) =>
-          mapRef.current?.fitBounds(coords, {
+          mapRef.current?.fitToCoordinates(coords, {
             edgePadding: { top: 80, right: 40, bottom: 200, left: 40 },
             animated: true,
           });
@@ -337,7 +337,8 @@ const MapViewWrapper = forwardRef<any, MapViewWrapperProps>(
               const [lng, lat] = cluster.geometry.coordinates;
               const count = cluster.properties.point_count;
               const size = count < 10 ? 36 : count < 50 ? 44 : 52;
-              const bgColor = count < 10 ? "#7B8B6F" : count < 50 ? "#5D6B52" : "#3F4B36";
+              // Showa Modern: cream disc, vermilion ring, charcoal numerals
+              const bgColor = "#F7F3EA";
               return (
                 <Marker
                   key={`cluster-${cluster.id}`}
@@ -346,7 +347,7 @@ const MapViewWrapper = forwardRef<any, MapViewWrapperProps>(
                   anchor={{ x: 0.5, y: 0.5 }}
                 >
                   <View style={[styles.clusterBubble, { width: size, height: size, borderRadius: size / 2, backgroundColor: bgColor }]}>
-                    <Text style={styles.clusterText}>
+                    <Text style={[styles.clusterText, { lineHeight: size }]}>
                       {count}
                     </Text>
                   </View>
@@ -412,8 +413,8 @@ const styles = StyleSheet.create({
   clusterBubble: {
     justifyContent: "center",
     alignItems: "center",
-    borderWidth: 2,
-    borderColor: "#FFFFFF",
+    borderWidth: 3,
+    borderColor: "#E85A1F",
     ...Platform.select({
       ios: {
         shadowColor: "#000",
@@ -425,7 +426,7 @@ const styles = StyleSheet.create({
     }),
   },
   clusterText: {
-    color: "#FFFFFF",
+    color: "#423F3B",
     fontWeight: "700",
     fontSize: 13,
     lineHeight: 15,

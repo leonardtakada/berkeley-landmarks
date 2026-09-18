@@ -179,9 +179,9 @@ export default function LandmarkDetailScreen() {
             </View>
           )}
           {landmark.nationalRegister && (
-            <View style={[styles.statusBadge, { backgroundColor: '#3D6B5C22' }]}>
-              <IconSymbol name="star.fill" size={14} color="#3D6B5C" />
-              <Text style={[styles.statusText, { color: '#3D6B5C' }]}>National Register</Text>
+            <View style={[styles.statusBadge, { backgroundColor: '#3B55A222' }]}>
+              <IconSymbol name="star.fill" size={14} color="#3B55A2" />
+              <Text style={[styles.statusText, { color: '#3B55A2' }]}>National Register</Text>
             </View>
           )}
           <View style={[styles.statusBadge, { backgroundColor: catColor + '22' }]}>
@@ -216,8 +216,8 @@ export default function LandmarkDetailScreen() {
         {/* Add Photo Button */}
         <View style={{ paddingHorizontal: 16, marginTop: 16 }}>
           {uploadSuccess ? (
-            <View style={[styles.addPhotoBtn, { backgroundColor: '#4CAF5022' }]}>
-              <Text style={{ color: '#4CAF50', fontWeight: '600' }}>✓ Thank you! Your photo is pending review.</Text>
+            <View style={[styles.addPhotoBtn, { backgroundColor: '#2E9E5C22' }]}>
+              <Text style={{ color: '#2E9E5C', fontWeight: '600' }}>✓ Thank you! Your photo is pending review.</Text>
             </View>
           ) : uploading ? (
             <View style={[styles.addPhotoBtn, { backgroundColor: colors.surface }]}>
