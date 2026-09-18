@@ -1,7 +1,7 @@
 import { and, count, desc, eq, isNull } from "drizzle-orm";
 import { z } from "zod";
 import { submissions, type Submission } from "../drizzle/schema";
-import { getDb } from "./db";
+import { getDb, applySubmissionToLandmark, listLandmarks } from "./db";
 import { adminProcedure, protectedProcedure, router } from "./_core/trpc";
 import { invokeLLM } from "./_core/llm";
 import {
@@ -202,6 +202,20 @@ export const submissionsRouter = router({
     .mutation(async ({ ctx, input }) => {
       const db = await getDb();
       if (!db) throw new Error("Database not available");
+
+      const [submission] = await db
+        .select()
+        .from(submissions)
+        .where(eq(submissions.id, input.submissionId))
+        .limit(1);
+      if (!submission) throw new Error("Submission not found");
+      if (submission.status !== "pending") throw new Error(`Submission already ${submission.status}`);
+
+      let applied = false;
+      if (input.action === "approve") {
+        applied = await applySubmissionToLandmark(submission.landmarkId, submission.payload);
+      }
+
       await db
         .update(submissions)
         .set({
@@ -211,7 +225,7 @@ export const submissionsRouter = router({
           reviewerNote: input.reviewerNote ?? null,
         })
         .where(eq(submissions.id, input.submissionId));
-      return { success: true as const };
+      return { success: true as const, applied };
     }),
 
   /**

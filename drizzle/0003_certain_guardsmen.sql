@@ -1,0 +1,20 @@
+CREATE TABLE `landmarks` (
+	`id` varchar(128) NOT NULL,
+	`name` varchar(200) NOT NULL,
+	`address` varchar(300) NOT NULL,
+	`latitude` double NOT NULL,
+	`longitude` double NOT NULL,
+	`architect` varchar(300),
+	`year_built` varchar(100),
+	`category` varchar(64) NOT NULL,
+	`landmark_number` varchar(100),
+	`description` text,
+	`style` varchar(200),
+	`national_register` boolean NOT NULL DEFAULT false,
+	`neighborhood` varchar(120),
+	`designation_type` varchar(64),
+	`photo_url` varchar(512),
+	`createdAt` timestamp NOT NULL DEFAULT (now()),
+	`updatedAt` timestamp NOT NULL DEFAULT (now()) ON UPDATE CURRENT_TIMESTAMP,
+	CONSTRAINT `landmarks_id` PRIMARY KEY(`id`)
+);

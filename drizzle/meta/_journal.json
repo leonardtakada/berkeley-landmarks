@@ -22,6 +22,13 @@
       "when": 1789585608463,
       "tag": "0002_quick_banshee",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "5",
+      "when": 1789704092499,
+      "tag": "0003_certain_guardsmen",
+      "breakpoints": true
     }
   ]
 }

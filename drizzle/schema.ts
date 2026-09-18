@@ -1,4 +1,4 @@
-import { int, json, mysqlEnum, mysqlTable, text, timestamp, varchar } from "drizzle-orm/mysql-core";
+import { boolean, double, int, json, mysqlEnum, mysqlTable, text, timestamp, varchar } from "drizzle-orm/mysql-core";
 
 /**
  * Core user table backing auth flow.
@@ -87,5 +87,33 @@ export const submissions = mysqlTable("submissions", {
 
 export type Submission = typeof submissions.$inferSelect;
 export type InsertSubmission = typeof submissions.$inferInsert;
+
+/**
+ * DB-backed landmarks. Seeded from data/landmarks.json; approved community
+ * edits are applied here so the app serves live data instead of the bundled JSON.
+ */
+export const landmarksTable = mysqlTable("landmarks", {
+  /** Stable slug id from the bundled dataset (e.g. 'lm-1'). */
+  id: varchar("id", { length: 128 }).primaryKey(),
+  name: varchar("name", { length: 200 }).notNull(),
+  address: varchar("address", { length: 300 }).notNull(),
+  latitude: double("latitude").notNull(),
+  longitude: double("longitude").notNull(),
+  architect: varchar("architect", { length: 300 }),
+  yearBuilt: varchar("year_built", { length: 100 }),
+  category: varchar("category", { length: 64 }).notNull(),
+  landmarkNumber: varchar("landmark_number", { length: 100 }),
+  description: text("description"),
+  style: varchar("style", { length: 200 }),
+  nationalRegister: boolean("national_register").default(false).notNull(),
+  neighborhood: varchar("neighborhood", { length: 120 }),
+  designationType: varchar("designation_type", { length: 64 }),
+  photoUrl: varchar("photo_url", { length: 512 }),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type LandmarkRow = typeof landmarksTable.$inferSelect;
+export type InsertLandmarkRow = typeof landmarksTable.$inferInsert;
 
 // TODO: Add your tables here
