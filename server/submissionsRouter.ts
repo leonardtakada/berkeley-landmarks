@@ -37,7 +37,7 @@ const FIELD_TO_COLUMN: Record<string, string> = {
  * data/landmarks.json (served at /landmarks.json). Throws on failure so the
  * caller can surface it; the submission row itself is not touched here.
  */
-async function applyApprovedChanges(submission: Submission): Promise<void> {
+export async function applyApprovedChanges(submission: Submission): Promise<void> {
   const validated = validateSubmissionPayload(submission.payload);
   if (!validated.ok) throw new Error(validated.error);
   const changes = validated.changes;

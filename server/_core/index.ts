@@ -7,6 +7,11 @@ import { registerEmailAuthRoutes } from "./emailAuthRoutes";
 import { appRouter } from "../routers";
 import { createContext } from "./context";
 import path from "path";
+import { eq, desc } from "drizzle-orm";
+import { submissions } from "../../drizzle/schema";
+import { photos } from "../../drizzle/schema";
+import { getDb } from "../db";
+import { applyApprovedChanges } from "../submissionsRouter";
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise((resolve) => {
@@ -77,11 +82,9 @@ async function startServer() {
 
   // Photo moderation API (REST, simpler than tRPC for admin dashboard)
   app.get("/api/photos", async (req, res) => {
-    const status = req.query.status || 'pending';
+    const status = (String(req.query.status) || 'pending') as 'pending' | 'approved' | 'rejected';
     try {
-      const { getDb } = require('../server/db');
-      const { photos } = require('../drizzle/schema');
-      const { eq, desc } = require('drizzle-orm');
+
       const db = await getDb();
       if (!db) return res.json([]);
       const result = await db.select().from(photos).where(eq(photos.status, status)).orderBy(desc(photos.createdAt));
@@ -93,9 +96,7 @@ async function startServer() {
 
   app.post("/api/photos/:id/approve", async (req, res) => {
     try {
-      const { getDb } = require('../server/db');
-      const { photos } = require('../drizzle/schema');
-      const { eq } = require('drizzle-orm');
+
       const db = await getDb();
       if (!db) throw new Error('No DB');
       await db.update(photos).set({ status: 'approved', reviewedAt: new Date() }).where(eq(photos.id, parseInt(req.params.id)));
@@ -107,9 +108,7 @@ async function startServer() {
 
   app.post("/api/photos/:id/reject", async (req, res) => {
     try {
-      const { getDb } = require('../server/db');
-      const { photos } = require('../drizzle/schema');
-      const { eq } = require('drizzle-orm');
+
       const db = await getDb();
       if (!db) throw new Error('No DB');
       await db.update(photos).set({ status: 'rejected', reviewedAt: new Date() }).where(eq(photos.id, parseInt(req.params.id)));
@@ -121,11 +120,8 @@ async function startServer() {
 
   // Submission moderation API (REST, mirrors the tRPC submissions router for the admin dashboard)
   app.get("/api/submissions", async (req, res) => {
-    const status = req.query.status || 'pending';
+    const status = (String(req.query.status) || 'pending') as 'pending' | 'approved' | 'rejected';
     try {
-      const { getDb } = require('../server/db');
-      const { submissions } = require('../drizzle/schema');
-      const { eq, desc } = require('drizzle-orm');
       const db = await getDb();
       if (!db) return res.json([]);
       const result = await db.select().from(submissions).where(eq(submissions.status, status)).orderBy(desc(submissions.createdAt));
@@ -137,12 +133,12 @@ async function startServer() {
 
   app.post("/api/submissions/:id/approve", async (req, res) => {
     try {
-      const { getDb } = require('../server/db');
-      const { submissions } = require('../drizzle/schema');
-      const { eq } = require('drizzle-orm');
       const db = await getDb();
       if (!db) throw new Error('No DB');
-      await db.update(submissions).set({ status: 'approved', reviewedAt: new Date() }).where(eq(submissions.id, parseInt(req.params.id)));
+      const id = parseInt(req.params.id);
+      const [row] = await db.select().from(submissions).where(eq(submissions.id, id)).limit(1);
+      if (row && row.status === 'pending') await applyApprovedChanges(row);
+      await db.update(submissions).set({ status: 'approved', reviewedAt: new Date() }).where(eq(submissions.id, id));
       res.json({ success: true });
     } catch (e: any) {
       res.status(500).json({ error: e.message });
@@ -151,9 +147,6 @@ async function startServer() {
 
   app.post("/api/submissions/:id/reject", async (req, res) => {
     try {
-      const { getDb } = require('../server/db');
-      const { submissions } = require('../drizzle/schema');
-      const { eq } = require('drizzle-orm');
       const db = await getDb();
       if (!db) throw new Error('No DB');
       await db.update(submissions).set({ status: 'rejected', reviewedAt: new Date() }).where(eq(submissions.id, parseInt(req.params.id)));
