@@ -4,10 +4,9 @@
  * Run with DATABASE_URL set, e.g.:
  *   DATABASE_URL=mysql://... npx tsx server/seedLandmarks.ts
  */
-import { readFile } from "node:fs/promises";
-import path from "node:path";
 import { getDb } from "./db";
 import { landmarksTable } from "../drizzle/schema";
+import { landmarks } from "../data/landmarks";
 import type { Landmark } from "../data/landmarks";
 
 type SeedRow = typeof landmarksTable.$inferInsert;
@@ -36,8 +35,7 @@ export async function seedLandmarks(): Promise<{ inserted: number; updated: numb
   const db = await getDb();
   if (!db) throw new Error("Database not available — set DATABASE_URL");
 
-  const raw = await readFile(path.resolve(__dirname, "../data/landmarks.json"), "utf8");
-  const data: Landmark[] = JSON.parse(raw);
+  const data: Landmark[] = landmarks.filter((l) => l.latitude != null && l.longitude != null);
 
   let inserted = 0;
   let updated = 0;
