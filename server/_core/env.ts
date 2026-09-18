@@ -10,4 +10,7 @@ export const ENV = {
   isProduction: process.env.NODE_ENV === "production",
   forgeApiUrl: process.env.BUILT_IN_FORGE_API_URL ?? "",
   forgeApiKey: process.env.BUILT_IN_FORGE_API_KEY ?? "",
+  llmBaseUrl: process.env.LLM_BASE_URL ?? "https://open.bigmodel.cn/api/paas/v4/chat/completions",
+  llmModel: process.env.LLM_MODEL ?? "glm-4.7",
+  llmApiKey: process.env.LLM_API_KEY ?? "",
 };
