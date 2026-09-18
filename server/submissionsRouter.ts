@@ -1,4 +1,7 @@
 import { and, count, desc, eq, isNull } from "drizzle-orm";
+import fs from "fs";
+import path from "path";
+import mysql from "mysql2/promise";
 import { z } from "zod";
 import { submissions, type Submission } from "../drizzle/schema";
 import { getDb } from "./db";
@@ -17,6 +20,53 @@ import { landmarks } from "../data/landmarks";
  * Rate limit for submission creation: max 5 submissions per user per hour.
  * In-memory, single-process; sufficient for the current deployment shape.
  */
+/** Maps editable field names to landmarks DB columns (snake_case). */
+const FIELD_TO_COLUMN: Record<string, string> = {
+  name: "name",
+  address: "address",
+  architect: "architect",
+  yearBuilt: "year_built",
+  style: "style",
+  neighborhood: "neighborhood",
+  description: "description",
+  photoUrl: "photo_url",
+};
+
+/**
+ * Apply an approved submission's changes to the landmarks DB table and
+ * data/landmarks.json (served at /landmarks.json). Throws on failure so the
+ * caller can surface it; the submission row itself is not touched here.
+ */
+async function applyApprovedChanges(submission: Submission): Promise<void> {
+  const validated = validateSubmissionPayload(submission.payload);
+  if (!validated.ok) throw new Error(validated.error);
+  const changes = validated.changes;
+  const entries = Object.entries(changes) as [string, string][];
+  if (entries.length === 0) throw new Error("No changes to apply");
+
+  // 1. Update MySQL landmarks table (predates drizzle schema defs — raw SQL, parameterized)
+  if (process.env.DATABASE_URL) {
+    const conn = await mysql.createConnection(process.env.DATABASE_URL);
+    try {
+      const updateList = entries.map(([f]) => `\`${FIELD_TO_COLUMN[f]}\` = ?`).join(", ");
+      await conn.execute(
+        `UPDATE landmarks SET ${updateList}, updatedAt = NOW() WHERE id = ?`,
+        [...entries.map(([, v]) => v), submission.landmarkId],
+      );
+    } finally {
+      await conn.end();
+    }
+  }
+
+  // 2. Mirror into data/landmarks.json (clients read this via /landmarks.json)
+  const jsonPath = path.resolve(process.cwd(), "data/landmarks.json");
+  const all = JSON.parse(fs.readFileSync(jsonPath, "utf8")) as Array<Record<string, unknown>>;
+  const lm = all.find((l) => l.id === submission.landmarkId);
+  if (!lm) throw new Error(`Landmark ${submission.landmarkId} missing from landmarks.json`);
+  for (const [field, value] of entries) lm[field] = value;
+  fs.writeFileSync(jsonPath, JSON.stringify(all, null, 2) + "\n");
+}
+
 const submitRateLimiter = new SlidingWindowRateLimiter(5, 60 * 60 * 1000);
 
 /** Max pending submissions per user across all landmarks. */
@@ -202,6 +252,15 @@ export const submissionsRouter = router({
     .mutation(async ({ ctx, input }) => {
       const db = await getDb();
       if (!db) throw new Error("Database not available");
+
+      const [row] = await db.select().from(submissions).where(eq(submissions.id, input.submissionId)).limit(1);
+      if (!row) throw new Error("Submission not found");
+      if (row.status !== "pending") throw new Error("Submission already reviewed");
+
+      if (input.action === "approve") {
+        await applyApprovedChanges(row);
+      }
+
       await db
         .update(submissions)
         .set({
