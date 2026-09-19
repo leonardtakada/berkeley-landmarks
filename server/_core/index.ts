@@ -6,6 +6,7 @@ import { createExpressMiddleware } from "@trpc/server/adapters/express";
 import { registerEmailAuthRoutes } from "./emailAuthRoutes";
 import { appRouter } from "../routers";
 import { createContext } from "./context";
+import fs from "fs";
 import path from "path";
 import { eq, desc } from "drizzle-orm";
 import { submissions } from "../../drizzle/schema";
@@ -72,10 +73,11 @@ async function startServer() {
   app.get("/landmarks.json", (_req, res) => {
     // Read the landmarks data and return as JSON
     try {
-      const fs = require('fs');
       const content = fs.readFileSync(path.resolve(process.cwd(), 'data/landmarks.json'), 'utf8');
       res.json(JSON.parse(content));
-    } catch {
+    } catch (e: any) {
+      console.error('[landmarks.json] failed:', e?.message);
+
       res.json([]);
     }
   });
