@@ -127,7 +127,11 @@ export async function scoreSubmissionWithAI(
     });
 
     const content = result.choices?.[0]?.message?.content;
-    const text = typeof content === "string" ? content : JSON.stringify(content ?? "");
+    const raw = typeof content === "string" ? content : JSON.stringify(content ?? "");
+    // Tolerate markdown fences / prose around the JSON object (e.g. glm flash)
+    const start = raw.indexOf("{");
+    const end = raw.lastIndexOf("}");
+    const text = start !== -1 && end > start ? raw.slice(start, end + 1) : raw;
     const parsed = JSON.parse(text) as { riskScore?: unknown; flags?: unknown; note?: unknown };
     const riskScore =
       typeof parsed.riskScore === "number" ? Math.max(0, Math.min(100, Math.round(parsed.riskScore))) : null;
