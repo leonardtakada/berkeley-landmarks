@@ -95,6 +95,12 @@ const config: ExpoConfig = {
       },
     ],
     [
+      "expo-image-picker",
+      {
+        photoLibraryPermission: "Allow $(PRODUCT_NAME) to access your photos so you can submit photos of landmarks.",
+      },
+    ],
+    [
       "expo-splash-screen",
       {
         image: "./assets/images/splash-icon.png",
