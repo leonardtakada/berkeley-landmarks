@@ -1,0 +1,954 @@
+[
+ [
+  "lm-100",
+  "West Berkeley Macaroni Factory"
+ ],
+ [
+  "lm-101",
+  "Luther M. Williamson Building"
+ ],
+ [
+  "lm-103",
+  "Francis Kittredge Shattuck Building"
+ ],
+ [
+  "lm-104",
+  "Underwood Building"
+ ],
+ [
+  "lm-105",
+  "Charles Wilkinson House"
+ ],
+ [
+  "lm-106",
+  "John Brennan House"
+ ],
+ [
+  "lm-107",
+  "Cooper Woodworking"
+ ],
+ [
+  "lm-108",
+  "Armstrong Worker's Cottage"
+ ],
+ [
+  "lm-11",
+  "John Galen Howard House"
+ ],
+ [
+  "lm-110",
+  "Armstrong Building"
+ ],
+ [
+  "lm-111",
+  "Frederick H. Dakin Warehouse"
+ ],
+ [
+  "lm-112",
+  "The William Clephane Corner Store"
+ ],
+ [
+  "lm-113",
+  "Carlson's Block"
+ ],
+ [
+  "lm-114",
+  "India Block"
+ ],
+ [
+  "lm-116",
+  "Hull Undertaking Company Complex"
+ ],
+ [
+  "lm-118",
+  "Allston Square Building"
+ ],
+ [
+  "lm-120",
+  "YWCA"
+ ],
+ [
+  "lm-121",
+  "McCormack House"
+ ],
+ [
+  "lm-123",
+  "The Wallace-Sauer House"
+ ],
+ [
+  "lm-124",
+  "F.A. Thomas House"
+ ],
+ [
+  "lm-125",
+  "Webb Block (Hudson's Antiques)"
+ ],
+ [
+  "lm-126",
+  "Frederick and Amy Corkill House"
+ ],
+ [
+  "lm-128",
+  "The Broad House & Broad Apartment"
+ ],
+ [
+  "lm-129",
+  "Waste & Clark Apts."
+ ],
+ [
+  "lm-131",
+  "University YWCA"
+ ],
+ [
+  "lm-133",
+  "Jennie C. Smith House"
+ ],
+ [
+  "lm-134",
+  "Villa Wiley House and Cottages"
+ ],
+ [
+  "lm-135",
+  "Dickman House"
+ ],
+ [
+  "lm-136",
+  "The Westenberg House"
+ ],
+ [
+  "lm-137",
+  "The Thomas & Louise Hicks House"
+ ],
+ [
+  "lm-138",
+  "Berkeley Bay Commons"
+ ],
+ [
+  "lm-139",
+  "Joseph Clapp Cottage"
+ ],
+ [
+  "lm-140",
+  "Morgan Building"
+ ],
+ [
+  "lm-141",
+  "Bartlett House"
+ ],
+ [
+  "lm-142",
+  "House and"
+ ],
+ [
+  "lm-143",
+  "Bonita House"
+ ],
+ [
+  "lm-144",
+  "Rose Berteaux Cottage"
+ ],
+ [
+  "lm-146",
+  "Tuft's House #3"
+ ],
+ [
+  "lm-147",
+  "Charles Rieber House"
+ ],
+ [
+  "lm-151",
+  "Mikkelsen & Berry Building"
+ ],
+ [
+  "lm-153",
+  "Niehaus House"
+ ],
+ [
+  "lm-154",
+  "Grace Baptist Church"
+ ],
+ [
+  "lm-155",
+  "Luttrell House"
+ ],
+ [
+  "lm-156",
+  "Epworth Hall"
+ ],
+ [
+  "lm-157",
+  "Samuel Davis House"
+ ],
+ [
+  "lm-158",
+  "Public Amenities"
+ ],
+ [
+  "lm-161",
+  "Warren Cheney Houses"
+ ],
+ [
+  "lm-163",
+  "Claremont Hardware"
+ ],
+ [
+  "lm-164",
+  "Mercantile Trust Co."
+ ],
+ [
+  "lm-167",
+  "Alphonso House"
+ ],
+ [
+  "lm-168",
+  "Bowen's Inn Higgins Grocery"
+ ],
+ [
+  "lm-172",
+  "Cambridge Apartments"
+ ],
+ [
+  "lm-173",
+  "Brasfield Hotel"
+ ],
+ [
+  "lm-174",
+  "Unit 1"
+ ],
+ [
+  "lm-175",
+  "Fish-Clark House"
+ ],
+ [
+  "lm-176",
+  "Williamson Building"
+ ],
+ [
+  "lm-179",
+  "Stuart House"
+ ],
+ [
+  "lm-181",
+  "Hobart Hall"
+ ],
+ [
+  "lm-182",
+  "Charles Wilkinson House"
+ ],
+ [
+  "lm-184",
+  "Standard Die & Specialty Company"
+ ],
+ [
+  "lm-186",
+  "Park Congregrational"
+ ],
+ [
+  "lm-187",
+  "Heywood House"
+ ],
+ [
+  "lm-188",
+  "Silva House"
+ ],
+ [
+  "lm-189",
+  "California Ink Co."
+ ],
+ [
+  "lm-190",
+  "Ghego House"
+ ],
+ [
+  "lm-192",
+  "Shellmound"
+ ],
+ [
+  "lm-193",
+  "Bosse Cottage"
+ ],
+ [
+  "lm-194",
+  "Bosse Cottage"
+ ],
+ [
+  "lm-195",
+  "Kueffer House"
+ ],
+ [
+  "lm-196",
+  "Greenwood Common #1"
+ ],
+ [
+  "lm-197",
+  "Greenwood Common #2"
+ ],
+ [
+  "lm-198",
+  "Greenwood Common"
+ ],
+ [
+  "lm-199",
+  "Greenwood Common"
+ ],
+ [
+  "lm-200",
+  "Greenwood Common"
+ ],
+ [
+  "lm-201",
+  "Greenwood Common"
+ ],
+ [
+  "lm-202",
+  "Greenwood Common"
+ ],
+ [
+  "lm-203",
+  "Greenwood Common"
+ ],
+ [
+  "lm-206",
+  "Bicentennial Mural"
+ ],
+ [
+  "lm-207",
+  "The Berkeley Inn"
+ ],
+ [
+  "lm-208",
+  "Casa Bonita Apartments"
+ ],
+ [
+  "lm-209",
+  "Unit 2"
+ ],
+ [
+  "lm-211",
+  "David Brower Houses & David"
+ ],
+ [
+  "lm-212",
+  "Daggett House"
+ ],
+ [
+  "lm-213",
+  "Marsh House and Gardens"
+ ],
+ [
+  "lm-214",
+  "Sperry-McLaughlin House"
+ ],
+ [
+  "lm-215",
+  "The George D. and Ellen G. Blood"
+ ],
+ [
+  "lm-217",
+  "Stocker-Ding House"
+ ],
+ [
+  "lm-218",
+  "Harris House / Smith House"
+ ],
+ [
+  "lm-219",
+  "Beta Theta Pi House"
+ ],
+ [
+  "lm-220",
+  "Foods Plant"
+ ],
+ [
+  "lm-221",
+  "Frederick H. Meyer Studio"
+ ],
+ [
+  "lm-222",
+  "Charles Keeler Place"
+ ],
+ [
+  "lm-223",
+  "ABSW Campus"
+ ],
+ [
+  "lm-224",
+  "Smith Cottage"
+ ],
+ [
+  "lm-225",
+  "Marshall-Lindblom"
+ ],
+ [
+  "lm-229",
+  "Phi Kappa Psi House"
+ ],
+ [
+  "lm-230",
+  "La Vereda Road House"
+ ],
+ [
+  "lm-231",
+  "Kluegel House, Laura Belle Marsh"
+ ],
+ [
+  "lm-232",
+  "Bentley House"
+ ],
+ [
+  "lm-235",
+  "Goldsmith House"
+ ],
+ [
+  "lm-236",
+  "The Maybeck House"
+ ],
+ [
+  "lm-237",
+  "Ralph White House"
+ ],
+ [
+  "lm-238",
+  "Perry / Bell House"
+ ],
+ [
+  "lm-239",
+  "The Charles H. Spear House"
+ ],
+ [
+  "lm-246",
+  "The Steilberg House and Cottages"
+ ],
+ [
+  "lm-247",
+  "Montgomery House"
+ ],
+ [
+  "lm-248",
+  "The Steilberg House and Cottages"
+ ],
+ [
+  "lm-249",
+  "Webb House"
+ ],
+ [
+  "lm-25",
+  "Samuel Hume House"
+ ],
+ [
+  "lm-251",
+  "Richfield Oil Co. Station"
+ ],
+ [
+  "lm-252",
+  "UC Press Building"
+ ],
+ [
+  "lm-253",
+  "William Such Building"
+ ],
+ [
+  "lm-254",
+  "The Steilberg House and Cottages"
+ ],
+ [
+  "lm-255",
+  "Kappa Sigma House"
+ ],
+ [
+  "lm-256",
+  "Dilley House"
+ ],
+ [
+  "lm-257",
+  "Bennington Apartments"
+ ],
+ [
+  "lm-258",
+  "Duncan and Jean McDuffie Estate"
+ ],
+ [
+  "lm-26",
+  "Andrew Cowper Lawson House"
+ ],
+ [
+  "lm-263",
+  "Judah Magnes Memorial Museum"
+ ],
+ [
+  "lm-264",
+  "Spring Estate"
+ ],
+ [
+  "lm-267",
+  "Borg Building"
+ ],
+ [
+  "lm-268",
+  "Sutcliff Picnic Rock"
+ ],
+ [
+  "lm-269",
+  "Berkeley Municipal Incinerator"
+ ],
+ [
+  "lm-270",
+  "Elmer Buckman House"
+ ],
+ [
+  "lm-271",
+  "Captain Maury House"
+ ],
+ [
+  "lm-272",
+  "Captain Maury House"
+ ],
+ [
+  "lm-273",
+  "Capitol Market Building"
+ ],
+ [
+  "lm-274",
+  "MacFarlane Building"
+ ],
+ [
+  "lm-2753bv",
+  "John S. Thomas House"
+ ],
+ [
+  "lm-277",
+  "Mason-McDuffie Company"
+ ],
+ [
+  "lm-278",
+  "The Wright Block"
+ ],
+ [
+  "lm-279",
+  "Amherst Apartments"
+ ],
+ [
+  "lm-280",
+  "Hezlett Silk Store Building"
+ ],
+ [
+  "lm-283",
+  "Morrill Apartments"
+ ],
+ [
+  "lm-284",
+  "Morrill Apartments"
+ ],
+ [
+  "lm-285",
+  "Barker Building"
+ ],
+ [
+  "lm-29",
+  "Odd Fellows Temple"
+ ],
+ [
+  "lm-290",
+  "Shattuck Square"
+ ],
+ [
+  "lm-292",
+  "Andrews House"
+ ],
+ [
+  "lm-293",
+  "Workman's Cottage"
+ ],
+ [
+  "lm-296",
+  "Carrick House & Cottages"
+ ],
+ [
+  "lm-297",
+  "Normandy Village"
+ ],
+ [
+  "lm-298",
+  "Normandy Village"
+ ],
+ [
+  "lm-299",
+  "Normandy Village"
+ ],
+ [
+  "lm-3",
+  "Westminster Presbyterian Church"
+ ],
+ [
+  "lm-300",
+  "Normandy Village"
+ ],
+ [
+  "lm-301",
+  "Normandy Village"
+ ],
+ [
+  "lm-302",
+  "Normandy Village"
+ ],
+ [
+  "lm-303",
+  "Telegraph Building"
+ ],
+ [
+  "lm-304",
+  "Telegraph Building"
+ ],
+ [
+  "lm-306",
+  "Marshall Mansion"
+ ],
+ [
+  "lm-307",
+  "Yazdi Building"
+ ],
+ [
+  "lm-308",
+  "Concrete Grid Forms Company"
+ ],
+ [
+  "lm-314",
+  "Bowles Hall"
+ ],
+ [
+  "lm-315",
+  "Ernest V. Cowell Memorial Hospital"
+ ],
+ [
+  "lm-316",
+  "California Hall"
+ ],
+ [
+  "lm-318",
+  "Doe Memorial Library"
+ ],
+ [
+  "lm-321",
+  "Giannini Hall"
+ ],
+ [
+  "lm-323",
+  "Hearst Gymnasium for Women"
+ ],
+ [
+  "lm-325",
+  "Hilgard Hall"
+ ],
+ [
+  "lm-336",
+  "Landscape Features"
+ ],
+ [
+  "lm-337",
+  "Pelican Building"
+ ],
+ [
+  "lm-339",
+  "Suendermann Plumbing Company"
+ ],
+ [
+  "lm-340",
+  "Mobilized Women of Berkeley Building"
+ ],
+ [
+  "lm-342",
+  "Fox Court"
+ ],
+ [
+  "lm-344",
+  "Bonita Apartments"
+ ],
+ [
+  "lm-345",
+  "Bertin Properties"
+ ],
+ [
+  "lm-346",
+  "Bertin Properties"
+ ],
+ [
+  "lm-347",
+  "Koerber Building"
+ ],
+ [
+  "lm-348",
+  "Acheson Physician's Building"
+ ],
+ [
+  "lm-349",
+  "Sill's Grocery and Hardware Company"
+ ],
+ [
+  "lm-350",
+  "Berkeley Hardware Co. Building"
+ ],
+ [
+  "lm-352",
+  "EBMUD Vine Street Pumping Plant"
+ ],
+ [
+  "lm-355",
+  "The MacGregor House"
+ ],
+ [
+  "lm-356",
+  "Bishop House"
+ ],
+ [
+  "lm-357",
+  "Rowell House"
+ ],
+ [
+  "lm-358",
+  "Ballantine House and Cottage"
+ ],
+ [
+  "lm-359",
+  "Weeks House"
+ ],
+ [
+  "lm-360",
+  "Walton House"
+ ],
+ [
+  "lm-361",
+  "Wells House"
+ ],
+ [
+  "lm-362",
+  "Tolman House"
+ ],
+ [
+  "lm-363",
+  "Tolman Cottage"
+ ],
+ [
+  "lm-364",
+  "Tolman Cottage"
+ ],
+ [
+  "lm-365",
+  "Etcheverry House"
+ ],
+ [
+  "lm-366",
+  "Mathewson House"
+ ],
+ [
+  "lm-367",
+  "Underwood Building"
+ ],
+ [
+  "lm-368",
+  "The Hoffman Building"
+ ],
+ [
+  "lm-369",
+  "Morrison House"
+ ],
+ [
+  "lm-370",
+  "House and Palm"
+ ],
+ [
+  "lm-371",
+  "Apartment House"
+ ],
+ [
+  "lm-373",
+  "Hill, Anita Jeffress House"
+ ],
+ [
+  "lm-374",
+  "Haller-Dowd House"
+ ],
+ [
+  "lm-375",
+  "Peter H. Haller House"
+ ],
+ [
+  "lm-376",
+  "A.H. Broad House"
+ ],
+ [
+  "lm-377",
+  "Laflin House"
+ ],
+ [
+  "lm-379",
+  "City Hall"
+ ],
+ [
+  "lm-380",
+  "Hall of Justice"
+ ],
+ [
+  "lm-382",
+  "Laboratories"
+ ],
+ [
+  "lm-383",
+  "Piedmont Avenue House"
+ ],
+ [
+  "lm-384",
+  "Merton J. Cogdon House"
+ ],
+ [
+  "lm-385",
+  "Lucinda Reames House #1"
+ ],
+ [
+  "lm-386",
+  "Lucinda Reames House #2"
+ ],
+ [
+  "lm-387",
+  "William Wilkinson House"
+ ],
+ [
+  "lm-389",
+  "Church By The Side Of The Road"
+ ],
+ [
+  "lm-390",
+  "Weisbrod Building Guys Drugs"
+ ],
+ [
+  "lm-391",
+  "Swink House, Cottage and Garden"
+ ],
+ [
+  "lm-393",
+  "Mattern/Berkeley"
+ ],
+ [
+  "lm-394",
+  "Maurer House"
+ ],
+ [
+  "lm-395",
+  "Edward McVay House"
+ ],
+ [
+  "lm-396",
+  "Clara Ballard House"
+ ],
+ [
+  "lm-397",
+  "Frederick J. L. Edwards"
+ ],
+ [
+  "lm-398",
+  "John Haller House"
+ ],
+ [
+  "lm-399",
+  "Haller-Callais House"
+ ],
+ [
+  "lm-400",
+  "West Berkeley YMCA"
+ ],
+ [
+  "lm-401",
+  "Farley House"
+ ],
+ [
+  "lm-403",
+  "Squires Block"
+ ],
+ [
+  "lm-404",
+  "Las Casitas Apartments"
+ ],
+ [
+  "lm-405",
+  "Elizabeth M Kenney Cottage"
+ ],
+ [
+  "lm-44",
+  "Fidelity Building"
+ ],
+ [
+  "lm-49",
+  "Captain Boudrow House"
+ ],
+ [
+  "lm-50",
+  "William E. Colby House"
+ ],
+ [
+  "lm-52",
+  "Kennedy-Nixon House (Maybeck Studio)"
+ ],
+ [
+  "lm-56",
+  "Greenwood Common"
+ ],
+ [
+  "lm-6",
+  "Town and Gown Club"
+ ],
+ [
+  "lm-68",
+  "Berkeley Tennis Club"
+ ],
+ [
+  "lm-77",
+  "Cooper Woodworking Building"
+ ],
+ [
+  "lm-79",
+  "Old Jefferson Elementary School"
+ ],
+ [
+  "lm-80",
+  "Judge Benjamin Ferris House"
+ ],
+ [
+  "lm-81",
+  "U.S. Realty Corp. Building"
+ ],
+ [
+  "lm-82",
+  "Heywood Building"
+ ],
+ [
+  "lm-85",
+  "Maria Marsh House"
+ ],
+ [
+  "lm-86",
+  "Kawneer Manufacturing Co."
+ ],
+ [
+  "lm-87",
+  "J.J. Pfister Knitting Mill"
+ ],
+ [
+  "lm-93",
+  "Rose Garden Inn"
+ ],
+ [
+  "lm-94",
+  "Arthur Ayers House"
+ ],
+ [
+  "lm-95",
+  "John Woolley House"
+ ],
+ [
+  "lm-96",
+  "Davis-Harmes House"
+ ],
+ [
+  "lm-98",
+  "Elks Club (BPOE Lodge)"
+ ]
+]
