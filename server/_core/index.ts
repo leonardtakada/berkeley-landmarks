@@ -69,6 +69,28 @@ async function startServer() {
     res.sendFile(path.resolve(process.cwd(), "server/admin.html"));
   });
 
+  // Privacy policy (public URL for App Store)
+  app.get("/privacy", (_req, res) => {
+    try {
+      const md = fs.readFileSync(path.resolve(process.cwd(), "PRIVACY.md"), "utf8");
+      const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+      const body = md
+        .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+        .replace(/^###### (.*)$/gm, "<h6>$1</h6>").replace(/^##### (.*)$/gm, "<h5>$1</h5>")
+        .replace(/^#### (.*)$/gm, "<h4>$1</h4>").replace(/^### (.*)$/gm, "<h3>$1</h3>")
+        .replace(/^## (.*)$/gm, "<h2>$1</h2>").replace(/^# (.*)$/gm, "<h1>$1</h1>")
+        .replace(/^\s*[-*] (.*)$/gm, "<li>$1</li>")
+        .replace(/(<li>[\s\S]*?<\/li>)/g, "<ul>$1</ul>")
+        .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
+        .replace(/(?<!<strong>[^<]*)\*([^*]+)\*/g, "<em>$1</em>")
+        .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>')
+        .replace(/\n{2,}/g, "\n<p>\n").replace(/\n(?!<)/g, "<br>\n");
+      res.send(`<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Privacy Policy — Berkeley Landmarks</title><style>body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#F7F3EC;color:#2A2520;max-width:720px;margin:0 auto;padding:32px 20px;line-height:1.6}h1,h2,h3{color:#1E3F32}a{color:#3D6B5C}</style></head><body>${body}</body></html>`);
+    } catch (e: any) {
+      res.status(500).send("Privacy policy unavailable");
+    }
+  });
+
   // Landmarks data for admin dashboard
   app.get("/landmarks.json", (_req, res) => {
     // Read the landmarks data and return as JSON
