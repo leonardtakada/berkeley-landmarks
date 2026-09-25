@@ -3,7 +3,7 @@ import "./scripts/load-env.js";
 import type { ExpoConfig } from "expo/config";
 
 // Bundle ID: reverse-DNS, letters/numbers/dots only; each segment must start with a letter
-const rawBundleId = "com.berkeleylandmarks.app";
+const rawBundleId = "com.berkeleytours.app";
 const bundleId =
   rawBundleId
     .replace(/[-_]/g, ".") // Replace hyphens/underscores with dots
@@ -17,7 +17,7 @@ const bundleId =
       // Prefix with 'x' if segment starts with a digit
       return /^[a-zA-Z]/.test(segment) ? segment : "x" + segment;
     })
-    .join(".") || "com.berkeleylandmarks.app";
+    .join(".") || "com.berkeleytours.app";
 // Deep link scheme derived from bundle id (without TLD)
 const schemeFromBundleId = "berkeleylandmarks";
 

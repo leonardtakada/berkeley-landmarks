@@ -435,7 +435,7 @@
 					"-lc++",
 				);
 				OTHER_SWIFT_FLAGS = "$(inherited) -D EXPO_CONFIGURATION_DEBUG";
-				PRODUCT_BUNDLE_IDENTIFIER = com.berkeleylandmarks.app;
+				PRODUCT_BUNDLE_IDENTIFIER = com.berkeleytours.app;
 				PRODUCT_NAME = BerkeleyLandmarks;
 				SWIFT_OBJC_BRIDGING_HEADER = "BerkeleyLandmarks/BerkeleyLandmarks-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
@@ -467,7 +467,7 @@
 					"-lc++",
 				);
 				OTHER_SWIFT_FLAGS = "$(inherited) -D EXPO_CONFIGURATION_RELEASE";
-				PRODUCT_BUNDLE_IDENTIFIER = com.berkeleylandmarks.app;
+				PRODUCT_BUNDLE_IDENTIFIER = com.berkeleytours.app;
 				PRODUCT_NAME = BerkeleyLandmarks;
 				SWIFT_OBJC_BRIDGING_HEADER = "BerkeleyLandmarks/BerkeleyLandmarks-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
