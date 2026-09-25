@@ -10,7 +10,7 @@ config.resolver.blockList = [
 ];
 
 // Bundled themed-tile container (see scripts/bake_tiles.mjs)
-config.resolver.assetExts.push("bin");
+config.resolver.assetExts.push("bin", "pmtiles", "pbf");
 
 module.exports = withNativeWind(config, {
   input: "./global.css",

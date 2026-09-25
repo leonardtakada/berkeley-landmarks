@@ -1,14 +1,16 @@
 /** @type {const} */
+/** Palette adopted from revised Campanile logo (Sep 14 2026):
+ *  Berkeley Blue #0032A0 / deep navy #041E42, Cal orange #EE7624, cream #F9F6F0 */
 const themeColors = {
-  primary: { light: '#3D6B5C', dark: '#5A9B84' },
-  background: { light: '#F7F3EC', dark: '#1C1B19' },
-  surface: { light: '#FFFDF8', dark: '#252320' },
-  foreground: { light: '#2A2520', dark: '#E8E3DA' },
-  muted: { light: '#7A7168', dark: '#9B9488' },
-  border: { light: '#D9D2C7', dark: '#3D3830' },
-  accent: { light: '#8B6D4A', dark: '#B8956A' },
-  success: { light: '#3D6B5C', dark: '#5A9B84' },
-  warning: { light: '#8B6D4A', dark: '#B8956A' },
+  primary: { light: '#0032A0', dark: '#7FA3E0' },
+  background: { light: '#F9F6F0', dark: '#101B30' },
+  surface: { light: '#F0EDE5', dark: '#1A2740' },
+  foreground: { light: '#041E42', dark: '#E8E3DA' },
+  muted: { light: '#6B7FA6', dark: '#9B9488' },
+  border: { light: '#DCD5C8', dark: '#2C3A55' },
+  accent: { light: '#EE7624', dark: '#EE7624' },
+  success: { light: '#2E9E5C', dark: '#5A9B84' },
+  warning: { light: '#EE7624', dark: '#EE7624' },
   error: { light: '#9B4D3A', dark: '#C47A5A' },
 };
 

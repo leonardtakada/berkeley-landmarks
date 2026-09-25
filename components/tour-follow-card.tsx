@@ -64,7 +64,7 @@ export function TourFollowCard({ tour, follow }: TourFollowCardProps) {
           onPress={follow.active ? follow.stop : follow.start}
           style={({ pressed }) => [
             styles.followToggle,
-            { backgroundColor: follow.active ? tour.color : colors.background, opacity: pressed ? 0.8 : 1 },
+            { backgroundColor: follow.active ? tour.color : colors.border, opacity: pressed ? 0.8 : 1 },
           ]}
         >
           <IconSymbol

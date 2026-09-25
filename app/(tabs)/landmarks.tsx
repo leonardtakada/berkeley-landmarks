@@ -9,7 +9,7 @@ import {
   Platform,
 } from "react-native";
 import { useRouter } from "expo-router";
-import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
+import { useBottomTabBarHeight } from "expo-router/build/react-navigation/bottom-tabs";
 import { ScreenContainer } from "@/components/screen-container";
 import { useColors } from "@/hooks/use-colors";
 import { IconSymbol } from "@/components/ui/icon-symbol";
@@ -69,8 +69,8 @@ const LandmarkRow = React.memo(function LandmarkRow({ landmark, colors }: { land
       </View>
       <View style={styles.rowRight}>
         {landmark.nationalRegister && (
-          <View style={styles.nrBadge}>
-            <IconSymbol name="star.fill" size={10} color="#8B6D4A" />
+          <View style={[styles.nrBadge, { backgroundColor: colors.accent + '22' }]}>
+            <IconSymbol name="star.fill" size={10} color={colors.accent} />
           </View>
         )}
         <IconSymbol name="chevron.right" size={14} color={colors.muted} />
@@ -149,6 +149,9 @@ export default function LandmarksScreen() {
         )}
       </View>
 
+      {/* zIndex keeps the chips clickable on web, where the landmark
+          FlatList otherwise stacks over their hit area. */}
+      <View style={{ position: "relative", zIndex: 10 } as any}>
       <FlatList
         horizontal
         data={[null, ...ALL_CATEGORIES]}
@@ -181,6 +184,7 @@ export default function LandmarksScreen() {
           );
         }}
       />
+      </View>
 
       <View style={styles.sortRow}>
         <Pressable
@@ -402,7 +406,6 @@ const styles = StyleSheet.create({
     width: 20,
     height: 20,
     borderRadius: 10,
-    backgroundColor: '#8B6D4A15',
     alignItems: "center",
     justifyContent: "center",
   },
