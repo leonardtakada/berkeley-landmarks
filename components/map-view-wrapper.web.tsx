@@ -206,7 +206,7 @@ const WebMap = forwardRef<any, MapViewWrapperProps>(function WebMap(
     });
     mapRef.current = map;
 
-    makeCachedTileLayer(L)("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    new (makeCachedTileLayer(L))("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
       maxZoom: 19,
     }).addTo(map);
