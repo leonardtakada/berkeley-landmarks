@@ -23,7 +23,7 @@ const schemeFromBundleId = "berkeleylandmarks";
 
 const env = {
   // App branding - update these values directly (do not use env vars)
-  appName: "Berkeley Landmarks",
+  appName: "Berkeley Tours",
   appSlug: "berkeley-landmarks",
   // S3 URL of the app logo - set this to the URL returned by generate_image when creating custom logo
   // Leave empty to use the default icon from assets/images/icon.png
