@@ -1,4 +1,4 @@
-import React, { useRef, useState, useCallback, useMemo } from "react";
+import React, { useRef, useState, useCallback, useEffect, useMemo } from "react";
 import {
   Text,
   View,
@@ -14,7 +14,11 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useColors } from "@/hooks/use-colors";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { CategoryPlaceholder } from "@/components/category-placeholder";
-import MapViewWrapper, { MapMarker, MapPolyline, MapPolygon } from "@/components/map-view-wrapper";
+import MapViewWrapper, { MapPolyline, MapPolygon } from "@/components/map-view-wrapper";
+import MapLibreMapView, {
+  MapPolyline as VectorMapPolyline,
+} from "@/components/maplibre-view";
+import { useMapEngine } from "@/constants/map-engine";
 import {
   landmarks,
   BERKELEY_CENTER,
@@ -43,6 +47,7 @@ export default function MapScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const mapRef = useRef<any>(null);
+  const { isMapLibre, toggleEngine, ready: engineReady } = useMapEngine();
 
   const [selectedLandmark, setSelectedLandmark] = useState<Landmark | null>(null);
   const [activeCategories, setActiveCategories] = useState<Set<LandmarkCategory>>(
@@ -52,11 +57,57 @@ export default function MapScreen() {
     params.tourId ?? null
   );
 
+  // Tabs stay mounted, so a fresh "View Route on Map" push arrives as a
+  // param change on an already-mounted screen — sync it.
+  useEffect(() => {
+    if (params.tourId !== undefined) {
+      setActiveTourId(params.tourId as string);
+      setSelectedLandmark(null);
+    }
+  }, [params.tourId]);
+
   const activeTour = useMemo(
     () => (activeTourId ? tours.find((t) => t.id === activeTourId) : null),
     [activeTourId]
   );
   const tourFollow = useTourFollow(activeTour ?? null);
+
+  // Focus the whole tour route when a tour becomes active on the map.
+  const tourIdForFocus = activeTour?.id;
+  useEffect(() => {
+    if (!activeTour || !mapRef.current?.fitCoords) return;
+    const coords = activeTour.routeCoordinates.length
+      ? activeTour.routeCoordinates
+      : activeTour.stops.map((s) => {
+          const l = landmarks.find((lm) => lm.id === s.landmarkId);
+          return { latitude: l!.latitude, longitude: l!.longitude };
+        });
+    if (coords.length < 2) return;
+    // Small delay: the MapLibre view may still be (re)mounting when the
+    // tab first opens, and camera calls before mount are dropped.
+    const t = setTimeout(() => mapRef.current?.fitCoords?.(coords), 350);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- refocus only when the tour changes
+  }, [tourIdForFocus]);
+
+  // Follow the current stop as the user cycles through landmarks.
+  const currentStopIndex = tourFollow.currentStopIndex;
+  useEffect(() => {
+    if (!activeTour) return;
+    const stop = tourFollow.stops[currentStopIndex];
+    if (!stop) return;
+    const t = setTimeout(() => {
+      mapRef.current?.flyToCoord?.(
+        {
+          latitude: stop.landmark.latitude,
+          longitude: stop.landmark.longitude,
+        },
+        16
+      );
+    }, 150);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- camera command, values read fresh
+  }, [activeTour?.id, currentStopIndex]);
 
   const tourStopIds = useMemo(
     () => new Set(activeTour?.stops.map((s) => s.landmarkId) ?? []),
@@ -97,12 +148,53 @@ export default function MapScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <MapViewWrapper
+      {isMapLibre ? (
+        <MapLibreMapView
         ref={mapRef}
         style={styles.map}
         initialRegion={BERKELEY_CENTER}
         minZoomLevel={12}
-        maxZoomLevel={20}
+        maxZoomLevel={17}
+        onPress={handleMapPress}
+        showsUserLocation
+        clusterMarkers={filteredLandmarks.map((landmark) => ({
+          id: landmark.id,
+          coordinate: { latitude: landmark.latitude, longitude: landmark.longitude },
+          pinColor: CATEGORY_COLORS[landmark.category],
+          onPress: () => handleMarkerPress(landmark),
+        }))}
+      >
+        {/* The vector style draws the city boundary natively; only the tour
+            route polyline is needed as an overlay. */}
+        {activeTour && activeTour.routeCoordinates.length > 1 && (
+          <>
+            {/* Soft casing under the route for contrast against the map */}
+            <VectorMapPolyline
+              coordinates={activeTour.routeCoordinates}
+              strokeColor={activeTour.color + "55"}
+              strokeWidth={7}
+            />
+            <VectorMapPolyline
+              coordinates={activeTour.routeCoordinates}
+              strokeColor="#FFFFFF"
+              strokeWidth={4.5}
+            />
+            <VectorMapPolyline
+              coordinates={activeTour.routeCoordinates}
+              strokeColor={activeTour.color}
+              strokeWidth={3}
+              lineDashPattern={[6, 7]}
+            />
+          </>
+        )}
+      </MapLibreMapView>
+      ) : (
+        <MapViewWrapper
+        ref={mapRef}
+        style={styles.map}
+        initialRegion={BERKELEY_CENTER}
+        minZoomLevel={12}
+        maxZoomLevel={16}
         region={undefined}
         onPress={handleMapPress}
         showsUserLocation
@@ -140,14 +232,54 @@ export default function MapScreen() {
         />
 
         {activeTour && activeTour.routeCoordinates.length > 1 && (
-          <MapPolyline
-            coordinates={activeTour.routeCoordinates}
-            strokeColor={activeTour.color}
-            strokeWidth={3.5}
-            lineDashPattern={[6, 7]}
-          />
+          <>
+            <MapPolyline
+              coordinates={activeTour.routeCoordinates}
+              strokeColor={activeTour.color + "55"}
+              strokeWidth={7}
+            />
+            <MapPolyline
+              coordinates={activeTour.routeCoordinates}
+              strokeColor="#FFFFFF"
+              strokeWidth={4.5}
+            />
+            <MapPolyline
+              coordinates={activeTour.routeCoordinates}
+              strokeColor={activeTour.color}
+              strokeWidth={3}
+              lineDashPattern={[6, 7]}
+            />
+          </>
         )}
       </MapViewWrapper>
+      )}
+
+      {/* Map engine toggle: MapLibre vector map ⇄ raster fallback */}
+      {engineReady && (
+        <Pressable
+          accessibilityLabel={
+            isMapLibre ? "Switch to raster map" : "Switch to vector map"
+          }
+          onPress={toggleEngine}
+          style={[
+            styles.spikeButton,
+            {
+              top: insets.top + 12,
+              backgroundColor: colors.background,
+              borderColor: colors.border,
+            },
+          ]}
+        >
+          <IconSymbol
+            name="map.fill"
+            size={12}
+            color={colors.text}
+          />
+          <Text style={{ color: colors.text, fontSize: 11 }}>
+            {isMapLibre ? "Vector" : "Raster"}
+          </Text>
+        </Pressable>
+      )}
 
       {/* Filter Chips - only show when no tour active */}
       {!activeTour && (
@@ -166,8 +298,9 @@ export default function MapScreen() {
                   style={({ pressed }) => [
                     styles.filterChip,
                     {
-                      backgroundColor: isActive ? CATEGORY_COLORS[cat] : colors.surface,
+                      backgroundColor: colors.surface,
                       borderColor: isActive ? CATEGORY_COLORS[cat] : colors.border,
+                      borderWidth: isActive ? 2 : 1,
                       opacity: pressed ? 0.8 : 1,
                     },
                   ]}
@@ -175,13 +308,13 @@ export default function MapScreen() {
                   <View
                     style={[
                       styles.chipDot,
-                      { backgroundColor: isActive ? "#FFFFFF" : CATEGORY_COLORS[cat] },
+                      { backgroundColor: CATEGORY_COLORS[cat] },
                     ]}
                   />
                   <Text
                     style={[
                       styles.chipText,
-                      { color: isActive ? "#FFFFFF" : colors.foreground },
+                      { color: isActive ? colors.foreground : colors.muted },
                     ]}
                   >
                     {CATEGORY_LABELS[cat]}
@@ -190,6 +323,17 @@ export default function MapScreen() {
               );
             })}
           </ScrollView>
+          {/* Edge fades: signals the row scrolls */}
+          <LinearGradient
+            pointerEvents="none"
+            colors={[colors.background + "F0", colors.background + "00"]}
+            style={styles.chipFadeLeft}
+          />
+          <LinearGradient
+            pointerEvents="none"
+            colors={[colors.background + "00", colors.background + "F0"]}
+            style={styles.chipFadeRight}
+          />
         </View>
       )}
 
@@ -230,9 +374,9 @@ export default function MapScreen() {
             styles.bottomSheet,
             {
               backgroundColor: Platform.select({
-                ios: 'rgba(255,255,255,0.88)',
+                ios: colors.surface + 'E0',
                 android: colors.surface,
-                default: 'rgba(255,255,255,0.88)',
+                default: colors.surface + 'E0',
               }),
               paddingBottom: Math.max(insets.bottom, 16) + 60,
             },
@@ -286,9 +430,9 @@ export default function MapScreen() {
                 {selectedLandmark.architect} · {selectedLandmark.yearBuilt}
               </Text>
               {selectedLandmark.nationalRegister && (
-                <View style={styles.nrBadge}>
+                <View style={[styles.nrBadge, { backgroundColor: colors.accent + '22' }]}>
                   <IconSymbol name="star.fill" size={10} color="#FF9500" />
-                  <Text style={styles.nrText}>NR</Text>
+                  <Text style={[styles.nrText, { color: colors.accent }]}>NR</Text>
                 </View>
               )}
             </View>
@@ -300,14 +444,14 @@ export default function MapScreen() {
               style={({ pressed }) => [
                 styles.detailButton,
                 {
-                  borderColor: '#3D6B5C',
+                  borderColor: colors.primary,
                   borderWidth: 1,
                   opacity: pressed ? 0.7 : 1,
                 },
               ]}
             >
-              <Text style={[styles.detailButtonText, { color: '#3D6B5C' }]}>View Details</Text>
-              <IconSymbol name="chevron.right" size={14} color="#3D6B5C" />
+              <Text style={[styles.detailButtonText, { color: colors.primary }]}>View Details</Text>
+              <IconSymbol name="chevron.right" size={14} color={colors.primary} />
             </Pressable>
           </View>
         </View>
@@ -319,7 +463,19 @@ export default function MapScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1 },
   map: {
-    ...StyleSheet.absoluteFillObject,
+    position: "absolute" as const,
+    top: 0, left: 0, right: 0, bottom: 0,
+  },
+  spikeButton: {
+    position: "absolute" as const,
+    right: 12,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    paddingHorizontal: 8,
+    paddingVertical: 6,
+    borderRadius: 8,
+    borderWidth: 1,
   },
   filterContainer: {
     position: "absolute",
@@ -329,7 +485,22 @@ const styles = StyleSheet.create({
   },
   filterScroll: {
     paddingHorizontal: 16,
+    paddingRight: 40,
     gap: 8,
+  },
+  chipFadeLeft: {
+    position: "absolute",
+    left: 0,
+    top: 0,
+    bottom: 0,
+    width: 20,
+  },
+  chipFadeRight: {
+    position: "absolute",
+    right: 0,
+    top: 0,
+    bottom: 0,
+    width: 20,
   },
   filterChip: {
     flexDirection: "row",
@@ -507,7 +678,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 3,
-    backgroundColor: '#8B6D4A15',
     paddingHorizontal: 8,
     paddingVertical: 2,
     borderRadius: 4,
@@ -515,7 +685,6 @@ const styles = StyleSheet.create({
   nrText: {
     fontSize: 11,
     fontWeight: "700",
-    color: '#8B6D4A',
   },
   detailButton: {
     marginTop: 14,

@@ -3,7 +3,7 @@ import { SymbolWeight, SymbolViewProps } from "expo-symbols";
 import { ComponentProps } from "react";
 import { OpaqueColorValue, type StyleProp, type TextStyle } from "react-native";
 
-type IconMapping = Partial<Record<SymbolViewProps["name"], ComponentProps<typeof MaterialIcons>["name"]>>;
+type IconMapping = Partial<Record<string, ComponentProps<typeof MaterialIcons>["name"]>>;
 type IconSymbolName = keyof typeof MAPPING;
 
 const MAPPING = {
@@ -12,8 +12,10 @@ const MAPPING = {
   "chevron.left.forwardslash.chevron.right": "code",
   "chevron.right": "chevron-right",
   "map.fill": "map",
+  "map": "map",
   "figure.walk": "directions-walk",
   "building.columns.fill": "account-balance",
+  "building.columns": "account-balance",
   "location.fill": "my-location",
   "xmark": "close",
   "magnifyingglass": "search",

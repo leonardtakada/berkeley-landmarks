@@ -15,9 +15,10 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: colors.tint,
+        tabBarActiveTintColor: colors.accent,
+        tabBarInactiveTintColor: colors.muted,
         headerShown: false,
-        tabBarButton: HapticTab,
+        tabBarButton: HapticTab as any,
         tabBarStyle: {
           paddingTop: 6,
           paddingBottom: bottomPadding,
@@ -28,7 +29,7 @@ export default function TabLayout() {
         },
         tabBarLabelStyle: {
           fontSize: 10,
-          fontWeight: "500",
+          fontWeight: "700",
           letterSpacing: 1.5,
           marginTop: 2,
         },
@@ -38,22 +39,31 @@ export default function TabLayout() {
         name="index"
         options={{
           title: "Map",
-          tabBarIcon: ({ color }) => <IconSymbol size={26} name="map.fill" color={color} weight="semibold" />,
+          tabBarIcon: ({ color, focused }) => (
+            <IconSymbol size={26} name={focused ? "map.fill" : "map"} color={color} weight="semibold" />
+          ),
         }}
       />
       <Tabs.Screen
         name="tours"
         options={{
           title: "Tours",
-          tabBarIcon: ({ color }) => <IconSymbol size={26} name="figure.walk" color={color} weight="semibold" />,
+          tabBarIcon: ({ color }) => (
+            <IconSymbol size={26} name="figure.walk" color={color} weight="medium" />
+          ),
         }}
       />
       <Tabs.Screen
         name="landmarks"
         options={{
           title: "Landmarks",
-          tabBarIcon: ({ color }) => (
-            <IconSymbol size={26} name="building.columns.fill" color={color} weight="semibold" />
+          tabBarIcon: ({ color, focused }) => (
+            <IconSymbol
+              size={26}
+              name={focused ? "building.columns.fill" : "building.columns"}
+              color={color}
+              weight="semibold"
+            />
           ),
         }}
       />

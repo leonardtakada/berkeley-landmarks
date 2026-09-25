@@ -28,6 +28,7 @@ export default function LandmarkDetailScreen() {
   const { user: authUser } = useAuth({ autoFetch: true });
 
   const [uploading, setUploading] = useState(false);
+  const [scrolledPastHero, setScrolledPastHero] = useState(false);
   const [uploadSuccess, setUploadSuccess] = useState(false);
   const [viewerUri, setViewerUri] = useState<string | null>(null);
 
@@ -107,7 +108,6 @@ export default function LandmarkDetailScreen() {
 
       const mime = asset.mimeType === "image/png" ? "image/png" : "image/jpeg";
 
-      Alert.prompt
       setUploading(true);
       setUploadSuccess(false);
 
@@ -165,14 +165,23 @@ export default function LandmarkDetailScreen() {
           >
             <IconSymbol name="arrow.left" size={20} color="#FFFFFF" />
           </Pressable>
-          <Text style={styles.headerTitle} numberOfLines={1}>
+          <Text style={[styles.headerTitle, { opacity: scrolledPastHero ? 1 : 0 }]} numberOfLines={1}>
             {landmark.name}
           </Text>
           <View style={{ width: 40 }} />
         </View>
       </LinearGradient>
 
-      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+        scrollEventThrottle={16}
+        onScroll={(e) => {
+          const y = e.nativeEvent.contentOffset.y;
+          const past = y > 150;
+          if (past !== scrolledPastHero) setScrolledPastHero(past);
+        }}
+      >
         {/* Hero Banner */}
         <View style={styles.heroBanner}>
           <LinearGradient
@@ -181,7 +190,17 @@ export default function LandmarkDetailScreen() {
             end={{ x: 0, y: 1 }}
             style={styles.heroGradient}
           >
-            {!landmark.photoUrl && (
+            {landmark.photoUrl ? (
+              <Image
+                source={{
+                  uri: landmark.photoUrl.startsWith("http")
+                    ? landmark.photoUrl
+                    : `${getApiBaseUrl()}${landmark.photoUrl}`,
+                }}
+                style={styles.heroImage}
+                resizeMode="cover"
+              />
+            ) : (
               <CategoryPlaceholder
                 category={landmark.category}
                 color={catColor}
@@ -225,9 +244,9 @@ export default function LandmarkDetailScreen() {
             </View>
           )}
           {landmark.nationalRegister && (
-            <View style={[styles.statusBadge, { backgroundColor: '#3D6B5C22' }]}>
-              <IconSymbol name="star.fill" size={14} color="#3D6B5C" />
-              <Text style={[styles.statusText, { color: '#3D6B5C' }]}>National Register</Text>
+            <View style={[styles.statusBadge, { backgroundColor: '#3B55A222' }]}>
+              <IconSymbol name="star.fill" size={14} color="#3B55A2" />
+              <Text style={[styles.statusText, { color: '#3B55A2' }]}>National Register</Text>
             </View>
           )}
           <View style={[styles.statusBadge, { backgroundColor: catColor + '22' }]}>
@@ -262,8 +281,8 @@ export default function LandmarkDetailScreen() {
         {/* Add Photo Button */}
         <View style={{ paddingHorizontal: 16, marginTop: 16 }}>
           {uploadSuccess ? (
-            <View style={[styles.addPhotoBtn, { backgroundColor: '#4CAF5022' }]}>
-              <Text style={{ color: '#4CAF50', fontWeight: '600' }}>✓ Thank you! Your photo is pending review.</Text>
+            <View style={[styles.addPhotoBtn, { backgroundColor: '#2E9E5C22' }]}>
+              <Text style={{ color: '#2E9E5C', fontWeight: '600' }}>✓ Thank you! Your photo is pending review.</Text>
             </View>
           ) : uploading ? (
             <View style={[styles.addPhotoBtn, { backgroundColor: colors.surface }]}>
@@ -505,6 +524,14 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     alignItems: 'center',
   },
+  heroImage: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    width: "100%",
+    height: 240,
+  },
   heroPlaceholder: {
     marginBottom: 16,
   },
@@ -607,7 +634,7 @@ const styles = StyleSheet.create({
   },
   dropCap: {
     fontSize: 44,
-    lineHeight: 38,
+    lineHeight: 48,
     fontWeight: "600",
     fontFamily: Platform.select({ ios: "ui-serif", default: "serif" }),
     paddingRight: 6,
