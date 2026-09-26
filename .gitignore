@@ -70,3 +70,6 @@ expo-qr-code.png
 # Secrets
 .env
 .env.*
+credentials.json
+.eas
+secrets/

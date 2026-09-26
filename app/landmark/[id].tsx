@@ -244,9 +244,9 @@ export default function LandmarkDetailScreen() {
             </View>
           )}
           {landmark.nationalRegister && (
-            <View style={[styles.statusBadge, { backgroundColor: '#3B55A222' }]}>
-              <IconSymbol name="star.fill" size={14} color="#3B55A2" />
-              <Text style={[styles.statusText, { color: '#3B55A2' }]}>National Register</Text>
+            <View style={[styles.statusBadge, { backgroundColor: '#2B3A6722' }]}>
+              <IconSymbol name="star.fill" size={14} color="#2B3A67" />
+              <Text style={[styles.statusText, { color: '#2B3A67' }]}>National Register</Text>
             </View>
           )}
           <View style={[styles.statusBadge, { backgroundColor: catColor + '22' }]}>
@@ -281,8 +281,8 @@ export default function LandmarkDetailScreen() {
         {/* Add Photo Button */}
         <View style={{ paddingHorizontal: 16, marginTop: 16 }}>
           {uploadSuccess ? (
-            <View style={[styles.addPhotoBtn, { backgroundColor: '#2E9E5C22' }]}>
-              <Text style={{ color: '#2E9E5C', fontWeight: '600' }}>✓ Thank you! Your photo is pending review.</Text>
+            <View style={[styles.addPhotoBtn, { backgroundColor: '#6B8E6D22' }]}>
+              <Text style={{ color: '#6B8E6D', fontWeight: '600' }}>✓ Thank you! Your photo is pending review.</Text>
             </View>
           ) : uploading ? (
             <View style={[styles.addPhotoBtn, { backgroundColor: colors.surface }]}>
@@ -303,8 +303,8 @@ export default function LandmarkDetailScreen() {
         {/* Suggest an Edit Button */}
         <View style={{ paddingHorizontal: 16, marginTop: 12 }}>
           {editSuccess ? (
-            <View style={[styles.addPhotoBtn, { backgroundColor: '#4CAF5022' }]}>
-              <Text style={{ color: '#4CAF50', fontWeight: '600' }}>✓ Thank you! Your edit is pending review.</Text>
+            <View style={[styles.addPhotoBtn, { backgroundColor: '#6B8E6D22' }]}>
+              <Text style={{ color: '#6B8E6D', fontWeight: '600' }}>✓ Thank you! Your edit is pending review.</Text>
             </View>
           ) : (
             <Pressable
