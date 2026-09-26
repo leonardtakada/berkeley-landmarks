@@ -41,8 +41,6 @@
     }
   },
   "submit": {
-    "production": {
-      "ascAppId": "6816351821"
-    }
+    "production": {}
   }
 }
