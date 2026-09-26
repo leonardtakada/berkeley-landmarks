@@ -1,7 +1,7 @@
 import { Tabs } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { HapticTab } from "@/components/haptic-tab";
+import { BookmarkTabBar } from "@/components/bookmark-tab-bar";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { Platform, StyleSheet } from "react-native";
 import { useColors } from "@/hooks/use-colors";
@@ -14,11 +14,11 @@ export default function TabLayout() {
 
   return (
     <Tabs
+      tabBar={(props: any) => <BookmarkTabBar {...props} />}
       screenOptions={{
         tabBarActiveTintColor: colors.accent,
         tabBarInactiveTintColor: colors.muted,
         headerShown: false,
-        tabBarButton: HapticTab as any,
         tabBarStyle: {
           paddingTop: 6,
           paddingBottom: bottomPadding,
