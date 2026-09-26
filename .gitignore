@@ -73,3 +73,4 @@ expo-qr-code.png
 credentials.json
 .eas
 secrets/
+ios/
