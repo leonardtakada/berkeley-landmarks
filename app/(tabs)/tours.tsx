@@ -9,6 +9,15 @@ import { IconSymbol } from "@/components/ui/icon-symbol";
 import { tours } from "@/data/tours";
 import type { Tour } from "@/data/tours";
 
+function roman(n: number): string {
+  const table: [number, string][] = [
+    [10, "X"], [9, "IX"], [5, "V"], [4, "IV"], [1, "I"],
+  ];
+  let out = "";
+  for (const [v, s] of table) while (n >= v) { out += s; n -= v; }
+  return out;
+}
+
 function TourCard({ tour, tourIndex }: { tour: Tour; tourIndex: number }) {
   const router = useRouter();
   const colors = useColors();
@@ -43,7 +52,7 @@ function TourCard({ tour, tourIndex }: { tour: Tour; tourIndex: number }) {
               [ {tour.neighborhood.toUpperCase()} ]
             </Text>
           </View>
-          <Text style={[styles.plateNo, { color: colors.muted }]}>No. {String(tourIndex + 1).padStart(2, "0")}</Text>
+          <Text style={[styles.plateNo, { color: colors.muted }]}>Ch. {roman(tourIndex + 1)}</Text>
         </View>
 
         <Text style={[styles.tourDescription, { color: colors.muted }]} numberOfLines={2}>
@@ -76,6 +85,7 @@ export default function ToursScreen() {
   return (
     <ScreenContainer>
       <View style={styles.screenHeader}>
+        <Text style={[styles.tocLabel, { color: colors.accent }]}>Table of Contents</Text>
         <Text style={[styles.screenTitle, { color: colors.foreground }]}>Walking Tours</Text>
         <Text style={[styles.screenSubtitle, { color: colors.muted }]}>
           Explore Berkeley&apos;s architectural heritage with BAHA-inspired walking tours
@@ -111,6 +121,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingTop: 8,
     paddingBottom: 16,
+  },
+  tocLabel: {
+    fontSize: 11,
+    fontWeight: "700",
+    letterSpacing: 2.5,
+    textTransform: "uppercase",
+    marginBottom: 2,
   },
   screenTitle: {
     fontSize: 36,

@@ -1,4 +1,4 @@
-import { View, type ViewProps } from "react-native";
+import { Image, StyleSheet, View, type ViewProps } from "react-native";
 import { SafeAreaView, type Edge } from "react-native-safe-area-context";
 
 import { cn } from "@/lib/utils";
@@ -56,6 +56,12 @@ export function ScreenContainer({
       )}
       {...props}
     >
+      {/* Paper grain — faint book-page texture over every screen */}
+      <Image
+        source={require("@/assets/textures/paper-grain.png")}
+        style={styles.grain}
+        resizeMode="repeat"
+      />
       <SafeAreaView
         edges={edges}
         className={cn("flex-1", safeAreaClassName)}
@@ -66,3 +72,13 @@ export function ScreenContainer({
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  grain: {
+    ...StyleSheet.absoluteFill,
+    width: "100%",
+    height: "100%",
+    opacity: 0.045,
+    pointerEvents: "none",
+  },
+});
