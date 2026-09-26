@@ -39,7 +39,6 @@ yarn-error.*
 app-example
 
 # generated native folders
-/ios
 /android
 
 # IDE
@@ -73,4 +72,3 @@ expo-qr-code.png
 credentials.json
 .eas
 secrets/
-ios/
