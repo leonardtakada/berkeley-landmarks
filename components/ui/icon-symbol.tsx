@@ -38,6 +38,9 @@ const MAPPING = {
   "camera.fill": "photo-camera",
   "pencil": "edit",
   "arrow.up.arrow.down": "sort",
+  "person.crop.circle.fill": "account-circle",
+  "person.crop.circle": "account-circle",
+  "arrow.up.right": "arrow-outward",
 } satisfies IconMapping;
 
 export function IconSymbol({

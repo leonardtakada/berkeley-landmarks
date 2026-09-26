@@ -9,6 +9,7 @@ import { useColors } from "@/hooks/use-colors";
 import { useAuth } from "@/hooks/use-auth";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { CategoryPlaceholder } from "@/components/category-placeholder";
+import { TippedInPlate } from "@/components/tipped-in-plate";
 import { trpc } from "@/lib/trpc";
 import { getApiBaseUrl } from "@/constants/api";
 
@@ -191,14 +192,15 @@ export default function LandmarkDetailScreen() {
             style={styles.heroGradient}
           >
             {landmark.photoUrl ? (
-              <Image
+              <TippedInPlate
                 source={{
                   uri: landmark.photoUrl.startsWith("http")
                     ? landmark.photoUrl
                     : `${getApiBaseUrl()}${landmark.photoUrl}`,
                 }}
-                style={styles.heroImage}
-                resizeMode="cover"
+                index={1}
+                style={styles.heroImageFrame}
+                imageStyle={styles.heroImage}
               />
             ) : (
               <CategoryPlaceholder
@@ -211,13 +213,6 @@ export default function LandmarkDetailScreen() {
             )}
             <View style={[styles.categoryBadge, { backgroundColor: catColor }]}>
               <Text style={styles.categoryText}>{CATEGORY_LABELS[landmark.category]}</Text>
-            </View>
-            <View style={styles.plateCaption}>
-              <View style={[styles.plateRule, { backgroundColor: colors.border }]} />
-              <Text style={[styles.plateText, { color: colors.muted }]}>
-                PLATE — {landmark.name.toUpperCase()}
-              </Text>
-              <View style={[styles.plateRule, { backgroundColor: colors.border }]} />
             </View>
             <Text style={[styles.heroName, { color: colors.foreground }]}>{landmark.name}</Text>
             <View style={styles.heroMeta}>
@@ -271,13 +266,17 @@ export default function LandmarkDetailScreen() {
               data={approvedPhotos}
               keyExtractor={(p) => String(p.id)}
               showsHorizontalScrollIndicator={false}
-              renderItem={({ item }) => {
+              renderItem={({ item, index }) => {
                 const baseUrl = getApiBaseUrl();
                 const uri = item.photoUrl.startsWith("http") ? item.photoUrl : `${baseUrl}${item.photoUrl}`;
                 return (
-                  <Pressable onPress={() => setViewerUri(uri)}>
-                    <Image source={{ uri }} style={styles.photoThumb} />
-                  </Pressable>
+                  <TippedInPlate
+                    source={{ uri }}
+                    index={index + 2}
+                    caption={landmark.name}
+                    onPress={() => setViewerUri(uri)}
+                    imageStyle={styles.photoThumb}
+                  />
                 );
               }}
               ItemSeparatorComponent={() => <View style={{ width: 8 }} />}
@@ -400,6 +399,19 @@ export default function LandmarkDetailScreen() {
           </Text>
         </View>
 
+        {/* View on Map */}
+        <Pressable
+          onPress={() => router.push({ pathname: "/map", params: { landmarkId: landmark.id } })}
+          style={({ pressed }) => [
+            styles.viewOnMapButton,
+            { borderColor: catColor, opacity: pressed ? 0.7 : 1 },
+          ]}
+        >
+          <IconSymbol name="map" size={16} color={catColor} />
+          <Text style={[styles.viewOnMapText, { color: catColor }]}>View on Map</Text>
+          <IconSymbol name="arrow.up.right" size={14} color={catColor} />
+        </Pressable>
+
         {/* Nearby Landmarks */}
         <View style={[styles.section, { backgroundColor: colors.surface, borderColor: colors.border }]}>
           <Text style={[styles.sectionTitle, { color: colors.foreground }]}>Nearby Landmarks</Text>
@@ -433,6 +445,21 @@ export default function LandmarkDetailScreen() {
 }
 
 const styles = StyleSheet.create({
+  viewOnMapButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    borderWidth: 1,
+    borderRadius: 8,
+    paddingVertical: 12,
+    marginTop: -10,
+  },
+  viewOnMapText: {
+    fontSize: 14,
+    fontWeight: "700",
+    letterSpacing: 0.5,
+  },
   editModalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.55)',
@@ -531,32 +558,18 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     alignItems: 'center',
   },
-  heroImage: {
+  heroImageFrame: {
     position: "absolute",
     top: 0,
     left: 0,
     right: 0,
     width: "100%",
+  },
+  heroImage: {
+    width: "100%",
     height: 240,
   },
-  plateCaption: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    marginTop: 8,
-    marginBottom: 2,
-    alignSelf: "stretch",
-    width: "100%",
-  },
-  plateRule: {
-    flex: 1,
-    height: StyleSheet.hairlineWidth,
-  },
-  plateText: {
-    fontSize: 9,
-    fontWeight: "700",
-    letterSpacing: 1.8,
-  },
+
   heroPlaceholder: {
     marginBottom: 16,
   },

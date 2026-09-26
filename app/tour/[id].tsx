@@ -6,6 +6,8 @@ import { landmarks, CATEGORY_COLORS } from "@/data/landmarks";
 import { useColors } from "@/hooks/use-colors";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { AccordionMap } from "@/components/accordion-map";
+import { TravelStamp } from "@/components/travel-stamp";
+import { useStamps } from "@/lib/stamps";
 
 function romanNumeral(n: number): string {
   const table: [number, string][] = [
@@ -23,6 +25,10 @@ export default function TourDetailScreen() {
   const insets = useSafeAreaInsets();
   const tour = tours.find((t) => t.id === id);
   const tourIndex = tours.findIndex((t) => t.id === id) + 1;
+  const stampState = useStamps(tour?.id ?? null);
+  const collectedCount = tour
+    ? tour.stops.filter((s) => stampState.stamps.has(s.landmarkId)).length
+    : 0;
 
   if (!tour) {
     return (
@@ -105,8 +111,45 @@ export default function TourDetailScreen() {
           muted={colors.muted}
           border={colors.border}
           surface={colors.surface}
-          onOpenFullMap={() => router.push({ pathname: "/(tabs)", params: { tourId: tour.id } })}
+          onOpenFullMap={() => router.push({ pathname: "/map", params: { tourId: tour.id } })}
         />
+
+        {/* Stamp strip — collected travel stamps per stop */}
+        <View style={[styles.section, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+          <View style={styles.stampHeaderRow}>
+            <Text style={[styles.sectionTitle, { color: colors.foreground, marginBottom: 0 }]}>Stamps</Text>
+            <Text style={[styles.stampCount, { color: colors.muted }]}>
+              {collectedCount} OF {tour.stops.length} COLLECTED
+            </Text>
+          </View>
+          {stampState.loaded ? (
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.stampStrip}
+            >
+              {tourLandmarks.map((stop, i) => {
+                const collected = stampState.stamps.has(stop.landmarkId);
+                return (
+                  <View key={stop.landmarkId} style={styles.stampSlot}>
+                    <TravelStamp
+                      landmarkName={stop.landmark!.name}
+                      tourName={tour.name}
+                      collected={collected}
+                      size={72}
+                      rotation={((i % 5) - 2) * 2.2}
+                    />
+                    <Text style={[styles.stampLabel, { color: collected ? colors.foreground : colors.muted }]} numberOfLines={1}>
+                      {stop.landmark!.name}
+                    </Text>
+                  </View>
+                );
+              })}
+            </ScrollView>
+          ) : (
+            <Text style={[styles.stampCount, { color: colors.muted }]}>…</Text>
+          )}
+        </View>
 
         {/* Tour Stops */}
         <View style={[styles.section, { backgroundColor: colors.surface, borderColor: colors.border }]}>
@@ -330,5 +373,30 @@ const styles = StyleSheet.create({
     height: 8,
     borderRadius: 4,
     marginTop: 6,
+  },
+  stampHeaderRow: {
+    flexDirection: "row",
+    alignItems: "baseline",
+    justifyContent: "space-between",
+    marginBottom: 12,
+  },
+  stampCount: {
+    fontSize: 10,
+    fontWeight: "700",
+    letterSpacing: 1.5,
+  },
+  stampStrip: {
+    gap: 14,
+    paddingVertical: 4,
+  },
+  stampSlot: {
+    alignItems: "center",
+    width: 84,
+  },
+  stampLabel: {
+    fontSize: 10,
+    lineHeight: 14,
+    marginTop: 6,
+    textAlign: "center",
   },
 });

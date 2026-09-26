@@ -38,9 +38,14 @@ export default function TabLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: "Map",
+          title: "Landmarks",
           tabBarIcon: ({ color, focused }) => (
-            <IconSymbol size={26} name={focused ? "map.fill" : "map"} color={color} weight="semibold" />
+            <IconSymbol
+              size={26}
+              name={focused ? "building.columns.fill" : "building.columns"}
+              color={color}
+              weight="semibold"
+            />
           ),
         }}
       />
@@ -54,15 +59,15 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="landmarks"
+        name="profile"
         options={{
-          title: "Landmarks",
+          title: "Profile",
           tabBarIcon: ({ color, focused }) => (
             <IconSymbol
               size={26}
-              name={focused ? "building.columns.fill" : "building.columns"}
+              name={focused ? "person.crop.circle.fill" : "person.crop.circle"}
               color={color}
-              weight="semibold"
+              weight="medium"
             />
           ),
         }}

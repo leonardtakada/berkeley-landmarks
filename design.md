@@ -1,7 +1,13 @@
 # Berkeley Landmarks App - Interface Design
 
 ## Overview
-A mobile app for exploring Berkeley, California's architectural landmarks and historic properties. The app centers on an interactive map showing landmarks, walking tour routes, and detailed property information sourced from BAHA (Berkeley Architectural Heritage Association).
+A mobile app for exploring Berkeley, California's architectural landmarks and historic properties, with content sourced from BAHA (Berkeley Architectural Heritage Association).
+
+### Design Concept: "A Book, Not a Map"
+Inspired by the Showa design books shared during ideation. The app reads like a beautifully typeset book about Berkeley's landmarks and their history:
+- **Landmarks and their stories are the product** — the map is a supporting reference, not the home
+- Editorial, page-like layouts: generous margins, strong typography, chapter-like navigation (tours read as chapters, landmarks as entries)
+- The map is never a top-level destination — it's reachable from a landmark or tour when you ask "where is this?"
 
 ## Color Palette
 - **Primary**: `#1B4332` (Deep Forest Green) — evokes Berkeley's tree-lined streets and parks
@@ -20,26 +26,25 @@ A mobile app for exploring Berkeley, California's architectural landmarks and hi
 
 ## Screen List
 
-### 1. Map Screen (Home / Tab 1)
-- Full-screen interactive map centered on Berkeley (37.8716, -122.2727)
-- Colored markers for landmarks by category (civic, residential, religious, commercial, educational)
-- Tour route polylines shown when a tour is selected
-- Bottom sheet with landmark quick-preview when marker tapped
-- Filter chips at top for landmark categories
-- "My Location" button
-- Cluster markers when zoomed out
+### 1. Landmarks Screen (Home / Tab 1)
+- Book-style searchable, filterable list of all landmarks (the "index" of the book)
+- Sort by: name, year built, architect, neighborhood
+- Each landmark entry shows: name, address, architect, year, category icon
+- Tapping an entry opens Landmark Detail ("View on Map" lives there)
 
 ### 2. Tours Screen (Tab 2)
-- List of BAHA walking tours organized by neighborhood
+- Book-style list of BAHA walking tours organized by neighborhood (tours read like chapters)
 - Each tour card shows: tour name, neighborhood, number of stops, estimated distance/time
-- Tour cards have a small preview map thumbnail
 - Tapping a tour navigates to Tour Detail
 
-### 3. Landmarks Screen (Tab 3)
-- Searchable, filterable list of all landmarks
-- Sort by: name, year built, architect, neighborhood
-- Each landmark card shows: name, address, architect, year, category icon
-- Quick-tap to view on map or open detail
+### 3. Map Screen (Push only — NOT a tab)
+- Full-screen interactive map centered on Berkeley (37.8716, -122.2727)
+- Reached from Landmark Detail ("View on Map") or Tour Detail ("Start Tour")
+- Colored markers for landmarks by category (civic, residential, religious, commercial, educational)
+- Tour route polylines shown when opened from a tour
+- Bottom sheet with landmark quick-preview when marker tapped
+- "My Location" button
+- Back navigation returns to the landmark/tour the user came from
 
 ### 4. Landmark Detail Screen (Push from Map/Landmarks)
 - Hero section with landmark name, address, and category badge
@@ -85,16 +90,16 @@ A mobile app for exploring Berkeley, California's architectural landmarks and hi
 
 ## Key User Flows
 
-### Flow 1: Explore Map
-1. User opens app → Map screen with all landmarks visible
-2. User taps a marker → Bottom sheet slides up with landmark preview
-3. User taps "View Details" → Landmark Detail screen
-4. User taps "View on Map" → Returns to map centered on landmark
+### Flow 1: Read the Landmarks
+1. User opens app → Landmarks screen (the book's index)
+2. User taps an entry → Landmark Detail with history, photos, and BAHA notes
+3. User taps "View on Map" → Pushes Map screen centered on that landmark
+4. Back returns to the detail page
 
-### Flow 2: Browse Tours
-1. User taps Tours tab → List of walking tours
-2. User taps a tour → Tour Detail screen with stops
-3. User taps "View on Map" → Map screen with tour route highlighted and stops numbered
+### Flow 2: Read a Tour (Chapter)
+1. User taps Tours tab → Book-style list of walking tours
+2. User taps a tour → Tour Detail with stops
+3. User taps "Start Tour" → Pushes Map screen with tour route highlighted and stops numbered
 
 ### Flow 3: Search Landmarks
 1. User taps Landmarks tab → Full list with search bar
@@ -104,6 +109,5 @@ A mobile app for exploring Berkeley, California's architectural landmarks and hi
 ## Tab Bar Configuration
 | Tab | Icon | Label |
 |-----|------|-------|
-| Map | `map.fill` (SF Symbol) / `map` (Material) | Map |
-| Tours | `figure.walk` / `directions-walk` | Tours |
 | Landmarks | `building.columns.fill` / `account-balance` | Landmarks |
+| Tours | `figure.walk` / `directions-walk` | Tours |

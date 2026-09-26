@@ -10,6 +10,7 @@
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
 		3E461D99554A48A4959DE609 /* SplashScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */; };
 		5A2BABDC88443F713A5CEF5F /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 55C49B672B9FA7F86C70B407 /* PrivacyInfo.xcprivacy */; };
+		8FE9A1BA3067AAD800B60E96 /* MapLibre in Frameworks */ = {isa = PBXBuildFile; productRef = 77261164A67E0FC5C5B29593 /* MapLibre */; };
 		A2B9B265E9658A69F26EB126 /* libPods-BerkeleyLandmarks.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B917CF34C0D24E9EDAB2D405 /* libPods-BerkeleyLandmarks.a */; };
 		A87F903205F28358F22B4397 /* ExpoModulesProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = B39921BCBCDA25305E16BAB4 /* ExpoModulesProvider.swift */; };
 		BB2F792D24A3F905000567C9 /* Expo.plist in Resources */ = {isa = PBXBuildFile; fileRef = BB2F792C24A3F905000567C9 /* Expo.plist */; };
@@ -21,7 +22,7 @@
 		13B07F961A680F5B00A75B9A /* BerkeleyLandmarks.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BerkeleyLandmarks.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		13B07FB51A68108700A75B9A /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = BerkeleyLandmarks/Images.xcassets; sourceTree = "<group>"; };
 		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = BerkeleyLandmarks/Info.plist; sourceTree = "<group>"; };
-		55C49B672B9FA7F86C70B407 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; includeInIndex = 1; name = PrivacyInfo.xcprivacy; path = BerkeleyLandmarks/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		55C49B672B9FA7F86C70B407 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xml; name = PrivacyInfo.xcprivacy; path = BerkeleyLandmarks/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		8755AA0B34F2D21766A64A7F /* Pods-BerkeleyLandmarks.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-BerkeleyLandmarks.debug.xcconfig"; path = "Target Support Files/Pods-BerkeleyLandmarks/Pods-BerkeleyLandmarks.debug.xcconfig"; sourceTree = "<group>"; };
 		AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = SplashScreen.storyboard; path = BerkeleyLandmarks/SplashScreen.storyboard; sourceTree = "<group>"; };
 		B39921BCBCDA25305E16BAB4 /* ExpoModulesProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ExpoModulesProvider.swift; path = "Pods/Target Support Files/Pods-BerkeleyLandmarks/ExpoModulesProvider.swift"; sourceTree = "<group>"; };
@@ -37,6 +38,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8FE9A1BA3067AAD800B60E96 /* MapLibre in Frameworks */,
 				A2B9B265E9658A69F26EB126 /* libPods-BerkeleyLandmarks.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -81,7 +83,6 @@
 				8755AA0B34F2D21766A64A7F /* Pods-BerkeleyLandmarks.debug.xcconfig */,
 				026B0CA7DF1B0C4A476F05FF /* Pods-BerkeleyLandmarks.release.xcconfig */,
 			);
-			name = Pods;
 			path = Pods;
 			sourceTree = "<group>";
 		};
@@ -416,6 +417,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = BerkeleyLandmarks/BerkeleyLandmarks.entitlements;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 34V4KNQPZ5;
 				ENABLE_BITCODE = NO;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"$(inherited)",
@@ -453,6 +455,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = BerkeleyLandmarks/BerkeleyLandmarks.entitlements;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 34V4KNQPZ5;
 				INFOPLIST_FILE = BerkeleyLandmarks/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 16.4;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -641,7 +644,7 @@
 			repositoryURL = "https://github.com/maplibre/maplibre-gl-native-distribution";
 			requirement = {
 				kind = exactVersion;
-				version = 6.26.0;
+				version = 6.31.0;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */

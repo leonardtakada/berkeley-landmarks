@@ -6,6 +6,8 @@ import { IconSymbol } from "@/components/ui/icon-symbol";
 import type { TourFollowState } from "@/hooks/use-tour-follow";
 import type { Tour } from "@/data/tours";
 
+const SERIF = Platform.select({ ios: "Georgia", default: "serif" });
+
 interface TourFollowCardProps {
   tour: Tour;
   follow: TourFollowState;
@@ -152,7 +154,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     left: 16,
     right: 16,
-    borderRadius: 6,
+    borderRadius: 2,
     borderWidth: 1,
     padding: 14,
     zIndex: 12,
@@ -173,8 +175,6 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     height: 3,
-    borderTopLeftRadius: 6,
-    borderTopRightRadius: 6,
   },
   headerRow: {
     flexDirection: "row",
@@ -183,6 +183,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   headerLabel: {
+    fontFamily: SERIF,
     fontSize: 11,
     fontWeight: "700",
     letterSpacing: 1.4,
@@ -193,13 +194,15 @@ const styles = StyleSheet.create({
     gap: 5,
     paddingHorizontal: 10,
     paddingVertical: 5,
-    borderRadius: 4,
+    borderRadius: 2,
   },
   followToggleText: {
     color: "#FFFFFF",
+    fontFamily: SERIF,
     fontSize: 11,
     fontWeight: "700",
-    letterSpacing: 0.5,
+    letterSpacing: 1,
+    textTransform: "uppercase",
   },
   unavailable: {
     fontSize: 12,
@@ -214,7 +217,7 @@ const styles = StyleSheet.create({
   nextNumber: {
     width: 26,
     height: 26,
-    borderRadius: 13,
+    borderRadius: 2,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -233,9 +236,10 @@ const styles = StyleSheet.create({
     lineHeight: 21,
   },
   nextMeta: {
+    fontFamily: SERIF,
     fontSize: 11,
-    fontWeight: "600",
-    letterSpacing: 0.8,
+    fontWeight: "700",
+    letterSpacing: 1,
     marginTop: 1,
   },
   nextNote: {
@@ -266,15 +270,18 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     gap: 5,
     paddingVertical: 8,
-    borderRadius: 4,
+    borderRadius: 2,
     borderWidth: 1,
   },
   skipButton: {
     borderWidth: 0,
   },
   controlText: {
+    fontFamily: SERIF,
     fontSize: 13,
     fontWeight: "700",
+    letterSpacing: 0.8,
+    textTransform: "uppercase",
   },
   skipText: {
     color: "#FFFFFF",
