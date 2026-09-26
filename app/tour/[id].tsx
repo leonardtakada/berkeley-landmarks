@@ -5,6 +5,7 @@ import { tours } from "@/data/tours";
 import { landmarks, CATEGORY_COLORS } from "@/data/landmarks";
 import { useColors } from "@/hooks/use-colors";
 import { IconSymbol } from "@/components/ui/icon-symbol";
+import { AccordionMap } from "@/components/accordion-map";
 
 export default function TourDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -73,17 +74,22 @@ export default function TourDetailScreen() {
           <Text style={[styles.author, { color: colors.muted }]}>Guide by {tour.author}</Text>
         </View>
 
-        {/* View on Map Button */}
-        <Pressable
-          onPress={() => router.push({ pathname: "/(tabs)", params: { tourId: tour.id } })}
-          style={({ pressed }) => [
-            styles.mapButton,
-            { backgroundColor: tour.color, opacity: pressed ? 0.9 : 1 },
-          ]}
-        >
-          <IconSymbol name="map.fill" size={18} color="#FFFFFF" />
-          <Text style={styles.mapButtonText}>View Route on Map</Text>
-        </Pressable>
+        {/* Fold-out route map insert */}
+        <AccordionMap
+          stops={tourLandmarks.map((s) => ({
+            id: s.landmarkId,
+            name: s.landmark!.name,
+            order: s.order,
+            latitude: s.landmark!.latitude,
+            longitude: s.landmark!.longitude,
+          }))}
+          color={tour.color}
+          foreground={colors.foreground}
+          muted={colors.muted}
+          border={colors.border}
+          surface={colors.surface}
+          onOpenFullMap={() => router.push({ pathname: "/(tabs)", params: { tourId: tour.id } })}
+        />
 
         {/* Tour Stops */}
         <View style={[styles.section, { backgroundColor: colors.surface, borderColor: colors.border }]}>
@@ -228,21 +234,6 @@ const styles = StyleSheet.create({
     fontSize: 13,
     marginTop: 10,
     fontStyle: "italic",
-  },
-  mapButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    marginHorizontal: 16,
-    marginTop: 16,
-    paddingVertical: 14,
-    borderRadius: 6,
-    gap: 8,
-  },
-  mapButtonText: {
-    color: "#FFFFFF",
-    fontSize: 16,
-    fontWeight: "700",
   },
   stopItem: {
     flexDirection: "row",
