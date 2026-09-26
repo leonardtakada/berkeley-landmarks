@@ -212,6 +212,13 @@ export default function LandmarkDetailScreen() {
             <View style={[styles.categoryBadge, { backgroundColor: catColor }]}>
               <Text style={styles.categoryText}>{CATEGORY_LABELS[landmark.category]}</Text>
             </View>
+            <View style={styles.plateCaption}>
+              <View style={[styles.plateRule, { backgroundColor: colors.border }]} />
+              <Text style={[styles.plateText, { color: colors.muted }]}>
+                PLATE — {landmark.name.toUpperCase()}
+              </Text>
+              <View style={[styles.plateRule, { backgroundColor: colors.border }]} />
+            </View>
             <Text style={[styles.heroName, { color: colors.foreground }]}>{landmark.name}</Text>
             <View style={styles.heroMeta}>
               <IconSymbol name="mappin.and.ellipse" size={14} color={colors.muted} />
@@ -531,6 +538,24 @@ const styles = StyleSheet.create({
     right: 0,
     width: "100%",
     height: 240,
+  },
+  plateCaption: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    marginTop: 8,
+    marginBottom: 2,
+    alignSelf: "stretch",
+    width: "100%",
+  },
+  plateRule: {
+    flex: 1,
+    height: StyleSheet.hairlineWidth,
+  },
+  plateText: {
+    fontSize: 9,
+    fontWeight: "700",
+    letterSpacing: 1.8,
   },
   heroPlaceholder: {
     marginBottom: 16,

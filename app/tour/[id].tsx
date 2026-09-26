@@ -7,12 +7,22 @@ import { useColors } from "@/hooks/use-colors";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { AccordionMap } from "@/components/accordion-map";
 
+function romanNumeral(n: number): string {
+  const table: [number, string][] = [
+    [10, "X"], [9, "IX"], [5, "V"], [4, "IV"], [1, "I"],
+  ];
+  let out = "";
+  for (const [v, s] of table) while (n >= v) { out += s; n -= v; }
+  return out || "I";
+}
+
 export default function TourDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const tour = tours.find((t) => t.id === id);
+  const tourIndex = tours.findIndex((t) => t.id === id) + 1;
 
   if (!tour) {
     return (
@@ -46,14 +56,21 @@ export default function TourDetailScreen() {
       </View>
 
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-        {/* Tour Hero */}
+        {/* Tour Hero — chapter opener */}
         <View style={[styles.heroBanner, { backgroundColor: tour.color + '15' }]}>
-          <View style={[styles.tourBadge, { backgroundColor: tour.color }]}>
+          <View style={[styles.chapterRule, { backgroundColor: tour.color + '55' }]} />
+          <View style={styles.chapterRow}>
+            <Text style={[styles.chapterNumeral, { color: tour.color }]}>{romanNumeral(tourIndex)}</Text>
+            <View style={styles.chapterMeta}>
+              <Text style={[styles.chapterLabel, { color: colors.muted }]}>CHAPTER</Text>
+              <Text style={[styles.heroName, { color: colors.foreground }]}>{tour.name}</Text>
+              <Text style={[styles.heroNeighborhood, { color: colors.muted }]}>{tour.neighborhood}</Text>
+            </View>
+          </View>
+          <View style={[styles.tourBadge, { backgroundColor: tour.color, alignSelf: 'center' }]}>
             <IconSymbol name="figure.walk" size={14} color="#FFFFFF" />
             <Text style={styles.tourBadgeText}>Walking Tour</Text>
           </View>
-          <Text style={[styles.heroName, { color: colors.foreground }]}>{tour.name}</Text>
-          <Text style={[styles.heroNeighborhood, { color: colors.muted }]}>{tour.neighborhood}</Text>
         </View>
 
         {/* Tour Stats — catalog line */}
@@ -161,6 +178,33 @@ const styles = StyleSheet.create({
   heroBanner: {
     padding: 24,
     paddingTop: 20,
+  },
+  chapterRule: {
+    height: 3,
+    marginBottom: 14,
+  },
+  chapterRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 16,
+    marginBottom: 14,
+  },
+  chapterNumeral: {
+    fontSize: 56,
+    fontWeight: "600",
+    fontFamily: "SourceSerif4_600SemiBold",
+    lineHeight: 60,
+    minWidth: 64,
+    textAlign: "center",
+  },
+  chapterMeta: {
+    flex: 1,
+  },
+  chapterLabel: {
+    fontSize: 10,
+    fontWeight: "700",
+    letterSpacing: 2.5,
+    marginBottom: 2,
   },
   tourBadge: {
     flexDirection: "row",

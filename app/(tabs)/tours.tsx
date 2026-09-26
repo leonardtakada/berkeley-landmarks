@@ -85,11 +85,27 @@ export default function ToursScreen() {
   return (
     <ScreenContainer>
       <View style={styles.screenHeader}>
-        <Text style={[styles.tocLabel, { color: colors.accent }]}>Table of Contents</Text>
-        <Text style={[styles.screenTitle, { color: colors.foreground }]}>Walking Tours</Text>
-        <Text style={[styles.screenSubtitle, { color: colors.muted }]}>
-          Explore Berkeley&apos;s architectural heritage with BAHA-inspired walking tours
-        </Text>
+        {/* Showa book cover: double-rule frame, seal, stacked title */}
+        <View style={[styles.coverFrame, { borderColor: colors.primary }]}>
+          <View style={[styles.coverRule, { backgroundColor: colors.primary }]} />
+          <View style={styles.coverRow}>
+            <View style={{ flex: 1 }}>
+              <Text style={[styles.coverKicker, { color: colors.muted }]}>BERKELEY ARCHITECTURAL HERITAGE</Text>
+              <Text style={[styles.screenTitle, { color: colors.primary }]}>Walking{"\n"}Tours</Text>
+              <View>
+                <View style={[styles.underlineRule, { backgroundColor: "#E15A3E" }]} />
+              </View>
+              <Text style={[styles.screenSubtitle, { color: colors.muted }]}>
+                A field folio of the city&apos;s architectural heritage — five walking routes, illustrated
+              </Text>
+            </View>
+            <View style={[styles.hanko, { backgroundColor: "#B14A38" }]}>
+              <Text style={styles.hankoGlyph}>博</Text>
+              <Text style={styles.hankoSub}>BERKELEY</Text>
+            </View>
+          </View>
+        </View>
+        <Text style={[styles.tocLabel, { color: "#E15A3E" }]}>目次 · Table of Contents</Text>
       </View>
       <FlatList
         data={tours}
@@ -122,19 +138,79 @@ const styles = StyleSheet.create({
     paddingTop: 8,
     paddingBottom: 16,
   },
+  coverFrame: {
+    borderWidth: 1.5,
+    padding: 18,
+    paddingBottom: 16,
+    borderRadius: 2,
+  },
+  coverRule: {
+    position: "absolute",
+    top: 5,
+    left: 5,
+    right: 5,
+    bottom: 5,
+    borderWidth: 0.75,
+    borderColor: "rgba(43,58,103,0.45)",
+    borderRadius: 1,
+  },
+  coverRow: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 14,
+  },
+  coverKicker: {
+    fontSize: 9,
+    fontWeight: "700",
+    letterSpacing: 2.2,
+    marginBottom: 8,
+  },
+  hanko: {
+    width: 52,
+    borderRadius: 4,
+    paddingVertical: 8,
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "#B14A38",
+    shadowOpacity: 0.35,
+    shadowRadius: 3,
+    shadowOffset: { width: 1, height: 2 },
+    elevation: 3,
+    transform: [{ rotate: "-3deg" }],
+  },
+  hankoGlyph: {
+    color: "#F2F0E6",
+    fontSize: 26,
+    fontWeight: "700",
+    lineHeight: 30,
+  },
+  hankoSub: {
+    color: "#F2F0E6",
+    fontSize: 6.5,
+    fontWeight: "700",
+    letterSpacing: 1.2,
+    marginTop: 2,
+  },
+  underlineRule: {
+    width: 56,
+    height: 3,
+    marginTop: 10,
+    marginBottom: 10,
+  },
   tocLabel: {
     fontSize: 11,
     fontWeight: "700",
     letterSpacing: 2.5,
     textTransform: "uppercase",
+    marginTop: 18,
     marginBottom: 2,
   },
   screenTitle: {
-    fontSize: 36,
+    fontSize: 44,
     fontWeight: "600",
     fontFamily: "SourceSerif4_600SemiBold",
-    letterSpacing: -0.3,
-    lineHeight: 42,
+    letterSpacing: -0.5,
+    lineHeight: 46,
   },
   screenSubtitle: {
     fontSize: 15,
