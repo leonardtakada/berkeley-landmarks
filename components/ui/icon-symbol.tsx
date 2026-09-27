@@ -41,6 +41,8 @@ const MAPPING = {
   "person.crop.circle.fill": "account-circle",
   "person.crop.circle": "account-circle",
   "arrow.up.right": "arrow-outward",
+  "book.closed": "menu-book",
+  "book.closed.fill": "menu-book",
 } satisfies IconMapping;
 
 export function IconSymbol({

@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Platform, Pressable, StyleSheet, Text, View } from "react-native";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -47,11 +47,12 @@ const RIBBON_COLORS: Record<string, string> = {
   profile: "#6B8E6D",
 };
 // Staggered resting hang lengths — each ribbon drapes at a slightly
-// different length, like real book ribbons
+// different length, like real book ribbons. Generously long: the cover is
+// sparse and the ribbons should clearly read as hanging into the book.
 const STAGGER: Record<string, number> = {
-  index: 22,
-  tours: 15,
-  profile: 18,
+  index: 46,
+  tours: 34,
+  profile: 40,
 };
 
 // hexToRGBA helper (colors are always 6-digit hex here)
@@ -88,12 +89,12 @@ function RibbonTab({
   }, [focused, focus]);
 
   const ribbonPalette = ["#2B3A67", "#E15A3E", "#6B8E6D"];
-  const stagger = [22, 14, 18];
+  const stagger = [46, 34, 40];
   const ribbonColor = RIBBON_COLORS[routeName] ?? ribbonPalette[0];
   const rest = STAGGER[routeName] ?? stagger[0];
 
   const ribbonStyle = useAnimatedStyle(() => {
-    const height = rest + 12 * focus.value;
+    const height = rest + 18 * focus.value;
     const alpha = 0.7 + 0.3 * focus.value;
     return {
       height,
@@ -148,7 +149,7 @@ function RibbonTab({
           ]}
         >
           <IconSymbol
-            size={focused ? 17 : 15}
+            size={focused ? 24 : 20}
             name={
               (focused
                 ? ICONS[routeName]?.focused ?? "book.fill"
@@ -279,31 +280,32 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   ribbon: {
-    width: 36,
+    width: 56,
     borderWidth: StyleSheet.hairlineWidth,
     borderTopWidth: 0,
     borderBottomLeftRadius: 0,
     borderBottomRightRadius: 0,
     alignItems: "center",
     justifyContent: "flex-start",
-    paddingTop: 4,
+    paddingTop: 7,
   },
   ribbonTail: {
     width: 0,
     height: 0,
-    borderLeftWidth: 18,
-    borderRightWidth: 18,
-    borderTopWidth: 7,
+    borderLeftWidth: 28,
+    borderRightWidth: 28,
+    borderTopWidth: 10,
     borderLeftColor: "transparent",
     borderRightColor: "transparent",
     borderTopColor: "#000",
   },
   label: {
-    fontSize: 10,
+    fontFamily: Platform.select({ ios: "Georgia", default: "serif" }),
+    fontSize: 12,
     fontWeight: "700",
-    letterSpacing: 1.2,
+    letterSpacing: 1.8,
     textTransform: "uppercase",
-    marginTop: 5,
+    marginTop: 7,
   },
   // Page lift: rotated square with a light bottom/left edge and soft
   // shadow — reads as the page dipping where the ribbon is draped over

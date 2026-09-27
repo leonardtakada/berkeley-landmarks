@@ -1,46 +1,29 @@
-import React, { useRef, useState, useMemo } from "react";
-import {
-  Text,
-  View,
-  FlatList,
-  Pressable,
-  TextInput,
-  StyleSheet,
-  Platform,
-} from "react-native";
-import { useRouter } from "expo-router";
+import React from "react";
+import { Platform, StyleSheet, Text, View } from "react-native";
 import Svg, { Circle, Path } from "react-native-svg";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ScreenContainer } from "@/components/screen-container";
 import { PageFlip } from "@/components/page-flip";
 import { PaperGrain } from "@/components/paper-grain";
 import { useColors } from "@/hooks/use-colors";
-import { IconSymbol } from "@/components/ui/icon-symbol";
-import {
-  landmarks,
-  CATEGORY_COLORS,
-  CATEGORY_LABELS,
-  type Landmark,
-  type LandmarkCategory,
-} from "@/data/landmarks";
-
-const ALL_CATEGORIES: LandmarkCategory[] = [
-  "civic",
-  "residential",
-  "religious",
-  "commercial",
-  "educational",
-  "cultural",
-];
-
-type SortOption = "name" | "year" | "architect" | "neighborhood";
 
 const SERIF = Platform.select({ ios: "Georgia", default: "serif" });
 const SERIF_BOLD = Platform.select({ ios: "Georgia-Bold", default: "serif" });
-const SERIF_SEMI = "SourceSerif4_600SemiBold";
+
+/** Brand blue from the logo — deep ultramarine on cream, like an indigo
+ *  Showa-era two-color print. Sepia remains for secondary details. */
+const BRAND_BLUE = "#0B2E8C";
+const SEPIA = "#8A7A5E";
 
 /** Ornamental rule: hairline — diamond — hairline (printer's divider). */
-function OrnamentalRule({ color, accent, width = 180 }: { color: string; accent: string; width?: number }) {
+function OrnamentalRule({
+  color,
+  accent,
+  width = 200,
+}: {
+  color: string;
+  accent: string;
+  width?: number;
+}) {
   return (
     <View style={[styles.ruleRow, { width }]}>
       <View style={[styles.ruleLine, { backgroundColor: color, flex: 1 }]} />
@@ -55,14 +38,14 @@ function OrnamentalRule({ color, accent, width = 180 }: { color: string; accent:
 /**
  * Hand-drawn-style ink vignette: Sather Tower (the Campanile) rising over
  * the Berkeley hills, scratchy line art like a Showa-era guidebook plate.
- * Pure stroke paths — no fills except the distant sun.
+ * Indigo linework like a classic two-color print; sepia for the sun mark.
  */
 function CampanileVignette({ ink, accent }: { ink: string; accent: string }) {
   const w = 300;
   const h = 190;
   return (
     <Svg width="100%" height={h} viewBox={`0 0 ${w} ${h}`} fill="none">
-      {/* distant sun — the only accent mark, like a two-color print */}
+      {/* distant sun — the only secondary mark, sepia like a two-color print */}
       <Circle cx={228} cy={40} r={15} fill={accent} opacity={0.85} />
       <Circle cx={228} cy={40} r={20} stroke={accent} strokeWidth={0.75} opacity={0.4} />
 
@@ -81,7 +64,7 @@ function CampanileVignette({ ink, accent }: { ink: string; accent: string }) {
       />
       {/* eucalyptus-ish trees on the ridge */}
       <Path d="M52 133 q 2 -12 0 -18 M56 133 q 4 -10 8 -14 M48 133 q -4 -9 -8 -12" stroke={ink} strokeWidth={1} opacity={0.6} />
-      <Path d="M240 124 q 2 -11 0 -16 M245 124 q 4 -9 8 -12" stroke={ink} strokeWidth={1} opacity={0.55} />
+      <Path d="M240 124 q 2 -11 0 -16 M245 124 q 4 -9 8 -12" stroke={ink} strokeWidth={0.9} opacity={0.55} />
 
       {/* the Campanile: slender tower, stepped head, clock, open arcades */}
       {/* shaft */}
@@ -119,7 +102,7 @@ function CampanileVignette({ ink, accent }: { ink: string; accent: string }) {
 }
 
 /**
- * Hanko-style stamped seal accent: a small square red seal in the corner
+ * Hanko-style stamped seal accent: a small square seal in the corner
  * of the plate, like a collector's mark on a vintage cover.
  */
 function StampedSeal({ accent }: { accent: string }) {
@@ -131,339 +114,55 @@ function StampedSeal({ accent }: { accent: string }) {
   );
 }
 
-/** Book-styled CTA: bordered serif button with a corner tick. */
-function CoverButton({
-  label,
-  onPress,
-  primary,
-  fg,
-  bg,
-  border,
-}: {
-  label: string;
-  onPress: () => void;
-  primary?: boolean;
-  fg: string;
-  bg: string;
-  border: string;
-}) {
-  return (
-    <Pressable
-      onPress={onPress}
-      accessibilityRole="button"
-      style={({ pressed }) => [
-        styles.coverBtn,
-        { borderColor: primary ? fg : border, opacity: pressed ? 0.8 : 1, backgroundColor: primary ? bg : "transparent" },
-      ]}
-    >
-      <Text
-        style={[
-          styles.coverBtnText,
-          { color: primary ? fg : border },
-          !primary && styles.coverBtnTextGhost,
-        ]}
-      >
-        {label.toUpperCase()}
-      </Text>
-    </Pressable>
-  );
-}
-
-const LandmarkRow = React.memo(function LandmarkRow({ landmark, colors }: { landmark: Landmark; colors: ReturnType<typeof useColors> }) {
-  const router = useRouter();
-  const catColor = CATEGORY_COLORS[landmark.category];
-  const rowStyle = useMemo(() => ({
-    backgroundColor: colors.surface,
-    borderRadius: 6,
-    overflow: "hidden" as const,
-    flexDirection: "row" as const,
-    alignItems: "center" as const,
-    borderWidth: 1,
-    borderColor: colors.border,
-  }), [colors.surface, colors.border]);
-
-  return (
-    <Pressable
-      onPress={() => router.push(`/landmark/${landmark.id}`)}
-      style={({ pressed }) => [
-        rowStyle,
-        { opacity: pressed ? 0.85 : 1 },
-      ]}
-    >
-      <View style={[styles.catIndicator, { backgroundColor: catColor, opacity: 0.8 }]} />
-      <View style={styles.rowContent}>
-        <Text style={[styles.rowName, { color: colors.foreground }]} numberOfLines={1}>
-          {landmark.name}
-        </Text>
-        <Text style={[styles.rowAddress, { color: colors.muted }]} numberOfLines={1}>
-          {landmark.address}
-        </Text>
-        <View style={styles.rowMeta}>
-          <Text style={[styles.rowMetaText, { color: colors.muted }]}>
-            {landmark.architect} · {landmark.yearBuilt}
-          </Text>
-        </View>
-      </View>
-      <View style={styles.rowRight}>
-        {landmark.nationalRegister && (
-          <View style={[styles.nrBadge, { backgroundColor: colors.accent + '22' }]}>
-            <IconSymbol name="star.fill" size={10} color={colors.accent} />
-          </View>
-        )}
-        <IconSymbol name="chevron.right" size={14} color={colors.muted} />
-      </View>
-    </Pressable>
-  );
-});
-
-export default function LandmarksScreen() {
+/**
+ * The COVER: a pure title page in the manner of a 1930s indigo-printed
+ * Japanese travel guide — double-ruled ultramarine frame, spaced serif
+ * capitals, ornamental diamond rule, an indigo line-art plate of the
+ * Campanile over the hills, and a stamped seal. Nothing else; the
+ * bookmark ribbons at the head of the book carry the navigation.
+ */
+export default function CoverScreen() {
   const colors = useColors();
-  const router = useRouter();
-  // The bookmark bar hangs at the top; pad the list bottom by the safe inset.
-  const insets = useSafeAreaInsets();
-  const listBottomPadding = Math.max(insets.bottom, 12) + 24;
-  const listRef = useRef<FlatList<Landmark>>(null);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState<LandmarkCategory | null>(null);
-  const [sortBy, setSortBy] = useState<SortOption>("name");
-
-  const filteredLandmarks = useMemo(() => {
-    let result = [...landmarks];
-
-    if (searchQuery.trim()) {
-      const q = searchQuery.toLowerCase();
-      result = result.filter(
-        (l) =>
-          l.name.toLowerCase().includes(q) ||
-          l.architect.toLowerCase().includes(q) ||
-          l.address.toLowerCase().includes(q) ||
-          l.neighborhood.toLowerCase().includes(q) ||
-          l.style.toLowerCase().includes(q)
-      );
-    }
-
-    if (selectedCategory) {
-      result = result.filter((l) => l.category === selectedCategory);
-    }
-
-    result.sort((a, b) => {
-      switch (sortBy) {
-        case "name":
-          return a.name.localeCompare(b.name);
-        case "year":
-          return (parseInt(a.yearBuilt) || 0) - (parseInt(b.yearBuilt) || 0);
-        case "architect":
-          return a.architect.localeCompare(b.architect);
-        case "neighborhood":
-          return a.neighborhood.localeCompare(b.neighborhood);
-        default:
-          return 0;
-      }
-    });
-
-    return result;
-  }, [searchQuery, selectedCategory, sortBy]);
-
-  /** Scroll from the cover down into the registry proper. */
-  const openRegistry = () => {
-    listRef.current?.scrollToOffset({ offset: 340, animated: true });
-  };
-
-  const ink = colors.foreground;
-
-  /**
-   * The COVER: a 1930s Japanese travel-guide front board — double-ruled
-   * frame, spaced serif capitals, ornamental diamond rule, an ink line-art
-   * plate of the Campanile over the hills, and a hanko-style seal.
-   */
-  const Cover = (
-    <View style={styles.cover}>
-      <View style={[styles.coverFrame, { borderColor: ink }]} />
-      <View style={[styles.coverFrameInner, { borderColor: ink }]} />
-      <View style={styles.coverContent}>
-        <Text style={[styles.coverKicker, { color: colors.accent }]}>
-          A FIELD GUIDE IN THE OLD MANNER
-        </Text>
-
-        <View style={styles.coverTitleBlock}>
-          <Text style={[styles.coverTitle, { color: ink }]}>BERKELEY</Text>
-          <OrnamentalRule color={ink} accent={colors.accent} />
-          <Text style={[styles.coverSubtitle, { color: ink }]}>TOURS</Text>
-        </View>
-
-        <Text style={[styles.coverDedication, { color: colors.muted }]}>
-          Being an illustrated companion to the town's
-        </Text>
-        <Text style={[styles.coverDedication, { color: colors.muted }]}>
-          landmarks, walks &amp; quiet corners
-        </Text>
-
-        <View style={styles.plateWrap}>
-          <CampanileVignette ink={ink} accent={colors.accent} />
-          <StampedSeal accent={colors.accent} />
-          <Text style={[styles.plateCaption, { color: colors.muted }]}>
-            PLATE I — THE CAMPANILE &amp; THE HILLS
-          </Text>
-        </View>
-
-        <View style={styles.coverBtnRow}>
-          <CoverButton
-            label="Open the Registry"
-            primary
-            fg={ink}
-            bg={colors.background}
-            border={colors.border}
-            onPress={openRegistry}
-          />
-          <CoverButton
-            label="Browse the Tours"
-            fg={ink}
-            bg={colors.background}
-            border={colors.muted}
-            onPress={() => router.push("/(tabs)/tours" as never)}
-          />
-        </View>
-
-        <Text style={[styles.coverImprint, { color: colors.muted }]}>
-          BERKELEY · CALIFORNIA · MCMXIV
-        </Text>
-      </View>
-    </View>
-  );
 
   return (
     <ScreenContainer>
       <PageFlip direction={1}>
-      <PaperGrain />
-      <FlatList
-        ref={listRef}
-        data={filteredLandmarks}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => <LandmarkRow landmark={item} colors={colors} />}
-        initialNumToRender={20}
-        maxToRenderPerBatch={10}
-        windowSize={5}
-        removeClippedSubviews={true}
-        ListHeaderComponent={
-          <View>
-            {Cover}
-            <View style={styles.screenHeader}>
-              <Text style={[styles.screenSubtitle, { color: colors.muted }]}>
-                {landmarks.length} designated landmarks in Berkeley
-              </Text>
-            </View>
-            <View
-              style={[
-                styles.searchBar,
-                { backgroundColor: colors.surface, borderColor: colors.border },
-              ]}
-            >
-              <Text style={[styles.searchGlyph, { color: colors.muted }]}>⌕</Text>
-              <TextInput
-                style={[styles.searchInput, { color: colors.foreground }]}
-                placeholder="Search landmarks, architects, styles..."
-                placeholderTextColor={colors.muted}
-                value={searchQuery}
-                onChangeText={setSearchQuery}
-                returnKeyType="done"
-              />
-              {searchQuery.length > 0 && (
-                <Pressable onPress={() => setSearchQuery("")}>
-                  <IconSymbol name="xmark" size={16} color={colors.muted} />
-                </Pressable>
-              )}
-            </View>
-            <FlatList
-              horizontal
-              data={[null, ...ALL_CATEGORIES]}
-              keyExtractor={(item) => item ?? "all"}
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={styles.categoryScroll}
-              renderItem={({ item: cat }) => {
-                const isActive = cat === selectedCategory || (cat === null && selectedCategory === null);
-                const chipColor = cat ? CATEGORY_COLORS[cat] : colors.primary;
-                return (
-                  <Pressable
-                    onPress={() => setSelectedCategory(cat)}
-                    style={({ pressed }) => [
-                      styles.catChip,
-                      {
-                        borderColor: isActive ? chipColor : colors.border,
-                        opacity: pressed ? 0.8 : 1,
-                      },
-                    ]}
-                  >
-                    <Text
-                      style={[
-                        styles.catChipText,
-                        { color: isActive ? colors.foreground : colors.muted },
-                      ]}
-                    >
-                      {cat ? CATEGORY_LABELS[cat].toUpperCase() : "ALL"}
-                    </Text>
-                  </Pressable>
-                );
-              }}
-            />
-            <View style={styles.sortRow}>
-              <Pressable
-                onPress={() => {
-                  const opts: SortOption[] = ["name", "year", "architect", "neighborhood"];
-                  const idx = opts.indexOf(sortBy);
-                  setSortBy(opts[(idx + 1) % opts.length]);
-                }}
-                style={({ pressed }) => [
-                  styles.sortChip,
-                  { borderColor: colors.border, opacity: pressed ? 0.7 : 1 },
-                ]}
-              >
-                <Text style={[styles.sortChipText, { color: colors.primary }]}>
-                  SORT · {sortBy.toUpperCase()}
-                </Text>
-              </Pressable>
-              <View style={{ flex: 1 }} />
-              <Text style={[styles.resultsText, { color: colors.muted }]}>
-                {filteredLandmarks.length} landmark{filteredLandmarks.length !== 1 ? "s" : ""}
-              </Text>
-            </View>
-          </View>
-        }
-        contentContainerStyle={[styles.listContent, { paddingBottom: listBottomPadding }]}
-        showsVerticalScrollIndicator={false}
-        ItemSeparatorComponent={() => <View style={{ height: 8 }} />}
-        ListFooterComponent={<FolioFooter />}
-        ListEmptyComponent={
-          <View style={styles.emptyState}>
-            <IconSymbol name="magnifyingglass" size={40} color={colors.muted} />
-            <Text style={[styles.emptyText, { color: colors.muted }]}>
-              No landmarks found matching your search
+        <PaperGrain />
+        <View style={styles.cover}>
+          <View style={[styles.coverFrame, { borderColor: BRAND_BLUE }]} />
+          <View style={[styles.coverFrameInner, { borderColor: BRAND_BLUE }]} />
+          <View style={styles.coverContent}>
+            <Text style={[styles.coverKicker, { color: SEPIA }]}>
+              A FIELD GUIDE IN THE OLD MANNER
             </Text>
+
+            <View style={styles.coverTitleBlock}>
+              <Text style={[styles.coverTitle, { color: BRAND_BLUE }]}>BERKELEY</Text>
+              <OrnamentalRule color={BRAND_BLUE} accent={SEPIA} />
+              <Text style={[styles.coverSubtitle, { color: BRAND_BLUE }]}>TOURS</Text>
+            </View>
+
+            <View style={styles.plateWrap}>
+              <CampanileVignette ink={BRAND_BLUE} accent={SEPIA} />
+              <StampedSeal accent={BRAND_BLUE} />
+              <Text style={[styles.plateCaption, { color: colors.muted }]}>
+                PLATE I — THE CAMPANILE &amp; THE HILLS
+              </Text>
+            </View>
           </View>
-        }
-      />
+        </View>
       </PageFlip>
     </ScreenContainer>
   );
 }
 
-function FolioFooter() {
-  const colors = useColors();
-  return (
-    <View style={styles.folio}>
-      <View style={[styles.folioRule, { backgroundColor: colors.border }]} />
-      <Text style={[styles.folioText, { color: colors.border }]}>
-        THE REGISTRY · BERKELEY · CALIFORNIA
-      </Text>
-    </View>
-  );
-}
-
 const styles = StyleSheet.create({
-  // ---- Cover ----
+  // ---- Cover (title page) ----
   cover: {
+    flex: 1,
     marginHorizontal: 12,
-    marginTop: 16,
-    marginBottom: 8,
+    marginTop: 12,
+    marginBottom: 12,
     padding: 4,
   },
   coverFrame: {
@@ -483,47 +182,40 @@ const styles = StyleSheet.create({
     borderWidth: StyleSheet.hairlineWidth,
   },
   coverContent: {
+    flex: 1,
     alignItems: "center",
+    justifyContent: "center",
     paddingVertical: 40,
     paddingHorizontal: 20,
-    gap: 0,
   },
   coverKicker: {
     fontFamily: SERIF,
     fontSize: 10,
     fontWeight: "700",
     letterSpacing: 3,
-    marginBottom: 22,
+    marginBottom: 26,
   },
   coverTitleBlock: {
     alignItems: "center",
   },
   coverTitle: {
     fontFamily: SERIF_BOLD,
-    fontSize: 52,
+    fontSize: 54,
     letterSpacing: 10,
     textAlign: "center",
   },
   coverSubtitle: {
     fontFamily: SERIF,
-    fontSize: 20,
+    fontSize: 21,
     fontWeight: "600",
     letterSpacing: 12,
     marginTop: 10,
     paddingRight: 12, // optically re-center tracked small caps
   },
-  coverDedication: {
-    fontFamily: SERIF,
-    fontSize: 13,
-    fontStyle: "italic",
-    lineHeight: 19,
-    textAlign: "center",
-    marginTop: 14,
-  },
   plateWrap: {
     width: "100%",
     alignItems: "center",
-    marginTop: 26,
+    marginTop: 34,
   },
   plateCaption: {
     fontFamily: SERIF,
@@ -556,30 +248,6 @@ const styles = StyleSheet.create({
     height: 4,
     borderRadius: 2,
   },
-  coverBtnRow: {
-    flexDirection: "row",
-    gap: 12,
-    marginTop: 30,
-  },
-  coverBtn: {
-    borderWidth: 1.5,
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-  },
-  coverBtnText: {
-    fontFamily: SERIF_SEMI,
-    fontSize: 12,
-    fontWeight: "600",
-    letterSpacing: 2.5,
-  },
-  coverBtnTextGhost: {},
-  coverImprint: {
-    fontFamily: SERIF,
-    fontSize: 9,
-    fontWeight: "600",
-    letterSpacing: 2.5,
-    marginTop: 26,
-  },
   // ---- Ornamental rule ----
   ruleRow: {
     flexDirection: "row",
@@ -596,179 +264,5 @@ const styles = StyleSheet.create({
     height: 7,
     borderWidth: 1,
     transform: [{ rotate: "45deg" }],
-  },
-
-  folio: {
-    alignItems: "center",
-    marginTop: 28,
-    gap: 8,
-  },
-  folioRule: {
-    width: 48,
-    height: StyleSheet.hairlineWidth,
-  },
-  folioText: {
-    fontSize: 9,
-    fontWeight: "600",
-    letterSpacing: 2,
-  },
-
-  headerTopSpacer: {
-    paddingTop: 12,
-  },
-  screenHeader: {
-    paddingHorizontal: 16,
-    paddingTop: 24,
-    paddingBottom: 20,
-  },
-  screenSubtitle: {
-    fontSize: 15,
-    lineHeight: 22,
-    marginTop: 2,
-  },
-  searchBar: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginHorizontal: 16,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    borderWidth: 1,
-    borderRadius: 2,
-    gap: 10,
-  },
-  searchGlyph: {
-    fontSize: 16,
-    lineHeight: 20,
-    fontFamily: Platform.select({ ios: "Georgia", default: "serif" }),
-  },
-  searchInput: {
-    flex: 1,
-    fontSize: 16,
-    lineHeight: 20,
-    padding: 0,
-  },
-  categoryScroll: {
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    gap: 8,
-  },
-  catChip: {
-    paddingHorizontal: 12,
-    paddingVertical: 7,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderRadius: 3,
-    marginRight: 8,
-  },
-  catChipText: {
-    fontSize: 11,
-    fontWeight: "500",
-    textTransform: "uppercase",
-    letterSpacing: 1,
-  },
-  sortRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 16,
-    marginBottom: 8,
-  },
-    sortChip: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderRadius: 2,
-  },
-  sortChipText: {
-    fontSize: 10,
-    fontWeight: "600",
-    textTransform: "uppercase",
-    letterSpacing: 1.5,
-    fontFamily: Platform.select({ ios: "Georgia", default: "serif" }),
-  },
-  resultsRow: {
-    paddingHorizontal: 16,
-    paddingBottom: 8,
-  },
-  resultsText: {
-    fontSize: 11,
-    fontWeight: "500",
-    textTransform: "uppercase",
-    letterSpacing: 1,
-  },
-  listContent: {
-    paddingHorizontal: 16,
-    paddingBottom: 100,
-  },
-  landmarkRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    borderRadius: 6,
-    overflow: "hidden",
-    ...Platform.select({
-      ios: {
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.02,
-        shadowRadius: 2,
-      },
-      android: { elevation: 1 },
-      web: { boxShadow: "0 1px 2px rgba(0,0,0,0.02)" },
-    }),
-  },
-  catIndicator: {
-    width: 3,
-    alignSelf: "stretch",
-  },
-  rowContent: {
-    flex: 1,
-    paddingVertical: 16,
-    paddingHorizontal: 14,
-  },
-  rowName: {
-    fontSize: 16,
-    fontWeight: "600",
-    fontFamily: "SourceSerif4_600SemiBold",
-    lineHeight: 22,
-  },
-  rowAddress: {
-    fontSize: 14,
-    lineHeight: 18,
-    marginTop: 2,
-  },
-  rowMeta: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginTop: 4,
-    gap: 6,
-  },
-  rowMetaText: {
-    fontSize: 11,
-    lineHeight: 14,
-    textTransform: "uppercase",
-    letterSpacing: 1,
-    fontWeight: "500",
-  },
-  rowRight: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    paddingRight: 14,
-  },
-  nrBadge: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  emptyState: {
-    alignItems: "center",
-    paddingTop: 60,
-    gap: 12,
-  },
-  emptyText: {
-    fontSize: 15,
-    textAlign: "center",
   },
 });

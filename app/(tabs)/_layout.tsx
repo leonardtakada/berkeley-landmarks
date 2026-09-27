@@ -9,11 +9,10 @@ export default function TabLayout() {
 
   return (
     <Tabs
-      // The cover (index) reads as a closed front board — show it clean,
-      // without the bookmark ribbons.
-      tabBar={(props: any) =>
-        props.state?.index === 0 ? null : <BookmarkTabBar {...props} />
-      }
+      // The bookmark ribbons hang from the HEAD of the book, over the
+      // top of every page — including the cover — like ribbons draped
+      // over the top edge of a closed guidebook.
+      tabBar={(props: any) => <BookmarkTabBar {...props} />}
       screenOptions={{
         // The bookmark ribbons hang from the HEAD of the book, like
         // ribbons draped over the top edge of a closed guidebook.
@@ -35,6 +34,20 @@ export default function TabLayout() {
     >
       <Tabs.Screen
         name="index"
+        options={{
+          title: "Cover",
+          tabBarIcon: ({ color, focused }) => (
+            <IconSymbol
+              size={26}
+              name={focused ? "book.closed.fill" : "book.closed"}
+              color={color}
+              weight="semibold"
+            />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="registry"
         options={{
           title: "Landmarks",
           tabBarIcon: ({ color, focused }) => (
