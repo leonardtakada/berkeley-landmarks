@@ -96,6 +96,19 @@ export default function MapScreen() {
       if (lm) {
         setActiveTourId(null);
         setSelectedLandmark(lm);
+        // Fly the camera to the landmark so the user actually sees where it
+        // is. Delay accounts for map mount (~maplibre asset staging) plus
+        // the ~450ms MapUnfold animation — camera commands issued before
+        // the view is mounted are silently dropped.
+        const t = setTimeout(
+          () =>
+            mapRef.current?.flyToCoord?.(
+              { latitude: lm.latitude, longitude: lm.longitude },
+              16
+            ),
+          900
+        );
+        return () => clearTimeout(t);
       }
     }
   }, [params.landmarkId]);
@@ -125,9 +138,9 @@ export default function MapScreen() {
           return { latitude: l!.latitude, longitude: l!.longitude };
         });
     if (coords.length < 2) return;
-    // Small delay: the MapLibre view may still be (re)mounting when the
-    // tab first opens, and camera calls before mount are dropped.
-    const t = setTimeout(() => mapRef.current?.fitCoords?.(coords), 350);
+    // Delay: map mount + the ~450ms MapUnfold animation — camera calls
+    // issued before the view has mounted are dropped.
+    const t = setTimeout(() => mapRef.current?.fitCoords?.(coords), 900);
     return () => clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps -- refocus only when the tour changes
   }, [tourIdForFocus]);
@@ -202,6 +215,13 @@ export default function MapScreen() {
     setSelectedLandmark(null);
   }, []);
 
+  // Book-styled close affordance: map is a push route with no tab chrome,
+  // so give the map an explicit way out.
+  const handleClose = useCallback(() => {
+    if (router.canGoBack()) router.back();
+    else router.replace("/");
+  }, [router]);
+
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <MapUnfold animated={!hasMounted.current}>
@@ -214,6 +234,14 @@ export default function MapScreen() {
         maxZoomLevel={17}
         onPress={handleMapPress}
         showsUserLocation
+        highlight={
+          selectedLandmark
+            ? {
+                latitude: selectedLandmark.latitude,
+                longitude: selectedLandmark.longitude,
+              }
+            : null
+        }
         clusterMarkers={filteredLandmarks.map((landmark) => ({
           id: landmark.id,
           coordinate: { latitude: landmark.latitude, longitude: landmark.longitude },
@@ -253,6 +281,14 @@ export default function MapScreen() {
         showsCompass
         showsScale
         mapType="standard"
+        highlight={
+          selectedLandmark
+            ? {
+                latitude: selectedLandmark.latitude,
+                longitude: selectedLandmark.longitude,
+              }
+            : null
+        }
         clusterMarkers={filteredLandmarks.map((landmark) => ({
           id: landmark.id,
           coordinate: { latitude: landmark.latitude, longitude: landmark.longitude },
@@ -302,6 +338,25 @@ export default function MapScreen() {
       </MapViewWrapper>
       )}
       </MapUnfold>
+
+      {/* Book-styled CLOSE button — the map has no tab chrome to escape from */}
+      <Pressable
+        accessibilityLabel="Close map"
+        accessibilityRole="button"
+        onPress={handleClose}
+        style={({ pressed }) => [
+          styles.closeButton,
+          {
+            top: insets.top + 12,
+            backgroundColor: colors.surface,
+            borderColor: colors.border,
+            opacity: pressed ? 0.7 : 1,
+          },
+        ]}
+      >
+        <IconSymbol name="xmark" size={12} color={colors.text} />
+        <Text style={[styles.closeButtonText, { color: colors.text }]}>Close</Text>
+      </Pressable>
 
       {/* Map engine toggle: MapLibre vector map ⇄ raster fallback */}
       {__DEV__ && engineReady && (
@@ -546,7 +601,7 @@ const styles = StyleSheet.create({
     zIndex: 10,
   },
   filterScroll: {
-    paddingHorizontal: 16,
+    paddingLeft: 76,
     paddingRight: 40,
     gap: 8,
   },
@@ -578,6 +633,35 @@ const styles = StyleSheet.create({
     height: 7,
     borderRadius: 1,
   },
+  closeButton: {
+    position: "absolute" as const,
+    left: 12,
+    zIndex: 20,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    paddingHorizontal: 10,
+    paddingVertical: 7,
+    borderRadius: 2,
+    borderWidth: 1,
+    ...Platform.select({
+      ios: {
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.06,
+        shadowRadius: 6,
+      },
+      android: { elevation: 2 },
+      web: { boxShadow: "0 2px 6px rgba(0,0,0,0.06)" },
+    }),
+  },
+  closeButtonText: {
+    fontFamily: SERIF,
+    fontSize: 11,
+    fontWeight: "600",
+    letterSpacing: 1.2,
+    textTransform: "uppercase",
+  },
   chipText: {
     fontFamily: SERIF,
     fontSize: 11,
@@ -587,7 +671,7 @@ const styles = StyleSheet.create({
   },
   tourBanner: {
     position: "absolute",
-    left: 16,
+    left: 76,
     right: 16,
     flexDirection: "row",
     alignItems: "center",

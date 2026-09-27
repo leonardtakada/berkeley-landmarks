@@ -71,6 +71,8 @@ interface MapViewWrapperProps {
   }>;
   clusterRadius?: number;
   clusterMaxZoom?: number;
+  /** Emphasized landmark (deep-link / selection): ink crosshair ring */
+  highlight?: Coordinate | null;
 }
 
 export function MapMarker(props: MarkerProps) {
@@ -135,6 +137,19 @@ function CityBoundaryOverlay() {
   );
 }
 
+/** Red-ink crosshair ring marking the highlighted landmark (Showa motif). */
+function HighlightCrosshair() {
+  return (
+    <View style={styles.highlightRing}>
+      <View style={styles.highlightTickTop} />
+      <View style={styles.highlightTickBottom} />
+      <View style={styles.highlightTickLeft} />
+      <View style={styles.highlightTickRight} />
+      <View style={styles.highlightDot} />
+    </View>
+  );
+}
+
 function PaperTintOverlay() {
   const colors = useColors();
   const dark = colors.background === "#1C1B19";
@@ -143,7 +158,7 @@ function PaperTintOverlay() {
 }
 
 const MapViewWrapper = forwardRef<any, MapViewWrapperProps>(
-  ({ children, clusterMarkers, clusterRadius = 50, clusterMaxZoom = 15, ...props }, ref) => {
+  ({ children, clusterMarkers, clusterRadius = 50, clusterMaxZoom = 15, highlight, ...props }, ref) => {
     const [currentRegion, setCurrentRegion] = useState<RegionLike | null>(null);
     const systemScheme = useColorScheme();
     const scheme: TileScheme = systemScheme === "dark" ? "dark" : "light";
@@ -155,9 +170,16 @@ const MapViewWrapper = forwardRef<any, MapViewWrapperProps>(
       () => {
         const inner = mapRef.current ?? {};
         const merged: any = { ...inner };
-        merged.flyToCoord = (coord: { latitude: number; longitude: number }) =>
+        merged.flyToCoord = (
+          coord: { latitude: number; longitude: number },
+          zoom = 16
+        ) =>
           mapRef.current?.animateToRegion(
-            { ...coord, latitudeDelta: 0.004, longitudeDelta: 0.004 },
+            {
+              ...coord,
+              latitudeDelta: 360 / Math.pow(2, zoom),
+              longitudeDelta: 360 / Math.pow(2, zoom),
+            },
             500
           );
         merged.fitCoords = (coords: Array<{ latitude: number; longitude: number }>) =>
@@ -366,6 +388,17 @@ const MapViewWrapper = forwardRef<any, MapViewWrapperProps>(
               />
             );
             })}
+
+            {highlight && (
+              <Marker
+                coordinate={highlight}
+                anchor={{ x: 0.5, y: 0.5 }}
+                tracksViewChanges={false}
+                pointerEvents="none"
+              >
+                <HighlightCrosshair />
+              </Marker>
+            )}
           </MapView>
           {tilesReady ? null : <LoadingCover progress={mapProgress} />}
           <PaperTintOverlay />
@@ -395,6 +428,16 @@ const MapViewWrapper = forwardRef<any, MapViewWrapperProps>(
           />
           <CityBoundaryOverlay />
           {children}
+          {highlight && (
+            <Marker
+              coordinate={highlight}
+              anchor={{ x: 0.5, y: 0.5 }}
+              tracksViewChanges={false}
+              pointerEvents="none"
+            >
+              <HighlightCrosshair />
+            </Marker>
+          )}
         </MapView>
         {tilesReady ? null : <LoadingCover progress={mapProgress} />}
         <PaperTintOverlay />
@@ -409,6 +452,54 @@ export default MapViewWrapper;
 
 const styles = StyleSheet.create({
   mapShell: { flex: 1 },
+  highlightRing: {
+    width: 32,
+    height: 32,
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: 16,
+    borderWidth: 2.5,
+    borderColor: "#C0392B",
+    backgroundColor: "rgba(247, 243, 234, 0.55)",
+  },
+  highlightDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: "#C0392B",
+  },
+  highlightTickTop: {
+    position: "absolute",
+    top: -7,
+    left: 14,
+    width: 2,
+    height: 6,
+    backgroundColor: "#C0392B",
+  },
+  highlightTickBottom: {
+    position: "absolute",
+    bottom: -7,
+    left: 14,
+    width: 2,
+    height: 6,
+    backgroundColor: "#C0392B",
+  },
+  highlightTickLeft: {
+    position: "absolute",
+    left: -7,
+    top: 14,
+    width: 6,
+    height: 2,
+    backgroundColor: "#C0392B",
+  },
+  highlightTickRight: {
+    position: "absolute",
+    right: -7,
+    top: 14,
+    width: 6,
+    height: 2,
+    backgroundColor: "#C0392B",
+  },
   paperTint: { position: "absolute" as const, top: 0, left: 0, right: 0, bottom: 0 },
   clusterBubble: {
     justifyContent: "center",

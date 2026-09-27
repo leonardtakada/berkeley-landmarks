@@ -91,6 +91,8 @@ interface MapLibreViewProps {
   clusterMarkers?: ClusterMarker[];
   clusterRadius?: number;
   clusterMaxZoom?: number;
+  /** Emphasized landmark (deep-link / selection): ink crosshair ring */
+  highlight?: Coordinate | null;
   children?: React.ReactNode;
 }
 
@@ -179,6 +181,9 @@ function useOfflineAssets() {
 // LngLatBounds tuple order: [west, south, east, north].
 const MAX_BOUNDS: [number, number, number, number] = [-122.41, 37.785, -122.15, 37.965];
 
+// Red ink used for the landmark highlight motif (see app/map.tsx INK_RED).
+const INK_RED = "#C0392B";
+
 const MapLibreMapView = forwardRef<MapRef | null, MapLibreViewProps>(
   (
     {
@@ -191,6 +196,7 @@ const MapLibreMapView = forwardRef<MapRef | null, MapLibreViewProps>(
       clusterMarkers,
       clusterRadius = 50,
       clusterMaxZoom = 15,
+      highlight,
       children,
     },
     ref
@@ -352,6 +358,47 @@ const MapLibreMapView = forwardRef<MapRef | null, MapLibreViewProps>(
             maxBounds={MAX_BOUNDS}
           />
           {showsUserLocation && <UserLocation accuracy heading />}
+
+          {/* Highlighted landmark — paper halo + red-ink crosshair ring so a
+              deep-linked landmark is unmistakable after the camera flies in. */}
+          {highlight && (
+            <GeoJSONSource
+              id="highlight-marker"
+              data={{
+                type: "Feature" as const,
+                properties: {},
+                geometry: {
+                  type: "Point" as const,
+                  coordinates: [highlight.longitude, highlight.latitude],
+                },
+              }}
+            >
+              <Layer
+                id="highlight-halo"
+                type="circle"
+                paint={{
+                  "circle-radius": 18,
+                  "circle-color": "#F7F3EA",
+                  "circle-opacity": 0.8,
+                }}
+              />
+              <Layer
+                id="highlight-ring"
+                type="circle"
+                paint={{
+                  "circle-radius": 14,
+                  "circle-color": "transparent",
+                  "circle-stroke-width": 2.5,
+                  "circle-stroke-color": INK_RED,
+                }}
+              />
+              <Layer
+                id="highlight-dot"
+                type="circle"
+                paint={{ "circle-radius": 4, "circle-color": INK_RED }}
+              />
+            </GeoJSONSource>
+          )}
 
           {markerGeoJSON && (
             <GeoJSONSource

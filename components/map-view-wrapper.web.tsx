@@ -1,4 +1,4 @@
-import React, { forwardRef, useEffect, useMemo, useRef } from "react";
+import React, { forwardRef, useEffect, useImperativeHandle, useMemo, useRef } from "react";
 import type * as LeafletNS from "leaflet";
 import "leaflet/dist/leaflet.css";
 import SuperCluster from "supercluster";
@@ -62,6 +62,8 @@ interface MapViewWrapperProps {
   clusterMarkers?: ClusterMarkerData[];
   clusterRadius?: number;
   clusterMaxZoom?: number;
+  /** Emphasized landmark (deep-link / selection): ink crosshair ring */
+  highlight?: Coordinate | null;
 }
 
 export function MapMarker(_props: MarkerProps) {
@@ -161,6 +163,7 @@ const WebMap = forwardRef<any, MapViewWrapperProps>(function WebMap(
     clusterMarkers,
     clusterRadius = 50,
     clusterMaxZoom = 17,
+    highlight,
     children,
   },
   ref
@@ -169,6 +172,32 @@ const WebMap = forwardRef<any, MapViewWrapperProps>(function WebMap(
   const mapRef = useRef<L.Map | null>(null);
   const overlayLayer = useRef<L.LayerGroup | null>(null);
   const markerLayer = useRef<L.LayerGroup | null>(null);
+  const highlightLayer = useRef<L.LayerGroup | null>(null);
+
+  // Common camera API (parity with the native wrappers) so screens can fly /
+  // fit without caring which engine is mounted.
+  useImperativeHandle(
+    ref,
+    () => ({
+      flyToCoord: (
+        coord: { latitude: number; longitude: number },
+        zoom = 16
+      ) =>
+        mapRef.current?.flyTo([coord.latitude, coord.longitude], zoom, {
+          duration: 0.8,
+        }),
+      fitCoords: (coords: Array<{ latitude: number; longitude: number }>) => {
+        if (coords.length < 2 || !mapRef.current) return;
+        const L = getLeaflet();
+        mapRef.current.fitBounds(L.latLngBounds(coords.map(toLatLng)), {
+          paddingTopLeft: L.point(70, 110),
+          paddingBottomRight: L.point(70, 130),
+          animate: true,
+        });
+      },
+    }),
+    []
+  );
 
   // Extract overlay geometry from declarative children
   const overlays = useMemo(() => {
@@ -213,7 +242,7 @@ const WebMap = forwardRef<any, MapViewWrapperProps>(function WebMap(
     });
     mapRef.current = map;
 
-    new (makeCachedTileLayer(L))("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    new (makeCachedTileLayer(L) as any)("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
       maxZoom: 19,
     }).addTo(map);
@@ -229,6 +258,7 @@ const WebMap = forwardRef<any, MapViewWrapperProps>(function WebMap(
 
     overlayLayer.current = L.layerGroup().addTo(map);
     markerLayer.current = L.layerGroup().addTo(map);
+    highlightLayer.current = L.layerGroup().addTo(map);
 
     if (initialRegion) {
       map.setView(
@@ -398,6 +428,36 @@ const WebMap = forwardRef<any, MapViewWrapperProps>(function WebMap(
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [markerKey, clusterRadius, clusterMaxZoom]);
+
+  // Highlighted landmark — red-ink crosshair ring (deep-link emphasis)
+  const highlightKey = highlight
+    ? `${highlight.latitude.toFixed(6)},${highlight.longitude.toFixed(6)}`
+    : "";
+  useEffect(() => {
+    const layer = highlightLayer.current;
+    if (!layer) return;
+    const L = getLeaflet();
+    layer.clearLayers();
+    if (!highlight) return;
+    const latlng: [number, number] = [highlight.latitude, highlight.longitude];
+    L.circleMarker(latlng, {
+      radius: 14,
+      color: "#C0392B",
+      weight: 2.5,
+      opacity: 0.95,
+      fillColor: "#F7F3EA",
+      fillOpacity: 0.55,
+      interactive: false,
+    }).addTo(layer);
+    L.circleMarker(latlng, {
+      radius: 4,
+      stroke: false,
+      fillColor: "#C0392B",
+      fillOpacity: 1,
+      interactive: false,
+    }).addTo(layer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [highlightKey]);
 
   return <div ref={containerRef} style={{ flex: 1, width: "100%", height: "100%", ...(style as object) }} />;
 });
