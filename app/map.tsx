@@ -539,8 +539,8 @@ export default function MapScreen() {
                 {selectedLandmark.architect} · {selectedLandmark.yearBuilt}
               </Text>
               {selectedLandmark.nationalRegister && (
-                <View style={[styles.nrBadge, { backgroundColor: colors.accent + '22' }]}>
-                  <IconSymbol name="star.fill" size={10} color="#FF9500" />
+                <View style={[styles.nrBadge, { borderColor: colors.accent }]}>
+                  <IconSymbol name="star.fill" size={10} color={colors.accent} />
                   <Text style={[styles.nrText, { color: colors.accent }]}>NR</Text>
                 </View>
               )}
@@ -823,6 +823,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     paddingVertical: 2,
     borderRadius: 4,
+    borderWidth: StyleSheet.hairlineWidth,
   },
   nrText: {
     fontSize: 11,

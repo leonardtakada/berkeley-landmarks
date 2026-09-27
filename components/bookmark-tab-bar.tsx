@@ -14,24 +14,26 @@ import { IconSymbol } from "@/components/ui/icon-symbol";
 import { useColors } from "@/hooks/use-colors";
 
 /**
- * Bookmark-ribbon tab bar, hung from the TOP of the book.
- * Like ribbons draped over the head of a closed book, each tab is a
- * ribbon hanging DOWNWARD from the top edge. The focused ribbon hangs
- * longer and darker (the pull you'd grab); resting ribbons sit shorter.
- * Focus changes animate (height/color ~180ms) and the focused ribbon gets
- * a subtle "page lift" fold shadow where it meets the head of the book.
+ * Bookmark-ribbon tab bar, hung from the HEAD of the book.
+ *
+ * The ribbons visibly COME OUT OF the book: their tops are tucked UNDER a
+ * glossy dark-ink head-band (the spine's head strip along the very top edge
+ * of the page), they overlap the page edge and cast a small drop shadow
+ * where they cross it, and they end in a notched (swallow-tail) cut.
+ * The selected ribbon hangs longer and is printed in BRAND_BLUE
+ * (#0B2E8C); resting ribbons are faded sepia ink. Focus changes animate
+ * height/color (~200ms spring).
  */
 
-type Bookmark = {
-  name: string; // route name in (tabs)
-  href: string;
-  label: string;
-  icon: { focused: string; unfocused: string };
-  /** ribbon color; falls back to theme accent */
-  color: string;
-  /** staggered resting hang length below the top edge */
-  restHeight: number;
-};
+/** The logo blue — the only blue in the book. */
+const BRAND_BLUE = "#0B2E8C";
+/** Resting ribbons: faded sepia ink, like old silk. */
+const RIBBON_REST = "#7A7168";
+
+/** Height of the glossy head-band strip the ribbons emerge from behind. */
+const HEAD_BAND_H = 10;
+/** How far the ribbon tops are tucked under the band. */
+const TUCK = 7;
 
 const ICONS: Record<string, { focused: string; unfocused: string }> = {
   // index = Landmarks list (home)
@@ -40,19 +42,12 @@ const ICONS: Record<string, { focused: string; unfocused: string }> = {
   profile: { focused: "person.crop.circle.fill", unfocused: "person.crop.circle" },
 };
 
-// Ribbon color per tab route (Showa Modern): Landmarks=terracotta, Tours=indigo, Appendix=sage
-const RIBBON_COLORS: Record<string, string> = {
-  index: "#E15A3E",
-  tours: "#2B3A67",
-  profile: "#6B8E6D",
-};
 // Staggered resting hang lengths — each ribbon drapes at a slightly
-// different length, like real book ribbons. Generously long: the cover is
-// sparse and the ribbons should clearly read as hanging into the book.
+// different length, like real book ribbons pulled to different depths.
 const STAGGER: Record<string, number> = {
-  index: 46,
-  tours: 34,
-  profile: 40,
+  index: 44,
+  tours: 32,
+  profile: 38,
 };
 
 // hexToRGBA helper (colors are always 6-digit hex here)
@@ -64,7 +59,24 @@ function withAlpha(hex: string, alpha: number): string {
   return `rgba(${r},${g},${b},${alpha})`;
 }
 
-/** One animated bookmark ribbon hanging down from the top edge. */
+/** Interpolate two hex colors (same "worklet"-safe style as withAlpha). */
+function mixHex(a: string, b: string, t: number): string {
+  "worklet";
+  const ar = parseInt(a.slice(1, 3), 16),
+    ag = parseInt(a.slice(3, 5), 16),
+    ab = parseInt(a.slice(5, 7), 16);
+  const br = parseInt(b.slice(1, 3), 16),
+    bg = parseInt(b.slice(3, 5), 16),
+    bb = parseInt(b.slice(5, 7), 16);
+  const r = Math.round(ar + (br - ar) * t);
+  const g = Math.round(ag + (bg - ag) * t);
+  const bl = Math.round(ab + (bb - ab) * t);
+  return `#${r.toString(16).padStart(2, "0")}${g.toString(16).padStart(2, "0")}${bl
+    .toString(16)
+    .padStart(2, "0")}`;
+}
+
+/** One animated bookmark ribbon hanging down from behind the head-band. */
 function RibbonTab({
   focused,
   routeKey,
@@ -82,41 +94,26 @@ function RibbonTab({
   const focus = useSharedValue(focused ? 1 : 0);
 
   useEffect(() => {
-    // Subtle ~180ms spring on extend; timing on settle
+    // Subtle ~200ms spring on extend; timing on settle
     focus.value = focused
       ? withSpring(1, { damping: 20, stiffness: 260, mass: 0.7 })
-      : withTiming(0, { duration: 180 });
+      : withTiming(0, { duration: 200 });
   }, [focused, focus]);
 
-  const ribbonPalette = ["#2B3A67", "#E15A3E", "#6B8E6D"];
-  const stagger = [46, 34, 40];
-  const ribbonColor = RIBBON_COLORS[routeName] ?? ribbonPalette[0];
-  const rest = STAGGER[routeName] ?? stagger[0];
+  const rest = STAGGER[routeName] ?? 40;
 
+  // Ribbon body + tail share one animated color: sepia at rest → brand blue
+  // when pulled. Height grows with focus — the selected ribbon hangs longer.
+  const color = useAnimatedStyle(() => ({
+    backgroundColor: withAlpha(mixHex(RIBBON_REST, BRAND_BLUE, focus.value), 0.82 + 0.18 * focus.value),
+  }));
   const ribbonStyle = useAnimatedStyle(() => {
-    const height = rest + 18 * focus.value;
-    const alpha = 0.7 + 0.3 * focus.value;
-    return {
-      height,
-      backgroundColor: withAlpha(ribbonColor, alpha),
-    };
+    const height = rest + 16 * focus.value;
+    return { height };
   });
-
-  const tailStyle = useAnimatedStyle(() => {
-    const alpha = 0.7 + 0.3 * focus.value;
-    return {
-      borderTopColor: withAlpha(ribbonColor, alpha),
-    };
-  });
-
-  // Page lift: small triangular fold shadow just below where the ribbon
-  // enters the head of the book, fading in/out with focus (~180ms, subtle).
-  const cornerStyle = useAnimatedStyle(() => {
-    return {
-      opacity: 0.35 * focus.value,
-      transform: [{ translateY: 4 + 4 * focus.value }],
-    };
-  });
+  const tailStyle = useAnimatedStyle(() => ({
+    borderTopColor: withAlpha(mixHex(RIBBON_REST, BRAND_BLUE, focus.value), 0.82 + 0.18 * focus.value),
+  }));
 
   return (
     <Pressable
@@ -129,22 +126,16 @@ function RibbonTab({
       accessibilityState={{ selected: focused }}
     >
       <View style={styles.ribbonWrap}>
-        {/* page lift fold where the ribbon meets the head of the book */}
-        <Animated.View
-          pointerEvents="none"
-          style={[styles.cornerLift, cornerStyle]}
-        >
-          <View style={styles.cornerFold} />
-        </Animated.View>
-        {/* Ribbon — hangs DOWN from the top edge */}
+        {/* Ribbon — emerges from behind the head-band and hangs DOWN over
+            the page; the drop shadow is cast where it crosses the page edge. */}
         <Animated.View
           style={[
             styles.ribbon,
             ribbonStyle,
+            color,
             {
-              borderLeftColor: ribbonColor,
-              borderRightColor: ribbonColor,
-              borderBottomColor: ribbonColor,
+              borderLeftColor: "rgba(0,0,0,0.18)",
+              borderRightColor: "rgba(0,0,0,0.18)",
             },
           ]}
         >
@@ -159,7 +150,7 @@ function RibbonTab({
             weight="semibold"
           />
         </Animated.View>
-        {/* notched ribbon tail pointing down */}
+        {/* notched (swallow-tail) ribbon tail — a V cut into the ribbon end */}
         <Animated.View
           style={[
             styles.ribbonTail,
@@ -173,7 +164,7 @@ function RibbonTab({
         style={[
           styles.label,
           {
-            color: focused ? ribbonColor : colors.muted,
+            color: focused ? BRAND_BLUE : colors.muted,
           },
         ]}
         numberOfLines={1}
@@ -218,27 +209,38 @@ export function BookmarkTabBar(props: {
       style={[
         styles.bar,
         {
-          backgroundColor: colors.background,
+          backgroundColor: colors.pageBackground,
           paddingTop: topPadding,
-          borderColor: colors.border,
+          borderBottomColor: colors.pageBorder,
         },
       ]}
     >
-      {/* thin double rule like a book page trim, along the head */}
-      <View style={[styles.trim, { borderColor: colors.border }]} />
-      <View style={[styles.trim2, { borderColor: colors.border }]} />
+      <View style={styles.bookHead}>
+        {/* Ribbons — rendered FIRST so the head-band below covers their tops. */}
+        <View style={[styles.row, { paddingTop: HEAD_BAND_H - TUCK }]}>
+          {state.routes.map((route, i) => (
+            <RibbonTab
+              key={route.key}
+              routeKey={route.key}
+              routeName={route.name}
+              focused={i === state.index}
+              descriptorsTitle={props.descriptors[route.key]?.options?.title}
+              onPress={() => onSelect(route.name, route.key, i)}
+            />
+          ))}
+        </View>
 
-      <View style={styles.row}>
-        {state.routes.map((route, i) => (
-          <RibbonTab
-            key={route.key}
-            routeKey={route.key}
-            routeName={route.name}
-            focused={i === state.index}
-            descriptorsTitle={props.descriptors[route.key]?.options?.title}
-            onPress={() => onSelect(route.name, route.key, i)}
-          />
-        ))}
+        {/*
+         * HEAD-BAND: the glossy dark ink strip along the very top edge of
+         * the book. The ribbons tuck under it — this is what makes them read
+         * as coming OUT of the book rather than pasted onto the page.
+         */}
+        <View pointerEvents="none" style={styles.headBand}>
+          {/* gloss: a bright catch-light along the lower edge of the band */}
+          <View style={styles.headBandGloss} />
+          {/* page edge: hairline where the page meets the head of the book */}
+          <View style={[styles.pageEdge, { borderBottomColor: colors.pageBorder }]} />
+        </View>
       </View>
     </View>
   );
@@ -250,27 +252,14 @@ const styles = StyleSheet.create({
   bar: {
     borderBottomWidth: StyleSheet.hairlineWidth,
   },
-  trim: {
-    position: "absolute",
-    bottom: 0,
-    left: 12,
-    right: 12,
-    height: 0,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-  },
-  trim2: {
-    position: "absolute",
-    bottom: 3,
-    left: 20,
-    right: 20,
-    height: 0,
-    borderBottomWidth: StyleSheet.hairlineWidth,
+  bookHead: {
+    // Ribbons absolutely tuck under the band; keep a little room below.
   },
   row: {
     flexDirection: "row",
     alignItems: "flex-start",
     paddingHorizontal: 8,
-    paddingBottom: 6,
+    paddingBottom: 8,
   },
   tabBtn: {
     flex: 1,
@@ -280,57 +269,75 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   ribbon: {
-    width: 56,
+    width: 54,
     borderWidth: StyleSheet.hairlineWidth,
     borderTopWidth: 0,
-    borderBottomLeftRadius: 0,
-    borderBottomRightRadius: 0,
     alignItems: "center",
     justifyContent: "flex-start",
     paddingTop: 7,
+    // Drop shadow cast onto the page where the ribbon crosses its edge.
+    shadowColor: "#241D15",
+    shadowOpacity: 0.3,
+    shadowRadius: 2.5,
+    shadowOffset: { width: 0, height: 3 },
+    elevation: 4,
   },
+  // Swallow-tail: triangle NOTCH cut into the bottom of the ribbon.
   ribbonTail: {
     width: 0,
     height: 0,
-    borderLeftWidth: 28,
-    borderRightWidth: 28,
-    borderTopWidth: 10,
+    borderLeftWidth: 27,
+    borderRightWidth: 27,
+    borderTopWidth: 9,
     borderLeftColor: "transparent",
     borderRightColor: "transparent",
-    borderTopColor: "#000",
+    borderTopColor: "#000", // overridden by animated tailStyle
+    // The notch is part of the ribbon — it carries the same page shadow.
+    shadowColor: "#241D15",
+    shadowOpacity: 0.18,
+    shadowRadius: 2,
+    shadowOffset: { width: 0, height: 2 },
   },
   label: {
     fontFamily: Platform.select({ ios: "Georgia", default: "serif" }),
     fontSize: 12,
     fontWeight: "700",
-    letterSpacing: 1.8,
+    fontStyle: "italic",
+    letterSpacing: 2,
     textTransform: "uppercase",
-    marginTop: 7,
+    marginTop: 6,
   },
-  // Page lift: rotated square with a light bottom/left edge and soft
-  // shadow — reads as the page dipping where the ribbon is draped over
-  // the head of the book.
-  cornerLift: {
+  // ---- Head-band (the book's head strip the ribbons emerge from) ----
+  headBand: {
     position: "absolute",
-    top: -12,
-    width: 24,
-    height: 24,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  cornerFold: {
-    width: 18,
-    height: 18,
-    transform: [{ rotate: "45deg" }],
-    borderBottomWidth: 1,
-    borderLeftWidth: 1,
-    borderBottomColor: "rgba(255,255,255,0.7)",
-    borderLeftColor: "rgba(255,255,255,0.7)",
-    backgroundColor: "rgba(0,0,0,0.06)",
-    shadowColor: "#000",
-    shadowOpacity: 0.25,
+    top: 0,
+    left: 0,
+    right: 0,
+    height: HEAD_BAND_H,
+    // Glossy dark ink — near-black with a touch of sepia warmth.
+    backgroundColor: "#241D15",
+    zIndex: 2,
+    // The band presses onto the page — a tight shadow just below it.
+    shadowColor: "#241D15",
+    shadowOpacity: 0.4,
     shadowRadius: 2,
-    shadowOffset: { width: -1, height: 1 },
-    elevation: 2,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 6,
+  },
+  headBandGloss: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    bottom: 0,
+    height: 1.5,
+    backgroundColor: "rgba(255,255,255,0.22)",
+  },
+  pageEdge: {
+    position: "absolute",
+    left: 12,
+    right: 12,
+    top: HEAD_BAND_H,
+    height: 0,
+    borderBottomWidth: StyleSheet.hairlineWidth,
   },
 });

@@ -186,14 +186,9 @@ export default function LandmarkDetailScreen() {
           if (past !== scrolledPastHero) setScrolledPastHero(past);
         }}
       >
-        {/* Hero Banner */}
+        {/* Hero Banner — plain paper; the plate itself carries the image */}
         <View style={styles.heroBanner}>
-          <LinearGradient
-            colors={[catColor + '30', catColor + '08']}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 0, y: 1 }}
-            style={styles.heroGradient}
-          >
+          <View style={styles.heroGradient}>
             {landmark.photoUrl ? (
               <TippedInPlate
                 source={{
@@ -214,15 +209,15 @@ export default function LandmarkDetailScreen() {
                 style={styles.heroPlaceholder}
               />
             )}
-            <View style={[styles.categoryBadge, { backgroundColor: catColor }]}>
-              <Text style={styles.categoryText}>{CATEGORY_LABELS[landmark.category]}</Text>
+            <View style={[styles.categoryBadge, { borderColor: catColor }]}>
+              <Text style={[styles.categoryText, { color: catColor }]}>{CATEGORY_LABELS[landmark.category]}</Text>
             </View>
             <Text style={[styles.heroName, { color: colors.foreground }]}>{landmark.name}</Text>
             <View style={styles.heroMeta}>
               <IconSymbol name="mappin.and.ellipse" size={14} color={colors.muted} />
               <Text style={[styles.heroAddress, { color: colors.muted }]}>{landmark.address}, Berkeley, CA</Text>
             </View>
-          </LinearGradient>
+          </View>
         </View>
 
         {/* Quick Info Cards */}
@@ -244,18 +239,18 @@ export default function LandmarkDetailScreen() {
         {/* Status Badges */}
         <View style={styles.badgeRow}>
           {landmark.designationType && landmark.designationType !== 'Landmark' && (
-            <View style={[styles.statusBadge, { backgroundColor: colors.primary + '22' }]}>
+            <View style={[styles.statusBadge, { borderColor: colors.primary }]}>
               <IconSymbol name="rosette" size={14} color={colors.primary} />
               <Text style={[styles.statusText, { color: colors.primary }]}>{landmark.designationType}</Text>
             </View>
           )}
           {landmark.nationalRegister && (
-            <View style={[styles.statusBadge, { backgroundColor: '#2B3A6722' }]}>
-              <IconSymbol name="star.fill" size={14} color="#2B3A67" />
-              <Text style={[styles.statusText, { color: '#2B3A67' }]}>National Register</Text>
+            <View style={[styles.statusBadge, { borderColor: colors.primary }]}>
+              <IconSymbol name="star.fill" size={14} color={colors.primary} />
+              <Text style={[styles.statusText, { color: colors.primary }]}>National Register</Text>
             </View>
           )}
-          <View style={[styles.statusBadge, { backgroundColor: catColor + '22' }]}>
+          <View style={[styles.statusBadge, { borderColor: catColor, opacity: 0.9 }]}>
             <IconSymbol name="mappin.and.ellipse" size={14} color={catColor} />
             <Text style={[styles.statusText, { color: catColor }]}>{landmark.neighborhood}</Text>
           </View>
@@ -292,8 +287,8 @@ export default function LandmarkDetailScreen() {
         {/* Add Photo Button */}
         <View style={{ paddingHorizontal: 16, marginTop: 16 }}>
           {uploadSuccess ? (
-            <View style={[styles.addPhotoBtn, { backgroundColor: '#6B8E6D22' }]}>
-              <Text style={{ color: '#6B8E6D', fontWeight: '600' }}>✓ Thank you! Your photo is pending review.</Text>
+            <View style={[styles.addPhotoBtn, { borderColor: colors.success }]}>
+              <Text style={{ color: colors.success, fontWeight: '600' }}>✓ Thank you! Your photo is pending review.</Text>
             </View>
           ) : uploading ? (
             <View style={[styles.addPhotoBtn, { backgroundColor: colors.pageSurface }]}>
@@ -314,8 +309,8 @@ export default function LandmarkDetailScreen() {
         {/* Suggest an Edit Button */}
         <View style={{ paddingHorizontal: 16, marginTop: 12 }}>
           {editSuccess ? (
-            <View style={[styles.addPhotoBtn, { backgroundColor: '#6B8E6D22' }]}>
-              <Text style={{ color: '#6B8E6D', fontWeight: '600' }}>✓ Thank you! Your edit is pending review.</Text>
+            <View style={[styles.addPhotoBtn, { borderColor: colors.success }]}>
+              <Text style={{ color: colors.success, fontWeight: '600' }}>✓ Thank you! Your edit is pending review.</Text>
             </View>
           ) : (
             <Pressable
@@ -373,14 +368,14 @@ export default function LandmarkDetailScreen() {
                   <Text style={{ color: colors.foreground, fontWeight: '600' }}>Cancel</Text>
                 </Pressable>
                 <Pressable
-                  style={[styles.editModalBtn, styles.editModalBtnPrimary, editSubmitting && { opacity: 0.6 }]}
+                  style={[styles.editModalBtn, styles.editModalBtnPrimary, { borderColor: colors.primary }, editSubmitting && { opacity: 0.6 }]}
                   onPress={submitEdit}
                   disabled={editSubmitting}
                 >
                   {editSubmitting ? (
-                    <ActivityIndicator size="small" color="#FFFFFF" />
+                    <ActivityIndicator size="small" color={colors.primary} />
                   ) : (
-                    <Text style={{ color: '#FFFFFF', fontWeight: '600' }}>Submit for Review</Text>
+                    <Text style={{ color: colors.primary, fontWeight: '600' }}>Submit for Review</Text>
                   )}
                 </Pressable>
               </View>
@@ -528,7 +523,8 @@ const styles = StyleSheet.create({
     borderWidth: StyleSheet.hairlineWidth,
   },
   editModalBtnPrimary: {
-    backgroundColor: '#3D6B5C',
+    borderWidth: 1.5,
+    backgroundColor: 'transparent',
   },
   container: { flex: 1 },
   headerOverlay: {
@@ -592,14 +588,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 5,
     borderRadius: 4,
+    borderWidth: StyleSheet.hairlineWidth,
     marginBottom: 12,
   },
   categoryText: {
-    color: "#FFFFFF",
     fontSize: 12,
     fontWeight: "700",
     textTransform: "uppercase",
-    letterSpacing: 0.5,
+    letterSpacing: 0.8,
+    fontFamily: Platform.select({ ios: "Georgia", default: "serif" }),
   },
   heroName: {
     fontSize: 30,
@@ -617,6 +614,9 @@ const styles = StyleSheet.create({
   heroAddress: {
     fontSize: 14,
     lineHeight: 20,
+    fontStyle: "italic",
+    letterSpacing: 0.4,
+    fontFamily: Platform.select({ ios: "Georgia", default: "serif" }),
   },
   infoGrid: {
     flexDirection: "row",
@@ -636,13 +636,15 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontWeight: "600",
     textTransform: "uppercase",
-    letterSpacing: 0.5,
+    letterSpacing: 0.8,
     marginBottom: 4,
+    fontFamily: Platform.select({ ios: "Georgia", default: "serif" }),
   },
   infoValue: {
     fontSize: 15,
     fontWeight: "600",
     lineHeight: 20,
+    fontFamily: "SourceSerif4_600SemiBold",
   },
   badgeRow: {
     flexDirection: "row",
@@ -658,10 +660,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 16,
+    borderWidth: StyleSheet.hairlineWidth,
+    backgroundColor: "transparent",
   },
   statusText: {
     fontSize: 13,
     fontWeight: "600",
+    fontFamily: Platform.select({ ios: "Georgia", default: "serif" }),
   },
   section: {
     marginHorizontal: 16,

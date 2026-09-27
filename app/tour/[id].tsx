@@ -65,8 +65,8 @@ export default function TourDetailScreen() {
       </View>
 
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-        {/* Tour Hero — chapter opener */}
-        <View style={[styles.heroBanner, { backgroundColor: tour.color + '15' }]}>
+        {/* Tour Hero — chapter opener on plain paper */}
+        <View style={styles.heroBanner}>
           <View style={[styles.chapterRule, { backgroundColor: tour.color + '55' }]} />
           <View style={styles.chapterRow}>
             <Text style={[styles.chapterNumeral, { color: tour.color }]}>{romanNumeral(tourIndex)}</Text>
@@ -76,9 +76,9 @@ export default function TourDetailScreen() {
               <Text style={[styles.heroNeighborhood, { color: colors.muted }]}>{tour.neighborhood}</Text>
             </View>
           </View>
-          <View style={[styles.tourBadge, { backgroundColor: tour.color, alignSelf: 'center' }]}>
-            <IconSymbol name="figure.walk" size={14} color="#FFFFFF" />
-            <Text style={styles.tourBadgeText}>Walking Tour</Text>
+          <View style={[styles.tourBadge, { borderColor: tour.color, alignSelf: 'center' }]}>
+            <IconSymbol name="figure.walk" size={14} color={tour.color} />
+            <Text style={[styles.tourBadgeText, { color: tour.color }]}>Walking Tour</Text>
           </View>
         </View>
 
@@ -171,8 +171,8 @@ export default function TourDetailScreen() {
               ]}
             >
               <View style={styles.stopLeft}>
-                <View style={[styles.stopNumber, { backgroundColor: tour.color }]}>
-                  <Text style={styles.stopNumberText}>{stop.order}</Text>
+                <View style={[styles.stopNumber, { borderColor: tour.color }]}>
+                  <Text style={[styles.stopNumberText, { color: tour.color }]}>{stop.order}</Text>
                 </View>
                 {index < tourLandmarks.length - 1 && (
                   <View style={[styles.stopLine, { backgroundColor: tour.color + '40' }]} />
@@ -222,6 +222,7 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     textAlign: "center",
     marginHorizontal: 8,
+    fontFamily: Platform.select({ ios: "Georgia", default: "serif" }),
   },
   scrollContent: { paddingBottom: 20 },
   heroBanner: {
@@ -229,7 +230,7 @@ const styles = StyleSheet.create({
     paddingTop: 20,
   },
   chapterRule: {
-    height: 3,
+    height: StyleSheet.hairlineWidth * 2,
     marginBottom: 14,
   },
   chapterRow: {
@@ -254,6 +255,7 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     letterSpacing: 2.5,
     marginBottom: 2,
+    fontFamily: Platform.select({ ios: "Georgia", default: "serif" }),
   },
   tourBadge: {
     flexDirection: "row",
@@ -263,24 +265,29 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 5,
     borderRadius: 4,
+    borderWidth: StyleSheet.hairlineWidth,
     marginBottom: 12,
   },
   tourBadgeText: {
-    color: "#FFFFFF",
     fontSize: 12,
     fontWeight: "700",
     textTransform: "uppercase",
-    letterSpacing: 0.5,
+    letterSpacing: 1.2,
+    fontFamily: Platform.select({ ios: "Georgia", default: "serif" }),
   },
   heroName: {
     fontSize: 26,
     fontWeight: "600",
     lineHeight: 32,
     marginBottom: 4,
+    fontFamily: "SourceSerif4_600SemiBold",
   },
   heroNeighborhood: {
     fontSize: 15,
     lineHeight: 20,
+    fontStyle: "italic",
+    letterSpacing: 0.4,
+    fontFamily: Platform.select({ ios: "Georgia", default: "serif" }),
   },
   statsRule: {
     alignItems: "center",
@@ -293,6 +300,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: "600",
     letterSpacing: 1.6,
+    fontFamily: Platform.select({ ios: "Georgia", default: "serif" }),
   },
   statsRuleLine: {
     marginTop: 2,
@@ -343,13 +351,15 @@ const styles = StyleSheet.create({
     width: 28,
     height: 28,
     borderRadius: 14,
+    borderWidth: 1.5,
     alignItems: "center",
     justifyContent: "center",
+    backgroundColor: "transparent",
   },
   stopNumberText: {
-    color: "#FFFFFF",
     fontSize: 13,
     fontWeight: "700",
+    fontFamily: Platform.select({ ios: "Georgia", default: "serif" }),
   },
   stopLine: {
     width: 2,
@@ -364,16 +374,21 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: "600",
     lineHeight: 20,
+    fontFamily: "SourceSerif4_600SemiBold",
   },
   stopAddress: {
     fontSize: 13,
     lineHeight: 18,
     marginTop: 2,
+    fontFamily: Platform.select({ ios: "Georgia", default: "serif" }),
   },
   stopNote: {
     fontSize: 12,
     fontWeight: "600",
     marginTop: 4,
+    fontStyle: "italic",
+    letterSpacing: 0.3,
+    fontFamily: Platform.select({ ios: "Georgia", default: "serif" }),
   },
   stopCatDot: {
     width: 8,
@@ -391,6 +406,7 @@ const styles = StyleSheet.create({
     fontSize: 10,
     fontWeight: "700",
     letterSpacing: 1.5,
+    fontFamily: Platform.select({ ios: "Georgia", default: "serif" }),
   },
   stampStrip: {
     gap: 14,

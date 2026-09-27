@@ -102,7 +102,7 @@ const LandmarkRow = React.memo(function LandmarkRow({ landmark, colors }: { land
       </View>
       <View style={styles.rowRight}>
         {landmark.nationalRegister && (
-          <View style={[styles.nrBadge, { backgroundColor: colors.accent + '22' }]}>
+          <View style={[styles.nrBadge, { borderColor: colors.accent }]}>
             <IconSymbol name="star.fill" size={10} color={colors.accent} />
           </View>
         )}
@@ -451,6 +451,7 @@ const styles = StyleSheet.create({
   folioText: {
     fontSize: 9,
     fontWeight: "600",
+    fontFamily: Platform.select({ ios: "Georgia", default: "serif" }),
     letterSpacing: 2,
   },
 
@@ -511,6 +512,7 @@ const styles = StyleSheet.create({
     fontWeight: "500",
     textTransform: "uppercase",
     letterSpacing: 1,
+    fontFamily: Platform.select({ ios: "Georgia", default: "serif" }),
   },
   sortRow: {
     flexDirection: "row",
@@ -542,6 +544,7 @@ const styles = StyleSheet.create({
     fontWeight: "500",
     textTransform: "uppercase",
     letterSpacing: 1,
+    fontFamily: Platform.select({ ios: "Georgia", default: "serif" }),
   },
   listContent: {
     paddingHorizontal: 16,
@@ -582,6 +585,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 18,
     marginTop: 2,
+    fontFamily: Platform.select({ ios: "Georgia", default: "serif" }),
   },
   rowMeta: {
     flexDirection: "row",
@@ -595,6 +599,8 @@ const styles = StyleSheet.create({
     textTransform: "uppercase",
     letterSpacing: 1,
     fontWeight: "500",
+    fontStyle: "italic",
+    fontFamily: Platform.select({ ios: "Georgia", default: "serif" }),
   },
   rowRight: {
     flexDirection: "row",
@@ -606,6 +612,7 @@ const styles = StyleSheet.create({
     width: 20,
     height: 20,
     borderRadius: 10,
+    borderWidth: StyleSheet.hairlineWidth,
     alignItems: "center",
     justifyContent: "center",
   },

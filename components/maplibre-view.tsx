@@ -451,7 +451,7 @@ const MapLibreMapView = forwardRef<MapRef | null, MapLibreViewProps>(
                     "#F7F3EA",
                   ] as any,
                   "circle-stroke-width": ["step", ["get", "point_count"], 2.5, 15, 3, 40, 3.5, 100, 4] as any,
-                  "circle-stroke-color": "#0032A0",
+                  "circle-stroke-color": "#0B2E8C",
                 }}
               />
               {/* Cluster count */}

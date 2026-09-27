@@ -13,8 +13,8 @@ import Animated, {
 import * as Haptics from "expo-haptics";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 
-/** Indigo ink on light paper, cream ink on dark paper. */
-const INK_LIGHT = "#2B3A67";
+/** Brand ultramarine on light paper, cream ink on dark paper. */
+const INK_LIGHT = "#0B2E8C";
 const INK_DARK = "#EDE9DC";
 
 function abbreviate(name: string, max = 14): string {

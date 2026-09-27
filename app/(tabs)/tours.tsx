@@ -41,12 +41,12 @@ function TourCard({ tour, tourIndex }: { tour: Tour; tourIndex: number }) {
       ]}
     >
       <CornerTicks color={colors.pageBorder} size={11} inset={4} />
-      {/* Thin accent rule — like a pencil underline */}
-      <View style={[styles.accentBar, { backgroundColor: tour.color + '66' }]} />
+      {/* 3px category spine tick — the only category color allowed */}
+      <View style={[styles.spineTick, { backgroundColor: tour.color }]} />
 
       <View style={styles.cardContent}>
         <View style={styles.cardHeader}>
-          <View style={[styles.tourIcon, { backgroundColor: tour.color + '18' }]}>
+          <View style={[styles.tourIcon, { borderColor: colors.pageBorder }]}>
             <IconSymbol name="figure.walk" size={20} color={tour.color} />
           </View>
           <View style={styles.cardTitleArea}>
@@ -105,7 +105,7 @@ export default function ToursScreen() {
       {/* TOC label kept as list header; the big cover-frame title was removed
           as it doubled up with the ChapterHeader above. */}
       <View style={styles.screenHeader}>
-        <Text style={[styles.tocLabel, { color: "#E15A3E" }]}>目次 · Table of Contents</Text>
+        <Text style={[styles.tocLabel, { color: colors.primary }]}>目次 · Table of Contents</Text>
       </View>
       <FlatList
         data={tours}
@@ -142,6 +142,8 @@ const styles = StyleSheet.create({
   tocLabel: {
     fontSize: 11,
     fontWeight: "700",
+    fontStyle: "italic",
+    fontFamily: Platform.select({ ios: "Georgia", default: "serif" }),
     letterSpacing: 2.5,
     textTransform: "uppercase",
     marginBottom: 2,
@@ -159,6 +161,7 @@ const styles = StyleSheet.create({
   folioText: {
     fontSize: 9,
     fontWeight: "600",
+    fontFamily: Platform.select({ ios: "Georgia", default: "serif" }),
     letterSpacing: 2,
   },
   listContent: {
@@ -180,8 +183,12 @@ const styles = StyleSheet.create({
       web: { boxShadow: "0 1px 2px rgba(63,55,51,0.05)" },
     }),
   },
-  accentBar: {
-    height: 2,
+  spineTick: {
+    position: "absolute",
+    left: 0,
+    top: 10,
+    bottom: 10,
+    width: 3,
   },
   cardContent: {
     padding: 18,
@@ -196,6 +203,7 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 6,
+    borderWidth: StyleSheet.hairlineWidth,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -215,6 +223,7 @@ const styles = StyleSheet.create({
     textTransform: "uppercase",
     letterSpacing: 1.5,
     fontWeight: "500",
+    fontFamily: Platform.select({ ios: "Georgia", default: "serif" }),
   },
   plateNo: {
     fontSize: 11,
@@ -241,5 +250,6 @@ const styles = StyleSheet.create({
     fontWeight: "500",
     textTransform: "uppercase",
     letterSpacing: 1,
+    fontFamily: Platform.select({ ios: "Georgia", default: "serif" }),
   },
 });

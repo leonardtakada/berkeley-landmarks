@@ -221,8 +221,10 @@ const styles = StyleSheet.create({
     fontFamily: SERIF,
     fontSize: 9,
     fontWeight: "600",
-    letterSpacing: 2,
+    fontStyle: "italic",
+    letterSpacing: 2.4,
     marginTop: 6,
+    transform: [{ rotate: "-0.6deg" }],
   },
   seal: {
     position: "absolute",

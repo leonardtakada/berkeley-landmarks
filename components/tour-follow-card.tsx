@@ -66,15 +66,15 @@ export function TourFollowCard({ tour, follow }: TourFollowCardProps) {
           onPress={follow.active ? follow.stop : follow.start}
           style={({ pressed }) => [
             styles.followToggle,
-            { backgroundColor: follow.active ? tour.color : colors.border, opacity: pressed ? 0.8 : 1 },
+            { borderColor: follow.active ? tour.color : colors.border, opacity: pressed ? 0.8 : 1 },
           ]}
         >
           <IconSymbol
             name={follow.active ? "location.fill" : "figure.walk"}
             size={13}
-            color="#FFFFFF"
+            color={follow.active ? tour.color : colors.muted}
           />
-          <Text style={styles.followToggleText}>{follow.active ? "Following" : "Follow"}</Text>
+          <Text style={[styles.followToggleText, { color: follow.active ? tour.color : colors.muted }]}>{follow.active ? "Following" : "Follow"}</Text>
         </Pressable>
       </View>
 
@@ -89,8 +89,8 @@ export function TourFollowCard({ tour, follow }: TourFollowCardProps) {
         style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
       >
         <View style={styles.nextRow}>
-          <View style={[styles.nextNumber, { backgroundColor: tour.color }]}>
-            <Text style={styles.nextNumberText}>{next.stop.order}</Text>
+          <View style={[styles.nextNumber, { borderColor: tour.color }]}>
+            <Text style={[styles.nextNumberText, { color: tour.color }]}>{next.stop.order}</Text>
           </View>
           <View style={styles.nextContent}>
             <Text style={[styles.nextName, { color: colors.foreground }]} numberOfLines={1}>
@@ -136,13 +136,13 @@ export function TourFollowCard({ tour, follow }: TourFollowCardProps) {
           style={({ pressed }) => [
             styles.controlButton,
             styles.skipButton,
-            { backgroundColor: tour.color, opacity: pressed ? 0.85 : 1 },
+            { borderColor: tour.color, opacity: pressed ? 0.85 : 1 },
           ]}
         >
-          <Text style={[styles.controlText, styles.skipText]}>
+          <Text style={[styles.controlText, { color: tour.color }]}>
             {follow.currentStopIndex === follow.totalStops - 1 ? "Finish" : "Skip to Next"}
           </Text>
-          <IconSymbol name="chevron.right" size={13} color="#FFFFFF" />
+          <IconSymbol name="chevron.right" size={13} color={tour.color} />
         </Pressable>
       </View>
     </View>
@@ -195,6 +195,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 5,
     borderRadius: 2,
+    borderWidth: StyleSheet.hairlineWidth,
+    backgroundColor: "transparent",
   },
   followToggleText: {
     color: "#FFFFFF",
@@ -218,13 +220,15 @@ const styles = StyleSheet.create({
     width: 26,
     height: 26,
     borderRadius: 2,
+    borderWidth: 1.5,
     alignItems: "center",
     justifyContent: "center",
+    backgroundColor: "transparent",
   },
   nextNumberText: {
-    color: "#FFFFFF",
     fontSize: 12,
     fontWeight: "700",
+    fontFamily: SERIF,
   },
   nextContent: {
     flex: 1,
@@ -274,7 +278,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   skipButton: {
-    borderWidth: 0,
+    borderWidth: 1.5,
   },
   controlText: {
     fontFamily: SERIF,

@@ -13,6 +13,8 @@ const SERIF_BOLD = Platform.select({
   default: "serif",
 });
 
+const SERIF = Platform.select({ ios: "Georgia", default: "serif" });
+
 /**
  * Appendix tab — book colophon.
  * Centered serif title, thin rule, edition line, version, BAHA credit.
@@ -29,6 +31,7 @@ export default function AppendixScreen() {
       <PaperGrain />
       <View style={[styles.page, { paddingBottom: Math.max(insets.bottom, 12) }]}>
         <View style={styles.colophon}>
+          <Text style={[styles.kicker, { color: colors.primary }]}>APPENDIX</Text>
           <Text style={[styles.appName, { color: colors.foreground }]}>
             Berkeley Landmarks
           </Text>
@@ -60,6 +63,14 @@ const styles = StyleSheet.create({
   colophon: {
     alignItems: "center",
     gap: 8,
+  },
+  kicker: {
+    fontFamily: SERIF,
+    fontSize: 10,
+    fontWeight: "700",
+    letterSpacing: 3,
+    textTransform: "uppercase",
+    transform: [{ rotate: "-0.5deg" }],
   },
   appName: {
     fontFamily: SERIF_BOLD,
