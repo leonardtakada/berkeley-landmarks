@@ -2,11 +2,11 @@ import React from "react";
 import { Text, View, FlatList, Pressable, StyleSheet, Platform } from "react-native";
 // Platform already imported
 import { useRouter } from "expo-router";
-import { useBottomTabBarHeight } from "expo-router/build/react-navigation/bottom-tabs";
 import { ScreenContainer } from "@/components/screen-container";
 import { PageFlip } from "@/components/page-flip";
 import { PaperGrain } from "@/components/paper-grain";
 import { ChapterHeader } from "@/components/chapter-header";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/hooks/use-colors";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { tours } from "@/data/tours";
@@ -83,10 +83,12 @@ function TourCard({ tour, tourIndex }: { tour: Tour; tourIndex: number }) {
 
 export default function ToursScreen() {
   const colors = useColors();
-  const tabBarHeight = useBottomTabBarHeight();
+  // The bookmark bar hangs at the top; pad the list bottom by the safe inset.
+  const insets = useSafeAreaInsets();
+  const listBottomPadding = Math.max(insets.bottom, 12) + 24;
 
   return (
-    <ScreenContainer>
+    <ScreenContainer edges={["left", "right"]}>
       <PageFlip direction={1}>
       <PaperGrain />
       <ChapterHeader
@@ -107,7 +109,7 @@ export default function ToursScreen() {
         data={tours}
         keyExtractor={(item) => item.id}
         renderItem={({ item, index }) => <TourCard tour={item} tourIndex={index} />}
-        contentContainerStyle={[styles.listContent, { paddingBottom: tabBarHeight + 24 }]}
+        contentContainerStyle={[styles.listContent, { paddingBottom: listBottomPadding }]}
         showsVerticalScrollIndicator={false}
         ItemSeparatorComponent={() => <View style={{ height: 12 }} />}
         ListFooterComponent={<FolioFooter />}

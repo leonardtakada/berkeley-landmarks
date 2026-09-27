@@ -4,6 +4,7 @@ import Constants from "expo-constants";
 import { ScreenContainer } from "@/components/screen-container";
 import { PageFlip } from "@/components/page-flip";
 import { PaperGrain } from "@/components/paper-grain";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/hooks/use-colors";
 
 const SERIF_BOLD = Platform.select({
@@ -12,18 +13,20 @@ const SERIF_BOLD = Platform.select({
 });
 
 /**
- * Profile tab — book colophon.
+ * Appendix tab — book colophon.
  * Centered serif title, thin rule, edition line, version, BAHA credit.
  */
-export default function ProfileScreen() {
+export default function AppendixScreen() {
   const colors = useColors();
+  // The bookmark bar hangs at the top and already eats the top inset.
+  const insets = useSafeAreaInsets();
   const version = Constants.expoConfig?.version ?? "1.0.0";
 
   return (
-    <ScreenContainer>
+    <ScreenContainer edges={["left", "right"]}>
       <PageFlip direction={-1}>
       <PaperGrain />
-      <View style={styles.page}>
+      <View style={[styles.page, { paddingBottom: Math.max(insets.bottom, 12) }]}>
         <View style={styles.colophon}>
           <Text style={[styles.appName, { color: colors.foreground }]}>
             Berkeley Landmarks

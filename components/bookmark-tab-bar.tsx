@@ -1,12 +1,12 @@
 import React, { useEffect } from "react";
-import { Platform, Pressable, StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withTiming,
   withSpring,
 } from "react-native-reanimated";
-import { useRouter, usePathname } from "expo-router";
+import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Haptics from "expo-haptics";
 
@@ -14,11 +14,12 @@ import { IconSymbol } from "@/components/ui/icon-symbol";
 import { useColors } from "@/hooks/use-colors";
 
 /**
- * Bookmark-ribbon tab bar ("book chrome" phase 1).
- * Each tab is a ribbon protruding from the page edge at staggered heights.
- * Active ribbon extends and shows the label; inactive ribbons sit lower.
- * Focus changes animate (height/color ~180ms) and the focused tab gets a
- * subtle "page corner lift" fold shadow at the top edge above the ribbon.
+ * Bookmark-ribbon tab bar, hung from the TOP of the book.
+ * Like ribbons draped over the head of a closed book, each tab is a
+ * ribbon hanging DOWNWARD from the top edge. The focused ribbon hangs
+ * longer and darker (the pull you'd grab); resting ribbons sit shorter.
+ * Focus changes animate (height/color ~180ms) and the focused ribbon gets
+ * a subtle "page lift" fold shadow where it meets the head of the book.
  */
 
 type Bookmark = {
@@ -28,7 +29,7 @@ type Bookmark = {
   icon: { focused: string; unfocused: string };
   /** ribbon color; falls back to theme accent */
   color: string;
-  /** staggered resting height above the bar */
+  /** staggered resting hang length below the top edge */
   restHeight: number;
 };
 
@@ -39,13 +40,14 @@ const ICONS: Record<string, { focused: string; unfocused: string }> = {
   profile: { focused: "person.crop.circle.fill", unfocused: "person.crop.circle" },
 };
 
-// Ribbon color per tab route (Showa Modern): Landmarks=terracotta, Tours=indigo, Profile=sage
+// Ribbon color per tab route (Showa Modern): Landmarks=terracotta, Tours=indigo, Appendix=sage
 const RIBBON_COLORS: Record<string, string> = {
   index: "#E15A3E",
   tours: "#2B3A67",
   profile: "#6B8E6D",
 };
-// Staggered resting heights — each ribbon sits at a slightly different height
+// Staggered resting hang lengths — each ribbon drapes at a slightly
+// different length, like real book ribbons
 const STAGGER: Record<string, number> = {
   index: 22,
   tours: 15,
@@ -61,7 +63,7 @@ function withAlpha(hex: string, alpha: number): string {
   return `rgba(${r},${g},${b},${alpha})`;
 }
 
-/** One animated bookmark ribbon + label. */
+/** One animated bookmark ribbon hanging down from the top edge. */
 function RibbonTab({
   focused,
   routeKey,
@@ -106,12 +108,12 @@ function RibbonTab({
     };
   });
 
-  // Page corner lift: small triangular fold shadow above the ribbon,
-  // fading in/out with focus (~180ms, low opacity — subtle).
+  // Page lift: small triangular fold shadow just below where the ribbon
+  // enters the head of the book, fading in/out with focus (~180ms, subtle).
   const cornerStyle = useAnimatedStyle(() => {
     return {
       opacity: 0.35 * focus.value,
-      transform: [{ translateY: -4 - 4 * focus.value }],
+      transform: [{ translateY: 4 + 4 * focus.value }],
     };
   });
 
@@ -120,20 +122,20 @@ function RibbonTab({
       key={routeKey}
       onPress={onPress}
       style={styles.tabBtn}
-      hitSlop={{ top: 16, left: 8, right: 8 }}
+      hitSlop={{ bottom: 16, left: 8, right: 8 }}
       accessibilityRole="tab"
       accessibilityLabel={descriptorsTitle ?? routeName}
       accessibilityState={{ selected: focused }}
     >
       <View style={styles.ribbonWrap}>
-        {/* page corner lift fold (focused only, animated opacity) */}
+        {/* page lift fold where the ribbon meets the head of the book */}
         <Animated.View
           pointerEvents="none"
           style={[styles.cornerLift, cornerStyle]}
         >
           <View style={styles.cornerFold} />
         </Animated.View>
-        {/* Ribbon */}
+        {/* Ribbon — hangs DOWN from the top edge */}
         <Animated.View
           style={[
             styles.ribbon,
@@ -141,7 +143,7 @@ function RibbonTab({
             {
               borderLeftColor: ribbonColor,
               borderRightColor: ribbonColor,
-              borderTopColor: ribbonColor,
+              borderBottomColor: ribbonColor,
             },
           ]}
         >
@@ -156,7 +158,7 @@ function RibbonTab({
             weight="semibold"
           />
         </Animated.View>
-        {/* notched ribbon tail */}
+        {/* notched ribbon tail pointing down */}
         <Animated.View
           style={[
             styles.ribbonTail,
@@ -190,8 +192,8 @@ export function BookmarkTabBar(props: {
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const pathname = usePathname();
-  const bottomPadding = Platform.OS === "web" ? 12 : Math.max(insets.bottom, 10);
+  // The bar sits at the head of the book: respect the top inset.
+  const topPadding = Math.max(insets.top, 12);
 
   const onSelect = (routeName: string, key: string, i: number) => {
     const event = navigation.emit({
@@ -216,12 +218,12 @@ export function BookmarkTabBar(props: {
         styles.bar,
         {
           backgroundColor: colors.background,
-          paddingBottom: bottomPadding,
+          paddingTop: topPadding,
           borderColor: colors.border,
         },
       ]}
     >
-      {/* thin double rule like a book page trim */}
+      {/* thin double rule like a book page trim, along the head */}
       <View style={[styles.trim, { borderColor: colors.border }]} />
       <View style={[styles.trim2, { borderColor: colors.border }]} />
 
@@ -242,30 +244,32 @@ export function BookmarkTabBar(props: {
 }
 
 const styles = StyleSheet.create({
+  // Draped over the head of the book; the navigator renders this bar
+  // above the tab screens (tabBarPosition: 'top').
   bar: {
-    borderTopWidth: StyleSheet.hairlineWidth,
+    borderBottomWidth: StyleSheet.hairlineWidth,
   },
   trim: {
     position: "absolute",
-    top: 0,
+    bottom: 0,
     left: 12,
     right: 12,
     height: 0,
-    borderTopWidth: StyleSheet.hairlineWidth,
+    borderBottomWidth: StyleSheet.hairlineWidth,
   },
   trim2: {
     position: "absolute",
-    top: 3,
+    bottom: 3,
     left: 20,
     right: 20,
     height: 0,
-    borderTopWidth: StyleSheet.hairlineWidth,
+    borderBottomWidth: StyleSheet.hairlineWidth,
   },
   row: {
     flexDirection: "row",
-    alignItems: "flex-end",
+    alignItems: "flex-start",
     paddingHorizontal: 8,
-    paddingTop: 0,
+    paddingBottom: 6,
   },
   tabBtn: {
     flex: 1,
@@ -273,17 +277,16 @@ const styles = StyleSheet.create({
   },
   ribbonWrap: {
     alignItems: "center",
-    marginTop: -20, // protrude above the bar edge
   },
   ribbon: {
     width: 36,
     borderWidth: StyleSheet.hairlineWidth,
-    borderBottomWidth: 0,
-    borderTopLeftRadius: 3,
-    borderTopRightRadius: 3,
+    borderTopWidth: 0,
+    borderBottomLeftRadius: 0,
+    borderBottomRightRadius: 0,
     alignItems: "center",
-    justifyContent: "flex-end",
-    paddingBottom: 4,
+    justifyContent: "flex-start",
+    paddingTop: 4,
   },
   ribbonTail: {
     width: 0,
@@ -302,11 +305,12 @@ const styles = StyleSheet.create({
     textTransform: "uppercase",
     marginTop: 5,
   },
-  // Page corner lift: rotated square with a light top/left edge and soft
-  // shadow — reads as the page lifting where the ribbon is inserted.
+  // Page lift: rotated square with a light bottom/left edge and soft
+  // shadow — reads as the page dipping where the ribbon is draped over
+  // the head of the book.
   cornerLift: {
     position: "absolute",
-    top: -14,
+    top: -12,
     width: 24,
     height: 24,
     alignItems: "center",
@@ -316,15 +320,15 @@ const styles = StyleSheet.create({
     width: 18,
     height: 18,
     transform: [{ rotate: "45deg" }],
-    borderTopWidth: 1,
+    borderBottomWidth: 1,
     borderLeftWidth: 1,
-    borderTopColor: "rgba(255,255,255,0.7)",
+    borderBottomColor: "rgba(255,255,255,0.7)",
     borderLeftColor: "rgba(255,255,255,0.7)",
     backgroundColor: "rgba(0,0,0,0.06)",
     shadowColor: "#000",
     shadowOpacity: 0.25,
     shadowRadius: 2,
-    shadowOffset: { width: -1, height: -1 },
+    shadowOffset: { width: -1, height: 1 },
     elevation: 2,
   },
 });

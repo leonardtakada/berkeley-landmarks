@@ -1,31 +1,29 @@
 import { Tabs } from "expo-router";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { BookmarkTabBar } from "@/components/bookmark-tab-bar";
 import { IconSymbol } from "@/components/ui/icon-symbol";
-import { Platform, StyleSheet } from "react-native";
 import { useColors } from "@/hooks/use-colors";
 
 export default function TabLayout() {
   const colors = useColors();
-  const insets = useSafeAreaInsets();
-  const bottomPadding = Platform.OS === "web" ? 12 : Math.max(insets.bottom, 8);
-  const tabBarHeight = 56 + bottomPadding;
 
   return (
     <Tabs
-      tabBar={(props: any) => <BookmarkTabBar {...props} />}
+      // The cover (index) reads as a closed front board — show it clean,
+      // without the bookmark ribbons.
+      tabBar={(props: any) =>
+        props.state?.index === 0 ? null : <BookmarkTabBar {...props} />
+      }
       screenOptions={{
+        // The bookmark ribbons hang from the HEAD of the book, like
+        // ribbons draped over the top edge of a closed guidebook.
+        tabBarPosition: "top",
         tabBarActiveTintColor: colors.accent,
         tabBarInactiveTintColor: colors.muted,
         headerShown: false,
         tabBarStyle: {
-          paddingTop: 6,
-          paddingBottom: bottomPadding,
-          height: tabBarHeight,
           backgroundColor: colors.background,
-          borderTopColor: colors.border,
-          borderTopWidth: StyleSheet.hairlineWidth,
+          elevation: 0,
         },
         tabBarLabelStyle: {
           fontSize: 10,
@@ -61,7 +59,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="profile"
         options={{
-          title: "Profile",
+          title: "Appendix",
           tabBarIcon: ({ color, focused }) => (
             <IconSymbol
               size={26}

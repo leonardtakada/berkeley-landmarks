@@ -10,7 +10,7 @@ import {
 } from "react-native";
 import { useRouter } from "expo-router";
 import Svg, { Circle, Path } from "react-native-svg";
-import { useBottomTabBarHeight } from "expo-router/build/react-navigation/bottom-tabs";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ScreenContainer } from "@/components/screen-container";
 import { PageFlip } from "@/components/page-flip";
 import { PaperGrain } from "@/components/paper-grain";
@@ -219,7 +219,9 @@ const LandmarkRow = React.memo(function LandmarkRow({ landmark, colors }: { land
 export default function LandmarksScreen() {
   const colors = useColors();
   const router = useRouter();
-  const tabBarHeight = useBottomTabBarHeight();
+  // The bookmark bar hangs at the top; pad the list bottom by the safe inset.
+  const insets = useSafeAreaInsets();
+  const listBottomPadding = Math.max(insets.bottom, 12) + 24;
   const listRef = useRef<FlatList<Landmark>>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<LandmarkCategory | null>(null);
@@ -426,7 +428,7 @@ export default function LandmarksScreen() {
             </View>
           </View>
         }
-        contentContainerStyle={[styles.listContent, { paddingBottom: tabBarHeight + 24 }]}
+        contentContainerStyle={[styles.listContent, { paddingBottom: listBottomPadding }]}
         showsVerticalScrollIndicator={false}
         ItemSeparatorComponent={() => <View style={{ height: 8 }} />}
         ListFooterComponent={<FolioFooter />}
