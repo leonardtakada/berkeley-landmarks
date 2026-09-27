@@ -14,6 +14,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ScreenContainer } from "@/components/screen-container";
 import { PageFlip } from "@/components/page-flip";
 import { PaperGrain } from "@/components/paper-grain";
+import { CornerTicks, InkDash, InkRule } from "@/components/hand-inked";
 import { useColors } from "@/hooks/use-colors";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import {
@@ -58,14 +59,24 @@ const LandmarkRow = React.memo(function LandmarkRow({ landmark, colors }: { land
   const router = useRouter();
   const catColor = CATEGORY_COLORS[landmark.category];
   const rowStyle = useMemo(() => ({
-    backgroundColor: colors.surface,
+    backgroundColor: colors.pageSurface,
     borderRadius: 6,
     overflow: "hidden" as const,
     flexDirection: "row" as const,
     alignItems: "center" as const,
     borderWidth: 1,
-    borderColor: colors.border,
-  }), [colors.surface, colors.border]);
+    borderColor: colors.pageBorder,
+    ...Platform.select({
+      ios: {
+        shadowColor: "#3F3733",
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.06,
+        shadowRadius: 2,
+      },
+      android: { elevation: 1 },
+      web: { boxShadow: "0 1px 2px rgba(63,55,51,0.06)" },
+    }),
+  }), [colors.pageSurface, colors.pageBorder]);
 
   return (
     <Pressable
@@ -97,6 +108,7 @@ const LandmarkRow = React.memo(function LandmarkRow({ landmark, colors }: { land
         )}
         <IconSymbol name="chevron.right" size={14} color={colors.muted} />
       </View>
+      <CornerTicks color={colors.pageBorder} size={9} inset={3} />
     </Pressable>
   );
 });
@@ -149,7 +161,7 @@ export default function LandmarksScreen() {
   }, [searchQuery, selectedCategory, sortBy]);
 
   return (
-    <ScreenContainer>
+    <ScreenContainer variant="page">
       <PageFlip direction={1}>
       <PaperGrain />
       <FlatList
@@ -174,9 +186,10 @@ export default function LandmarksScreen() {
             <View
               style={[
                 styles.searchBar,
-                { backgroundColor: colors.surface, borderColor: colors.border },
+                { backgroundColor: colors.pageSurface, borderColor: colors.pageBorder },
               ]}
             >
+              <CornerTicks color={colors.pageBorder} size={8} inset={2} />
               <Text style={[styles.searchGlyph, { color: colors.muted }]}>⌕</Text>
               <TextInput
                 style={[styles.searchInput, { color: colors.foreground }]}
@@ -207,7 +220,7 @@ export default function LandmarksScreen() {
                     style={({ pressed }) => [
                       styles.catChip,
                       {
-                        borderColor: isActive ? chipColor : colors.border,
+                        borderColor: isActive ? chipColor : colors.pageBorder,
                         opacity: pressed ? 0.8 : 1,
                       },
                     ]}
@@ -233,7 +246,7 @@ export default function LandmarksScreen() {
                 }}
                 style={({ pressed }) => [
                   styles.sortChip,
-                  { borderColor: colors.border, opacity: pressed ? 0.7 : 1 },
+                  { borderColor: colors.pageBorder, opacity: pressed ? 0.7 : 1 },
                 ]}
               >
                 <Text style={[styles.sortChipText, { color: colors.primary }]}>
@@ -249,7 +262,11 @@ export default function LandmarksScreen() {
         }
         contentContainerStyle={[styles.listContent, { paddingBottom: listBottomPadding }]}
         showsVerticalScrollIndicator={false}
-        ItemSeparatorComponent={() => <View style={{ height: 8 }} />}
+        ItemSeparatorComponent={() => (
+          <View pointerEvents="none" style={styles.deckleSep}>
+            <InkDash color={colors.pageBorder} />
+          </View>
+        )}
         ListFooterComponent={<FolioFooter />}
         ListEmptyComponent={
           <View style={styles.emptyState}>
@@ -269,7 +286,7 @@ function FolioFooter() {
   const colors = useColors();
   return (
     <View style={styles.folio}>
-      <View style={[styles.folioRule, { backgroundColor: colors.border }]} />
+      <InkRule color={colors.pageBorder} width={48} diamond={4} />
       <Text style={[styles.folioText, { color: colors.border }]}>
         THE REGISTRY · BERKELEY · CALIFORNIA
       </Text>
@@ -417,6 +434,11 @@ const styles = StyleSheet.create({
     transform: [{ rotate: "45deg" }],
   },
 
+  deckleSep: {
+    height: 14,
+    justifyContent: "center",
+    opacity: 0.9,
+  },
   folio: {
     alignItems: "center",
     marginTop: 28,

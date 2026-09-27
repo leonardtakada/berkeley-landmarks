@@ -59,7 +59,7 @@ export default function LoginScreen() {
   };
 
   return (
-    <ScreenContainer edges={["top", "left", "right", "bottom"]} className="px-6 justify-center">
+    <ScreenContainer variant="page" edges={["top", "left", "right", "bottom"]} className="px-6 justify-center">
       <View className="gap-3">
         <Text
           className="text-3xl font-semibold text-foreground"

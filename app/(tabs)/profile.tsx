@@ -4,6 +4,7 @@ import Constants from "expo-constants";
 import { ScreenContainer } from "@/components/screen-container";
 import { PageFlip } from "@/components/page-flip";
 import { PaperGrain } from "@/components/paper-grain";
+import { InkRule } from "@/components/hand-inked";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/hooks/use-colors";
 
@@ -23,7 +24,7 @@ export default function AppendixScreen() {
   const version = Constants.expoConfig?.version ?? "1.0.0";
 
   return (
-    <ScreenContainer edges={["left", "right"]}>
+    <ScreenContainer variant="page" edges={["left", "right"]}>
       <PageFlip direction={-1}>
       <PaperGrain />
       <View style={[styles.page, { paddingBottom: Math.max(insets.bottom, 12) }]}>
@@ -31,7 +32,7 @@ export default function AppendixScreen() {
           <Text style={[styles.appName, { color: colors.foreground }]}>
             Berkeley Landmarks
           </Text>
-          <View style={[styles.rule, { backgroundColor: colors.muted + "40" }]} />
+          <InkRule color={colors.muted + "66"} width={72} diamond={4} />
           <Text style={[styles.edition, { color: colors.muted }]}>
             First Edition · 2026
           </Text>

@@ -8,6 +8,12 @@ const themeColors = {
   foreground: { light: '#3F3733', dark: '#EDE9DC' },
   muted: { light: '#8A8272', dark: '#9B9488' },
   border: { light: '#D9D2C0', dark: '#2C3A55' },
+  /** Interior page stock: warm paper white (cover keeps `background` cream). */
+  pageBackground: { light: '#FAF6EC', dark: '#151A29' },
+  /** Interior card stock: a shade lighter, like paper laid on paper. */
+  pageSurface: { light: '#FFFCF3', dark: '#1D2438' },
+  /** Interior hairline: slightly dustier than the cover border. */
+  pageBorder: { light: '#E4DCC7', dark: '#2C3A55' },
   accent: { light: '#E15A3E', dark: '#E8825F' },
   success: { light: '#6B8E6D', dark: '#7FA389' },
   warning: { light: '#D9942B', dark: '#D9A85C' },

@@ -3,7 +3,16 @@ import { SafeAreaView, type Edge } from "react-native-safe-area-context";
 
 import { cn } from "@/lib/utils";
 
+/**
+ * Which page stock this screen is printed on.
+ * - "cover": the book cover — cream stock (`background`, #F2F0E6).
+ * - "page": interior pages — warm paper white (`pageBackground`).
+ */
+export type PageStock = "cover" | "page";
+
 export interface ScreenContainerProps extends ViewProps {
+  /** Page stock. Interior screens should use "page". Defaults to "cover". */
+  variant?: PageStock;
   /**
    * SafeArea edges to apply. Defaults to ["top", "left", "right"].
    * Bottom is typically handled by Tab Bar.
@@ -39,6 +48,7 @@ export interface ScreenContainerProps extends ViewProps {
  * ```
  */
 export function ScreenContainer({
+  variant = "cover",
   children,
   edges = ["top", "left", "right"],
   className,
@@ -51,7 +61,7 @@ export function ScreenContainer({
     <View
       className={cn(
         "flex-1",
-        "bg-background",
+        variant === "page" ? "bg-pageBackground" : "bg-background",
         containerClassName
       )}
       {...props}

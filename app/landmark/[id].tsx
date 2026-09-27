@@ -10,6 +10,8 @@ import { useAuth } from "@/hooks/use-auth";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { CategoryPlaceholder } from "@/components/category-placeholder";
 import { TippedInPlate } from "@/components/tipped-in-plate";
+import { PaperGrain } from "@/components/paper-grain";
+import { CornerTicks } from "@/components/hand-inked";
 import { trpc } from "@/lib/trpc";
 import { getApiBaseUrl } from "@/constants/api";
 
@@ -145,7 +147,7 @@ export default function LandmarkDetailScreen() {
 
   if (!landmark) {
     return (
-      <View style={[styles.container, { backgroundColor: colors.background, paddingTop: insets.top }]}>
+      <View style={[styles.container, { backgroundColor: colors.pageBackground, paddingTop: insets.top }]}>
         <Text style={{ color: colors.foreground }}>Landmark not found</Text>
       </View>
     );
@@ -154,7 +156,8 @@ export default function LandmarkDetailScreen() {
   const catColor = CATEGORY_COLORS[landmark.category];
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
+    <View style={[styles.container, { backgroundColor: colors.pageBackground }]}>
+      <PaperGrain />
       <LinearGradient
         colors={['rgba(0,0,0,0.5)', 'transparent']}
         style={[styles.headerOverlay, { paddingTop: insets.top + 8 }]}
@@ -230,7 +233,8 @@ export default function LandmarkDetailScreen() {
             { label: 'Style', value: landmark.style },
             ...(landmark.landmarkNumber ? [{ label: 'Landmark #', value: landmark.landmarkNumber }] : []),
           ].map((info) => (
-            <View key={info.label} style={[styles.infoCard, { backgroundColor: colors.surface }]}>
+            <View key={info.label} style={[styles.infoCard, { backgroundColor: colors.pageSurface, borderColor: colors.pageBorder }]}>
+              <CornerTicks color={colors.pageBorder} size={7} inset={2} />
               <Text style={[styles.infoLabel, { color: colors.muted }]}>{info.label}</Text>
               <Text style={[styles.infoValue, { color: colors.foreground }]}>{info.value}</Text>
             </View>
@@ -259,7 +263,8 @@ export default function LandmarkDetailScreen() {
 
         {/* Photo Gallery */}
         {(approvedPhotos && approvedPhotos.length > 0) && (
-          <View style={[styles.section, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+          <View style={[styles.section, { backgroundColor: colors.pageSurface, borderColor: colors.pageBorder }]}>
+            <CornerTicks color={colors.pageBorder} />
             <Text style={[styles.sectionTitle, { color: colors.foreground }]}>Community Photos</Text>
             <FlatList
               horizontal
@@ -291,14 +296,14 @@ export default function LandmarkDetailScreen() {
               <Text style={{ color: '#6B8E6D', fontWeight: '600' }}>✓ Thank you! Your photo is pending review.</Text>
             </View>
           ) : uploading ? (
-            <View style={[styles.addPhotoBtn, { backgroundColor: colors.surface }]}>
+            <View style={[styles.addPhotoBtn, { backgroundColor: colors.pageSurface }]}>
               <ActivityIndicator size="small" color={colors.foreground} />
               <Text style={{ marginLeft: 8, color: colors.muted }}>Uploading…</Text>
             </View>
           ) : (
             <Pressable
               onPress={pickAndSubmit}
-              style={({ pressed }) => [styles.addPhotoBtn, { backgroundColor: colors.surface, borderColor: colors.border, opacity: pressed ? 0.7 : 1 }]}
+              style={({ pressed }) => [styles.addPhotoBtn, { backgroundColor: colors.pageSurface, borderColor: colors.pageBorder, opacity: pressed ? 0.7 : 1 }]}
             >
               <IconSymbol name="camera.fill" size={18} color={colors.foreground} />
               <Text style={{ marginLeft: 8, color: colors.foreground, fontWeight: '600' }}>Add a Photo</Text>
@@ -315,7 +320,7 @@ export default function LandmarkDetailScreen() {
           ) : (
             <Pressable
               onPress={openEditModal}
-              style={({ pressed }) => [styles.addPhotoBtn, { backgroundColor: colors.surface, borderColor: colors.border, opacity: pressed ? 0.7 : 1 }]}
+              style={({ pressed }) => [styles.addPhotoBtn, { backgroundColor: colors.pageSurface, borderColor: colors.pageBorder, opacity: pressed ? 0.7 : 1 }]}
             >
               <IconSymbol name="pencil" size={18} color={colors.foreground} />
               <Text style={{ marginLeft: 8, color: colors.foreground, fontWeight: '600' }}>Suggest an Edit</Text>
@@ -326,7 +331,7 @@ export default function LandmarkDetailScreen() {
         {/* Suggest an Edit Modal */}
         <Modal visible={editModalVisible} transparent animationType="slide" onRequestClose={() => setEditModalVisible(false)}>
           <View style={styles.editModalOverlay}>
-            <View style={[styles.editModalCard, { backgroundColor: colors.background }]}>
+            <View style={[styles.editModalCard, { backgroundColor: colors.pageBackground }]}>
               <Text style={[styles.editModalTitle, { color: colors.foreground }]}>Suggest an Edit</Text>
               <Text style={[styles.editModalSubtitle, { color: colors.muted }]}>
                 Leave a field blank to keep the current value. Changes are reviewed before going live.
@@ -391,7 +396,8 @@ export default function LandmarkDetailScreen() {
         </Modal>
 
         {/* Description */}
-        <View style={[styles.section, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+        <View style={[styles.section, { backgroundColor: colors.pageSurface, borderColor: colors.pageBorder }]}>
+          <CornerTicks color={colors.pageBorder} />
           <Text style={[styles.sectionTitle, { color: colors.muted }]}>About</Text>
           <Text style={[styles.description, { color: colors.foreground }]}>
             <Text style={[styles.dropCap, { color: catColor }]}>{landmark.description.charAt(0)}</Text>
@@ -413,7 +419,8 @@ export default function LandmarkDetailScreen() {
         </Pressable>
 
         {/* Nearby Landmarks */}
-        <View style={[styles.section, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+        <View style={[styles.section, { backgroundColor: colors.pageSurface, borderColor: colors.pageBorder }]}>
+          <CornerTicks color={colors.pageBorder} />
           <Text style={[styles.sectionTitle, { color: colors.foreground }]}>Nearby Landmarks</Text>
           {nearbyLandmarks.map((nearby) => (
               <Pressable
@@ -421,7 +428,7 @@ export default function LandmarkDetailScreen() {
                 onPress={() => router.push(`/landmark/${nearby.id}`)}
                 style={({ pressed }) => [
                   styles.nearbyItem,
-                  { borderBottomColor: colors.border, opacity: pressed ? 0.7 : 1 },
+                  { borderBottomColor: colors.pageBorder, opacity: pressed ? 0.7 : 1 },
                 ]}
               >
                 <View style={[styles.nearbyDot, { backgroundColor: CATEGORY_COLORS[nearby.category] }]} />
@@ -669,6 +676,7 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     fontFamily: Platform.select({ ios: "ui-serif", default: "serif" }),
     marginBottom: 10,
+    transform: [{ rotate: "-0.35deg" }],
   },
   dropCap: {
     fontSize: 44,
@@ -685,7 +693,8 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     paddingVertical: 12,
-    borderBottomWidth: 0.5,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderStyle: "dashed" as const,
     gap: 12,
   },
   nearbyDot: {

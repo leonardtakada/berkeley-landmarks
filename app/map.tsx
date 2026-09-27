@@ -223,7 +223,7 @@ export default function MapScreen() {
   }, [router]);
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
+    <View style={[styles.container, { backgroundColor: colors.pageBackground }]}>
       <MapUnfold animated={!hasMounted.current}>
       {isMapLibre ? (
         <MapLibreMapView
@@ -348,8 +348,8 @@ export default function MapScreen() {
           styles.closeButton,
           {
             top: insets.top + 12,
-            backgroundColor: colors.surface,
-            borderColor: colors.border,
+            backgroundColor: colors.pageSurface,
+            borderColor: colors.pageBorder,
             opacity: pressed ? 0.7 : 1,
           },
         ]}
@@ -369,8 +369,8 @@ export default function MapScreen() {
             styles.spikeButton,
             {
               top: insets.top + 12,
-              backgroundColor: colors.background,
-              borderColor: colors.border,
+              backgroundColor: colors.pageBackground,
+              borderColor: colors.pageBorder,
             },
           ]}
         >
@@ -402,8 +402,8 @@ export default function MapScreen() {
                   style={({ pressed }) => [
                     styles.filterChip,
                     {
-                      backgroundColor: colors.surface,
-                      borderColor: isActive ? CATEGORY_COLORS[cat] : colors.border,
+                      backgroundColor: colors.pageSurface,
+                      borderColor: isActive ? CATEGORY_COLORS[cat] : colors.pageBorder,
                       borderWidth: isActive ? 2 : 1,
                       opacity: pressed ? 0.8 : 1,
                     },
@@ -430,12 +430,12 @@ export default function MapScreen() {
           {/* Edge fades: signals the row scrolls */}
           <LinearGradient
             pointerEvents="none"
-            colors={[colors.background + "F0", colors.background + "00"]}
+            colors={[colors.pageBackground + "F0", colors.pageBackground + "00"]}
             style={styles.chipFadeLeft}
           />
           <LinearGradient
             pointerEvents="none"
-            colors={[colors.background + "00", colors.background + "F0"]}
+            colors={[colors.pageBackground + "00", colors.pageBackground + "F0"]}
             style={styles.chipFadeRight}
           />
         </View>
@@ -448,8 +448,8 @@ export default function MapScreen() {
             styles.tourBanner,
             {
               top: insets.top + 12,
-              backgroundColor: colors.surface,
-              borderColor: colors.border,
+              backgroundColor: colors.pageSurface,
+              borderColor: colors.pageBorder,
             },
           ]}
         >
@@ -463,7 +463,7 @@ export default function MapScreen() {
             onPress={clearTour}
             style={({ pressed }) => [
               styles.tourBannerClose,
-              { backgroundColor: colors.border + "33", opacity: pressed ? 0.7 : 1 },
+              { backgroundColor: colors.pageBorder + "33", opacity: pressed ? 0.7 : 1 },
             ]}
           >
             <IconSymbol name="xmark" size={16} color={colors.muted} />
@@ -483,9 +483,9 @@ export default function MapScreen() {
             styles.bottomSheet,
             {
               backgroundColor: Platform.select({
-                ios: colors.surface + 'E0',
-                android: colors.surface,
-                default: colors.surface + 'E0',
+                ios: colors.pageSurface + 'E0',
+                android: colors.pageSurface,
+                default: colors.pageSurface + 'E0',
               }),
               paddingBottom: Math.max(insets.bottom, 16) + 60,
             },
@@ -525,7 +525,7 @@ export default function MapScreen() {
                 onPress={() => setSelectedLandmark(null)}
                 style={({ pressed }) => [
                   styles.sheetClose,
-                  { backgroundColor: colors.background, opacity: pressed ? 0.7 : 1 },
+                  { backgroundColor: colors.pageBackground, opacity: pressed ? 0.7 : 1 },
                 ]}
               >
                 <IconSymbol name="xmark" size={14} color={colors.muted} />

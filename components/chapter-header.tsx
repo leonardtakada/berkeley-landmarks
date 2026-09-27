@@ -1,5 +1,6 @@
 import React from "react";
 import { StyleSheet, Text, View, Platform } from "react-native";
+import { InkRule } from "@/components/hand-inked";
 
 const SERIF = Platform.select({
   ios: "Georgia",
@@ -52,7 +53,9 @@ export function ChapterHeader({
         ) : null}
       </View>
       <Text style={[styles.title, { color: foregroundColor }]}>{title}</Text>
-      <View style={[styles.rule, { backgroundColor: accentColor }]} />
+      <View style={styles.ruleWrap}>
+        <InkRule color={accentColor} width={72} diamond={5} />
+      </View>
       {subtitle ? (
         <Text style={[styles.subtitle, { color: mutedColor }]}>{subtitle}</Text>
       ) : null}
@@ -78,6 +81,7 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     letterSpacing: 2.5,
     textTransform: "uppercase",
+    transform: [{ rotate: "-0.45deg" }],
   },
   plate: {
     fontFamily: SERIF,
@@ -90,11 +94,10 @@ const styles = StyleSheet.create({
     lineHeight: 44,
     letterSpacing: -0.4,
   },
-  rule: {
-    width: 64,
-    height: StyleSheet.hairlineWidth * 2,
+  ruleWrap: {
     marginTop: 12,
     marginBottom: 12,
+    transform: [{ rotate: "0.3deg" }],
   },
   subtitle: {
     fontFamily: SERIF,

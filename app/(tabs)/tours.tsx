@@ -5,6 +5,7 @@ import { useRouter } from "expo-router";
 import { ScreenContainer } from "@/components/screen-container";
 import { PageFlip } from "@/components/page-flip";
 import { PaperGrain } from "@/components/paper-grain";
+import { CornerTicks, InkRule } from "@/components/hand-inked";
 import { ChapterHeader } from "@/components/chapter-header";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/hooks/use-colors";
@@ -33,12 +34,13 @@ function TourCard({ tour, tourIndex }: { tour: Tour; tourIndex: number }) {
       style={({ pressed }) => [
         styles.tourCard,
         {
-          backgroundColor: colors.surface,
-          borderColor: colors.border,
+          backgroundColor: colors.pageSurface,
+          borderColor: colors.pageBorder,
           opacity: pressed ? 0.85 : 1,
         },
       ]}
     >
+      <CornerTicks color={colors.pageBorder} size={11} inset={4} />
       {/* Thin accent rule — like a pencil underline */}
       <View style={[styles.accentBar, { backgroundColor: tour.color + '66' }]} />
 
@@ -88,7 +90,7 @@ export default function ToursScreen() {
   const listBottomPadding = Math.max(insets.bottom, 12) + 24;
 
   return (
-    <ScreenContainer edges={["left", "right"]}>
+    <ScreenContainer variant="page" edges={["left", "right"]}>
       <PageFlip direction={1}>
       <PaperGrain />
       <ChapterHeader
@@ -123,7 +125,7 @@ function FolioFooter() {
   const colors = useColors();
   return (
     <View style={styles.folio}>
-      <View style={[styles.folioRule, { backgroundColor: colors.border }]} />
+      <InkRule color={colors.pageBorder} width={48} diamond={4} />
       <Text style={[styles.folioText, { color: colors.border }]}>
         BERKELEY ARCHITECTURAL HERITAGE · FIELD FOLIO · 2026
       </Text>
@@ -143,6 +145,7 @@ const styles = StyleSheet.create({
     letterSpacing: 2.5,
     textTransform: "uppercase",
     marginBottom: 2,
+    transform: [{ rotate: "-0.4deg" }],
   },
   folio: {
     alignItems: "center",
@@ -166,6 +169,16 @@ const styles = StyleSheet.create({
     borderRadius: 6,
     overflow: "hidden",
     borderWidth: 1,
+    ...Platform.select({
+      ios: {
+        shadowColor: "#3F3733",
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.05,
+        shadowRadius: 2,
+      },
+      android: { elevation: 1 },
+      web: { boxShadow: "0 1px 2px rgba(63,55,51,0.05)" },
+    }),
   },
   accentBar: {
     height: 2,

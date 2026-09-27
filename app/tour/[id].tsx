@@ -7,6 +7,8 @@ import { useColors } from "@/hooks/use-colors";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { AccordionMap } from "@/components/accordion-map";
 import { TravelStamp } from "@/components/travel-stamp";
+import { PaperGrain } from "@/components/paper-grain";
+import { CornerTicks } from "@/components/hand-inked";
 import { useStamps } from "@/lib/stamps";
 
 function romanNumeral(n: number): string {
@@ -32,7 +34,7 @@ export default function TourDetailScreen() {
 
   if (!tour) {
     return (
-      <View style={[styles.container, { backgroundColor: colors.background, paddingTop: insets.top }]}>
+      <View style={[styles.container, { backgroundColor: colors.pageBackground, paddingTop: insets.top }]}>
         <Text style={{ color: colors.foreground }}>Tour not found</Text>
       </View>
     );
@@ -47,8 +49,9 @@ export default function TourDetailScreen() {
     .filter((s) => s.landmark);
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <View style={[styles.header, { paddingTop: insets.top + 8, backgroundColor: colors.background, borderBottomColor: colors.border }]}>
+    <View style={[styles.container, { backgroundColor: colors.pageBackground }]}>
+      <PaperGrain />
+      <View style={[styles.header, { paddingTop: insets.top + 8, backgroundColor: colors.pageBackground, borderBottomColor: colors.pageBorder }]}>
         <Pressable
           onPress={() => router.back()}
           style={({ pressed }) => [styles.backButton, { backgroundColor: colors.surface, opacity: pressed ? 0.7 : 1 }]}
@@ -88,7 +91,8 @@ export default function TourDetailScreen() {
         </View>
 
         {/* Description */}
-        <View style={[styles.section, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+        <View style={[styles.section, { backgroundColor: colors.pageSurface, borderColor: colors.pageBorder }]}>
+          <CornerTicks color={colors.pageBorder} />
           <Text style={[styles.sectionTitle, { color: colors.muted }]}>About This Tour</Text>
           <Text style={[styles.description, { color: colors.foreground }]}>
             <Text style={[styles.dropCap, { color: tour.color }]}>{tour.description.charAt(0)}</Text>
@@ -115,7 +119,8 @@ export default function TourDetailScreen() {
         />
 
         {/* Stamp strip — collected travel stamps per stop */}
-        <View style={[styles.section, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+        <View style={[styles.section, { backgroundColor: colors.pageSurface, borderColor: colors.pageBorder }]}>
+          <CornerTicks color={colors.pageBorder} />
           <View style={styles.stampHeaderRow}>
             <Text style={[styles.sectionTitle, { color: colors.foreground, marginBottom: 0 }]}>Stamps</Text>
             <Text style={[styles.stampCount, { color: colors.muted }]}>
@@ -152,7 +157,8 @@ export default function TourDetailScreen() {
         </View>
 
         {/* Tour Stops */}
-        <View style={[styles.section, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+        <View style={[styles.section, { backgroundColor: colors.pageSurface, borderColor: colors.pageBorder }]}>
+          <CornerTicks color={colors.pageBorder} />
           <Text style={[styles.sectionTitle, { color: colors.foreground }]}>Tour Stops</Text>
           {tourLandmarks.map((stop, index) => (
             <Pressable
@@ -161,7 +167,7 @@ export default function TourDetailScreen() {
               style={({ pressed }) => [
                 styles.stopItem,
                 { opacity: pressed ? 0.7 : 1 },
-                index < tourLandmarks.length - 1 && { borderBottomColor: colors.border, borderBottomWidth: 0.5 },
+                index < tourLandmarks.length - 1 && { borderBottomColor: colors.pageBorder, borderBottomWidth: 1, borderStyle: "dashed" as const },
               ]}
             >
               <View style={styles.stopLeft}>
@@ -312,6 +318,7 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     fontFamily: Platform.select({ ios: "ui-serif", default: "serif" }),
     marginBottom: 10,
+    transform: [{ rotate: "-0.35deg" }],
   },
   description: {
     fontSize: 15,

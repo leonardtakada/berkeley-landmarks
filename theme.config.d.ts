@@ -5,6 +5,9 @@ export const themeColors: {
   foreground: { light: string; dark: string };
   muted: { light: string; dark: string };
   border: { light: string; dark: string };
+  pageBackground: { light: string; dark: string };
+  pageSurface: { light: string; dark: string };
+  pageBorder: { light: string; dark: string };
   accent: { light: string; dark: string };
   success: { light: string; dark: string };
   warning: { light: string; dark: string };
