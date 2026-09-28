@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 240" width="200" height="240">
+  <defs><clipPath id="frame"><path d="M16 240 V124 C34 116 52 98 66 72 L100 14 L134 72 C148 98 166 116 184 124 V240 Z"/></clipPath></defs>
+  <!-- William R. Yelland: a storybook gable with bell-cast eaves, vermilion tint -->
+  <path d="M16 240 V124 C34 116 52 98 66 72 L100 14 L134 72 C148 98 166 116 184 124 V240 Z" fill="#F4CDB9"/>
+  <g clip-path="url(#frame)">
+    <!-- tweed jacket -->
+    <path d="M10 240 C18 204 54 190 100 188 C146 190 182 204 190 240 Z" fill="#0B2E8C"/>
+    <path d="M30 214 h6 M48 206 h6 M40 226 h6 M60 218 h6 M140 206 h6 M150 222 h6 M162 212 h6 M134 230 h6" stroke="#C9D0E4" stroke-width="1.6" stroke-linecap="round"/>
+    <!-- shirt and bow tie -->
+    <path d="M86 188 L100 222 L114 188 Z" fill="#FDFAF2"/>
+    <path d="M100 190 L86 182 L86 198 Z M100 190 L114 182 L114 198 Z" fill="#E4592B"/>
+    <rect x="96" y="186" width="8" height="8" rx="2" fill="#E4592B"/>
+    <!-- neck, ears, face -->
+    <path d="M90 146 H110 V176 H90 Z" fill="#FDFAF2"/>
+    <ellipse cx="70" cy="114" rx="7" ry="10" fill="#FDFAF2"/>
+    <ellipse cx="130" cy="114" rx="7" ry="10" fill="#FDFAF2"/>
+    <path d="M72 102 C70 136 84 156 100 158 C116 156 130 136 128 102 C126 80 114 70 100 70 C86 70 74 80 72 102 Z" fill="#FDFAF2"/>
+    <!-- sideburns, and a flat cap brought back from France -->
+    <path d="M71 104 V118 L76 112 V100 Z M129 104 V118 L124 112 V100 Z" fill="#2E2A27"/>
+    <path d="M66 98 C64 72 82 58 104 58 C126 58 140 72 138 90 C132 86 120 84 104 86 C88 88 74 92 66 98 Z" fill="#2E2A27"/>
+    <path d="M62 98 C80 88 112 86 144 92 C142 99 126 100 104 100 C86 100 72 102 62 98 Z" fill="#2E2A27"/>
+    <path data-anim="brow" d="M82 106 C86 103 91 103 94 105 M106 105 C109 103 114 103 118 106" stroke="#2E2A27" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+    <circle data-anim="eye" cx="88" cy="113" r="2.4" fill="#2E2A27"/>
+    <circle data-anim="eye" cx="112" cy="113" r="2.4" fill="#2E2A27"/>
+    <path d="M100 110 L96 125 L102 126" stroke="#2E2A27" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    <!-- a pencil moustache, and a grin -->
+    <path d="M88 132 C94 129 106 129 112 132" stroke="#2E2A27" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+    <path data-anim="mouth" d="M88 139 Q100 150 112 139 Z" data-smile="M86 137 Q100 155 114 137 Z" fill="#E4592B"/>
+  </g>
+</svg>

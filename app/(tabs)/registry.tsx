@@ -1,31 +1,36 @@
-import React, { useRef, useState, useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import {
-  Text,
-  View,
-  FlatList,
   Pressable,
-  TextInput,
+  ScrollView,
+  SectionList,
   StyleSheet,
-  Platform,
+  Text,
+  TextInput,
+  View,
 } from "react-native";
-import { useRouter } from "expo-router";
-import Svg, { Circle, Path } from "react-native-svg";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import Animated from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { ScreenContainer } from "@/components/screen-container";
-import { PageFlip } from "@/components/page-flip";
-import { PaperGrain } from "@/components/paper-grain";
-import { CornerTicks, InkDash, InkRule } from "@/components/hand-inked";
-import { useColors } from "@/hooks/use-colors";
-import { IconSymbol } from "@/components/ui/icon-symbol";
-import {
-  landmarks,
-  CATEGORY_COLORS,
-  CATEGORY_LABELS,
-  type Landmark,
-  type LandmarkCategory,
-} from "@/data/landmarks";
+import Svg, { Path, SvgXml } from "react-native-svg";
 
-const ALL_CATEGORIES: LandmarkCategory[] = [
+import { ArchitectPortrait } from "@/components/architect-portrait";
+import {
+  ChapterOpener,
+  Folio,
+  InkIn,
+  Leader,
+  SectionPage,
+  useFirstReveal,
+} from "@/components/book-page";
+import { REGISTRY_FRIEZE_SVG } from "@/components/print-art.generated";
+import { Annotation, Rule } from "@/components/print";
+import { ScrollClock, useScrollClockHandler } from "@/components/scroll-clock";
+import { FONT, INK, MARGIN, PAPER, TYPE } from "@/constants/book";
+import { landmarks, type Landmark, type LandmarkCategory } from "@/data/landmarks";
+import { ARCHITECTS, architectOf, type ArchitectKey } from "@/lib/architects";
+
+const CATEGORIES: (LandmarkCategory | null)[] = [
+  null,
   "civic",
   "residential",
   "religious",
@@ -34,595 +39,533 @@ const ALL_CATEGORIES: LandmarkCategory[] = [
   "cultural",
 ];
 
-type SortOption = "name" | "year" | "architect" | "neighborhood";
+type Arrangement = "name" | "year" | "architect" | "district";
+const ARRANGEMENTS: Arrangement[] = ["name", "year", "architect", "district"];
 
-const SERIF = Platform.select({ ios: "Georgia", default: "serif" });
-const SERIF_BOLD = Platform.select({ ios: "Georgia-Bold", default: "serif" });
-const SERIF_SEMI = "SourceSerif4_600SemiBold";
+type Entry = Landmark & { seq: number };
+type Section = { key: string; title: string; index: number; architect: ArchitectKey | null; data: Entry[] };
 
-/** Ornamental rule: hairline — diamond — hairline (printer's divider). */
+// The index, as a list the page's illustrations can follow the scroll of.
+const AnimatedSectionList = Animated.createAnimatedComponent(SectionList) as unknown as React.ComponentType<
+  React.ComponentProps<typeof SectionList<Entry, Section>>
+>;
+
+function yearOf(l: Landmark) {
+  const y = parseInt(l.yearBuilt, 10);
+  return Number.isFinite(y) ? y : null;
+}
+
+function sectionKey(l: Landmark, by: Arrangement): string {
+  switch (by) {
+    case "name": {
+      const c = l.name.trim().charAt(0).toUpperCase();
+      return /[A-Z]/.test(c) ? c : "#";
+    }
+    case "year": {
+      const y = yearOf(l);
+      return y ? `${Math.floor(y / 10) * 10}s` : "Undated";
+    }
+    case "architect": {
+      // The notable architects gather every spelling of their name under one heading.
+      const notable = architectOf(l);
+      if (notable) return ARCHITECTS[notable].name;
+      return l.architect?.replace(/^[^A-Za-z]+/, "").trim() || "Unknown";
+    }
+    case "district":
+      return l.neighborhood?.trim() || "Elsewhere";
+  }
+}
+
+function compare(a: Landmark, b: Landmark, by: Arrangement): number {
+  if (by === "year") return (yearOf(a) ?? 9999) - (yearOf(b) ?? 9999) || a.name.localeCompare(b.name);
+  const ka = sectionKey(a, by);
+  const kb = sectionKey(b, by);
+  // Unattributed work files at the back of the index.
+  const tail = (k: string) => (/^(unknown|various|undated|#)$/i.test(k) ? 1 : 0);
+  return tail(ka) - tail(kb) || ka.localeCompare(kb) || a.name.localeCompare(b.name);
+}
 
 /**
- * Hand-drawn-style ink vignette: Sather Tower (the Campanile) rising over
- * the Berkeley hills, scratchy line art like a Showa-era guidebook plate.
- * Pure stroke paths — no fills except the distant sun.
+ * Part Two — the Registry: every designated landmark, set as the index of
+ * the book. Letter (or decade, architect, district) headings; each entry
+ * runs on dotted leaders to its registry number.
  */
-
-/**
- * Hanko-style stamped seal accent: a small square red seal in the corner
- * of the plate, like a collector's mark on a vintage cover.
- */
-
-/** Book-styled CTA: bordered serif button with a corner tick. */
-
-const LandmarkRow = React.memo(function LandmarkRow({ landmark, colors }: { landmark: Landmark; colors: ReturnType<typeof useColors> }) {
+export default function RegistryScreen() {
   const router = useRouter();
-  const catColor = CATEGORY_COLORS[landmark.category];
-  const rowStyle = useMemo(() => ({
-    backgroundColor: colors.pageSurface,
-    borderRadius: 6,
-    overflow: "hidden" as const,
-    flexDirection: "row" as const,
-    alignItems: "center" as const,
-    borderWidth: 1,
-    borderColor: colors.pageBorder,
-    ...Platform.select({
-      ios: {
-        shadowColor: "#3F3733",
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.06,
-        shadowRadius: 2,
-      },
-      android: { elevation: 1 },
-      web: { boxShadow: "0 1px 2px rgba(63,55,51,0.06)" },
-    }),
-  }), [colors.pageSurface, colors.pageBorder]);
-
-  return (
-    <Pressable
-      onPress={() => router.push(`/landmark/${landmark.id}`)}
-      style={({ pressed }) => [
-        rowStyle,
-        { opacity: pressed ? 0.85 : 1 },
-      ]}
-    >
-      <View style={[styles.catIndicator, { backgroundColor: catColor, opacity: 0.8 }]} />
-      <View style={styles.rowContent}>
-        <Text style={[styles.rowName, { color: colors.foreground }]} numberOfLines={1}>
-          {landmark.name}
-        </Text>
-        <Text style={[styles.rowAddress, { color: colors.muted }]} numberOfLines={1}>
-          {landmark.address}
-        </Text>
-        <View style={styles.rowMeta}>
-          <Text style={[styles.rowMetaText, { color: colors.muted }]}>
-            {landmark.architect} · {landmark.yearBuilt}
-          </Text>
-        </View>
-      </View>
-      <View style={styles.rowRight}>
-        {landmark.nationalRegister && (
-          <View style={[styles.nrBadge, { borderColor: colors.accent }]}>
-            <IconSymbol name="star.fill" size={10} color={colors.accent} />
-          </View>
-        )}
-        <IconSymbol name="chevron.right" size={14} color={colors.muted} />
-      </View>
-      <CornerTicks color={colors.pageBorder} size={9} inset={3} />
-    </Pressable>
-  );
-});
-
-export default function LandmarksScreen() {
-  const colors = useColors();
-  // The bookmark bar hangs at the top; pad the list bottom by the safe inset.
   const insets = useSafeAreaInsets();
-  const listBottomPadding = Math.max(insets.bottom, 12) + 24;
-  const listRef = useRef<FlatList<Landmark>>(null);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState<LandmarkCategory | null>(null);
-  const [sortBy, setSortBy] = useState<SortOption>("name");
+  const reveal = useFirstReveal();
+  const clock = useScrollClockHandler();
+  const params = useLocalSearchParams<{ q?: string }>();
+  const [query, setQuery] = useState("");
+  const [category, setCategory] = useState<LandmarkCategory | null>(null);
+  const [arrangement, setArrangement] = useState<Arrangement>("name");
 
-  const filteredLandmarks = useMemo(() => {
-    let result = [...landmarks];
+  // Another page can open the registry at an architect's works.
+  const [openedAt, setOpenedAt] = useState<string | undefined>(undefined);
+  if (params.q !== openedAt) {
+    setOpenedAt(params.q);
+    if (params.q) {
+      setQuery(params.q);
+      setArrangement("name");
+    }
+  }
 
-    if (searchQuery.trim()) {
-      const q = searchQuery.toLowerCase();
-      result = result.filter(
+  const sections = useMemo<Section[]>(() => {
+    const q = query.trim().toLowerCase();
+    const found = landmarks
+      .filter((l) => !category || l.category === category)
+      .filter(
         (l) =>
+          !q ||
           l.name.toLowerCase().includes(q) ||
           l.architect.toLowerCase().includes(q) ||
           l.address.toLowerCase().includes(q) ||
           l.neighborhood.toLowerCase().includes(q) ||
-          l.style.toLowerCase().includes(q)
-      );
-    }
-
-    if (selectedCategory) {
-      result = result.filter((l) => l.category === selectedCategory);
-    }
-
-    result.sort((a, b) => {
-      switch (sortBy) {
-        case "name":
-          return a.name.localeCompare(b.name);
-        case "year":
-          return (parseInt(a.yearBuilt) || 0) - (parseInt(b.yearBuilt) || 0);
-        case "architect":
-          return a.architect.localeCompare(b.architect);
-        case "neighborhood":
-          return a.neighborhood.localeCompare(b.neighborhood);
-        default:
-          return 0;
+          l.style.toLowerCase().includes(q),
+      )
+      .sort((a, b) => compare(a, b, arrangement));
+    const out: Section[] = [];
+    found.forEach((l, i) => {
+      const key = sectionKey(l, arrangement);
+      let s = out[out.length - 1];
+      if (!s || s.key !== key) {
+        s = {
+          key,
+          title: key,
+          index: out.length,
+          architect: arrangement === "architect" ? architectOf(l) : null,
+          data: [],
+        };
+        out.push(s);
       }
+      s.data.push({ ...l, seq: i });
     });
+    return out;
+  }, [query, category, arrangement]);
 
-    return result;
-  }, [searchQuery, selectedCategory, sortBy]);
+  const total = sections.reduce((n, s) => n + s.data.length, 0);
 
   return (
-    <ScreenContainer variant="page">
-      <PageFlip direction={1}>
-      <PaperGrain />
-      <FlatList
-        ref={listRef}
-        data={filteredLandmarks}
+    <SectionPage>
+      <ScrollClock value={clock.offset}>
+      <AnimatedSectionList
+        sections={sections}
+        onScroll={clock.onScroll}
+        scrollEventThrottle={16}
         keyExtractor={(item) => item.id}
-        renderItem={({ item }) => <LandmarkRow landmark={item} colors={colors} />}
-        initialNumToRender={20}
-        maxToRenderPerBatch={10}
-        windowSize={5}
-        removeClippedSubviews={true}
+        stickySectionHeadersEnabled={false}
+        initialNumToRender={16}
+        maxToRenderPerBatch={16}
+        windowSize={7}
+        keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="on-drag"
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: Math.max(insets.bottom, 16) + 36 }}
         ListHeaderComponent={
           <View>
-            <View style={styles.screenHeader}>
-              <Text style={[styles.screenTitle, { color: colors.foreground }]}>
-                THE REGISTRY
-              </Text>
-              <Text style={[styles.screenSubtitle, { color: colors.muted }]}>
-                {landmarks.length} designated landmarks in Berkeley
-              </Text>
-            </View>
-            <View
-              style={[
-                styles.searchBar,
-                { backgroundColor: colors.pageSurface, borderColor: colors.pageBorder },
-              ]}
-            >
-              <CornerTicks color={colors.pageBorder} size={8} inset={2} />
-              <Text style={[styles.searchGlyph, { color: colors.muted }]}>⌕</Text>
-              <TextInput
-                style={[styles.searchInput, { color: colors.foreground }]}
-                placeholder="Search landmarks, architects, styles..."
-                placeholderTextColor={colors.muted}
-                value={searchQuery}
-                onChangeText={setSearchQuery}
-                returnKeyType="done"
-              />
-              {searchQuery.length > 0 && (
-                <Pressable onPress={() => setSearchQuery("")}>
-                  <IconSymbol name="xmark" size={16} color={colors.muted} />
-                </Pressable>
-              )}
-            </View>
-            <FlatList
-              horizontal
-              data={[null, ...ALL_CATEGORIES]}
-              keyExtractor={(item) => item ?? "all"}
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={styles.categoryScroll}
-              renderItem={({ item: cat }) => {
-                const isActive = cat === selectedCategory || (cat === null && selectedCategory === null);
-                const chipColor = cat ? CATEGORY_COLORS[cat] : colors.primary;
-                return (
-                  <Pressable
-                    onPress={() => setSelectedCategory(cat)}
-                    style={({ pressed }) => [
-                      styles.catChip,
-                      {
-                        borderColor: isActive ? chipColor : colors.pageBorder,
-                        opacity: pressed ? 0.8 : 1,
-                      },
-                    ]}
-                  >
-                    <Text
-                      style={[
-                        styles.catChipText,
-                        { color: isActive ? colors.foreground : colors.muted },
-                      ]}
-                    >
-                      {cat ? CATEGORY_LABELS[cat].toUpperCase() : "ALL"}
-                    </Text>
-                  </Pressable>
-                );
-              }}
+            <ChapterOpener
+              kicker="Part Two"
+              title="The Registry"
+              note="Every designated landmark in the city, set out as an index."
+              reveal={reveal}
             />
-            <View style={styles.sortRow}>
-              <Pressable
-                onPress={() => {
-                  const opts: SortOption[] = ["name", "year", "architect", "neighborhood"];
-                  const idx = opts.indexOf(sortBy);
-                  setSortBy(opts[(idx + 1) % opts.length]);
-                }}
-                style={({ pressed }) => [
-                  styles.sortChip,
-                  { borderColor: colors.pageBorder, opacity: pressed ? 0.7 : 1 },
-                ]}
+            <InkIn reveal={reveal} index={1} style={styles.frieze}>
+              <View
+                style={styles.friezeArt}
+                accessible
+                accessibilityRole="image"
+                accessibilityLabel="A street of Berkeley buildings: a church, a Queen Anne house, the Campanile, City Hall, the library, a cottage and a bungalow"
               >
-                <Text style={[styles.sortChipText, { color: colors.primary }]}>
-                  SORT · {sortBy.toUpperCase()}
+                <SvgXml xml={REGISTRY_FRIEZE_SVG} width="100%" height="100%" />
+              </View>
+            </InkIn>
+            <InkIn reveal={reveal} index={2} style={styles.controls}>
+              <View style={styles.findRow}>
+                <Text style={styles.controlLabel}>Find</Text>
+                <TextInput
+                  value={query}
+                  onChangeText={setQuery}
+                  placeholder="A name, an architect, a style"
+                  placeholderTextColor={INK.faded}
+                  style={styles.findInput}
+                  returnKeyType="search"
+                  autoCorrect={false}
+                  clearButtonMode="never"
+                />
+                {query ? (
+                  <Pressable
+                    onPress={() => setQuery("")}
+                    style={styles.clearBox}
+                    accessibilityRole="button"
+                    accessibilityLabel="Clear the search"
+                  >
+                    <Text style={styles.clear}>×</Text>
+                  </Pressable>
+                ) : null}
+              </View>
+              <Rule color={INK.charcoal} weight={1} />
+
+              <ChoiceRow
+                label="Kind"
+                options={CATEGORIES.map((c) => ({ key: c ?? "all", label: c ?? "all" }))}
+                selected={category ?? "all"}
+                onSelect={(k) => setCategory(k === "all" ? null : (k as LandmarkCategory))}
+              />
+              <ChoiceRow
+                label="Order"
+                options={ARRANGEMENTS.map((a) => ({ key: a, label: a }))}
+                selected={arrangement}
+                onSelect={(k) => setArrangement(k as Arrangement)}
+              />
+              <View style={styles.countRow}>
+                <Text style={TYPE.label}>
+                  {total} {total === 1 ? "entry" : "entries"}
                 </Text>
-              </Pressable>
-              <View style={{ flex: 1 }} />
-              <Text style={[styles.resultsText, { color: colors.muted }]}>
-                {filteredLandmarks.length} landmark{filteredLandmarks.length !== 1 ? "s" : ""}
-              </Text>
-            </View>
+                <Text style={TYPE.label}>
+                  <Text style={styles.nrMark}>※ </Text>National Register
+                </Text>
+              </View>
+            </InkIn>
           </View>
         }
-        contentContainerStyle={[styles.listContent, { paddingBottom: listBottomPadding }]}
-        showsVerticalScrollIndicator={false}
-        ItemSeparatorComponent={() => (
-          <View pointerEvents="none" style={styles.deckleSep}>
-            <InkDash color={colors.pageBorder} />
-          </View>
-        )}
-        ListFooterComponent={<FolioFooter />}
+        renderSectionHeader={({ section }) => <SectionHead section={section as Section} arrangement={arrangement} />}
+        renderItem={({ item, index, section }) => {
+          const row = (
+            <IndexEntry
+              landmark={item}
+              arrangement={arrangement}
+              last={index === section.data.length - 1}
+              onPress={() => router.push(`/landmark/${item.id}`)}
+            />
+          );
+          return item.seq < 12 ? (
+            <InkIn reveal={reveal} index={3 + item.seq} step={0.04}>
+              {row}
+            </InkIn>
+          ) : (
+            row
+          );
+        }}
         ListEmptyComponent={
-          <View style={styles.emptyState}>
-            <IconSymbol name="magnifyingglass" size={40} color={colors.muted} />
-            <Text style={[styles.emptyText, { color: colors.muted }]}>
-              No landmarks found matching your search
-            </Text>
+          <View style={styles.empty}>
+            <Annotation>Nothing in the registry answers to that.</Annotation>
           </View>
         }
+        ListFooterComponent={total ? <Folio>The Registry · Berkeley</Folio> : null}
       />
-      </PageFlip>
-    </ScreenContainer>
+      </ScrollClock>
+    </SectionPage>
   );
 }
 
-function FolioFooter() {
-  const colors = useColors();
+/** A row of tracked choices; the chosen one is inked blue with a solid bar beneath. */
+function ChoiceRow({
+  label,
+  options,
+  selected,
+  onSelect,
+}: {
+  label: string;
+  options: { key: string; label: string }[];
+  selected: string;
+  onSelect: (key: string) => void;
+}) {
   return (
-    <View style={styles.folio}>
-      <InkRule color={colors.pageBorder} width={48} diamond={4} />
-      <Text style={[styles.folioText, { color: colors.border }]}>
-        THE REGISTRY · BERKELEY · CALIFORNIA
-      </Text>
+    <View style={styles.choiceRow}>
+      <Text style={styles.controlLabel}>{label}</Text>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.choices}>
+        {options.map((o) => {
+          const on = o.key === selected;
+          return (
+            <Pressable
+              key={o.key}
+              onPress={() => onSelect(o.key)}
+              hitSlop={{ top: 10, bottom: 10, left: 6, right: 6 }}
+              accessibilityRole="button"
+              accessibilityState={{ selected: on }}
+              style={styles.choice}
+            >
+              <Text style={[styles.choiceText, on && styles.choiceOn]}>{o.label}</Text>
+              <View style={[styles.choiceBar, on && styles.choiceBarOn]} />
+            </Pressable>
+          );
+        })}
+      </ScrollView>
     </View>
   );
 }
 
+function SectionHead({ section, arrangement }: { section: Section; arrangement: Arrangement }) {
+  if (arrangement === "name") {
+    const n = section.data.length;
+    return (
+      <View style={styles.letterHead}>
+        <LetterBlock letter={section.title} index={section.index} />
+        <View style={styles.letterRule} />
+        <Text style={TYPE.label}>
+          {n} {n === 1 ? "entry" : "entries"}
+        </Text>
+      </View>
+    );
+  }
+  return (
+    <View style={styles.sectionHead}>
+      {section.architect ? (
+        <ArchitectPortrait architect={section.architect} width={76} style={styles.headPortrait} />
+      ) : null}
+      <View style={styles.sectionTitleRow}>
+        <Text style={styles.sectionTitle} numberOfLines={2}>
+          {section.title}
+        </Text>
+        {section.architect ? <Text style={styles.headYears}>{ARCHITECTS[section.architect].years}</Text> : null}
+      </View>
+      <Rule color={INK.blue} weight={1.5} />
+    </View>
+  );
+}
+
+const BLOCK = 56;
+const BLOCK_SHAPES = [
+  // circle, square, arch, gable — the label shapes of the book
+  "M0 28 C0 12.5 12.5 0 28 0 C43.5 0 56 12.5 56 28 C56 43.5 43.5 56 28 56 C12.5 56 0 43.5 0 28 Z",
+  "M0 0 H56 V56 H0 Z",
+  "M0 56 V28 C0 12.5 12.5 0 28 0 C43.5 0 56 12.5 56 28 V56 Z",
+  "M0 56 V22 L28 0 L56 22 V56 Z",
+];
+
+/**
+ * An index letter cut out of a block of flat ink, like the lettering on a
+ * Showa travel label. Shapes run circle, square, arch, gable down the index;
+ * the ink alternates blue and vermilion, shifting a step each round.
+ */
+function LetterBlock({ letter, index }: { letter: string; index: number }) {
+  const shape = index % BLOCK_SHAPES.length;
+  const ink = (index + Math.floor(index / BLOCK_SHAPES.length)) % 2 ? INK.vermilion : INK.blue;
+  return (
+    <View style={styles.block} accessibilityRole="header" accessibilityLabel={letter}>
+      <Svg width={BLOCK} height={BLOCK} viewBox="0 0 56 56" style={StyleSheet.absoluteFill}>
+        <Path d={BLOCK_SHAPES[shape]} fill={ink} />
+      </Svg>
+      <Text style={[styles.blockLetter, shape >= 2 && styles.blockLetterLow]}>{letter}</Text>
+    </View>
+  );
+}
+
+function IndexEntry({
+  landmark,
+  arrangement,
+  last,
+  onPress,
+}: {
+  landmark: Landmark;
+  arrangement: Arrangement;
+  last: boolean;
+  onPress: () => void;
+}) {
+  const number = landmark.landmarkNumber?.replace(/^#/, "");
+  // Say what the heading doesn't: no need to repeat the architect under an architect heading.
+  const meta = [
+    arrangement !== "architect" ? landmark.architect : null,
+    arrangement !== "year" ? landmark.yearBuilt : null,
+    arrangement !== "district" ? landmark.neighborhood : null,
+  ]
+    .filter((x) => x && !/^unknown$/i.test(x))
+    .join("  ·  ");
+  return (
+    <Pressable
+      onPress={onPress}
+      style={({ pressed }) => [styles.entry, pressed && styles.entryPressed]}
+      accessibilityRole="button"
+      accessibilityLabel={`${landmark.name}${number ? `, landmark number ${number}` : ""}`}
+    >
+      <View style={styles.entryLine}>
+        <Text style={styles.entryName} numberOfLines={2}>
+          {landmark.name}
+          {landmark.nationalRegister ? <Text style={styles.nrMark}>{" ※"}</Text> : null}
+        </Text>
+        <Leader />
+        <Text style={styles.entryNo}>{number ? `No. ${number}` : "—"}</Text>
+      </View>
+      {meta ? (
+        <Text style={styles.entryMeta} numberOfLines={1}>
+          {meta}
+        </Text>
+      ) : null}
+      {!last ? <Rule style={styles.entryRule} /> : null}
+    </Pressable>
+  );
+}
+
 const styles = StyleSheet.create({
-  // ---- Cover ----
-  cover: {
-    marginHorizontal: 12,
+  frieze: {
+    paddingHorizontal: MARGIN.outer,
+    marginBottom: 26,
+  },
+  friezeArt: {
+    width: "100%",
+    aspectRatio: 400 / 140,
+  },
+  controls: {
+    paddingHorizontal: MARGIN.outer,
+    paddingBottom: 6,
+  },
+  controlLabel: {
+    ...TYPE.label,
+    width: 64,
+  },
+  findRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingTop: 4,
+  },
+  findInput: {
+    flex: 1,
+    marginRight: 4,
+    fontFamily: FONT.regular,
+    fontSize: 17,
+    color: INK.charcoal,
+    paddingVertical: 10,
+  },
+  clearBox: {
+    width: 40,
+    height: 40,
+    marginRight: -10,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  clear: {
+    fontFamily: FONT.light,
+    fontSize: 24,
+    color: INK.sepia,
+  },
+  choiceRow: {
+    flexDirection: "row",
+    alignItems: "center",
     marginTop: 16,
-    marginBottom: 8,
-    padding: 4,
   },
-  coverFrame: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    borderWidth: 2.5,
-  },
-  coverFrameInner: {
-    position: "absolute",
-    top: 4,
-    left: 4,
-    right: 4,
-    bottom: 4,
-    borderWidth: StyleSheet.hairlineWidth,
-  },
-  coverContent: {
+  choices: {
     alignItems: "center",
-    paddingVertical: 40,
-    paddingHorizontal: 20,
-    gap: 0,
+    gap: 16,
+    paddingRight: MARGIN.outer,
   },
-  coverKicker: {
-    fontFamily: SERIF,
-    fontSize: 10,
-    fontWeight: "700",
-    letterSpacing: 3,
-    marginBottom: 22,
+  choice: {
+    alignItems: "stretch",
   },
-  coverTitleBlock: {
+  choiceText: {
+    fontFamily: FONT.medium,
+    fontSize: 11.5,
+    letterSpacing: 1.8,
+    textTransform: "uppercase",
+    color: INK.faded,
+    paddingBottom: 4,
+  },
+  choiceOn: {
+    color: INK.blue,
+  },
+  choiceBar: {
+    height: 2,
+  },
+  choiceBarOn: {
+    backgroundColor: INK.blue,
+  },
+  countRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginTop: 22,
+  },
+  nrMark: {
+    color: INK.vermilion,
+  },
+  letterHead: {
+    flexDirection: "row",
     alignItems: "center",
+    gap: 12,
+    paddingHorizontal: MARGIN.outer,
+    paddingTop: 34,
+    paddingBottom: 4,
   },
-  coverTitle: {
-    fontFamily: SERIF_BOLD,
-    fontSize: 52,
-    letterSpacing: 10,
-    textAlign: "center",
+  letterRule: {
+    flex: 1,
+    height: 1.5,
+    backgroundColor: INK.blue,
   },
-  coverSubtitle: {
-    fontFamily: SERIF,
-    fontSize: 20,
-    fontWeight: "600",
-    letterSpacing: 12,
-    marginTop: 10,
-    paddingRight: 12, // optically re-center tracked small caps
+  block: {
+    width: BLOCK,
+    height: BLOCK,
+    alignItems: "center",
+    justifyContent: "center",
   },
-  coverDedication: {
-    fontFamily: SERIF,
+  blockLetter: {
+    fontFamily: FONT.light,
+    fontSize: 30,
+    lineHeight: 34,
+    color: PAPER.cover,
+  },
+  blockLetterLow: {
+    marginTop: 8,
+  },
+  sectionHead: {
+    paddingHorizontal: MARGIN.outer,
+    paddingTop: 34,
+    paddingBottom: 2,
+  },
+  headPortrait: {
+    marginBottom: 12,
+  },
+  sectionTitleRow: {
+    flexDirection: "row",
+    alignItems: "flex-end",
+    justifyContent: "space-between",
+    paddingBottom: 6,
+  },
+  sectionTitle: {
+    flexShrink: 1,
+    fontFamily: FONT.light,
+    fontSize: 24,
+    lineHeight: 28,
+    color: INK.blue,
+  },
+  headYears: {
+    ...TYPE.label,
+    marginBottom: 4,
+  },
+  entry: {
+    paddingHorizontal: MARGIN.outer,
+    paddingTop: 14,
+  },
+  entryPressed: {
+    opacity: 0.5,
+  },
+  entryLine: {
+    flexDirection: "row",
+    alignItems: "flex-end",
+  },
+  entryName: {
+    flexShrink: 1,
+    fontFamily: FONT.regular,
+    fontSize: 18,
+    lineHeight: 23,
+    color: INK.charcoal,
+  },
+  entryNo: {
+    fontFamily: FONT.medium,
+    fontSize: 11.5,
+    letterSpacing: 1.2,
+    color: INK.blue,
+    marginBottom: 2,
+  },
+  entryMeta: {
+    fontFamily: FONT.regular,
     fontSize: 13,
-    fontStyle: "italic",
-    lineHeight: 19,
-    textAlign: "center",
+    letterSpacing: 0.2,
+    color: INK.sepia,
+    marginTop: 3,
+  },
+  entryRule: {
     marginTop: 14,
   },
-  plateWrap: {
-    width: "100%",
-    alignItems: "center",
-    marginTop: 26,
-  },
-  plateCaption: {
-    fontFamily: SERIF,
-    fontSize: 9,
-    fontWeight: "600",
-    letterSpacing: 2,
-    marginTop: 6,
-  },
-  seal: {
-    position: "absolute",
-    right: 18,
-    top: 12,
-    width: 34,
-    height: 34,
-    borderWidth: 1.5,
-    alignItems: "center",
-    justifyContent: "center",
-    transform: [{ rotate: "-6deg" }],
-    opacity: 0.85,
-  },
-  sealInner: {
-    width: 22,
-    height: 22,
-    borderWidth: 1,
-    transform: [{ rotate: "45deg" }],
-  },
-  sealDot: {
-    position: "absolute",
-    width: 4,
-    height: 4,
-    borderRadius: 2,
-  },
-  coverBtnRow: {
-    flexDirection: "row",
-    gap: 12,
-    marginTop: 30,
-  },
-  coverBtn: {
-    borderWidth: 1.5,
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-  },
-  coverBtnText: {
-    fontFamily: SERIF_SEMI,
-    fontSize: 12,
-    fontWeight: "600",
-    letterSpacing: 2.5,
-  },
-  coverBtnTextGhost: {},
-  coverImprint: {
-    fontFamily: SERIF,
-    fontSize: 9,
-    fontWeight: "600",
-    letterSpacing: 2.5,
-    marginTop: 26,
-  },
-  // ---- Ornamental rule ----
-  ruleRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    marginTop: 12,
-    marginBottom: 4,
-  },
-  ruleLine: {
-    height: StyleSheet.hairlineWidth * 2,
-  },
-  ruleDiamond: {
-    width: 7,
-    height: 7,
-    borderWidth: 1,
-    transform: [{ rotate: "45deg" }],
-  },
-
-  deckleSep: {
-    height: 14,
-    justifyContent: "center",
-    opacity: 0.9,
-  },
-  folio: {
-    alignItems: "center",
-    marginTop: 28,
-    gap: 8,
-  },
-  folioRule: {
-    width: 48,
-    height: StyleSheet.hairlineWidth,
-  },
-  folioText: {
-    fontSize: 9,
-    fontWeight: "600",
-    fontFamily: Platform.select({ ios: "Georgia", default: "serif" }),
-    letterSpacing: 2,
-  },
-
-  headerTopSpacer: {
-    paddingTop: 12,
-  },
-  screenHeader: {
-    paddingHorizontal: 16,
-    paddingTop: 24,
-    paddingBottom: 20,
-  },
-  screenTitle: {
-    fontFamily: SERIF_SEMI,
-    fontSize: 22,
-    letterSpacing: 4,
-    marginBottom: 4,
-  },
-  screenSubtitle: {
-    fontSize: 15,
-    lineHeight: 22,
-    marginTop: 2,
-  },
-  searchBar: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginHorizontal: 16,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    borderWidth: 1,
-    borderRadius: 2,
-    gap: 10,
-  },
-  searchGlyph: {
-    fontSize: 16,
-    lineHeight: 20,
-    fontFamily: Platform.select({ ios: "Georgia", default: "serif" }),
-  },
-  searchInput: {
-    flex: 1,
-    fontSize: 16,
-    lineHeight: 20,
-    padding: 0,
-  },
-  categoryScroll: {
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    gap: 8,
-  },
-  catChip: {
-    paddingHorizontal: 12,
-    paddingVertical: 7,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderRadius: 3,
-    marginRight: 8,
-  },
-  catChipText: {
-    fontSize: 11,
-    fontWeight: "500",
-    textTransform: "uppercase",
-    letterSpacing: 1,
-    fontFamily: Platform.select({ ios: "Georgia", default: "serif" }),
-  },
-  sortRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 16,
-    marginBottom: 8,
-  },
-    sortChip: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderRadius: 2,
-  },
-  sortChipText: {
-    fontSize: 10,
-    fontWeight: "600",
-    textTransform: "uppercase",
-    letterSpacing: 1.5,
-    fontFamily: Platform.select({ ios: "Georgia", default: "serif" }),
-  },
-  resultsRow: {
-    paddingHorizontal: 16,
-    paddingBottom: 8,
-  },
-  resultsText: {
-    fontSize: 11,
-    fontWeight: "500",
-    textTransform: "uppercase",
-    letterSpacing: 1,
-    fontFamily: Platform.select({ ios: "Georgia", default: "serif" }),
-  },
-  listContent: {
-    paddingHorizontal: 16,
-    paddingBottom: 100,
-  },
-  landmarkRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    borderRadius: 6,
-    overflow: "hidden",
-    ...Platform.select({
-      ios: {
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.02,
-        shadowRadius: 2,
-      },
-      android: { elevation: 1 },
-      web: { boxShadow: "0 1px 2px rgba(0,0,0,0.02)" },
-    }),
-  },
-  catIndicator: {
-    width: 3,
-    alignSelf: "stretch",
-  },
-  rowContent: {
-    flex: 1,
-    paddingVertical: 16,
-    paddingHorizontal: 14,
-  },
-  rowName: {
-    fontSize: 16,
-    fontWeight: "600",
-    fontFamily: "SourceSerif4_600SemiBold",
-    lineHeight: 22,
-  },
-  rowAddress: {
-    fontSize: 14,
-    lineHeight: 18,
-    marginTop: 2,
-    fontFamily: Platform.select({ ios: "Georgia", default: "serif" }),
-  },
-  rowMeta: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginTop: 4,
-    gap: 6,
-  },
-  rowMetaText: {
-    fontSize: 11,
-    lineHeight: 14,
-    textTransform: "uppercase",
-    letterSpacing: 1,
-    fontWeight: "500",
-    fontStyle: "italic",
-    fontFamily: Platform.select({ ios: "Georgia", default: "serif" }),
-  },
-  rowRight: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    paddingRight: 14,
-  },
-  nrBadge: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    borderWidth: StyleSheet.hairlineWidth,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  emptyState: {
-    alignItems: "center",
-    paddingTop: 60,
-    gap: 12,
-  },
-  emptyText: {
-    fontSize: 15,
-    textAlign: "center",
+  empty: {
+    paddingHorizontal: MARGIN.outer,
+    paddingTop: 40,
   },
 });

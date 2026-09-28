@@ -3,16 +3,7 @@ import { z } from "zod";
 import { photos } from "../drizzle/schema";
 import { getDb } from "./db";
 import { publicProcedure, protectedProcedure, adminProcedure, router } from "./_core/trpc";
-import path from "path";
-import fs from "fs";
-
-const UPLOADS_DIR = path.resolve(process.cwd(), "uploads");
-
-function ensureUploadsDir() {
-  if (!fs.existsSync(UPLOADS_DIR)) {
-    fs.mkdirSync(UPLOADS_DIR, { recursive: true });
-  }
-}
+import { saveUpload } from "./uploads";
 
 export const photosRouter = router({
   submit: protectedProcedure
@@ -43,20 +34,8 @@ export const photosRouter = router({
         throw new Error("You can have at most 3 pending photo submissions per landmark");
       }
 
-      // Decode and validate size (5MB)
-      const buffer = Buffer.from(input.photoBase64, "base64");
-      if (buffer.length > 5 * 1024 * 1024) {
-        throw new Error("File size must be under 5MB");
-      }
-
-      // Save to uploads
-      ensureUploadsDir();
-      const ext = input.mimeType === "image/png" ? "png" : "jpg";
-      const filename = `${input.landmarkId}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
-      const filepath = path.join(UPLOADS_DIR, filename);
-      fs.writeFileSync(filepath, buffer);
-
-      const photoUrl = `/uploads/${filename}`;
+      // Decode, check the size (5MB) and save under /uploads
+      const photoUrl = saveUpload(input.photoBase64, input.mimeType, input.landmarkId);
 
       const [row] = await db.insert(photos).values({
         landmarkId: input.landmarkId,

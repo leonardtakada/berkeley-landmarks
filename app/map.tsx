@@ -5,24 +5,20 @@ import {
   Pressable,
   StyleSheet,
   ScrollView,
-  Platform,
-  Image,
 } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { LinearGradient } from "expo-linear-gradient";
 import { useColors } from "@/hooks/use-colors";
 import { IconSymbol } from "@/components/ui/icon-symbol";
-import { CategoryPlaceholder } from "@/components/category-placeholder";
 import MapViewWrapper, { MapPolyline, MapPolygon } from "@/components/map-view-wrapper";
 import MapLibreMapView, {
   MapPolyline as VectorMapPolyline,
+  type MapCameraHandle,
 } from "@/components/maplibre-view";
 import { useMapEngine } from "@/constants/map-engine";
 import {
   landmarks,
   BERKELEY_CENTER,
-  CATEGORY_COLORS,
   CATEGORY_LABELS,
   type LandmarkCategory,
   type Landmark,
@@ -34,6 +30,14 @@ import { TourFollowCard } from "@/components/tour-follow-card";
 import { useStamps } from "@/lib/stamps";
 import { StampCollectOverlay } from "@/components/travel-stamp";
 import { MapUnfold } from "@/components/map-unfold";
+import { ArchitectPortrait } from "@/components/architect-portrait";
+import { Arrow, Rule } from "@/components/print";
+import { PaperGrain } from "@/components/paper-grain";
+import { TippedInPlate } from "@/components/tipped-in-plate";
+import { FONT, INK, PAPER, TYPE, chapterNo } from "@/constants/book";
+import { architectOf } from "@/lib/architects";
+import { photoSource } from "@/lib/photo-source";
+import { legBetween } from "@/lib/route-legs";
 
 const ALL_CATEGORIES: LandmarkCategory[] = [
   "civic",
@@ -44,24 +48,22 @@ const ALL_CATEGORIES: LandmarkCategory[] = [
   "cultural",
 ];
 
-// Hand-inked tour route (Showa book motif): a thick red-ink stroke over a
-// wider, low-opacity darker underlayer that mimics ink weight variation —
-// like a brush S-curve printed on a paper map. Hex-alpha in the underlayer
+// The walk: a vermilion stroke over a wider, pale underlayer that mimics ink
+// spreading into the paper — the same line as the fold-out map. Hex-alpha in the underlayer
 // color works on all three engines (react-native-maps, MapLibre, Leaflet).
-const INK_RED = "#C0392B";
-const INK_RED_UNDER = "#7E24185A"; // darker red @ ~35% opacity
-const INK_WIDTH = 5.5;
-const INK_UNDER_WIDTH = 7.5;
-
-// Showa book serif (see components/chapter-header.tsx)
-const SERIF = Platform.select({ ios: "Georgia", default: "serif" });
+const INK_RED = INK.vermilion;
+/** Rough height of the landmark entry sheet, for camera padding. */
+const SHEET_ESTIMATE = 330;
+const INK_RED_UNDER = "#E4592B38"; // vermilion @ ~22% opacity
+const INK_WIDTH = 4.5;
+const INK_UNDER_WIDTH = 9;
 
 export default function MapScreen() {
   const router = useRouter();
-  const params = useLocalSearchParams<{ tourId?: string; landmarkId?: string }>();
+  const params = useLocalSearchParams<{ tourId?: string; landmarkId?: string; walk?: string }>();
   const colors = useColors();
   const insets = useSafeAreaInsets();
-  const mapRef = useRef<any>(null);
+  const mapRef = useRef<MapCameraHandle | null>(null);
   const { isMapLibre, toggleEngine, ready: engineReady } = useMapEngine();
 
   const [selectedLandmark, setSelectedLandmark] = useState<Landmark | null>(null);
@@ -72,45 +74,43 @@ export default function MapScreen() {
     params.tourId ?? null
   );
 
-  // Fold-out map animation plays once, on the screen's first mount. Push
-  // navigation reuses the mounted screen (params change in place), so this
-  // ref keeps the unfold from replaying on every subsequent push.
-  const hasMounted = useRef(false);
-  useEffect(() => {
-    hasMounted.current = true;
-  }, []);
+  // "Set out on foot" arrives walking, stop by stop; "the large map" arrives
+  // with the walk laid out whole until the reader begins it.
+  const [walking, setWalking] = useState(params.walk === "1");
 
   // Map is a push route; a fresh push arrives as a param change on an
   // already-mounted screen — sync it.
   useEffect(() => {
     if (params.tourId !== undefined) {
       setActiveTourId(params.tourId as string);
+      setWalking(params.walk === "1");
       setSelectedLandmark(null);
     }
-  }, [params.tourId]);
+  }, [params.tourId, params.walk]);
 
-  // Deep link / "View on Map" push for a single landmark.
+  // Camera padding keeps whatever is in focus clear of the slips laid over
+  // the map: the banner at the top, the walk card or entry sheet below.
+  const [cardHeight, setCardHeight] = useState(250);
+  const padFor = useCallback(
+    (bottom: number) => ({ top: insets.top + 80, right: 36, bottom: bottom + 24, left: 36 }),
+    [insets.top],
+  );
+
+  // "Find it on the map": fly in to the landmark, above its entry sheet.
   useEffect(() => {
     if (params.landmarkId !== undefined) {
       const lm = landmarks.find((l) => l.id === params.landmarkId);
       if (lm) {
         setActiveTourId(null);
         setSelectedLandmark(lm);
-        // Fly the camera to the landmark so the user actually sees where it
-        // is. Delay accounts for map mount (~maplibre asset staging) plus
-        // the ~450ms MapUnfold animation — camera commands issued before
-        // the view is mounted are silently dropped.
-        const t = setTimeout(
-          () =>
-            mapRef.current?.flyToCoord?.(
-              { latitude: lm.latitude, longitude: lm.longitude },
-              16
-            ),
-          900
+        mapRef.current?.flyToCoord(
+          { latitude: lm.latitude, longitude: lm.longitude },
+          17,
+          padFor(SHEET_ESTIMATE),
         );
-        return () => clearTimeout(t);
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- camera command on arrival
   }, [params.landmarkId]);
 
   const activeTour = useMemo(
@@ -120,52 +120,42 @@ export default function MapScreen() {
   const tourFollow = useTourFollow(activeTour ?? null);
 
   // Tour-progress stamps: tapping a stop while its tour is active collects
-  // a vintage ink stamp (Showa travel-book motif).
+  // a travel label.
   const stampState = useStamps(activeTour?.id ?? null);
   const [collectedFlash, setCollectedFlash] = useState<{
     landmarkName: string;
     tourName: string;
   } | null>(null);
 
-  // Focus the whole tour route when a tour becomes active on the map.
-  const tourIdForFocus = activeTour?.id;
-  useEffect(() => {
-    if (!activeTour || !mapRef.current?.fitCoords) return;
-    const coords = activeTour.routeCoordinates.length
-      ? activeTour.routeCoordinates
-      : activeTour.stops.map((s) => {
-          const l = landmarks.find((lm) => lm.id === s.landmarkId);
-          return { latitude: l!.latitude, longitude: l!.longitude };
-        });
-    if (coords.length < 2) return;
-    // Delay: map mount + the ~450ms MapUnfold animation — camera calls
-    // issued before the view has mounted are dropped.
-    const t = setTimeout(() => mapRef.current?.fitCoords?.(coords), 900);
-    return () => clearTimeout(t);
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- refocus only when the tour changes
-  }, [tourIdForFocus]);
-
-  // Follow the current stop as the user cycles through landmarks.
-  const currentStopIndex = tourFollow.currentStopIndex;
+  // Frame the walk: the whole route until the reader sets out; then the
+  // first stop; then, at each step, the leg of the route between the stop
+  // just left and the next.
+  const stepIndex = tourFollow.currentStopIndex;
   useEffect(() => {
     if (!activeTour) return;
-    const stop = tourFollow.stops[currentStopIndex];
-    if (!stop) return;
-    const t = setTimeout(() => {
-      mapRef.current?.flyToCoord?.(
-        {
-          latitude: stop.landmark.latitude,
-          longitude: stop.landmark.longitude,
-        },
-        16
-      );
-    }, 150);
-    return () => clearTimeout(t);
+    const stops = tourFollow.stops.map((s) => ({
+      latitude: s.landmark.latitude,
+      longitude: s.landmark.longitude,
+    }));
+    if (!stops.length) return;
+    const route = activeTour.routeCoordinates;
+    const pad = padFor(cardHeight);
+    if (!walking || tourFollow.finished) {
+      mapRef.current?.fitCoords(route.length > 1 ? [...route, ...stops] : stops, pad);
+    } else if (stepIndex === 0) {
+      mapRef.current?.flyToCoord(stops[0], 17, pad);
+    } else {
+      mapRef.current?.fitCoords(legBetween(route, stops, stepIndex - 1, stepIndex), pad);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps -- camera command, values read fresh
-  }, [activeTour?.id, currentStopIndex]);
+  }, [activeTour?.id, walking, stepIndex, tourFollow.finished, cardHeight]);
 
   const tourStopIds = useMemo(
     () => new Set(activeTour?.stops.map((s) => s.landmarkId) ?? []),
+    [activeTour]
+  );
+  const stopOrder = useMemo(
+    () => new Map(activeTour?.stops.map((s) => [s.landmarkId, String(s.order)]) ?? []),
     [activeTour]
   );
 
@@ -224,7 +214,8 @@ export default function MapScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.pageBackground }]}>
-      <MapUnfold animated={!hasMounted.current}>
+      {/* Unfolds once, when the screen mounts; later pushes reuse it in place. */}
+      <MapUnfold animated>
       {isMapLibre ? (
         <MapLibreMapView
         ref={mapRef}
@@ -245,7 +236,8 @@ export default function MapScreen() {
         clusterMarkers={filteredLandmarks.map((landmark) => ({
           id: landmark.id,
           coordinate: { latitude: landmark.latitude, longitude: landmark.longitude },
-          pinColor: CATEGORY_COLORS[landmark.category],
+          pinColor: INK.blue,
+          label: stopOrder.get(landmark.id),
           onPress: () => handleMarkerPress(landmark),
         }))}
       >
@@ -292,7 +284,7 @@ export default function MapScreen() {
         clusterMarkers={filteredLandmarks.map((landmark) => ({
           id: landmark.id,
           coordinate: { latitude: landmark.latitude, longitude: landmark.longitude },
-          pinColor: CATEGORY_COLORS[landmark.category],
+          pinColor: INK.blue,
           onPress: () => handleMarkerPress(landmark),
         }))}
       >
@@ -339,23 +331,16 @@ export default function MapScreen() {
       )}
       </MapUnfold>
 
-      {/* Book-styled CLOSE button — the map has no tab chrome to escape from */}
+      {/* Fold the map away — the map is a loose sheet with no ribbons to escape by. */}
       <Pressable
-        accessibilityLabel="Close map"
+        accessibilityLabel="Fold the map away"
         accessibilityRole="button"
         onPress={handleClose}
-        style={({ pressed }) => [
-          styles.closeButton,
-          {
-            top: insets.top + 12,
-            backgroundColor: colors.pageSurface,
-            borderColor: colors.pageBorder,
-            opacity: pressed ? 0.7 : 1,
-          },
-        ]}
+        style={({ pressed }) => [styles.closeButton, { top: insets.top + 10, opacity: pressed ? 0.6 : 1 }]}
       >
-        <IconSymbol name="xmark" size={12} color={colors.text} />
-        <Text style={[styles.closeButtonText, { color: colors.text }]}>Close</Text>
+        <PaperGrain opacity={0.7} />
+        <Arrow direction="left" length={16} />
+        <Text style={styles.closeButtonText}>Close</Text>
       </Pressable>
 
       {/* Map engine toggle: MapLibre vector map ⇄ raster fallback */}
@@ -379,188 +364,148 @@ export default function MapScreen() {
             size={12}
             color={colors.text}
           />
-          <Text style={{ color: colors.text, fontSize: 11, fontFamily: SERIF, letterSpacing: 1.2, textTransform: "uppercase" }}>
-            {isMapLibre ? "Vector" : "Raster"}
+          <Text style={{ color: INK.blue, fontSize: 11, fontFamily: FONT.medium, letterSpacing: 1.4, textTransform: "uppercase" }}>
+            {isMapLibre ? "vector" : "raster"}
           </Text>
         </Pressable>
       )}
 
-      {/* Filter Chips - only show when no tour active */}
+      {/* The legend: kinds of building, struck through when hidden. */}
       {!activeTour && (
-        <View style={[styles.filterContainer, { top: insets.top + 12 }]}>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.filterScroll}
-          >
-            {ALL_CATEGORIES.map((cat) => {
-              const isActive = activeCategories.has(cat);
-              return (
-                <Pressable
-                  key={cat}
-                  onPress={() => toggleCategory(cat)}
-                  style={({ pressed }) => [
-                    styles.filterChip,
-                    {
-                      backgroundColor: colors.pageSurface,
-                      borderColor: isActive ? CATEGORY_COLORS[cat] : colors.pageBorder,
-                      borderWidth: isActive ? 2 : 1,
-                      opacity: pressed ? 0.8 : 1,
-                    },
-                  ]}
-                >
-                  <View
-                    style={[
-                      styles.chipDot,
-                      { backgroundColor: CATEGORY_COLORS[cat] },
-                    ]}
-                  />
-                  <Text
-                    style={[
-                      styles.chipText,
-                      { color: isActive ? colors.foreground : colors.muted },
-                    ]}
-                  >
-                    {CATEGORY_LABELS[cat]}
-                  </Text>
-                </Pressable>
-              );
-            })}
-          </ScrollView>
-          {/* Edge fades: signals the row scrolls */}
-          <LinearGradient
-            pointerEvents="none"
-            colors={[colors.pageBackground + "F0", colors.pageBackground + "00"]}
-            style={styles.chipFadeLeft}
-          />
-          <LinearGradient
-            pointerEvents="none"
-            colors={[colors.pageBackground + "00", colors.pageBackground + "F0"]}
-            style={styles.chipFadeRight}
-          />
+        <View style={[styles.filterContainer, { top: insets.top + 10 }]}>
+          <View style={styles.legend}>
+            <PaperGrain opacity={0.7} />
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.filterScroll}
+            >
+              {ALL_CATEGORIES.map((cat, i) => {
+                const isActive = activeCategories.has(cat);
+                return (
+                  <React.Fragment key={cat}>
+                    {i > 0 ? <Text style={styles.chipDot}>·</Text> : null}
+                    <Pressable
+                      onPress={() => toggleCategory(cat)}
+                      hitSlop={{ top: 10, bottom: 10, left: 4, right: 4 }}
+                      accessibilityRole="button"
+                      accessibilityState={{ selected: isActive }}
+                      style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
+                    >
+                      <Text
+                        style={[
+                          styles.chipText,
+                          { color: isActive ? INK.blue : INK.faded },
+                          !isActive && styles.chipOff,
+                        ]}
+                      >
+                        {CATEGORY_LABELS[cat]}
+                      </Text>
+                    </Pressable>
+                  </React.Fragment>
+                );
+              })}
+            </ScrollView>
+          </View>
         </View>
       )}
 
-      {/* Tour Banner — printed map-legend strip */}
+      {/* The walk being followed, as a slip laid on the map. */}
       {activeTour && (
-        <View
-          style={[
-            styles.tourBanner,
-            {
-              top: insets.top + 12,
-              backgroundColor: colors.pageSurface,
-              borderColor: colors.pageBorder,
-            },
-          ]}
-        >
-          <View style={[styles.tourBannerContent, { borderLeftColor: activeTour.color }]}>
-            <IconSymbol name="figure.walk" size={16} color={activeTour.color} />
-            <Text style={[styles.tourBannerText, { color: activeTour.color }]} numberOfLines={1}>
+        <View style={[styles.tourBanner, { top: insets.top + 10 }]}>
+          <PaperGrain opacity={0.7} />
+          <View style={styles.tourBannerContent}>
+            <Text style={styles.tourBannerKicker}>
+              Walk {chapterNo(tours.indexOf(activeTour) + 1)}
+            </Text>
+            <Text style={styles.tourBannerText} numberOfLines={1}>
               {activeTour.name}
             </Text>
           </View>
           <Pressable
             onPress={clearTour}
-            style={({ pressed }) => [
-              styles.tourBannerClose,
-              { backgroundColor: colors.pageBorder + "33", opacity: pressed ? 0.7 : 1 },
-            ]}
+            hitSlop={10}
+            accessibilityLabel="Leave this walk"
+            style={({ pressed }) => [styles.tourBannerClose, { opacity: pressed ? 0.5 : 1 }]}
           >
-            <IconSymbol name="xmark" size={16} color={colors.muted} />
+            <Text style={styles.tourBannerX}>×</Text>
           </Pressable>
         </View>
       )}
 
       {/* Follow-along tour card */}
       {activeTour && !selectedLandmark && (
-        <TourFollowCard tour={activeTour} follow={tourFollow} />
+        <TourFollowCard
+          tour={activeTour}
+          follow={tourFollow}
+          walking={walking}
+          onBegin={() => setWalking(true)}
+          onLayout={(e) => {
+            const h = Math.round(e.nativeEvent.layout.height);
+            if (Math.abs(h - cardHeight) > 12) setCardHeight(h);
+          }}
+        />
       )}
 
-      {/* Bottom Sheet - Landmark Preview */}
+      {/* The entry, torn from the registry and laid on the map. */}
       {selectedLandmark && (
-        <View
-          style={[
-            styles.bottomSheet,
-            {
-              backgroundColor: Platform.select({
-                ios: colors.pageSurface + 'E0',
-                android: colors.pageSurface,
-                default: colors.pageSurface + 'E0',
-              }),
-              paddingBottom: Math.max(insets.bottom, 16) + 60,
-            },
-          ]}
-        >
-          <View style={styles.sheetHandle}>
-            <View style={[styles.handleBar, { backgroundColor: colors.muted + '40' }]} />
-          </View>
+        <View style={[styles.bottomSheet, { paddingBottom: Math.max(insets.bottom, 16) + 12 }]}>
+          <PaperGrain opacity={0.8} />
           <View style={styles.sheetContent}>
-            {selectedLandmark.photoUrl ? (
-              <Image
-                source={{ uri: selectedLandmark.photoUrl }}
-                style={styles.sheetPhoto}
-                resizeMode="cover"
-              />
-            ) : (
-              <CategoryPlaceholder
-                category={selectedLandmark.category}
-                color={CATEGORY_COLORS[selectedLandmark.category]}
-                size={120}
-                style={styles.sheetPhotoPlaceholder}
-              />
-            )}
             <View style={styles.sheetHeader}>
               <View style={styles.sheetTitleRow}>
-                <View
-                  style={[
-                    styles.sheetCatDot,
-                    { backgroundColor: CATEGORY_COLORS[selectedLandmark.category] },
-                  ]}
-                />
-                <Text style={[styles.sheetName, { color: colors.foreground }]} numberOfLines={2}>
+                <Text style={styles.sheetKicker}>
+                  {CATEGORY_LABELS[selectedLandmark.category]}
+                  {selectedLandmark.landmarkNumber
+                    ? `  ·  No. ${selectedLandmark.landmarkNumber.replace(/^#/, "")}`
+                    : ""}
+                </Text>
+                <Text style={styles.sheetName} numberOfLines={2}>
                   {selectedLandmark.name}
                 </Text>
+                <Text style={styles.sheetAddress}>{selectedLandmark.address}</Text>
               </View>
               <Pressable
                 onPress={() => setSelectedLandmark(null)}
-                style={({ pressed }) => [
-                  styles.sheetClose,
-                  { backgroundColor: colors.pageBackground, opacity: pressed ? 0.7 : 1 },
-                ]}
+                hitSlop={10}
+                accessibilityLabel="Put the entry away"
+                style={({ pressed }) => [styles.sheetClose, { opacity: pressed ? 0.5 : 1 }]}
               >
-                <IconSymbol name="xmark" size={14} color={colors.muted} />
+                <Text style={styles.tourBannerX}>×</Text>
               </Pressable>
             </View>
-            <Text style={[styles.sheetAddress, { color: colors.muted }]}>
-              {selectedLandmark.address}, Berkeley, CA
-            </Text>
-            <View style={styles.sheetMeta}>
-              <Text style={[styles.sheetMetaText, { color: colors.muted }]}>
-                {selectedLandmark.architect} · {selectedLandmark.yearBuilt}
-              </Text>
-              {selectedLandmark.nationalRegister && (
-                <View style={[styles.nrBadge, { borderColor: colors.accent }]}>
-                  <IconSymbol name="star.fill" size={10} color={colors.accent} />
-                  <Text style={[styles.nrText, { color: colors.accent }]}>NR</Text>
-                </View>
-              )}
+            <View style={styles.sheetBody}>
+              {selectedLandmark.photoUrl ? (
+                <TippedInPlate
+                  source={photoSource(selectedLandmark.photoUrl)}
+                  index={1}
+                  width={118}
+                  height={86}
+                  offset={6}
+                  style={styles.sheetPlate}
+                />
+              ) : architectOf(selectedLandmark) ? (
+                <ArchitectPortrait architect={architectOf(selectedLandmark)!} width={78} delay={120} />
+              ) : null}
+              <View style={styles.sheetMeta}>
+                <Text style={styles.sheetMetaLabel}>Architect</Text>
+                <Text style={styles.sheetMetaText} numberOfLines={2}>
+                  {selectedLandmark.architect}
+                </Text>
+                <Text style={[styles.sheetMetaLabel, { marginTop: 10 }]}>Built</Text>
+                <Text style={styles.sheetMetaText}>{selectedLandmark.yearBuilt}</Text>
+              </View>
             </View>
+            <Rule style={{ marginTop: 16 }} />
             <Pressable
               onPress={() => {
                 setSelectedLandmark(null);
                 router.push(`/landmark/${selectedLandmark.id}`);
               }}
-              style={({ pressed }) => [
-                styles.detailButton,
-                {
-                  borderColor: colors.primary,
-                  borderWidth: 1,
-                  opacity: pressed ? 0.7 : 1,
-                },
-              ]}
+              style={({ pressed }) => [styles.detailButton, { opacity: pressed ? 0.5 : 1 }]}
             >
-              <Text style={[styles.detailButtonText, { color: colors.primary }]}>View Details</Text>
-              <IconSymbol name="chevron.right" size={14} color={colors.primary} />
+              <Text style={styles.detailButtonText}>Read the entry</Text>
+              <Arrow length={22} />
             </Pressable>
           </View>
         </View>
@@ -601,37 +546,35 @@ const styles = StyleSheet.create({
     zIndex: 10,
   },
   filterScroll: {
-    paddingLeft: 76,
-    paddingRight: 40,
-    gap: 8,
-  },
-  chipFadeLeft: {
-    position: "absolute",
-    left: 0,
-    top: 0,
-    bottom: 0,
-    width: 20,
-  },
-  chipFadeRight: {
-    position: "absolute",
-    right: 0,
-    top: 0,
-    bottom: 0,
-    width: 20,
-  },
-  filterChip: {
-    flexDirection: "row",
     alignItems: "center",
-    paddingHorizontal: 12,
-    paddingVertical: 7,
-    borderRadius: 2,
-    borderWidth: 1,
-    gap: 6,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+  },
+  legend: {
+    marginLeft: 140,
+    marginRight: 12,
+    backgroundColor: PAPER.slip,
+    overflow: "hidden",
+    shadowColor: "#2A2016",
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    shadowOffset: { width: 1, height: 2 },
   },
   chipDot: {
-    width: 7,
-    height: 7,
-    borderRadius: 1,
+    fontFamily: FONT.regular,
+    fontSize: 12,
+    color: INK.faded,
+    marginHorizontal: 6,
+  },
+  chipText: {
+    fontFamily: FONT.medium,
+    fontSize: 11,
+    letterSpacing: 1.6,
+    textTransform: "uppercase",
+  },
+  chipOff: {
+    textDecorationLine: "line-through",
+    textDecorationColor: INK.sepia,
   },
   closeButton: {
     position: "absolute" as const,
@@ -639,133 +582,79 @@ const styles = StyleSheet.create({
     zIndex: 20,
     flexDirection: "row",
     alignItems: "center",
-    gap: 4,
-    paddingHorizontal: 10,
-    paddingVertical: 7,
-    borderRadius: 2,
-    borderWidth: 1,
-    ...Platform.select({
-      ios: {
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.06,
-        shadowRadius: 6,
-      },
-      android: { elevation: 2 },
-      web: { boxShadow: "0 2px 6px rgba(0,0,0,0.06)" },
-    }),
+    gap: 6,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    backgroundColor: PAPER.slip,
+    overflow: "hidden",
+    shadowColor: "#2A2016",
+    shadowOpacity: 0.22,
+    shadowRadius: 4,
+    shadowOffset: { width: 1, height: 2 },
   },
   closeButtonText: {
-    fontFamily: SERIF,
-    fontSize: 11,
-    fontWeight: "600",
-    letterSpacing: 1.2,
+    fontFamily: FONT.medium,
+    fontSize: 11.5,
+    letterSpacing: 2,
     textTransform: "uppercase",
-  },
-  chipText: {
-    fontFamily: SERIF,
-    fontSize: 11,
-    fontWeight: "600",
-    letterSpacing: 1.2,
-    textTransform: "uppercase",
+    color: INK.blue,
   },
   tourBanner: {
     position: "absolute",
-    left: 76,
-    right: 16,
+    left: 140,
+    right: 12,
     flexDirection: "row",
     alignItems: "center",
+    paddingVertical: 8,
+    paddingLeft: 14,
     paddingRight: 8,
-    paddingVertical: 4,
-    borderRadius: 2,
-    borderWidth: 1,
+    backgroundColor: PAPER.slip,
     zIndex: 10,
     overflow: "hidden",
-    ...Platform.select({
-      ios: {
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.06,
-        shadowRadius: 6,
-      },
-      android: { elevation: 2 },
-      web: { boxShadow: "0 2px 6px rgba(0,0,0,0.06)" },
-    }),
+    shadowColor: "#2A2016",
+    shadowOpacity: 0.22,
+    shadowRadius: 4,
+    shadowOffset: { width: 1, height: 2 },
   },
   tourBannerContent: {
     flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    borderLeftWidth: 3,
+  },
+  tourBannerKicker: {
+    ...TYPE.kicker,
+    fontSize: 10,
   },
   tourBannerText: {
-    fontSize: 13,
-    fontWeight: "600",
-    fontFamily: SERIF,
-    letterSpacing: 1.2,
-    textTransform: "uppercase",
+    fontFamily: FONT.regular,
+    fontSize: 17,
+    color: INK.charcoal,
   },
   tourBannerClose: {
-    width: 28,
-    height: 28,
-    borderRadius: 4,
+    width: 32,
+    height: 32,
     alignItems: "center",
     justifyContent: "center",
+  },
+  tourBannerX: {
+    fontFamily: FONT.light,
+    fontSize: 26,
+    color: INK.sepia,
   },
   bottomSheet: {
     position: "absolute",
     bottom: 0,
-    left: 0,
-    right: 0,
-    borderTopLeftRadius: 8,
-    borderTopRightRadius: 8,
-    ...Platform.select({
-      ios: {
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: -2 },
-        shadowOpacity: 0.06,
-        shadowRadius: 12,
-      },
-      android: { elevation: 4 },
-      web: { boxShadow: "0 -2px 12px rgba(0,0,0,0.06)" },
-    }),
-  },
-  sheetHandle: {
-    alignItems: "center",
-    paddingTop: 10,
-    paddingBottom: 6,
-  },
-  handleBar: {
-    width: 36,
-    height: 4,
-    borderRadius: 2,
+    left: 8,
+    right: 8,
+    backgroundColor: PAPER.slip,
+    overflow: "hidden",
+    shadowColor: "#2A2016",
+    shadowOffset: { width: 0, height: -3 },
+    shadowOpacity: 0.25,
+    shadowRadius: 10,
+    elevation: 6,
   },
   sheetContent: {
-    paddingHorizontal: 20,
-    paddingBottom: 8,
-  },
-  sheetPhoto: {
-    width: '100%',
-    height: 120,
-    borderRadius: 12,
-    marginBottom: 12,
-  },
-  sheetPhotoPlaceholder: {
-    width: '100%',
-    height: 80,
-    borderRadius: 12,
-    marginBottom: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  sheetDescription: {
-    fontSize: 13,
-    lineHeight: 18,
-    marginTop: 6,
-    marginBottom: 8,
+    paddingHorizontal: 22,
+    paddingTop: 20,
   },
   sheetHeader: {
     flexDirection: "row",
@@ -773,73 +662,67 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
   sheetTitleRow: {
-    flexDirection: "row",
-    alignItems: "center",
     flex: 1,
-    gap: 10,
   },
-  sheetCatDot: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
+  sheetKicker: {
+    ...TYPE.kicker,
   },
   sheetName: {
-    fontSize: 20,
-    fontWeight: "700",
-    fontFamily: Platform.select({ ios: "ui-serif", default: "serif" }),
-    lineHeight: 26,
-    letterSpacing: -0.2,
-    flex: 1,
+    fontFamily: FONT.light,
+    fontSize: 26,
+    lineHeight: 30,
+    color: INK.charcoal,
+    marginTop: 6,
   },
   sheetClose: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
+    width: 32,
+    height: 32,
     alignItems: "center",
     justifyContent: "center",
     marginLeft: 8,
+    marginTop: -4,
   },
   sheetAddress: {
+    fontFamily: FONT.regular,
     fontSize: 14,
-    lineHeight: 20,
-    marginTop: 6,
-    marginLeft: 22,
+    color: INK.sepia,
+    marginTop: 4,
+  },
+  sheetBody: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 16,
+    marginTop: 14,
+  },
+  sheetPlate: {
+    alignSelf: "flex-start",
   },
   sheetMeta: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginTop: 6,
-    marginLeft: 22,
-    gap: 8,
+    flex: 1,
+    paddingTop: 4,
+  },
+  sheetMetaLabel: {
+    ...TYPE.label,
   },
   sheetMetaText: {
-    fontSize: 13,
-    lineHeight: 18,
-  },
-  nrBadge: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 3,
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 4,
-    borderWidth: StyleSheet.hairlineWidth,
-  },
-  nrText: {
-    fontSize: 11,
-    fontWeight: "700",
+    fontFamily: FONT.regular,
+    fontSize: 16,
+    color: INK.charcoal,
+    marginTop: 2,
   },
   detailButton: {
-    marginTop: 14,
-    paddingVertical: 12,
-    borderRadius: 6,
+    marginTop: 12,
+    paddingVertical: 6,
     flexDirection: "row",
-    gap: 6,
+    gap: 8,
     alignItems: "center",
     justifyContent: "center",
   },
   detailButtonText: {
-    fontSize: 15,
-    fontWeight: "700",
+    fontFamily: FONT.medium,
+    fontSize: 12,
+    letterSpacing: 2,
+    textTransform: "uppercase",
+    color: INK.blue,
   },
 });

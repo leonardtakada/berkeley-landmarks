@@ -1,88 +1,55 @@
-import { Tabs } from "expo-router";
+import { useState } from "react";
+import { StyleSheet, View } from "react-native";
+import { useTabsWithTriggers } from "expo-router/ui";
+import type { ScreenTrigger } from "expo-router/build/ui/common";
 
-import { BookmarkTabBar } from "@/components/bookmark-tab-bar";
-import { IconSymbol } from "@/components/ui/icon-symbol";
-import { useColors } from "@/hooks/use-colors";
+import { BookPages } from "@/components/book-pages";
+import { BookmarkRibbons } from "@/components/bookmark-ribbons";
+import { PAPER } from "@/constants/book";
 
-export default function TabLayout() {
-  const colors = useColors();
+/**
+ * The book: cover, then three sections reached by the ribbons at its head.
+ * Order here is page order — turning to a later section turns forward.
+ */
+const TRIGGERS: ScreenTrigger[] = [
+  { type: "internal", name: "index", href: "/" },
+  { type: "internal", name: "tours", href: "/tours" },
+  { type: "internal", name: "registry", href: "/registry" },
+  { type: "internal", name: "profile", href: "/profile" },
+];
+
+export default function BookLayout() {
+  const { state, descriptors, navigation, NavigationContent } = useTabsWithTriggers({
+    triggers: TRIGGERS,
+  });
+  const [turning, setTurning] = useState(false);
+  const focused = state.routes[state.index].name;
 
   return (
-    <Tabs
-      // The bookmark ribbons hang from the HEAD of the book, over the
-      // top of every page — including the cover — like ribbons draped
-      // over the top edge of a closed guidebook.
-      tabBar={(props: any) => <BookmarkTabBar {...props} />}
-      screenOptions={{
-        // The bookmark ribbons hang from the HEAD of the book, like
-        // ribbons draped over the top edge of a closed guidebook.
-        tabBarPosition: "top",
-        tabBarActiveTintColor: colors.accent,
-        tabBarInactiveTintColor: colors.muted,
-        headerShown: false,
-        tabBarStyle: {
-          backgroundColor: colors.background,
-          elevation: 0,
-        },
-        tabBarLabelStyle: {
-          fontSize: 10,
-          fontWeight: "700",
-          letterSpacing: 1.5,
-          marginTop: 2,
-        },
-      }}
-    >
-      <Tabs.Screen
-        name="index"
-        options={{
-          title: "Cover",
-          tabBarIcon: ({ color, focused }) => (
-            <IconSymbol
-              size={26}
-              name={focused ? "book.closed.fill" : "book.closed"}
-              color={color}
-              weight="semibold"
-            />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="registry"
-        options={{
-          title: "Landmarks",
-          tabBarIcon: ({ color, focused }) => (
-            <IconSymbol
-              size={26}
-              name={focused ? "building.columns.fill" : "building.columns"}
-              color={color}
-              weight="semibold"
-            />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="tours"
-        options={{
-          title: "Tours",
-          tabBarIcon: ({ color }) => (
-            <IconSymbol size={26} name="figure.walk" color={color} weight="medium" />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="profile"
-        options={{
-          title: "Appendix",
-          tabBarIcon: ({ color, focused }) => (
-            <IconSymbol
-              size={26}
-              name={focused ? "person.crop.circle.fill" : "person.crop.circle"}
-              color={color}
-              weight="medium"
-            />
-          ),
-        }}
-      />
-    </Tabs>
+    <NavigationContent>
+      <View style={styles.book}>
+        <BookPages
+          routes={state.routes}
+          index={state.index}
+          order={TRIGGERS.map((t) => t.name)}
+          descriptors={descriptors}
+          onTurningChange={setTurning}
+        />
+        <BookmarkRibbons
+          focused={focused}
+          onSelect={(name) => {
+            // One leaf at a time: a page mid-turn can't be grabbed again.
+            if (!turning) navigation.navigate(name);
+          }}
+        />
+      </View>
+    </NavigationContent>
   );
 }
+
+const styles = StyleSheet.create({
+  book: {
+    flex: 1,
+    backgroundColor: PAPER.shade,
+  },
+});

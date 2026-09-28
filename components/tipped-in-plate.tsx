@@ -1,157 +1,156 @@
-import React from "react";
-import { Image, Pressable, StyleSheet, Text, View, Platform } from "react-native";
-import type { ImageSourcePropType, StyleProp, ImageStyle, ViewStyle } from "react-native";
-import { useColorScheme } from "@/hooks/use-color-scheme";
-import { useColors } from "@/hooks/use-colors";
+import React, { useMemo } from "react";
+import {
+  Image,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+  type ImageSourcePropType,
+  type StyleProp,
+  type ViewStyle,
+} from "react-native";
+
+import { SvgXml } from "react-native-svg";
+
+import { InkPlane } from "@/components/print";
+import { FONT, INK, PAPER, TYPE, chapterNo } from "@/constants/book";
+import { PLATE_H, PLATE_W, buildingPlateSvg, type PlateSubject } from "@/lib/building-plate";
 
 /**
- * TippedInPlate — wraps a photo like a tipped-in plate in a Showa-era art book:
- * a paper border around the image, a small-caps serif italic caption beneath
- * ("Plate I", "Plate II", …), a deterministic slight rotation, and a subtle
- * shadow so the plate feels physically pasted onto the page.
+ * A photograph printed as a plate of the book: a one-ink duotone — shadows
+ * in the logo blue, highlights in cream — with a flat block of vermilion
+ * set behind it a little out of register, like the second plate of a
+ * two-colour print. Captioned as a figure.
  */
-
-/** Deterministic rotation in degrees, stable across renders. */
-function plateRotation(index: number): number {
-  return ((index % 5) - 2) * 0.9;
-}
-
-const ROMAN_NUMERAL_PAIRS: [number, string][] = [
-  [1000, "M"],
-  [900, "CM"],
-  [500, "D"],
-  [400, "CD"],
-  [100, "C"],
-  [90, "XC"],
-  [50, "L"],
-  [40, "XL"],
-  [10, "X"],
-  [9, "IX"],
-  [5, "V"],
-  [4, "IV"],
-  [1, "I"],
-];
-
-/** Small local roman-numeral helper (I, II, III, …). */
-function toRoman(n: number): string {
-  if (n <= 0) return "I";
-  let value = n;
-  let result = "";
-  for (const [num, sym] of ROMAN_NUMERAL_PAIRS) {
-    while (value >= num) {
-      result += sym;
-      value -= num;
-    }
-  }
-  return result;
-}
-
-export interface TippedInPlateProps {
-  /** Image source (uri or require()).
-   */
-  source: ImageSourcePropType;
-  /** Plate number (1-based). Determines roman numeral and rotation. */
-  index: number;
-  /** Optional short caption text after "Plate II — ". */
-  caption?: string;
-  /** Style for the outer (paper) frame. */
-  style?: StyleProp<ViewStyle>;
-  /** Style for the image itself (size etc.). */
-  imageStyle?: StyleProp<ImageStyle>;
-  /** Image resize mode; plates default to "cover". */
-  resizeMode?: "cover" | "contain" | "stretch" | "center";
-  /** Optional press handler (e.g. open viewer). */
-  onPress?: () => void;
-  /** Disable the paper shadow (e.g. for full-bleed usage). */
-  noShadow?: boolean;
-}
-
-const SERIF = Platform.select({ ios: "ui-serif", default: "serif" }) ?? "serif";
-
 export function TippedInPlate({
   source,
   index,
   caption,
-  style,
-  imageStyle,
-  resizeMode = "cover",
+  width,
+  height,
+  offset = 10,
   onPress,
-  noShadow = false,
-}: TippedInPlateProps) {
-  const colors = useColors();
-  const scheme = useColorScheme();
-
-  // Paper stays paper even in dark mode — a warm off-white pasted plate —
-  // while caption ink follows the theme so it reads against the page.
-  const paper = scheme === "dark" ? "#EDE9DF" : "#FEFDF8";
-  const ink = colors.muted;
-
-  const label = caption
-    ? `Plate ${toRoman(index)} — ${caption}`
-    : `Plate ${toRoman(index)}`;
-
-  const frame = (
-    <View
-      style={[
-        styles.paper,
-        {
-          backgroundColor: paper,
-          transform: [{ rotate: `${plateRotation(index)}deg` }],
-        },
-        !noShadow && styles.shadow,
-        style,
-      ]}
-    >
-      <Image
-        source={source}
-        style={[styles.image, imageStyle]}
-        resizeMode={resizeMode}
-      />
-      <Text style={[styles.caption, { color: ink }]} numberOfLines={1}>
-        {label.toUpperCase()}
+  style,
+}: {
+  source: ImageSourcePropType;
+  /** Figure number (1-based). */
+  index: number;
+  caption?: string;
+  width: number;
+  height: number;
+  /** How far the vermilion block sits out of register; 0 for none. */
+  offset?: number;
+  onPress?: () => void;
+  style?: StyleProp<ViewStyle>;
+}) {
+  const body = (
+    <View style={[{ width: width + offset }, style]}>
+      <View style={{ width: width + offset, height: height + offset }}>
+        {offset ? (
+          <InkPlane color={INK.vermilion} style={[styles.block, { left: offset, top: offset, width, height }]} />
+        ) : null}
+        <View style={[styles.photo, { width, height }]}>
+          <Image source={source} style={StyleSheet.absoluteFill} resizeMode="cover" />
+          {/* One-ink duotone: drain the colour, screen in the blue, multiply the cream. */}
+          <View pointerEvents="none" style={[StyleSheet.absoluteFill, styles.grey]} />
+          <View pointerEvents="none" style={[StyleSheet.absoluteFill, styles.ink]} />
+          <View pointerEvents="none" style={[StyleSheet.absoluteFill, styles.paper]} />
+        </View>
+      </View>
+      <Text style={[TYPE.label, styles.caption]} numberOfLines={1}>
+        <Text style={styles.fig}>Fig. {chapterNo(index)}</Text>
+        {caption ? `  ${caption}` : ""}
       </Text>
     </View>
   );
+  return onPress ? (
+    <Pressable onPress={onPress} accessibilityRole="imagebutton" accessibilityLabel={caption ?? `Figure ${index}`}>
+      {body}
+    </Pressable>
+  ) : (
+    body
+  );
+}
 
-  if (onPress) {
-    return (
-      <Pressable onPress={onPress} style={styles.pressable}>
-        {frame}
-      </Pressable>
-    );
-  }
-  return frame;
+/**
+ * Where the book has no photograph: a plate drawn instead — a cut-paper
+ * print of a building of the landmark's style and kind (lib/building-plate).
+ * An impression of the type, not a likeness, and captioned so.
+ */
+export function DrawnPlate({
+  subject,
+  index,
+  width,
+  style,
+}: {
+  subject: PlateSubject;
+  /** Figure number (1-based). */
+  index: number;
+  width: number;
+  style?: StyleProp<ViewStyle>;
+}) {
+  const { svg, caption } = useMemo(
+    () => buildingPlateSvg(subject),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [subject.id, subject.style, subject.category],
+  );
+  const height = Math.round((width * PLATE_H) / PLATE_W);
+  return (
+    <View style={[{ width }, style]}>
+      <View
+        style={[styles.drawn, { width, height }]}
+        accessible
+        accessibilityRole="image"
+        accessibilityLabel={`A drawing: ${caption}`}
+      >
+        <SvgXml xml={svg} width={width - 4} height={height - 4} />
+      </View>
+      <Text style={[TYPE.label, styles.caption]} numberOfLines={1}>
+        <Text style={styles.fig}>Fig. {chapterNo(index)}</Text>
+        {`  ${caption}`}
+      </Text>
+      <Text style={styles.drawnNote}>Drawn after its style; no photograph of it in the guide yet.</Text>
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
+  block: {
+    position: "absolute",
+  },
+  photo: {
+    overflow: "hidden",
+    backgroundColor: PAPER.slip,
+    isolation: "isolate",
+  },
+  grey: {
+    backgroundColor: "#808080",
+    mixBlendMode: "saturation",
+  },
+  ink: {
+    backgroundColor: INK.blue,
+    mixBlendMode: "screen",
+  },
   paper: {
-    padding: 8,
-    alignSelf: "flex-start",
-  },
-  shadow: {
-    shadowColor: "#000",
-    shadowOpacity: 0.18,
-    shadowRadius: 4,
-    shadowOffset: { width: 1, height: 2 },
-    elevation: 3,
-  },
-  image: {
-    width: "100%",
-    alignSelf: "stretch",
-    backgroundColor: "rgba(0,0,0,0.06)",
+    backgroundColor: PAPER.slip,
+    mixBlendMode: "multiply",
   },
   caption: {
-    marginTop: 6,
-    fontSize: 9,
-    fontFamily: SERIF,
-    fontStyle: "italic",
-    fontWeight: "600",
-    letterSpacing: 2,
-    textTransform: "uppercase",
-    alignSelf: "stretch",
-    textAlign: "center",
+    marginTop: 10,
   },
-  pressable: {
-    alignSelf: "flex-start",
+  fig: {
+    color: INK.vermilion,
+    fontFamily: FONT.medium,
+  },
+  drawn: {
+    borderWidth: 2,
+    borderColor: INK.blue,
+    overflow: "hidden",
+  },
+  drawnNote: {
+    fontFamily: FONT.regular,
+    fontSize: 12.5,
+    color: INK.sepia,
+    marginTop: 4,
   },
 });

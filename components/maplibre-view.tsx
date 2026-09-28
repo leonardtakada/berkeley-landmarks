@@ -30,7 +30,7 @@ import {
   Map as MLMap,
   UserLocation,
 } from "@maplibre/maplibre-react-native";
-import type { CameraRef, GeoJSONSourceRef, MapRef } from "@maplibre/maplibre-react-native";
+import type { CameraRef, GeoJSONSourceRef } from "@maplibre/maplibre-react-native";
 import { Asset } from "expo-asset";
 import type * as LegacyFS from "expo-file-system/legacy";
 import { useColors } from "@/hooks/use-colors";
@@ -74,10 +74,26 @@ interface PolygonProps {
   fillColor?: string;
 }
 
+/** Camera padding in points, keeping focus clear of the screen's chrome. */
+export interface CameraPadding {
+  top: number;
+  right: number;
+  bottom: number;
+  left: number;
+}
+
+/** The camera API map screens use, whichever engine is mounted. */
+export interface MapCameraHandle {
+  flyToCoord: (coord: Coordinate, zoom?: number, padding?: CameraPadding) => void;
+  fitCoords: (coords: Coordinate[], padding?: CameraPadding) => void;
+}
+
 interface ClusterMarker {
   id: string;
   coordinate: Coordinate;
   pinColor?: string;
+  /** Printed on the pin (tour stop numbers); labelled pins never cluster. */
+  label?: string;
   onPress?: () => void;
 }
 
@@ -181,10 +197,14 @@ function useOfflineAssets() {
 // LngLatBounds tuple order: [west, south, east, north].
 const MAX_BOUNDS: [number, number, number, number] = [-122.41, 37.785, -122.15, 37.965];
 
-// Red ink used for the landmark highlight motif (see app/map.tsx INK_RED).
-const INK_RED = "#C0392B";
+// Vermilion — the logo's second ink — marks the highlighted landmark.
+const INK_RED = "#E4592B";
+const PIN_BLUE = "#0B2E8C";
+const CREAM = "#F2F0E6";
 
-const MapLibreMapView = forwardRef<MapRef | null, MapLibreViewProps>(
+const DEFAULT_PADDING: CameraPadding = { top: 80, right: 48, bottom: 200, left: 48 };
+
+const MapLibreMapView = forwardRef<MapCameraHandle | null, MapLibreViewProps>(
   (
     {
       style,
@@ -207,38 +227,50 @@ const MapLibreMapView = forwardRef<MapRef | null, MapLibreViewProps>(
     const cameraRef = useRef<CameraRef>(null);
     const shapeRef = useRef<GeoJSONSourceRef>(null);
 
-    const setRefs = useCallback(
-      (r: MapRef | null) => {
-        if (typeof ref === "function") ref(r);
-        else if (ref && typeof ref === "object") (ref as any).current = r;
-      },
-      [ref]
-    );
+    // Camera moves asked for before the map has loaded (the offline tiles
+    // stage asynchronously) wait here and run once it has; only the latest
+    // request matters.
+    const loaded = useRef(false);
+    const pending = useRef<(() => void) | null>(null);
+    const run = useCallback((move: () => void) => {
+      if (loaded.current && cameraRef.current) move();
+      else pending.current = move;
+    }, []);
+    const onMapLoaded = useCallback(() => {
+      loaded.current = true;
+      const move = pending.current;
+      pending.current = null;
+      // One frame for the camera to attach before it is driven.
+      if (move) requestAnimationFrame(move);
+    }, []);
 
-    // Common camera API (shared with the raster wrapper) so screens can
-    // focus tours / stops without caring which engine is mounted.
+    // The screen's camera API. (The native MapRef is kept private: forwarding
+    // it through the same ref would replace this handle once the map mounts.)
     useImperativeHandle(
-      ref as any,
+      ref,
       () => ({
-        flyToCoord: (coord: { latitude: number; longitude: number }, zoom = 16) =>
-          cameraRef.current?.flyTo({
-            center: [coord.longitude, coord.latitude],
-            zoom,
-          }),
-        fitCoords: (coords: Array<{ latitude: number; longitude: number }>) => {
-          if (coords.length < 2) return;
+        flyToCoord: (coord, zoom = 16, padding) =>
+          run(() =>
+            cameraRef.current?.flyTo({
+              center: [coord.longitude, coord.latitude],
+              zoom,
+              ...(padding ? { padding } : null),
+              duration: 900,
+            }),
+          ),
+        fitCoords: (coords, padding = DEFAULT_PADDING) => {
+          if (coords.length === 0) return;
           const lats = coords.map((c) => c.latitude);
           const lngs = coords.map((c) => c.longitude);
-          cameraRef.current?.fitBounds(
-            [Math.min(...lngs), Math.min(...lats), Math.max(...lngs), Math.max(...lats)],
-            {
-              padding: { top: 80, right: 48, bottom: 200, left: 48 },
-              duration: 800,
-            }
+          run(() =>
+            cameraRef.current?.fitBounds(
+              [Math.min(...lngs), Math.min(...lats), Math.max(...lngs), Math.max(...lats)],
+              { padding, duration: 900 },
+            ),
           );
         },
       }),
-      []
+      [run],
     );
 
     // onPress callbacks by landmark id (layer features can't hold functions).
@@ -254,7 +286,7 @@ const MapLibreMapView = forwardRef<MapRef | null, MapLibreViewProps>(
         type: "FeatureCollection" as const,
         features: clusterMarkers.map((m) => ({
           type: "Feature" as const,
-          properties: { id: m.id, pinColor: m.pinColor ?? "#7B8B6F" },
+          properties: { id: m.id, pinColor: m.pinColor ?? PIN_BLUE, label: m.label ?? "" },
           geometry: {
             type: "Point" as const,
             coordinates: [m.coordinate.longitude, m.coordinate.latitude],
@@ -262,18 +294,21 @@ const MapLibreMapView = forwardRef<MapRef | null, MapLibreViewProps>(
         })),
       };
     }, [clusterMarkers]);
+    const labelled = useMemo(() => !!clusterMarkers?.some((m) => m.label), [clusterMarkers]);
 
     // Polyline descriptor children (tour route etc.). Polygon children
     // (boundary / dim overlay) are skipped — the vector style already draws
     // the boundary, and the map ends at the baked bbox.
     const polylines = useMemo(() => {
       const polys: PolylineProps[] = [];
-      // toArray flattens fragments so wrapped polyline groups are picked up.
-      React.Children.toArray(children).forEach((child) => {
-        if (React.isValidElement(child) && child.type === MapPolyline) {
-          polys.push(child.props as PolylineProps);
-        }
-      });
+      // Walk into fragments too: screens group a route's ink layers in one.
+      const visit = (nodes: React.ReactNode) =>
+        React.Children.forEach(nodes, (child) => {
+          if (!React.isValidElement(child)) return;
+          if (child.type === React.Fragment) visit((child.props as { children?: React.ReactNode }).children);
+          else if (child.type === MapPolyline) polys.push(child.props as PolylineProps);
+        });
+      visit(children);
       return polys;
     }, [children]);
 
@@ -343,12 +378,12 @@ const MapLibreMapView = forwardRef<MapRef | null, MapLibreViewProps>(
     return (
       <View style={[styles.container, style]}>
         <MLMap
-          ref={setRefs}
           style={styles.map}
           mapStyle={styleJSON}
           attribution={false}
           logo={false}
           onPress={onPress as any}
+          onDidFinishLoadingMap={onMapLoaded}
         >
           <Camera
             ref={cameraRef}
@@ -400,28 +435,75 @@ const MapLibreMapView = forwardRef<MapRef | null, MapLibreViewProps>(
             </GeoJSONSource>
           )}
 
+          {polylines.map((p, i) => (
+            <GeoJSONSource
+              key={`polyline-${i}`}
+              id={`polyline-${i}`}
+              data={{
+                type: "Feature" as const,
+                properties: {},
+                geometry: {
+                  type: "LineString" as const,
+                  coordinates: p.coordinates.map((c) => [c.longitude, c.latitude]),
+                },
+              }}
+            >
+              <Layer
+                id={`polyline-line-${i}`}
+                type="line"
+                layout={{
+                  "line-cap": "round",
+                  "line-join": "round",
+                  ...(p.lineDashPattern ? { "line-dasharray": p.lineDashPattern } : {}),
+                }}
+                paint={{
+                  "line-color": p.strokeColor ?? colors.tint,
+                  "line-width": p.strokeWidth ?? 3,
+                }}
+              />
+            </GeoJSONSource>
+          ))}
+
           {markerGeoJSON && (
             <GeoJSONSource
               ref={shapeRef}
               id="landmarks"
               data={markerGeoJSON}
-              cluster
+              cluster={!labelled}
               clusterRadius={clusterRadius}
               clusterMaxZoom={clusterMaxZoom}
               onPress={handleShapePress}
             >
-              {/* Individual landmark pins — colored by category */}
+              {/* Individual landmark pins; numbered when they are tour stops. */}
               <Layer
                 id="landmark-pins"
                 type="circle"
                 filter={["!", ["has", "point_count"]]}
                 paint={{
-                  "circle-radius": 6,
+                  "circle-radius": labelled ? 12 : 6,
                   "circle-color": ["get", "pinColor"] as any,
                   "circle-stroke-width": 2,
-                  "circle-stroke-color": "#FFFFFF",
+                  "circle-stroke-color": CREAM,
                 }}
               />
+              {labelled ? (
+                <Layer
+                  id="landmark-pin-labels"
+                  type="symbol"
+                  filter={["!", ["has", "point_count"]]}
+                  layout={{
+                    "text-field": ["get", "label"] as any,
+                    "text-font": ["Noto Sans Bold"],
+                    "text-size": 12,
+                    "text-anchor": "center",
+                    "text-allow-overlap": true,
+                    "text-ignore-placement": true,
+                    // The baked glyphs sit high; same correction as the cluster counts.
+                    "text-offset": [0.05, 1.1],
+                  }}
+                  paint={{ "text-color": CREAM }}
+                />
+              ) : null}
               {/* Cluster bubble */}
               <Layer
                 id="landmark-clusters"
@@ -476,34 +558,6 @@ const MapLibreMapView = forwardRef<MapRef | null, MapLibreViewProps>(
             </GeoJSONSource>
           )}
 
-          {polylines.map((p, i) => (
-            <GeoJSONSource
-              key={`polyline-${i}`}
-              id={`polyline-${i}`}
-              data={{
-                type: "Feature" as const,
-                properties: {},
-                geometry: {
-                  type: "LineString" as const,
-                  coordinates: p.coordinates.map((c) => [c.longitude, c.latitude]),
-                },
-              }}
-            >
-              <Layer
-                id={`polyline-line-${i}`}
-                type="line"
-                layout={{
-                  "line-cap": "round",
-                  "line-join": "round",
-                  ...(p.lineDashPattern ? { "line-dasharray": p.lineDashPattern } : {}),
-                }}
-                paint={{
-                  "line-color": p.strokeColor ?? colors.tint,
-                  "line-width": p.strokeWidth ?? 3,
-                }}
-              />
-            </GeoJSONSource>
-          ))}
         </MLMap>
       </View>
     );

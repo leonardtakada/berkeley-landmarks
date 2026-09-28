@@ -1,11 +1,12 @@
 import "dotenv/config";
-import express from "express";
+import express, { type RequestHandler } from "express";
 import { createServer } from "http";
 import net from "net";
 import { createExpressMiddleware } from "@trpc/server/adapters/express";
 import { registerEmailAuthRoutes } from "./emailAuthRoutes";
 import { appRouter } from "../routers";
 import { createContext } from "./context";
+import { sdk } from "./sdk";
 import fs from "fs";
 import path from "path";
 import { eq, desc } from "drizzle-orm";
@@ -103,6 +104,24 @@ async function startServer() {
       res.json([]);
     }
   });
+
+  // The review routes below approve and reject what readers send in, so only
+  // a signed-in admin may use them (the same rule as tRPC's adminProcedure).
+  const requireAdmin: RequestHandler = async (req, res, next) => {
+    let user;
+    try {
+      user = await sdk.authenticateRequest(req);
+    } catch {
+      res.status(401).json({ error: "Sign in as an admin" });
+      return;
+    }
+    if (user.role !== "admin") {
+      res.status(403).json({ error: "Admins only" });
+      return;
+    }
+    next();
+  };
+  app.use(["/api/photos", "/api/submissions"], requireAdmin);
 
   // Photo moderation API (REST, simpler than tRPC for admin dashboard)
   app.get("/api/photos", async (req, res) => {

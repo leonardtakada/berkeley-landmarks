@@ -1,64 +1,23 @@
 import { StyleSheet, View } from "react-native";
-import Svg, { Defs, Rect, Filter, FeTurbulence, FeColorMatrix } from "react-native-svg";
+
+import { TiledTexture } from "@/components/tiled-texture";
+import { PAPER } from "@/constants/book";
+
+const STOCK = require("@/assets/textures/paper-stock.png");
 
 /**
- * Subtle paper-grain overlay ("book chrome" phase 1).
- * Full-screen, absolutely positioned, pointer-events-none.
- *
- * Two static layers give interior pages a printed-paper feel:
- *  1. very-low-opacity fractal-noise fiber/fleck grain, and
- *  2. faint horizontal "laid lines" — the wire marks of hand-made paper.
+ * The tooth of smooth uncoated stock (scripts/paper-stock.mjs). Quiet by
+ * design — felt more than seen. Drop it as the first child of a page.
  */
-export function PaperGrain() {
+export function PaperGrain({ opacity = 1 }: { opacity?: number }) {
+  return <TiledTexture source={STOCK} opacity={opacity} />;
+}
+
+/** A full sheet of stock: flat paper colour and its tooth. */
+export function PaperSheet({ stock = "page" }: { stock?: "cover" | "page" }) {
   return (
-    <View pointerEvents="none" style={[StyleSheet.absoluteFill, styles.overlay]}>
-      <Svg height="100%" width="100%" style={styles.svg}>
-        <Defs>
-          <Filter id="paper-noise" x="0" y="0" width="100%" height="100%">
-            <FeTurbulence
-              type="fractalNoise"
-              baseFrequency="0.9"
-              numOctaves={2}
-              stitchTiles="stitch"
-              result="noise"
-            />
-            <FeColorMatrix
-              in="noise"
-              type="matrix"
-              // grayscale the noise, render via alpha only
-              values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.6 0"
-            />
-          </Filter>
-          {/* Coarser anisotropic noise → soft horizontal laid lines. */}
-          <Filter id="paper-laid" x="0" y="0" width="100%" height="100%">
-            <FeTurbulence
-              type="fractalNoise"
-              baseFrequency="0.008 0.24"
-              numOctaves={1}
-              stitchTiles="stitch"
-              result="laid"
-            />
-            <FeColorMatrix
-              in="laid"
-              type="matrix"
-              values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.5 0"
-            />
-          </Filter>
-        </Defs>
-        <Rect x="0" y="0" width="100%" height="100%" filter="url(#paper-noise)" />
-        <Rect x="0" y="0" width="100%" height="100%" filter="url(#paper-laid)" />
-      </Svg>
+    <View pointerEvents="none" style={[StyleSheet.absoluteFill, { backgroundColor: PAPER[stock] }]}>
+      <PaperGrain />
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  overlay: {
-    zIndex: 999,
-    elevation: 999,
-    opacity: 0.05,
-  },
-  svg: {
-    flex: 1,
-  },
-});

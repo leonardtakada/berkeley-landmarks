@@ -1,10 +1,10 @@
 import "@/global.css";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { Stack } from "expo-router";
-import { StatusBar } from "expo-status-bar";
+import Stack from "expo-router/js-stack";
+import { TransitionPresets } from "expo-router/js-stack";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import "react-native-reanimated";
+import { useReducedMotion } from "react-native-reanimated";
 import { Platform } from "react-native";
 import "@/lib/_core/nativewind-pressable";
 import { ThemeProvider } from "@/lib/theme-provider";
@@ -16,6 +16,14 @@ import {
   SourceSerif4_600SemiBold,
 } from "@expo-google-fonts/source-serif-4";
 import { useFonts } from "expo-font";
+import { FONT_ASSETS, PAPER } from "@/constants/book";
+import {
+  dissolveSpec,
+  forDissolve,
+  forPageTurn,
+  forUnfold,
+  pageTurnSpec,
+} from "@/lib/page-turn";
 import {
   SafeAreaFrameContext,
   SafeAreaInsetsContext,
@@ -74,7 +82,20 @@ export default function RootLayout() {
     SourceSerif4_400Regular,
     SourceSerif4_500Medium,
     SourceSerif4_600SemiBold,
+    ...FONT_ASSETS,
   });
+  const reduceMotion = useReducedMotion();
+
+  // Entry pages are leaves laid over the book: they turn in on a hinge and
+  // swipe back by the free edge. Reduce Motion swaps the turn for a dissolve.
+  const leafOptions = reduceMotion
+    ? { cardStyleInterpolator: forDissolve, transitionSpec: dissolveSpec }
+    : {
+        cardStyleInterpolator: forPageTurn,
+        transitionSpec: pageTurnSpec,
+        cardOverlayEnabled: true,
+        cardShadowEnabled: true,
+      };
   const [trpcClient] = useState(() => createTRPCClient());
 
   // Ensure minimum 8px padding for top and bottom on mobile
@@ -95,22 +116,35 @@ export default function RootLayout() {
       <FavoritesProvider>
         <QueryClientProvider client={queryClient}>
           <trpc.Provider client={trpcClient} queryClient={queryClient}>
-          {/* Default to hiding native headers so raw route segments don't appear (e.g. "(tabs)", "products/[id]"). */}
-          {/* If a screen needs the native header, explicitly enable it and set a human title via Stack.Screen options. */}
-          {/* in order for ios apps tab switching to work properly, use presentation: "fullScreenModal" for login page, whenever you decide to use presentation: "modal*/}
-          <Stack screenOptions={{ headerShown: false }}>
+          <Stack
+            screenOptions={{
+              headerShown: false,
+              gestureEnabled: true,
+              gestureDirection: "horizontal",
+              cardStyle: { backgroundColor: PAPER.page },
+              ...leafOptions,
+            }}
+          >
             <Stack.Screen name="(tabs)" />
-            <Stack.Screen name="login" options={{ presentation: "fullScreenModal" }} />
             <Stack.Screen
-              name="landmark/[id]"
-              options={{ presentation: "card", animation: "slide_from_right" }}
+              name="login"
+              options={{ presentation: "modal", ...TransitionPresets.ModalSlideFromBottomIOS }}
             />
             <Stack.Screen
-              name="tour/[id]"
-              options={{ presentation: "card", animation: "slide_from_right" }}
+              name="propose"
+              options={{ presentation: "modal", ...TransitionPresets.ModalSlideFromBottomIOS }}
+            />
+            <Stack.Screen name="landmark/[id]" />
+            <Stack.Screen name="tour/[id]" />
+            <Stack.Screen
+              name="map"
+              options={{
+                // Panning the map must never be mistaken for turning back.
+                gestureEnabled: false,
+                ...(reduceMotion ? null : { cardStyleInterpolator: forUnfold, cardShadowEnabled: false }),
+              }}
             />
           </Stack>
-          <StatusBar style="auto" />
           </trpc.Provider>
         </QueryClientProvider>
       </FavoritesProvider>

@@ -1,148 +1,131 @@
-import { Text, View, Pressable, StyleSheet, Platform } from "react-native";
+import { Pressable, StyleSheet, Text, View, type LayoutChangeEvent } from "react-native";
 import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useColors } from "@/hooks/use-colors";
-import { IconSymbol } from "@/components/ui/icon-symbol";
-import type { TourFollowState } from "@/hooks/use-tour-follow";
-import type { Tour } from "@/data/tours";
 
-const SERIF = Platform.select({ ios: "Georgia", default: "serif" });
+import { PaperGrain } from "@/components/paper-grain";
+import { Arrow } from "@/components/print";
+import { FONT, INK, PAPER, TYPE, chapterNo } from "@/constants/book";
+import { tours, type Tour } from "@/data/tours";
+import type { TourFollowState } from "@/hooks/use-tour-follow";
 
 interface TourFollowCardProps {
   tour: Tour;
   follow: TourFollowState;
+  /** Walking stop by stop; otherwise the card shows the walk as a whole. */
+  walking: boolean;
+  onBegin: () => void;
+  onLayout?: (e: LayoutChangeEvent) => void;
 }
 
 /**
- * Follow-along tour card — a field-guide "plate" pinned above the route:
- * serif headings, ink rules, and plate-numbered progress.
+ * The walk, as a slip laid over the foot of the map. Before setting out it
+ * summarises the route; once walking it names the next stop, with steps
+ * back and on — each step moves the map to that leg of the walk.
  */
-export function TourFollowCard({ tour, follow }: TourFollowCardProps) {
-  const colors = useColors();
+export function TourFollowCard({ tour, follow, walking, onBegin, onLayout }: TourFollowCardProps) {
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const no = chapterNo(tours.indexOf(tour) + 1);
+  const bottom = { paddingBottom: Math.max(insets.bottom, 14) + 12 };
 
-  if (follow.finished) {
+  if (!walking) {
     return (
-      <View style={[styles.card, styles.finishedCard, { backgroundColor: colors.surface, borderColor: colors.border, bottom: insets.bottom + 84 }]}>
-        <View style={[styles.finishedRule, { backgroundColor: colors.border }]} />
-        <Text style={[styles.finishedTitle, { color: colors.foreground }]}>Tour Complete</Text>
-        <Text style={[styles.finishedSub, { color: colors.muted }]}>
-          All {follow.totalStops} plates of {tour.name} visited.
+      <View style={[styles.card, bottom]} onLayout={onLayout}>
+        <PaperGrain />
+        <Text style={TYPE.kicker}>Walk {no}</Text>
+        <Text style={styles.title}>{tour.name}</Text>
+        <Text style={[TYPE.label, styles.meta]}>
+          {follow.totalStops} stops · {tour.distance} · {tour.duration}
         </Text>
+        <Pressable onPress={onBegin} style={({ pressed }) => [styles.solid, pressed && { opacity: 0.85 }]}>
+          <Text style={styles.solidText}>Begin at stop 1</Text>
+          <Arrow length={22} color={PAPER.cover} />
+        </Pressable>
       </View>
     );
   }
 
-  const next = follow.stops[follow.currentStopIndex];
-  const stopNumber = follow.currentStopIndex + 1;
-  const arrivedLabel =
-    follow.distanceToNextM != null && follow.distanceToNextM < 1000
-      ? `${Math.round(follow.distanceToNextM)} m`
-      : follow.distanceToNextM != null
-        ? `${(follow.distanceToNextM / 1000).toFixed(1)} km`
-        : follow.active
-          ? "locating…"
-          : "—";
+  if (follow.finished) {
+    return (
+      <View style={[styles.card, bottom]} onLayout={onLayout}>
+        <PaperGrain />
+        <Text style={TYPE.kicker}>Walk {no} · Complete</Text>
+        <Text style={styles.title}>{tour.name}</Text>
+        <Text style={styles.note}>All {follow.totalStops} stops visited.</Text>
+        <Pressable onPress={follow.rewind} hitSlop={8} style={styles.linkRow}>
+          <Arrow direction="left" length={18} />
+          <Text style={styles.link}>Back to the last stop</Text>
+        </Pressable>
+      </View>
+    );
+  }
+
+  const i = follow.currentStopIndex;
+  const next = follow.stops[i];
+  const prev = i > 0 ? follow.stops[i - 1] : null;
+  const distance =
+    follow.distanceToNextM == null
+      ? null
+      : follow.distanceToNextM < 1000
+        ? `${Math.round(follow.distanceToNextM)} m away`
+        : `${(follow.distanceToNextM / 1000).toFixed(1)} km away`;
 
   return (
-    <View
-      style={[
-        styles.card,
-        {
-          backgroundColor: colors.surface,
-          borderColor: colors.border,
-          bottom: insets.bottom + 84,
-        },
-      ]}
-    >
-      <View style={[styles.rule, { backgroundColor: tour.color }]} />
-
-      <View style={styles.headerRow}>
-        <Text style={[styles.headerLabel, { color: colors.muted }]}>
-          PLATE {stopNumber} OF {follow.totalStops}
+    <View style={[styles.card, bottom]} onLayout={onLayout}>
+      <PaperGrain />
+      <View style={styles.headRow}>
+        <Text style={TYPE.kicker}>
+          Stop {i + 1} of {follow.totalStops}
         </Text>
-        <Pressable
-          onPress={follow.active ? follow.stop : follow.start}
-          style={({ pressed }) => [
-            styles.followToggle,
-            { borderColor: follow.active ? tour.color : colors.border, opacity: pressed ? 0.8 : 1 },
-          ]}
-        >
-          <IconSymbol
-            name={follow.active ? "location.fill" : "figure.walk"}
-            size={13}
-            color={follow.active ? tour.color : colors.muted}
-          />
-          <Text style={[styles.followToggleText, { color: follow.active ? tour.color : colors.muted }]}>{follow.active ? "Following" : "Follow"}</Text>
+        <Pressable onPress={follow.active ? follow.stop : follow.start} hitSlop={8}>
+          <Text style={[styles.link, follow.active && { color: INK.vermilion }]}>
+            {follow.active ? "● Following you" : "Follow my location"}
+          </Text>
         </Pressable>
       </View>
 
-      {follow.locationUnavailable && (
-        <Text style={[styles.unavailable, { color: colors.muted }]}>
-          Location unavailable — step through manually.
-        </Text>
-      )}
+      {/* Progress: one segment per stop. */}
+      <View style={styles.progress}>
+        {follow.stops.map((s, k) => (
+          <View key={s.landmark.id} style={[styles.tick, k <= i && styles.tickOn]} />
+        ))}
+      </View>
 
       <Pressable
         onPress={() => router.push(`/landmark/${next.landmark.id}`)}
-        style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
+        style={({ pressed }) => [styles.nextRow, pressed && { opacity: 0.6 }]}
       >
-        <View style={styles.nextRow}>
-          <View style={[styles.nextNumber, { borderColor: tour.color }]}>
-            <Text style={[styles.nextNumberText, { color: tour.color }]}>{next.stop.order}</Text>
-          </View>
-          <View style={styles.nextContent}>
-            <Text style={[styles.nextName, { color: colors.foreground }]} numberOfLines={1}>
-              {next.landmark.name}
-            </Text>
-            <Text style={[styles.nextMeta, { color: colors.muted }]} numberOfLines={1}>
-              NEXT STOP · {arrivedLabel}
-            </Text>
-          </View>
+        <View style={styles.dot}>
+          <Text style={styles.dotText}>{next.stop.order}</Text>
+        </View>
+        <View style={styles.nextText}>
+          <Text style={styles.nextName} numberOfLines={1}>
+            {next.landmark.name}
+          </Text>
+          <Text style={styles.nextMeta} numberOfLines={1}>
+            {prev ? `From ${prev.landmark.name}` : next.landmark.address}
+            {distance ? `  ·  ${distance}` : ""}
+          </Text>
         </View>
       </Pressable>
 
-      {next.stop.note ? (
-        <Text style={[styles.nextNote, { color: tour.color }]} numberOfLines={2}>
-          {next.stop.note}
-        </Text>
+      {follow.locationUnavailable ? (
+        <Text style={styles.note}>Location unavailable — step through by hand.</Text>
       ) : null}
-
-      <View style={[styles.progressTrack, { backgroundColor: colors.border + "40" }]}>
-        <View
-          style={[
-            styles.progressFill,
-            { backgroundColor: tour.color, flex: Math.max(1, stopNumber) },
-          ]}
-        />
-        <View style={{ flex: Math.max(1, follow.totalStops - stopNumber) }} />
-      </View>
 
       <View style={styles.controls}>
         <Pressable
           onPress={follow.rewind}
-          disabled={follow.currentStopIndex === 0}
-          style={({ pressed }) => [
-            styles.controlButton,
-            { borderColor: colors.border, opacity: follow.currentStopIndex === 0 ? 0.35 : pressed ? 0.7 : 1 },
-          ]}
+          disabled={i === 0}
+          hitSlop={8}
+          style={[styles.linkRow, i === 0 && { opacity: 0.3 }]}
         >
-          <IconSymbol name="arrow.left" size={13} color={colors.foreground} />
-          <Text style={[styles.controlText, { color: colors.foreground }]}>Back</Text>
+          <Arrow direction="left" length={18} />
+          <Text style={styles.link}>Back</Text>
         </Pressable>
-        <Pressable
-          onPress={follow.advance}
-          style={({ pressed }) => [
-            styles.controlButton,
-            styles.skipButton,
-            { borderColor: tour.color, opacity: pressed ? 0.85 : 1 },
-          ]}
-        >
-          <Text style={[styles.controlText, { color: tour.color }]}>
-            {follow.currentStopIndex === follow.totalStops - 1 ? "Finish" : "Skip to Next"}
-          </Text>
-          <IconSymbol name="chevron.right" size={13} color={tour.color} />
+        <Pressable onPress={follow.advance} style={({ pressed }) => [styles.solidSmall, pressed && { opacity: 0.85 }]}>
+          <Text style={styles.solidText}>{i === follow.totalStops - 1 ? "Finish" : `On to stop ${i + 2}`}</Text>
+          <Arrow length={18} color={PAPER.cover} />
         </Pressable>
       </View>
     </View>
@@ -152,161 +135,131 @@ export function TourFollowCard({ tour, follow }: TourFollowCardProps) {
 const styles = StyleSheet.create({
   card: {
     position: "absolute",
-    left: 16,
-    right: 16,
-    borderRadius: 2,
-    borderWidth: 1,
-    padding: 14,
-    zIndex: 12,
-    ...Platform.select({
-      ios: {
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.08,
-        shadowRadius: 8,
-      },
-      android: { elevation: 3 },
-      web: { boxShadow: "0 2px 8px rgba(0,0,0,0.08)" },
-    }),
-  },
-  rule: {
-    position: "absolute",
-    top: 0,
     left: 0,
     right: 0,
-    height: 3,
+    bottom: 0,
+    backgroundColor: PAPER.slip,
+    paddingHorizontal: 22,
+    paddingTop: 18,
+    overflow: "hidden",
+    zIndex: 12,
+    borderTopWidth: 3,
+    borderTopColor: INK.blue,
+    shadowColor: "#1E1810",
+    shadowOffset: { width: 0, height: -3 },
+    shadowOpacity: 0.15,
+    shadowRadius: 10,
+    elevation: 6,
   },
-  headerRow: {
+  title: {
+    fontFamily: FONT.light,
+    fontSize: 26,
+    lineHeight: 30,
+    color: INK.charcoal,
+    marginTop: 6,
+  },
+  meta: {
+    marginTop: 6,
+  },
+  note: {
+    fontFamily: FONT.regular,
+    fontSize: 13.5,
+    color: INK.sepia,
+    marginTop: 8,
+  },
+  headRow: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    marginBottom: 8,
   },
-  headerLabel: {
-    fontFamily: SERIF,
-    fontSize: 11,
-    fontWeight: "700",
-    letterSpacing: 1.4,
-  },
-  followToggle: {
+  progress: {
     flexDirection: "row",
-    alignItems: "center",
-    gap: 5,
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 2,
-    borderWidth: StyleSheet.hairlineWidth,
-    backgroundColor: "transparent",
+    gap: 3,
+    marginTop: 12,
   },
-  followToggleText: {
-    color: "#FFFFFF",
-    fontFamily: SERIF,
-    fontSize: 11,
-    fontWeight: "700",
-    letterSpacing: 1,
-    textTransform: "uppercase",
+  tick: {
+    flex: 1,
+    height: 3,
+    backgroundColor: INK.blueTint,
   },
-  unavailable: {
-    fontSize: 12,
-    fontStyle: "italic",
-    marginBottom: 6,
+  tickOn: {
+    backgroundColor: INK.blue,
   },
   nextRow: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 10,
+    gap: 14,
+    marginTop: 14,
   },
-  nextNumber: {
-    width: 26,
-    height: 26,
-    borderRadius: 2,
-    borderWidth: 1.5,
+  dot: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    backgroundColor: INK.blue,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "transparent",
   },
-  nextNumberText: {
-    fontSize: 12,
-    fontWeight: "700",
-    fontFamily: SERIF,
+  dotText: {
+    fontFamily: FONT.medium,
+    fontSize: 14,
+    color: PAPER.cover,
   },
-  nextContent: {
+  nextText: {
     flex: 1,
   },
   nextName: {
-    fontSize: 16,
-    fontWeight: "600",
-    fontFamily: Platform.select({ ios: "ui-serif", default: "serif" }),
-    lineHeight: 21,
+    fontFamily: FONT.regular,
+    fontSize: 19,
+    lineHeight: 23,
+    color: INK.charcoal,
   },
   nextMeta: {
-    fontFamily: SERIF,
-    fontSize: 11,
-    fontWeight: "700",
-    letterSpacing: 1,
-    marginTop: 1,
-  },
-  nextNote: {
-    fontSize: 12,
-    fontStyle: "italic",
-    marginTop: 6,
-    lineHeight: 17,
-  },
-  progressTrack: {
-    flexDirection: "row",
-    height: 3,
-    borderRadius: 2,
-    marginTop: 10,
-    overflow: "hidden",
-  },
-  progressFill: {
-    height: 3,
+    fontFamily: FONT.regular,
+    fontSize: 13,
+    color: INK.sepia,
+    marginTop: 2,
   },
   controls: {
     flexDirection: "row",
-    gap: 8,
-    marginTop: 10,
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginTop: 16,
   },
-  controlButton: {
-    flex: 1,
+  linkRow: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "center",
-    gap: 5,
-    paddingVertical: 8,
-    borderRadius: 2,
-    borderWidth: 1,
-  },
-  skipButton: {
-    borderWidth: 1.5,
-  },
-  controlText: {
-    fontFamily: SERIF,
-    fontSize: 13,
-    fontWeight: "700",
-    letterSpacing: 0.8,
-    textTransform: "uppercase",
-  },
-  skipText: {
-    color: "#FFFFFF",
-  },
-  finishedCard: {
-    alignItems: "center",
-    paddingVertical: 16,
-  },
-  finishedRule: {
-    width: 40,
-    height: 2,
-    marginBottom: 10,
-  },
-  finishedTitle: {
-    fontSize: 18,
-    fontWeight: "700",
-    fontFamily: Platform.select({ ios: "ui-serif", default: "serif" }),
-  },
-  finishedSub: {
-    fontSize: 13,
+    gap: 8,
     marginTop: 4,
-    fontStyle: "italic",
+  },
+  link: {
+    fontFamily: FONT.medium,
+    fontSize: 11.5,
+    letterSpacing: 1.8,
+    textTransform: "uppercase",
+    color: INK.blue,
+  },
+  solid: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    backgroundColor: INK.blue,
+    paddingHorizontal: 18,
+    paddingVertical: 15,
+    marginTop: 16,
+  },
+  solidSmall: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    backgroundColor: INK.blue,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+  },
+  solidText: {
+    fontFamily: FONT.medium,
+    fontSize: 12,
+    letterSpacing: 2,
+    textTransform: "uppercase",
+    color: PAPER.cover,
   },
 });

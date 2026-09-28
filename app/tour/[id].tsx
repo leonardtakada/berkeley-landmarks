@@ -1,425 +1,438 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { ScrollView, Text, View, Pressable, StyleSheet, Platform } from "react-native";
+import React from "react";
+import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import Animated from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { tours } from "@/data/tours";
-import { landmarks, CATEGORY_COLORS } from "@/data/landmarks";
-import { useColors } from "@/hooks/use-colors";
-import { IconSymbol } from "@/components/ui/icon-symbol";
-import { AccordionMap } from "@/components/accordion-map";
+
+import { ArchitectPortrait } from "@/components/architect-portrait";
+import { EntryPage, RunningHead } from "@/components/entry-page";
+import { FoldOutMap } from "@/components/fold-out-map";
+import { Annotation, Arrow, Bar, Rule } from "@/components/print";
+import { ScrollClock, useScrollClockHandler } from "@/components/scroll-clock";
 import { TravelStamp } from "@/components/travel-stamp";
-import { PaperGrain } from "@/components/paper-grain";
-import { CornerTicks } from "@/components/hand-inked";
+import { WalkLabel } from "@/components/walk-label";
+import { FONT, INK, MARGIN, PAGE_TURN_MS, PAPER, TYPE, chapterNo } from "@/constants/book";
+import { landmarks } from "@/data/landmarks";
+import { tours } from "@/data/tours";
+import { ARCHITECTS, architectOf, architectsOnTour } from "@/lib/architects";
 import { useStamps } from "@/lib/stamps";
 
-function romanNumeral(n: number): string {
-  const table: [number, string][] = [
-    [10, "X"], [9, "IX"], [5, "V"], [4, "IV"], [1, "I"],
-  ];
-  let out = "";
-  for (const [v, s] of table) while (n >= v) { out += s; n -= v; }
-  return out || "I";
-}
-
-export default function TourDetailScreen() {
+/**
+ * A walk, printed as a chapter: its label, number, title and particulars; the
+ * architect who owns it, drawn; the fold-out map; the itinerary with each
+ * stop numbered as on the map; and the labels collected along the way.
+ */
+export default function TourChapterScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
-  const colors = useColors();
   const insets = useSafeAreaInsets();
-  const tour = tours.find((t) => t.id === id);
-  const tourIndex = tours.findIndex((t) => t.id === id) + 1;
+  const index = tours.findIndex((t) => t.id === id);
+  const tour = tours[index];
   const stampState = useStamps(tour?.id ?? null);
-  const collectedCount = tour
-    ? tour.stops.filter((s) => stampState.stamps.has(s.landmarkId)).length
-    : 0;
+  const clock = useScrollClockHandler();
 
   if (!tour) {
     return (
-      <View style={[styles.container, { backgroundColor: colors.pageBackground, paddingTop: insets.top }]}>
-        <Text style={{ color: colors.foreground }}>Tour not found</Text>
-      </View>
+      <EntryPage>
+        <RunningHead back="The Tours" />
+        <View style={styles.missing}>
+          <Annotation>This walk isn&apos;t in the guide.</Annotation>
+        </View>
+      </EntryPage>
     );
   }
 
-  const tourLandmarks = tour.stops
+  const no = chapterNo(index + 1);
+  const place = /^various$/i.test(tour.neighborhood) ? "Across the city" : tour.neighborhood;
+  const stops = [...tour.stops]
     .sort((a, b) => a.order - b.order)
-    .map((stop) => ({
-      ...stop,
-      landmark: landmarks.find((l) => l.id === stop.landmarkId),
-    }))
-    .filter((s) => s.landmark);
+    .map((s) => ({ ...s, landmark: landmarks.find((l) => l.id === s.landmarkId) }))
+    .filter((s): s is typeof s & { landmark: NonNullable<typeof s.landmark> } => !!s.landmark);
+  const { lead, cast } = architectsOnTour(tour);
+  const others = cast.filter((k) => k !== lead);
+  const collected = stops.filter((s) => stampState.stamps.has(s.landmarkId)).length;
+  const words = tour.description.split(" ");
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.pageBackground }]}>
-      <PaperGrain />
-      <View style={[styles.header, { paddingTop: insets.top + 8, backgroundColor: colors.pageBackground, borderBottomColor: colors.pageBorder }]}>
-        <Pressable
-          onPress={() => router.back()}
-          style={({ pressed }) => [styles.backButton, { backgroundColor: colors.surface, opacity: pressed ? 0.7 : 1 }]}
-        >
-          <IconSymbol name="arrow.left" size={20} color={colors.foreground} />
-        </Pressable>
-        <Text style={[styles.headerTitle, { color: colors.foreground }]} numberOfLines={1}>
-          {tour.name}
-        </Text>
-        <View style={{ width: 40 }} />
-      </View>
-
-      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-        {/* Tour Hero — chapter opener on plain paper */}
-        <View style={styles.heroBanner}>
-          <View style={[styles.chapterRule, { backgroundColor: tour.color + '55' }]} />
-          <View style={styles.chapterRow}>
-            <Text style={[styles.chapterNumeral, { color: tour.color }]}>{romanNumeral(tourIndex)}</Text>
-            <View style={styles.chapterMeta}>
-              <Text style={[styles.chapterLabel, { color: colors.muted }]}>CHAPTER</Text>
-              <Text style={[styles.heroName, { color: colors.foreground }]}>{tour.name}</Text>
-              <Text style={[styles.heroNeighborhood, { color: colors.muted }]}>{tour.neighborhood}</Text>
+    <EntryPage>
+      <RunningHead back="The Tours" folio={`Walk ${no}`} />
+      <ScrollClock value={clock.offset}>
+      <Animated.ScrollView
+        onScroll={clock.onScroll}
+        scrollEventThrottle={16}
+        contentContainerStyle={{ paddingBottom: Math.max(insets.bottom, 16) + 48 }}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Chapter opener */}
+        <View style={styles.opener}>
+          <WalkLabel tourId={tour.id} title={tour.name} width={140} delay={PAGE_TURN_MS * 0.6} />
+          <View style={styles.openerText}>
+            <Text style={styles.numeral}>{no}</Text>
+            <Bar />
+            <Text style={[TYPE.kicker, styles.kicker]}>{place}</Text>
+            <Text style={styles.title}>{tour.name}</Text>
+          </View>
+        </View>
+        <View style={[styles.block, styles.facts]}>
+          {[
+            ["Stops", String(stops.length)],
+            ["Distance", tour.distance],
+            ["Time", tour.duration],
+          ].map(([k, v], i) => (
+            <View key={k} style={[styles.fact, i > 0 && styles.factDivider]}>
+              <Text style={TYPE.label}>{k}</Text>
+              <Text style={styles.factValue}>{v}</Text>
             </View>
-          </View>
-          <View style={[styles.tourBadge, { borderColor: tour.color, alignSelf: 'center' }]}>
-            <IconSymbol name="figure.walk" size={14} color={tour.color} />
-            <Text style={[styles.tourBadgeText, { color: tour.color }]}>Walking Tour</Text>
-          </View>
-        </View>
-
-        {/* Tour Stats — catalog line */}
-        <View style={styles.statsRule}>
-          <Text style={[styles.statLine, { color: colors.muted }]}>
-            {tour.distance.toUpperCase()} · {tour.duration.toUpperCase()} · {tour.stops.length} STOPS
-          </Text>
-          <View style={[styles.statsRuleLine, { backgroundColor: colors.border }]} />
-        </View>
-
-        {/* Description */}
-        <View style={[styles.section, { backgroundColor: colors.pageSurface, borderColor: colors.pageBorder }]}>
-          <CornerTicks color={colors.pageBorder} />
-          <Text style={[styles.sectionTitle, { color: colors.muted }]}>About This Tour</Text>
-          <Text style={[styles.description, { color: colors.foreground }]}>
-            <Text style={[styles.dropCap, { color: tour.color }]}>{tour.description.charAt(0)}</Text>
-            {tour.description.slice(1)}
-          </Text>
-          <Text style={[styles.author, { color: colors.muted }]}>Guide by {tour.author}</Text>
-        </View>
-
-        {/* Fold-out route map insert */}
-        <AccordionMap
-          stops={tourLandmarks.map((s) => ({
-            id: s.landmarkId,
-            name: s.landmark!.name,
-            order: s.order,
-            latitude: s.landmark!.latitude,
-            longitude: s.landmark!.longitude,
-          }))}
-          color={tour.color}
-          foreground={colors.foreground}
-          muted={colors.muted}
-          border={colors.border}
-          surface={colors.surface}
-          onOpenFullMap={() => router.push({ pathname: "/map", params: { tourId: tour.id } })}
-        />
-
-        {/* Stamp strip — collected travel stamps per stop */}
-        <View style={[styles.section, { backgroundColor: colors.pageSurface, borderColor: colors.pageBorder }]}>
-          <CornerTicks color={colors.pageBorder} />
-          <View style={styles.stampHeaderRow}>
-            <Text style={[styles.sectionTitle, { color: colors.foreground, marginBottom: 0 }]}>Stamps</Text>
-            <Text style={[styles.stampCount, { color: colors.muted }]}>
-              {collectedCount} OF {tour.stops.length} COLLECTED
-            </Text>
-          </View>
-          {stampState.loaded ? (
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={styles.stampStrip}
-            >
-              {tourLandmarks.map((stop, i) => {
-                const collected = stampState.stamps.has(stop.landmarkId);
-                return (
-                  <View key={stop.landmarkId} style={styles.stampSlot}>
-                    <TravelStamp
-                      landmarkName={stop.landmark!.name}
-                      tourName={tour.name}
-                      collected={collected}
-                      size={72}
-                      rotation={((i % 5) - 2) * 2.2}
-                    />
-                    <Text style={[styles.stampLabel, { color: collected ? colors.foreground : colors.muted }]} numberOfLines={1}>
-                      {stop.landmark!.name}
-                    </Text>
-                  </View>
-                );
-              })}
-            </ScrollView>
-          ) : (
-            <Text style={[styles.stampCount, { color: colors.muted }]}>…</Text>
-          )}
-        </View>
-
-        {/* Tour Stops */}
-        <View style={[styles.section, { backgroundColor: colors.pageSurface, borderColor: colors.pageBorder }]}>
-          <CornerTicks color={colors.pageBorder} />
-          <Text style={[styles.sectionTitle, { color: colors.foreground }]}>Tour Stops</Text>
-          {tourLandmarks.map((stop, index) => (
-            <Pressable
-              key={stop.landmarkId}
-              onPress={() => router.push(`/landmark/${stop.landmarkId}`)}
-              style={({ pressed }) => [
-                styles.stopItem,
-                { opacity: pressed ? 0.7 : 1 },
-                index < tourLandmarks.length - 1 && { borderBottomColor: colors.pageBorder, borderBottomWidth: 1, borderStyle: "dashed" as const },
-              ]}
-            >
-              <View style={styles.stopLeft}>
-                <View style={[styles.stopNumber, { borderColor: tour.color }]}>
-                  <Text style={[styles.stopNumberText, { color: tour.color }]}>{stop.order}</Text>
-                </View>
-                {index < tourLandmarks.length - 1 && (
-                  <View style={[styles.stopLine, { backgroundColor: tour.color + '40' }]} />
-                )}
-              </View>
-              <View style={styles.stopContent}>
-                <Text style={[styles.stopName, { color: colors.foreground }]} numberOfLines={2}>
-                  {stop.landmark!.name}
-                </Text>
-                <Text style={[styles.stopAddress, { color: colors.muted }]} numberOfLines={1}>
-                  {stop.landmark!.address}
-                </Text>
-                {stop.note && (
-                  <Text style={[styles.stopNote, { color: tour.color }]}>{stop.note}</Text>
-                )}
-              </View>
-              <View style={[styles.stopCatDot, { backgroundColor: CATEGORY_COLORS[stop.landmark!.category] }]} />
-            </Pressable>
           ))}
         </View>
 
-        <View style={{ height: 40 }} />
-      </ScrollView>
-    </View>
+        {/* The walk's own architect */}
+        {lead ? (
+          <View style={[styles.block, styles.leadRow]}>
+            <ArchitectPortrait architect={lead} width={116} delay={PAGE_TURN_MS} />
+            <View style={styles.leadText}>
+              <Text style={TYPE.label}>Your guide on this walk</Text>
+              <Text style={styles.leadName}>{ARCHITECTS[lead].name}</Text>
+              <Text style={[TYPE.label, styles.leadYears]}>{ARCHITECTS[lead].years}</Text>
+              <Text style={styles.leadNote}>{ARCHITECTS[lead].note}</Text>
+            </View>
+          </View>
+        ) : null}
+
+        {/* Introduction */}
+        <View style={styles.block}>
+          <Rule color={INK.charcoal} weight={1} style={styles.rule} />
+          <Text style={styles.body}>
+            <Text style={styles.leadIn}>{words.slice(0, 3).join(" ").toUpperCase()}</Text>{" "}
+            {words.slice(3).join(" ")}
+          </Text>
+          <Text style={[TYPE.label, styles.byline]}>Walk by {tour.author}</Text>
+          {others.length ? (
+            <View style={styles.cameos}>
+              <Text style={TYPE.label}>Also met along the way</Text>
+              <View style={styles.cameoRow}>
+                {others.map((k, i) => (
+                  <View key={k} style={styles.cameo}>
+                    <ArchitectPortrait architect={k} width={64} delay={PAGE_TURN_MS + 120 * (i + 1)} />
+                    <Text style={styles.cameoName}>{ARCHITECTS[k].surname}</Text>
+                  </View>
+                ))}
+              </View>
+            </View>
+          ) : null}
+        </View>
+
+        {/* The fold-out map */}
+        <View style={styles.mapBlock}>
+          <FoldOutMap
+            tourId={tour.id}
+            title={tour.name}
+            distance={tour.distance}
+            stops={stops.map((s) => ({
+              id: s.landmarkId,
+              name: s.landmark.name,
+              order: s.order,
+              latitude: s.landmark.latitude,
+              longitude: s.landmark.longitude,
+            }))}
+            route={tour.routeCoordinates}
+            onOpenFullMap={() => router.push({ pathname: "/map", params: { tourId: tour.id } })}
+          />
+        </View>
+
+        {/* Itinerary */}
+        <View style={styles.block}>
+          <Text style={[TYPE.label, styles.subhead]}>The itinerary</Text>
+          <Rule color={INK.charcoal} weight={1} />
+          {stops.map((s, i) => {
+            const by = architectOf(s.landmark);
+            return (
+              <Pressable
+                key={s.landmarkId}
+                onPress={() => router.push(`/landmark/${s.landmarkId}`)}
+                style={({ pressed }) => [styles.stop, pressed && { opacity: 0.5 }]}
+              >
+                <View style={styles.stopRow}>
+                  <View style={styles.stopDot}>
+                    <Text style={styles.stopNo}>{s.order}</Text>
+                  </View>
+                  <View style={styles.stopText}>
+                    <Text style={styles.stopName}>{s.landmark.name}</Text>
+                    <Text style={styles.stopAddr}>{s.landmark.address}</Text>
+                    {s.note ? <Text style={styles.stopNote}>{s.note}</Text> : null}
+                  </View>
+                  {by && by !== lead ? (
+                    <ArchitectPortrait architect={by} width={40} animated={false} />
+                  ) : null}
+                </View>
+                {i < stops.length - 1 ? <Rule style={styles.stopRule} /> : null}
+              </Pressable>
+            );
+          })}
+        </View>
+
+        {/* Labels */}
+        <View style={styles.block}>
+          <View style={styles.stampHead}>
+            <Text style={TYPE.label}>Labels for this walk</Text>
+            <Text style={styles.stampCount}>
+              {collected} / {stops.length}
+            </Text>
+          </View>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.stamps}>
+            {stops.map((s, i) => {
+              const got = stampState.stamps.has(s.landmarkId);
+              return (
+                <View key={s.landmarkId} style={styles.stampSlot}>
+                  <TravelStamp landmarkName={s.landmark.name} tourName={tour.name} collected={got} size={80} variant={i} />
+                  <Text style={[styles.stampName, got && { color: INK.charcoal }]} numberOfLines={2}>
+                    {s.landmark.name}
+                  </Text>
+                </View>
+              );
+            })}
+          </ScrollView>
+          {!collected ? (
+            <Text style={styles.stampHint}>Stand at a stop and its label is added to this page.</Text>
+          ) : null}
+        </View>
+
+        {/* Set out */}
+        <Pressable
+          onPress={() => router.push({ pathname: "/map", params: { tourId: tour.id, walk: "1" } })}
+          style={({ pressed }) => [styles.block, styles.setOut, pressed && { opacity: 0.85 }]}
+          accessibilityRole="button"
+        >
+          <Text style={styles.setOutText}>Set out on foot</Text>
+          <Arrow length={24} color={PAPER.cover} />
+        </Pressable>
+      </Animated.ScrollView>
+      </ScrollClock>
+    </EntryPage>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
-  header: {
+  missing: {
+    padding: MARGIN.outer,
+    paddingTop: 60,
+  },
+  opener: {
     flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 16,
-    paddingBottom: 12,
-    borderBottomWidth: 0.5,
+    alignItems: "flex-end",
+    paddingHorizontal: MARGIN.outer,
+    paddingTop: 22,
+    gap: 14,
   },
-  backButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    alignItems: "center",
-    justifyContent: "center",
+  numeral: {
+    ...TYPE.numeral,
+    fontSize: 64,
+    lineHeight: 76,
+    marginBottom: 6,
   },
-  headerTitle: {
-    flex: 1,
-    fontSize: 17,
-    fontWeight: "600",
-    textAlign: "center",
-    marginHorizontal: 8,
-    fontFamily: Platform.select({ ios: "Georgia", default: "serif" }),
-  },
-  scrollContent: { paddingBottom: 20 },
-  heroBanner: {
-    padding: 24,
-    paddingTop: 20,
-  },
-  chapterRule: {
-    height: StyleSheet.hairlineWidth * 2,
-    marginBottom: 14,
-  },
-  chapterRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 16,
-    marginBottom: 14,
-  },
-  chapterNumeral: {
-    fontSize: 56,
-    fontWeight: "600",
-    fontFamily: "SourceSerif4_600SemiBold",
-    lineHeight: 60,
-    minWidth: 64,
-    textAlign: "center",
-  },
-  chapterMeta: {
+  openerText: {
     flex: 1,
   },
-  chapterLabel: {
-    fontSize: 10,
-    fontWeight: "700",
-    letterSpacing: 2.5,
-    marginBottom: 2,
-    fontFamily: Platform.select({ ios: "Georgia", default: "serif" }),
-  },
-  tourBadge: {
-    flexDirection: "row",
-    alignItems: "center",
-    alignSelf: "flex-start",
-    gap: 6,
-    paddingHorizontal: 12,
-    paddingVertical: 5,
-    borderRadius: 4,
-    borderWidth: StyleSheet.hairlineWidth,
-    marginBottom: 12,
-  },
-  tourBadgeText: {
-    fontSize: 12,
-    fontWeight: "700",
-    textTransform: "uppercase",
-    letterSpacing: 1.2,
-    fontFamily: Platform.select({ ios: "Georgia", default: "serif" }),
-  },
-  heroName: {
-    fontSize: 26,
-    fontWeight: "600",
-    lineHeight: 32,
-    marginBottom: 4,
-    fontFamily: "SourceSerif4_600SemiBold",
-  },
-  heroNeighborhood: {
-    fontSize: 15,
-    lineHeight: 20,
-    fontStyle: "italic",
-    letterSpacing: 0.4,
-    fontFamily: Platform.select({ ios: "Georgia", default: "serif" }),
-  },
-  statsRule: {
-    alignItems: "center",
-    gap: 8,
-    marginHorizontal: 20,
-    marginTop: 18,
-    marginBottom: 4,
-  },
-  statLine: {
-    fontSize: 12,
-    fontWeight: "600",
-    letterSpacing: 1.6,
-    fontFamily: Platform.select({ ios: "Georgia", default: "serif" }),
-  },
-  statsRuleLine: {
-    marginTop: 2,
-    alignSelf: "stretch",
-    height: StyleSheet.hairlineWidth,
-  },
-  dropCap: {
-    fontSize: 44,
-    lineHeight: 38,
-    fontWeight: "600",
-    fontFamily: Platform.select({ ios: "ui-serif", default: "serif" }),
-    paddingRight: 6,
-  },
-  section: {
-    marginHorizontal: 16,
-    marginTop: 16,
-    padding: 16,
-    borderRadius: 6,
-    borderWidth: 1,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: "700",
-    fontFamily: Platform.select({ ios: "ui-serif", default: "serif" }),
-    marginBottom: 10,
-    transform: [{ rotate: "-0.35deg" }],
-  },
-  description: {
-    fontSize: 15,
-    lineHeight: 24,
-  },
-  author: {
-    fontSize: 13,
+  kicker: {
     marginTop: 10,
-    fontStyle: "italic",
   },
-  stopItem: {
+  title: {
+    fontFamily: FONT.light,
+    fontSize: 32,
+    lineHeight: 36,
+    letterSpacing: -0.3,
+    color: INK.charcoal,
+    marginTop: 6,
+  },
+  block: {
+    paddingHorizontal: MARGIN.outer,
+    marginTop: 28,
+  },
+  facts: {
+    flexDirection: "row",
+    marginHorizontal: MARGIN.outer,
+    paddingHorizontal: 0,
+    borderTopWidth: 1.5,
+    borderTopColor: INK.blue,
+    borderBottomWidth: StyleSheet.hairlineWidth * 2,
+    borderBottomColor: INK.rule,
+  },
+  fact: {
+    flex: 1,
+    paddingVertical: 12,
+  },
+  factDivider: {
+    paddingLeft: 14,
+    borderLeftWidth: StyleSheet.hairlineWidth * 2,
+    borderLeftColor: INK.rule,
+  },
+  factValue: {
+    fontFamily: FONT.light,
+    fontSize: 22,
+    color: INK.charcoal,
+    marginTop: 4,
+  },
+  leadRow: {
     flexDirection: "row",
     alignItems: "flex-start",
-    paddingVertical: 14,
-    gap: 12,
+    gap: 18,
+    marginTop: 34,
   },
-  stopLeft: {
+  leadText: {
+    flex: 1,
+    paddingTop: 4,
+  },
+  leadName: {
+    fontFamily: FONT.regular,
+    fontSize: 21,
+    lineHeight: 25,
+    color: INK.charcoal,
+    marginTop: 6,
+  },
+  leadYears: {
+    marginTop: 4,
+  },
+  leadNote: {
+    fontFamily: FONT.regular,
+    fontSize: 14,
+    lineHeight: 20,
+    color: INK.charcoal,
+    marginTop: 10,
+  },
+  rule: {
+    marginBottom: 18,
+  },
+  body: {
+    fontFamily: FONT.regular,
+    fontSize: 16,
+    lineHeight: 26,
+    color: INK.charcoal,
+  },
+  leadIn: {
+    fontFamily: FONT.medium,
+    fontSize: 13,
+    letterSpacing: 1.6,
+    color: INK.blue,
+  },
+  byline: {
+    marginTop: 14,
+  },
+  cameos: {
+    marginTop: 28,
+  },
+  cameoRow: {
+    flexDirection: "row",
+    gap: 18,
+    marginTop: 12,
+  },
+  cameo: {
     alignItems: "center",
-    width: 32,
   },
-  stopNumber: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    borderWidth: 1.5,
+  cameoName: {
+    fontFamily: FONT.regular,
+    fontSize: 12,
+    color: INK.sepia,
+    marginTop: 6,
+  },
+  mapBlock: {
+    marginTop: 40,
+  },
+  subhead: {
+    marginBottom: 10,
+  },
+  stop: {
+    paddingTop: 14,
+  },
+  stopRow: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 14,
+  },
+  stopDot: {
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    backgroundColor: INK.blue,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "transparent",
+    marginTop: 1,
   },
-  stopNumberText: {
-    fontSize: 13,
-    fontWeight: "700",
-    fontFamily: Platform.select({ ios: "Georgia", default: "serif" }),
+  stopNo: {
+    fontFamily: FONT.medium,
+    fontSize: 12,
+    color: PAPER.cover,
   },
-  stopLine: {
-    width: 2,
-    flex: 1,
-    marginTop: 4,
-    minHeight: 20,
-  },
-  stopContent: {
+  stopText: {
     flex: 1,
   },
   stopName: {
-    fontSize: 15,
-    fontWeight: "600",
-    lineHeight: 20,
-    fontFamily: "SourceSerif4_600SemiBold",
+    fontFamily: FONT.regular,
+    fontSize: 18,
+    lineHeight: 23,
+    color: INK.charcoal,
   },
-  stopAddress: {
+  stopAddr: {
+    fontFamily: FONT.regular,
     fontSize: 13,
-    lineHeight: 18,
+    color: INK.sepia,
     marginTop: 2,
-    fontFamily: Platform.select({ ios: "Georgia", default: "serif" }),
   },
   stopNote: {
-    fontSize: 12,
-    fontWeight: "600",
-    marginTop: 4,
-    fontStyle: "italic",
-    letterSpacing: 0.3,
-    fontFamily: Platform.select({ ios: "Georgia", default: "serif" }),
-  },
-  stopCatDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
+    fontFamily: FONT.lightItalic,
+    fontSize: 14,
+    color: INK.vermilion,
     marginTop: 6,
   },
-  stampHeaderRow: {
+  stopRule: {
+    marginTop: 14,
+    marginLeft: 40,
+  },
+  stampHead: {
     flexDirection: "row",
     alignItems: "baseline",
     justifyContent: "space-between",
-    marginBottom: 12,
   },
   stampCount: {
-    fontSize: 10,
-    fontWeight: "700",
-    letterSpacing: 1.5,
-    fontFamily: Platform.select({ ios: "Georgia", default: "serif" }),
+    fontFamily: FONT.medium,
+    fontSize: 12,
+    letterSpacing: 1.6,
+    color: INK.blue,
   },
-  stampStrip: {
+  stamps: {
     gap: 14,
-    paddingVertical: 4,
+    paddingVertical: 16,
   },
   stampSlot: {
+    width: 88,
     alignItems: "center",
-    width: 84,
   },
-  stampLabel: {
-    fontSize: 10,
+  stampName: {
+    marginTop: 8,
+    fontFamily: FONT.regular,
+    fontSize: 11,
     lineHeight: 14,
-    marginTop: 6,
+    color: INK.faded,
     textAlign: "center",
+  },
+  stampHint: {
+    fontFamily: FONT.regular,
+    fontSize: 13,
+    color: INK.sepia,
+  },
+  setOut: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginHorizontal: MARGIN.outer,
+    marginTop: 40,
+    paddingVertical: 18,
+    backgroundColor: INK.blue,
+  },
+  setOutText: {
+    fontFamily: FONT.medium,
+    fontSize: 13,
+    letterSpacing: 2.4,
+    textTransform: "uppercase",
+    color: PAPER.cover,
   },
 });

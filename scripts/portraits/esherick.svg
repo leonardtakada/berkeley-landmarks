@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 240" width="200" height="240">
+  <defs><clipPath id="frame"><path d="M18 240 V96 L182 44 V240 Z"/></clipPath></defs>
+  <!-- Joseph Esherick: the shed roof of the Sea Ranch, paper, ruled in blue -->
+  <path d="M18 240 V96 L182 44 V240 Z" fill="#FDFAF2"/>
+  <g clip-path="url(#frame)">
+    <!-- jacket over a turtleneck -->
+    <path d="M10 240 C18 204 54 190 100 188 C146 190 182 204 190 240 Z" fill="#0B2E8C"/>
+    <path d="M78 186 C86 198 114 198 122 186 L124 240 H76 Z" fill="#2E2A27"/>
+    <path d="M84 164 H116 V186 C110 191 90 191 84 186 Z" fill="#2E2A27"/>
+    <!-- ears, face -->
+    <ellipse cx="70" cy="114" rx="7" ry="10" fill="#F4CDB9"/>
+    <ellipse cx="130" cy="114" rx="7" ry="10" fill="#F4CDB9"/>
+    <path d="M72 102 C70 136 84 160 100 162 C116 160 130 136 128 102 C126 78 114 66 100 66 C86 66 74 78 72 102 Z" fill="#F4CDB9"/>
+    <!-- a grey crew cut -->
+    <path d="M71 100 C68 72 84 60 100 60 C116 60 132 72 129 100 C125 88 116 82 100 82 C84 82 75 88 71 100 Z" fill="#D9D2C4"/>
+    <!-- heavy black spectacles -->
+    <rect x="76" y="100" width="21" height="15" rx="3" fill="none" stroke="#2E2A27" stroke-width="3.4"/>
+    <rect x="103" y="100" width="21" height="15" rx="3" fill="none" stroke="#2E2A27" stroke-width="3.4"/>
+    <path d="M97 106 H103 M76 104 L71 102 M124 104 L129 102" stroke="#2E2A27" stroke-width="2.6" fill="none"/>
+    <circle data-anim="eye" cx="87" cy="108" r="2.2" fill="#2E2A27"/>
+    <circle data-anim="eye" cx="113" cy="108" r="2.2" fill="#2E2A27"/>
+    <path d="M100 116 L97 129 L102 130" stroke="#2E2A27" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    <!-- a wry half-smile -->
+    <path data-anim="mouth" d="M90 142 C96 145 104 144 112 138" data-smile="M88 140 C95 148 105 147 113 134" stroke="#2E2A27" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+  </g>
+  <path d="M18 240 V96 L182 44 V240" fill="none" stroke="#0B2E8C" stroke-width="4" stroke-linejoin="miter"/>
+</svg>

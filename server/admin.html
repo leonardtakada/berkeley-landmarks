@@ -76,6 +76,7 @@
     <button class="tab active" onclick="showTab('pending')">Pending</button>
     <button class="tab" onclick="showTab('approved')">Approved</button>
     <button class="tab" onclick="showTab('rejected')">Rejected</button>
+    <button class="tab" onclick="showTab('proposals')">Proposed Landmarks</button>
     <button class="tab" onclick="showTab('edits')"><svg viewBox="0 0 16 16" width="13" height="13" fill="currentColor" style="vertical-align:-2px;margin-right:5px"><path d="M11.3 1.7l3 3L5 14H2v-3zM12 1l3 3-1.3 1.3-3-3z"/></svg>Suggested Edits</button>
   </div>
   <div id="content"></div>
@@ -87,6 +88,15 @@
 
 <script>
 const API = window.location.origin + '/api';
+
+// Everything a reader typed is escaped before it goes into the page.
+const escapeHtml = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+// The review routes answer only a signed-in admin; say so when a change is refused.
+async function post(url) {
+  const res = await fetch(url, { method: 'POST', credentials: 'include' });
+  if (!res.ok) alert(res.status === 401 || res.status === 403 ? 'Sign in as an admin to review.' : 'Could not save (' + res.status + ').');
+}
 
 let currentTab = 'pending';
 let landmarksMap = {};
@@ -102,7 +112,7 @@ async function loadLandmarks() {
 
 async function fetchPhotos(status) {
   try {
-    const res = await fetch(`${API}/photos?status=${status}`);
+    const res = await fetch(`${API}/photos?status=${status}`, { credentials: 'include' });
     if (!res.ok) throw new Error('Not authenticated');
     return await res.json();
   } catch (e) {
@@ -113,20 +123,20 @@ async function fetchPhotos(status) {
 async function approvePhoto(id) {
   const btn = document.querySelector(`[data-approve="${id}"]`);
   btn.textContent = 'Approving...'; btn.classList.add('btn-loading');
-  await fetch(`${API}/photos/${id}/approve`, { method: 'POST' });
+  await post(`${API}/photos/${id}/approve`);
   load();
 }
 
 async function rejectPhoto(id) {
   const btn = document.querySelector(`[data-reject="${id}"]`);
   btn.textContent = 'Rejecting...'; btn.classList.add('btn-loading');
-  await fetch(`${API}/photos/${id}/reject`, { method: 'POST' });
+  await post(`${API}/photos/${id}/reject`);
   load();
 }
 
 async function fetchSubmissions(status) {
   try {
-    const res = await fetch(`${API}/submissions?status=${status}`);
+    const res = await fetch(`${API}/submissions?status=${status}`, { credentials: 'include' });
     if (!res.ok) throw new Error('Not authenticated');
     return await res.json();
   } catch {
@@ -137,7 +147,7 @@ async function fetchSubmissions(status) {
 async function reviewSubmission(id, action) {
   const btn = document.querySelector(`[data-${action}="${id}"]`);
   if (btn) { btn.textContent = 'Saving...'; btn.classList.add('btn-loading'); }
-  await fetch(`${API}/submissions/${id}/${action}`, { method: 'POST' });
+  await post(`${API}/submissions/${id}/${action}`);
   load();
 }
 
@@ -147,6 +157,7 @@ async function runAiReview() {
   try {
     const res = await fetch(`${API}/trpc/submissions.aiReview?batch=1`, {
       method: 'POST',
+      credentials: 'include',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ "0": { json: {} } }),
     });
@@ -171,6 +182,7 @@ function showTab(tab) {
 
 async function load() {
   if (currentTab === 'edits') return loadEdits();
+  if (currentTab === 'proposals') return loadProposals();
   const photos = await fetchPhotos(currentTab);
   const content = document.getElementById('content');
   
@@ -189,16 +201,16 @@ async function load() {
 
   content.innerHTML = photos.map(p => {
     const lm = landmarksMap[p.landmarkId] || {};
-    const imgUrl = p.photoUrl.startsWith('http') ? p.photoUrl : window.location.origin + p.photoUrl;
+    const imgUrl = escapeHtml(p.photoUrl.startsWith('http') ? p.photoUrl : window.location.origin + p.photoUrl);
     return `
       <div class="photo-card">
-        <img src="${imgUrl}" onclick="showLightbox('${imgUrl}')" />
+        <img src="${imgUrl}" onclick="showLightbox(this.src)" />
         <div class="photo-info">
           <div>
-            <div class="landmark">${lm.name || p.landmarkId}</div>
-            <div class="address">${lm.address || ''}${lm.address ? ', Berkeley, CA' : ''}</div>
+            <div class="landmark">${escapeHtml(lm.name || p.landmarkId)}</div>
+            <div class="address">${escapeHtml(lm.address || '')}${lm.address ? ', Berkeley, CA' : ''}</div>
             <div class="meta">Submitted ${new Date(p.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' })}</div>
-            ${p.caption ? `<div class="caption">"${p.caption}"</div>` : ''}
+            ${p.caption ? `<div class="caption">"${escapeHtml(p.caption)}"</div>` : ''}
           </div>
           ${currentTab === 'pending' ? `
           <div class="actions">
@@ -216,6 +228,74 @@ async function load() {
 }
 
 loadLandmarks().then(load);
+
+// ── Proposed landmarks (admin-only tRPC routes; sign in as an admin) ──
+
+async function trpcQuery(path, input) {
+  const q = encodeURIComponent(JSON.stringify({ 0: { json: input } }));
+  const res = await fetch(`${API}/trpc/${path}?batch=1&input=${q}`, { credentials: 'include' });
+  if (!res.ok) throw new Error(String(res.status));
+  const [out] = await res.json();
+  return out.result.data.json;
+}
+
+async function trpcMutation(path, input) {
+  const res = await fetch(`${API}/trpc/${path}?batch=1`, {
+    method: 'POST',
+    credentials: 'include',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ 0: { json: input } }),
+  });
+  if (!res.ok) throw new Error(String(res.status));
+}
+
+async function loadProposals() {
+  const content = document.getElementById('content');
+  let rows;
+  try {
+    rows = await trpcQuery('proposals.list', { status: 'pending' });
+  } catch {
+    content.innerHTML = '<div class="empty"><p>Sign in as an admin to review proposed landmarks.</p></div>';
+    return;
+  }
+  if (!rows.length) {
+    content.innerHTML = '<div class="empty"><div class="icon">✅</div><p>No proposed landmarks awaiting review</p></div>';
+    return;
+  }
+  content.innerHTML = rows.map((p) => {
+    const photos = (p.photoUrls || []).map((u) => {
+      const url = u.startsWith('http') ? u : window.location.origin + u;
+      return `<img src="${escapeHtml(url)}" style="width:96px;height:96px;object-fit:cover;border-radius:8px;cursor:pointer" onclick="showLightbox(this.src)" />`;
+    }).join('');
+    const extra = [['Architect', p.architect], ['Built', p.yearBuilt], ['Style', p.style]]
+      .filter(([, v]) => v)
+      .map(([k, v]) => `<div class="change-row"><span class="field">${k}</span><span class="new">${escapeHtml(v)}</span></div>`)
+      .join('');
+    return `
+      <div class="edit-card">
+        <div class="landmark">${escapeHtml(p.name)}</div>
+        <div class="meta">${escapeHtml(p.address)} · proposed ${new Date(p.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} by ${escapeHtml(p.userId)}</div>
+        <div class="ai-note" style="font-style:normal;color:#333">${escapeHtml(p.why)}</div>
+        ${extra}
+        ${photos ? `<div style="display:flex;gap:8px;margin-top:10px">${photos}</div>` : ''}
+        <div class="actions">
+          <button class="btn btn-approve" data-approve="${p.id}" onclick="reviewProposal(${p.id}, 'approve')">✓ Accept</button>
+          <button class="btn btn-reject" data-reject="${p.id}" onclick="reviewProposal(${p.id}, 'reject')">✕ Decline</button>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+async function reviewProposal(id, action) {
+  const btn = document.querySelector(`[data-${action}="${id}"]`);
+  if (btn) { btn.textContent = 'Saving...'; btn.classList.add('btn-loading'); }
+  try {
+    await trpcMutation('proposals.review', { proposalId: id, action });
+  } catch (e) {
+    alert('Could not save: ' + e.message);
+  }
+  load();
+}
 
 async function loadEdits() {
   const subs = await fetchSubmissions('pending');
@@ -240,18 +320,18 @@ async function loadEdits() {
     const score = s.aiScore;
     const badge = score == null ? '<span class="ai-badge ai-mid">AI: not scored</span>' :
       `<span class="ai-badge ${score >= 60 ? 'ai-high' : score >= 30 ? 'ai-mid' : 'ai-low'}">AI risk: ${score}/100</span>` +
-      ((s.aiFlags || []).length ? `<span class="ai-flags">${s.aiFlags.map(f => `<span class="ai-flag">${f}</span>`).join('')}</span>` : '');
+      ((s.aiFlags || []).length ? `<span class="ai-flags">${s.aiFlags.map(f => `<span class="ai-flag">${escapeHtml(f)}</span>`).join('')}</span>` : '');
     return `
       <div class="edit-card">
-        <div class="landmark">${lm.name || s.landmarkId} <span style="font-weight:400;font-size:13px;color:#999">(${s.type})</span></div>
-        <div class="meta">Submitted ${new Date(s.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' })} by ${s.userId}</div>
+        <div class="landmark">${escapeHtml(lm.name || s.landmarkId)} <span style="font-weight:400;font-size:13px;color:#999">(${escapeHtml(s.type)})</span></div>
+        <div class="meta">Submitted ${new Date(s.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' })} by ${escapeHtml(s.userId)}</div>
         ${badge}
-        ${s.aiNote ? `<div class="ai-note">AI: "${s.aiNote}"</div>` : ''}
+        ${s.aiNote ? `<div class="ai-note">AI: "${escapeHtml(s.aiNote)}"</div>` : ''}
         ${changes.map(([f, v]) => {
           const old = lm[f] != null ? lm[f] : '';
-          return `<div class="change-row"><span class="field">${f}</span><span class="old" style="color:#999;text-decoration:line-through">${old}</span><span class="new">→ ${v}</span></div>`;
+          return `<div class="change-row"><span class="field">${escapeHtml(f)}</span><span class="old" style="color:#999;text-decoration:line-through">${escapeHtml(old)}</span><span class="new">→ ${escapeHtml(v)}</span></div>`;
         }).join('')}
-        ${s.note ? `<div class="ai-note">Submitter: "${s.note}"</div>` : ''}
+        ${s.note ? `<div class="ai-note">Submitter: "${escapeHtml(s.note)}"</div>` : ''}
         <div class="actions">
           <button class="btn btn-approve" data-approve="${s.id}" onclick="reviewSubmission(${s.id}, 'approve')">✓ Approve</button>
           <button class="btn btn-reject" data-reject="${s.id}" onclick="reviewSubmission(${s.id}, 'reject')">✕ Reject</button>

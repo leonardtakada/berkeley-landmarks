@@ -1,223 +1,163 @@
 import React, { useEffect } from "react";
-import { Platform, StyleSheet, Text, View } from "react-native";
-import Svg, { Circle, Defs, Path, Text as SvgText, TextPath, TSpan } from "react-native-svg";
+import { Platform, StyleSheet, View } from "react-native";
+import Svg, { Path, Text as SvgText } from "react-native-svg";
 import Animated, {
-  cancelAnimation,
-  runOnJS,
+  Easing,
   useAnimatedStyle,
   useSharedValue,
-  withDelay,
-  withSpring,
   withTiming,
 } from "react-native-reanimated";
 import * as Haptics from "expo-haptics";
-import { useColorScheme } from "@/hooks/use-color-scheme";
 
-/** Brand ultramarine on light paper, cream ink on dark paper. */
-const INK_LIGHT = "#0B2E8C";
-const INK_DARK = "#EDE9DC";
+import { FONT, INK, PAPER } from "@/constants/book";
 
-function abbreviate(name: string, max = 14): string {
-  const cleaned = name.replace(/[·—–-]/g, " ").replace(/\s+/g, " ").trim();
-  if (cleaned.length <= max) return cleaned;
-  const initials = cleaned
-    .split(" ")
-    .map((w) => w[0])
-    .join("");
-  return initials.length >= 3 ? initials.toUpperCase() : cleaned.slice(0, max);
+/**
+ * A collected stop, as a Showa-era travel label: a flat shape of ink —
+ * circle, square, triangle or arch — with the place set in Jost. Stops not
+ * yet visited show only the dashed outline of the label to come.
+ */
+
+type Shape = "circle" | "square" | "triangle" | "arch";
+const SHAPES: Shape[] = ["circle", "square", "arch", "triangle"];
+const INKS: { fill: string; text: string }[] = [
+  { fill: INK.blue, text: PAPER.cover },
+  { fill: INK.vermilion, text: PAPER.cover },
+  { fill: INK.blueTint, text: INK.blue },
+];
+
+function hash(s: string) {
+  let h = 7;
+  for (const c of s) h = (h * 31 + c.charCodeAt(0)) >>> 0;
+  return h;
+}
+
+function shapePath(shape: Shape, s: number): string {
+  const m = 2;
+  const e = s - m;
+  switch (shape) {
+    case "circle": {
+      const r = s / 2 - m;
+      const c = s / 2;
+      const k = r * 0.5523;
+      return `M${c} ${c - r} C${c + k} ${c - r} ${c + r} ${c - k} ${c + r} ${c} C${c + r} ${c + k} ${c + k} ${c + r} ${c} ${c + r} C${c - k} ${c + r} ${c - r} ${c + k} ${c - r} ${c} C${c - r} ${c - k} ${c - k} ${c - r} ${c} ${c - r} Z`;
+    }
+    case "square":
+      return `M${m + 4} ${m + 4} H${e - 4} V${e - 4} H${m + 4} Z`;
+    case "triangle":
+      return `M${s / 2} ${m} L${e} ${e - 4} H${m} Z`;
+    case "arch": {
+      const w = s * 0.72;
+      const x0 = (s - w) / 2;
+      const r = w / 2;
+      return `M${x0} ${e} V${m + r} C${x0} ${m + r * 0.45} ${x0 + r * 0.45} ${m} ${s / 2} ${m} C${s - x0 - r * 0.45} ${m} ${s - x0} ${m + r * 0.45} ${s - x0} ${m + r} V${e} Z`;
+    }
+  }
+}
+
+/** Break a name into at most two short lines. */
+function lines(name: string, max = 11): string[] {
+  const words = name.replace(/[(),]/g, "").split(/\s+/).filter(Boolean);
+  const out: string[] = [];
+  let cur = "";
+  for (const w of words) {
+    if (!cur) cur = w;
+    else if ((cur + " " + w).length <= max) cur += " " + w;
+    else {
+      out.push(cur);
+      cur = w;
+    }
+    if (out.length === 2) break;
+  }
+  if (cur && out.length < 2) out.push(cur);
+  if (out.length === 2 && words.join(" ").length > out.join(" ").length) {
+    out[1] = out[1].length > max - 1 ? out[1].slice(0, max - 1) + "…" : out[1] + "…";
+  }
+  return out;
 }
 
 export interface TravelStampProps {
   landmarkName: string;
   tourName: string;
   collected: boolean;
-  /** Fire the ink-stamp slam animation (and one heavy haptic) on mount. */
+  /** Press the label onto the page (and one firm haptic) on mount. */
   justCollected?: boolean;
   size?: number;
-  /** Deterministic-feeling rotation so stamps sit slightly askew. */
+  /** Chooses the label's shape and ink; defaults to one derived from the name. */
+  variant?: number;
+  /** @deprecated labels sit square to the page */
   rotation?: number;
 }
 
-/**
- * Vintage travel-stamp: a double-ring circular rubber stamp with curved
- * small-caps serif lettering (landmark abbreviation on top arc, tour name
- * on the bottom arc) and a star motif. Collected = fully inked; otherwise
- * a dashed-outline placeholder.
- */
 export function TravelStamp({
   landmarkName,
-  tourName,
   collected,
   justCollected = false,
   size = 96,
-  rotation = -6,
+  variant,
 }: TravelStampProps) {
-  const scheme = useColorScheme();
-  const ink = scheme === "dark" ? INK_DARK : INK_LIGHT;
+  const v = variant ?? hash(landmarkName);
+  const shape = SHAPES[v % SHAPES.length];
+  const ink = INKS[v % INKS.length];
+  const d = shapePath(shape, size);
+  const name = lines(landmarkName.toUpperCase());
+  const fs = Math.max(7, size * 0.095);
+  // Triangles carry their lettering low, where the label is widest.
+  const cy = shape === "triangle" ? size * 0.66 : shape === "arch" ? size * 0.56 : size / 2;
 
-  // Rough double ring: outer solid, inner with tiny gaps to mimic ink skips.
-  const r = size / 2;
-  const outerR = r - 3;
-  const innerR = r - 9;
-  const c = r; // center
-
-  // Arc paths for curved text (sweep flag 1 = clockwise readable on top).
-  const topArcR = outerR - 11;
-  const bottomArcR = topArcR - 2;
-  const topArc = `M ${c - topArcR * 0.92} ${c} A ${topArcR} ${topArcR} 0 0 1 ${c + topArcR * 0.92} ${c}`;
-  const bottomArc = `M ${c - bottomArcR * 0.8} ${c} A ${bottomArcR} ${bottomArcR} 0 0 0 ${c + bottomArcR * 0.8} ${c}`;
-
-  const stamp = (
+  const art = (
     <Svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
-      <Defs>
-        <Path id={`top-arc-${size}`} d={topArc} />
-        <Path id={`bottom-arc-${size}`} d={bottomArc} />
-      </Defs>
-
-      {/* Outer ring */}
-      <Circle
-        cx={c}
-        cy={c}
-        r={outerR}
-        fill="none"
-        stroke={ink}
-        strokeWidth={2.5}
-        strokeDasharray={collected ? "34 1.5 22 1 40 1" : "5 4"}
-        opacity={collected ? 0.9 : 0.55}
-      />
-      {/* Inner ring */}
-      <Circle
-        cx={c}
-        cy={c}
-        r={innerR}
-        fill="none"
-        stroke={ink}
-        strokeWidth={1.5}
-        strokeDasharray={collected ? "26 1 18 1 30 1" : "3 4"}
-        opacity={collected ? 0.8 : 0.45}
-      />
-
-      {collected && (
+      {collected ? (
         <>
-          {/* Landmark name curved along the top */}
-          <SvgText
-            fill={ink}
-            fontSize={Math.max(8, size * 0.095)}
-            fontFamily={Platform.select({ ios: "ui-serif", default: "serif" })}
-            fontWeight="600"
-            letterSpacing={1}
-          >
-            <TextPath href={`#top-arc-${size}`} startOffset="50%" textAnchor="middle">
-              <TSpan>{abbreviate(landmarkName).toUpperCase()}</TSpan>
-            </TextPath>
-          </SvgText>
-
-          {/* Tour name curved along the bottom */}
-          <SvgText
-            fill={ink}
-            fontSize={Math.max(7, size * 0.08)}
-            fontFamily={Platform.select({ ios: "ui-serif", default: "serif" })}
-            fontWeight="600"
-            letterSpacing={1}
-          >
-            <TextPath href={`#bottom-arc-${size}`} startOffset="50%" textAnchor="middle">
-              <TSpan>{abbreviate(tourName, 16).toUpperCase()}</TSpan>
-            </TextPath>
-          </SvgText>
-
-          {/* Star motif */}
-          <SvgText
-            fill={ink}
-            fontSize={size * 0.22}
-            textAnchor="middle"
-            x={c}
-            y={c + size * 0.075}
-            fontFamily={Platform.select({ ios: "ui-serif", default: "serif" })}
-          >
-            ★
-          </SvgText>
-
-          {/* Date line under the star */}
-          <SvgText
-            fill={ink}
-            fontSize={Math.max(6, size * 0.065)}
-            textAnchor="middle"
-            x={c}
-            y={c + size * 0.21}
-            fontFamily={Platform.select({ ios: "ui-serif", default: "serif" })}
-            opacity={0.85}
-          >
-            BERKELEY
-          </SvgText>
+          <Path d={d} fill={ink.fill} />
+          {name.map((line, i) => (
+            <SvgText
+              key={i}
+              x={size / 2}
+              y={cy + (i - (name.length - 1) / 2) * fs * 1.25 + fs * 0.35}
+              fontSize={fs}
+              fontFamily={FONT.medium}
+              letterSpacing={0.8}
+              fill={ink.text}
+              textAnchor="middle"
+            >
+              {line}
+            </SvgText>
+          ))}
         </>
-      )}
-
-      {!collected && (
-        /* Placeholder center: "not yet stamped" dot */
-        <Circle cx={c} cy={c} r={2.5} fill={ink} opacity={0.35} />
+      ) : (
+        <Path d={d} fill="none" stroke={INK.faded} strokeWidth={1.2} strokeDasharray="4 4" />
       )}
     </Svg>
   );
 
-  return (
-    <InkStampAnimation active={justCollected} rotation={rotation}>
-      {stamp}
-    </InkStampAnimation>
-  );
+  return <Press active={justCollected}>{art}</Press>;
 }
 
-interface InkStampAnimationProps {
-  active: boolean;
-  rotation: number;
-  children: React.ReactNode;
-}
-
-/**
- * Ink-stamp slam: scales from ~1.6 → 1 with a springy rotation settle and
- * a fast opacity ramp, firing one heavy haptic impact on mount. When
- * inactive, renders statically with the resting rotation.
- */
-function InkStampAnimation({ active, rotation, children }: InkStampAnimationProps) {
-  const scale = useSharedValue(active ? 1.6 : 1);
-  const rotate = useSharedValue(active ? rotation + 14 : rotation);
-  const opacity = useSharedValue(active ? 0 : 1);
+/** A clean press onto the page: from slightly large to flat, no spring. */
+function Press({ active, children }: { active: boolean; children: React.ReactNode }) {
+  const t = useSharedValue(active ? 0 : 1);
 
   useEffect(() => {
-    if (!active) {
-      scale.value = 1;
-      rotate.value = rotation;
-      opacity.value = 1;
-      return;
-    }
-    // One heavy thump as the stamp hits the page.
-    if (Platform.OS !== "web") {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy).catch(() => {});
-    }
-    opacity.value = withTiming(1, { duration: 110 });
-    scale.value = withSpring(1, { mass: 0.7, damping: 9, stiffness: 190, overshootClamping: false });
-    rotate.value = withSpring(rotation, { mass: 0.7, damping: 8, stiffness: 160, overshootClamping: false });
-    return () => {
-      cancelAnimation(scale);
-      cancelAnimation(rotate);
-      cancelAnimation(opacity);
-    };
+    if (!active) return;
+    if (Platform.OS !== "web") Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy).catch(() => {});
+    t.value = withTiming(1, { duration: 260, easing: Easing.bezier(0.3, 0, 0.1, 1) });
     // eslint-disable-next-line react-hooks/exhaustive-deps -- fire once on mount
   }, []);
 
-  const animatedStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: scale.value }, { rotate: `${rotate.value}deg` }],
-    opacity: opacity.value,
+  const style = useAnimatedStyle(() => ({
+    opacity: Math.min(1, t.value * 2),
+    transform: [{ scale: 1.25 - 0.25 * t.value }],
   }));
 
-  return <Animated.View style={[styles.stampWrap, animatedStyle]}>{children}</Animated.View>;
+  return <Animated.View style={[styles.wrap, style]}>{children}</Animated.View>;
 }
 
-/** Full-screen overlay flash of a freshly collected stamp (auto-dismiss). */
+/** Full-screen flash of a freshly collected label (auto-dismiss). */
 export function StampCollectOverlay({
   landmarkName,
   tourName,
   onDismiss,
-  durationMs = 1200,
+  durationMs = 1400,
 }: {
   landmarkName: string;
   tourName: string;
@@ -225,29 +165,20 @@ export function StampCollectOverlay({
   durationMs?: number;
 }) {
   useEffect(() => {
-    const t = setTimeout(() => {
-      onDismiss();
-    }, durationMs);
+    const t = setTimeout(onDismiss, durationMs);
     return () => clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps -- one-shot timer
   }, []);
 
   return (
     <View style={styles.overlay} pointerEvents="none">
-      <TravelStamp
-        landmarkName={landmarkName}
-        tourName={tourName}
-        collected
-        justCollected
-        size={180}
-        rotation={-5}
-      />
+      <TravelStamp landmarkName={landmarkName} tourName={tourName} collected justCollected size={180} />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  stampWrap: {
+  wrap: {
     alignItems: "center",
     justifyContent: "center",
   },
@@ -258,6 +189,3 @@ const styles = StyleSheet.create({
     zIndex: 50,
   },
 });
-
-// Silence unused-import warnings if Text/View usage changes; kept minimal.
-export const __unused = { Text };

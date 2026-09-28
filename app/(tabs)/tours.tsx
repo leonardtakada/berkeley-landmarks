@@ -1,255 +1,200 @@
 import React from "react";
-import { Text, View, FlatList, Pressable, StyleSheet, Platform } from "react-native";
-// Platform already imported
+import { Pressable, StyleSheet, Text, View } from "react-native";
+import Animated from "react-native-reanimated";
 import { useRouter } from "expo-router";
-import { ScreenContainer } from "@/components/screen-container";
-import { PageFlip } from "@/components/page-flip";
-import { PaperGrain } from "@/components/paper-grain";
-import { CornerTicks, InkRule } from "@/components/hand-inked";
-import { ChapterHeader } from "@/components/chapter-header";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useColors } from "@/hooks/use-colors";
-import { IconSymbol } from "@/components/ui/icon-symbol";
-import { tours } from "@/data/tours";
-import type { Tour } from "@/data/tours";
 
-function roman(n: number): string {
-  const table: [number, string][] = [
-    [10, "X"], [9, "IX"], [5, "V"], [4, "IV"], [1, "I"],
-  ];
-  let out = "";
-  for (const [v, s] of table) while (n >= v) { out += s; n -= v; }
-  return out;
-}
+import { ArchitectPortrait } from "@/components/architect-portrait";
+import { ChapterOpener, Folio, InkIn, SectionPage, useFirstReveal } from "@/components/book-page";
+import { Rule } from "@/components/print";
+import { ScrollClock, useScrollClockHandler } from "@/components/scroll-clock";
+import { WalkLabel } from "@/components/walk-label";
+import { FONT, INK, MARGIN, TYPE, chapterNo } from "@/constants/book";
+import { tours, type Tour } from "@/data/tours";
+import { ARCHITECTS, architectsOnTour } from "@/lib/architects";
 
-function TourCard({ tour, tourIndex }: { tour: Tour; tourIndex: number }) {
+/**
+ * Part One — the Tours, set as a table of contents: each walk a numbered
+ * chapter with its length and its printed label, the labels alternating
+ * sides down the page. A walk that belongs to one architect has their
+ * portrait tucked against its label.
+ */
+export default function ToursScreen() {
   const router = useRouter();
-  const colors = useColors();
-
-  const stopCount = tour.stops.length;
+  const insets = useSafeAreaInsets();
+  const reveal = useFirstReveal();
+  const clock = useScrollClockHandler();
 
   return (
+    <SectionPage>
+      <ScrollClock value={clock.offset}>
+      <Animated.FlatList
+        data={tours}
+        onScroll={clock.onScroll}
+        scrollEventThrottle={16}
+        keyExtractor={(t) => t.id}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: Math.max(insets.bottom, 16) + 36 }}
+        ListHeaderComponent={
+          <ChapterOpener
+            kicker="Part One"
+            title="The Tours"
+            note={`${spell(tours.length)} walks through the city, each with its own map.`}
+            reveal={reveal}
+          />
+        }
+        renderItem={({ item, index }) => (
+          <InkIn reveal={reveal} index={2 + index} step={0.07}>
+            <ContentsEntry
+              tour={item}
+              number={index + 1}
+              last={index === tours.length - 1}
+              onPress={() => router.push(`/tour/${item.id}`)}
+            />
+          </InkIn>
+        )}
+        ListFooterComponent={<Folio>The Tours · Berkeley</Folio>}
+      />
+      </ScrollClock>
+    </SectionPage>
+  );
+}
+
+function ContentsEntry({
+  tour,
+  number,
+  last,
+  onPress,
+}: {
+  tour: Tour;
+  number: number;
+  last: boolean;
+  onPress: () => void;
+}) {
+  const { lead, cast } = architectsOnTour(tour);
+  const others = cast.filter((k) => k !== lead).map((k) => ARCHITECTS[k].surname);
+  const place = /^various$/i.test(tour.neighborhood) ? "Across the city" : tour.neighborhood;
+  // Labels alternate sides down the page, as on a sheet of travel labels.
+  const flip = number % 2 === 0;
+  const credit = [
+    lead ? `Guided by ${ARCHITECTS[lead].surname}` : null,
+    others.length
+      ? `${lead ? "with" : "With"} the work of ${
+          others.length > 1 ? `${others.slice(0, -1).join(", ")} & ${others[others.length - 1]}` : others[0]
+        }`
+      : null,
+  ]
+    .filter(Boolean)
+    .join(", ");
+  return (
     <Pressable
-      onPress={() => router.push(`/tour/${tour.id}`)}
-      style={({ pressed }) => [
-        styles.tourCard,
-        {
-          backgroundColor: colors.pageSurface,
-          borderColor: colors.pageBorder,
-          opacity: pressed ? 0.85 : 1,
-        },
-      ]}
+      onPress={onPress}
+      style={({ pressed }) => [styles.entry, pressed && styles.pressed]}
+      accessibilityRole="button"
+      accessibilityLabel={`Walk ${number}: ${tour.name}, ${tour.distance}`}
     >
-      <CornerTicks color={colors.pageBorder} size={11} inset={4} />
-      {/* 3px category spine tick — the only category color allowed */}
-      <View style={[styles.spineTick, { backgroundColor: tour.color }]} />
-
-      <View style={styles.cardContent}>
-        <View style={styles.cardHeader}>
-          <View style={[styles.tourIcon, { borderColor: colors.pageBorder }]}>
-            <IconSymbol name="figure.walk" size={20} color={tour.color} />
-          </View>
-          <View style={styles.cardTitleArea}>
-            <Text style={[styles.tourName, { color: colors.foreground }]} numberOfLines={1}>
-              {tour.name}
-            </Text>
-            <Text style={[styles.tourNeighborhood, { color: colors.muted }]}>
-              [ {tour.neighborhood.toUpperCase()} ]
-            </Text>
-          </View>
-          <Text style={[styles.plateNo, { color: colors.muted }]}>Ch. {roman(tourIndex + 1)}</Text>
+      <View style={[styles.row, flip && styles.rowFlip]}>
+        <View style={styles.labelBox}>
+          <WalkLabel tourId={tour.id} title={tour.name} width={LABEL_W} animated={false} />
+          {lead ? (
+            <ArchitectPortrait
+              architect={lead}
+              width={46}
+              animated={false}
+              style={[styles.cameo, flip ? styles.cameoLeft : styles.cameoRight]}
+            />
+          ) : null}
         </View>
-
-        <Text style={[styles.tourDescription, { color: colors.muted }]} numberOfLines={2}>
-          {tour.description}
-        </Text>
-
-        <View style={styles.cardFooter}>
-          <View style={styles.statItem}>
-            <IconSymbol name="mappin.and.ellipse" size={13} color={colors.muted} />
-            <Text style={[styles.statText, { color: colors.muted }]}>{stopCount} stops</Text>
-          </View>
-          <View style={styles.statItem}>
-            <IconSymbol name="ruler.fill" size={13} color={colors.muted} />
-            <Text style={[styles.statText, { color: colors.muted }]}>{tour.distance}</Text>
-          </View>
-          <View style={styles.statItem}>
-            <IconSymbol name="clock.fill" size={13} color={colors.muted} />
-            <Text style={[styles.statText, { color: colors.muted }]}>{tour.duration}</Text>
-          </View>
+        <View style={styles.head}>
+          <Text style={styles.numeral}>{chapterNo(number)}</Text>
+          <Text style={styles.name}>{tour.name}</Text>
+          <Text style={styles.meta}>{place}</Text>
+          <Text style={styles.meta}>
+            {tour.stops.length} stops  ·  {tour.distance}  ·  {tour.duration}
+          </Text>
         </View>
       </View>
+      <Text style={styles.desc} numberOfLines={3}>
+        {tour.description}
+      </Text>
+      {credit ? <Text style={styles.cast}>{credit}</Text> : null}
+      {!last ? <Rule style={styles.rule} /> : null}
     </Pressable>
   );
 }
 
-export default function ToursScreen() {
-  const colors = useColors();
-  // The bookmark bar hangs at the top; pad the list bottom by the safe inset.
-  const insets = useSafeAreaInsets();
-  const listBottomPadding = Math.max(insets.bottom, 12) + 24;
-
-  return (
-    <ScreenContainer variant="page" edges={["left", "right"]}>
-      <PageFlip direction={1}>
-      <PaperGrain />
-      <ChapterHeader
-        kicker="Chapter II"
-        title="Tours"
-        subtitle="Walking tours by neighborhood"
-        accentColor={colors.accent}
-        foregroundColor={colors.foreground}
-        mutedColor={colors.muted}
-        romanNumeral="II"
-      />
-      {/* TOC label kept as list header; the big cover-frame title was removed
-          as it doubled up with the ChapterHeader above. */}
-      <View style={styles.screenHeader}>
-        <Text style={[styles.tocLabel, { color: colors.primary }]}>目次 · Table of Contents</Text>
-      </View>
-      <FlatList
-        data={tours}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item, index }) => <TourCard tour={item} tourIndex={index} />}
-        contentContainerStyle={[styles.listContent, { paddingBottom: listBottomPadding }]}
-        showsVerticalScrollIndicator={false}
-        ItemSeparatorComponent={() => <View style={{ height: 12 }} />}
-        ListFooterComponent={<FolioFooter />}
-      />
-      </PageFlip>
-    </ScreenContainer>
-  );
+function spell(n: number): string {
+  const words = ["No", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten", "Eleven", "Twelve"];
+  return words[n] ?? String(n);
 }
 
-function FolioFooter() {
-  const colors = useColors();
-  return (
-    <View style={styles.folio}>
-      <InkRule color={colors.pageBorder} width={48} diamond={4} />
-      <Text style={[styles.folioText, { color: colors.border }]}>
-        BERKELEY ARCHITECTURAL HERITAGE · FIELD FOLIO · 2026
-      </Text>
-    </View>
-  );
-}
+const LABEL_W = 108;
 
 const styles = StyleSheet.create({
-  screenHeader: {
-    paddingHorizontal: 16,
-    paddingTop: 4,
+  entry: {
+    paddingHorizontal: MARGIN.outer,
+    paddingTop: 24,
+  },
+  pressed: {
+    opacity: 0.5,
+  },
+  row: {
+    flexDirection: "row",
+    alignItems: "flex-end",
+    gap: 20,
+  },
+  rowFlip: {
+    flexDirection: "row-reverse",
+  },
+  labelBox: {
+    width: LABEL_W,
+  },
+  cameo: {
+    position: "absolute",
+    bottom: -12,
+  },
+  cameoRight: {
+    right: -16,
+  },
+  cameoLeft: {
+    left: -16,
+  },
+  head: {
+    flex: 1,
     paddingBottom: 4,
   },
-  tocLabel: {
-    fontSize: 11,
-    fontWeight: "700",
-    fontStyle: "italic",
-    fontFamily: Platform.select({ ios: "Georgia", default: "serif" }),
-    letterSpacing: 2.5,
-    textTransform: "uppercase",
-    marginBottom: 2,
-    transform: [{ rotate: "-0.4deg" }],
+  numeral: {
+    ...TYPE.numeral,
+    fontSize: 40,
+    lineHeight: 44,
   },
-  folio: {
-    alignItems: "center",
-    marginTop: 28,
-    gap: 8,
+  name: {
+    fontFamily: FONT.regular,
+    fontSize: 21,
+    lineHeight: 25,
+    color: INK.charcoal,
+    marginTop: 4,
   },
-  folioRule: {
-    width: 48,
-    height: StyleSheet.hairlineWidth,
+  meta: {
+    ...TYPE.label,
+    fontSize: 9.5,
+    letterSpacing: 1.6,
+    marginTop: 6,
   },
-  folioText: {
-    fontSize: 9,
-    fontWeight: "600",
-    fontFamily: Platform.select({ ios: "Georgia", default: "serif" }),
-    letterSpacing: 2,
-  },
-  listContent: {
-    paddingHorizontal: 16,
-    paddingBottom: 100,
-  },
-  tourCard: {
-    borderRadius: 6,
-    overflow: "hidden",
-    borderWidth: 1,
-    ...Platform.select({
-      ios: {
-        shadowColor: "#3F3733",
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.05,
-        shadowRadius: 2,
-      },
-      android: { elevation: 1 },
-      web: { boxShadow: "0 1px 2px rgba(63,55,51,0.05)" },
-    }),
-  },
-  spineTick: {
-    position: "absolute",
-    left: 0,
-    top: 10,
-    bottom: 10,
-    width: 3,
-  },
-  cardContent: {
-    padding: 18,
-  },
-  cardHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-    marginBottom: 10,
-  },
-  tourIcon: {
-    width: 44,
-    height: 44,
-    borderRadius: 6,
-    borderWidth: StyleSheet.hairlineWidth,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  cardTitleArea: {
-    flex: 1,
-  },
-  tourName: {
-    fontSize: 17,
-    fontWeight: "600",
-    fontFamily: "SourceSerif4_600SemiBold",
-    lineHeight: 22,
-  },
-  tourNeighborhood: {
-    fontSize: 11,
-    lineHeight: 16,
-    marginTop: 2,
-    textTransform: "uppercase",
-    letterSpacing: 1.5,
-    fontWeight: "500",
-    fontFamily: Platform.select({ ios: "Georgia", default: "serif" }),
-  },
-  plateNo: {
-    fontSize: 11,
-    fontStyle: "italic",
-    fontFamily: Platform.select({ ios: "ui-serif", default: "serif" }),
-    letterSpacing: 0.5,
-  },
-  tourDescription: {
+  desc: {
+    fontFamily: FONT.regular,
     fontSize: 14,
-    lineHeight: 20,
-    marginBottom: 14,
+    lineHeight: 21,
+    color: INK.charcoal,
+    marginTop: 18,
   },
-  cardFooter: {
-    flexDirection: "row",
-    gap: 16,
+  cast: {
+    fontFamily: FONT.regular,
+    fontSize: 12.5,
+    color: INK.blue,
+    marginTop: 8,
   },
-  statItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-  },
-  statText: {
-    fontSize: 11,
-    fontWeight: "500",
-    textTransform: "uppercase",
-    letterSpacing: 1,
-    fontFamily: Platform.select({ ios: "Georgia", default: "serif" }),
+  rule: {
+    marginTop: 22,
   },
 });

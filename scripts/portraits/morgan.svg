@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 240" width="200" height="240">
+  <defs><clipPath id="frame"><circle cx="100" cy="124" r="88"/></clipPath></defs>
+  <!-- Julia Morgan: the circle, blue tint -->
+  <circle cx="100" cy="124" r="88" fill="#C9D0E4"/>
+  <g clip-path="url(#frame)">
+    <!-- jacket -->
+    <path d="M12 240 C20 198 56 182 100 180 C144 182 180 198 188 240 Z" fill="#0B2E8C"/>
+    <!-- blouse and high collar -->
+    <path d="M84 180 L100 220 L116 180 Z" fill="#FDFAF2"/>
+    <path d="M88 150 H112 V178 C106 182 94 182 88 178 Z" fill="#FDFAF2"/>
+    <circle cx="100" cy="184" r="5" fill="#E4592B"/>
+    <!-- the bun, behind -->
+    <circle cx="129" cy="92" r="13" fill="#2E2A27"/>
+    <!-- neck and face -->
+    <path d="M91 134 H109 V152 H91 Z" fill="#F4CDB9"/>
+    <ellipse cx="100" cy="108" rx="26" ry="31" fill="#F4CDB9"/>
+    <!-- hair, parted at the centre and drawn back -->
+    <path d="M72 114 C66 78 84 66 100 66 C118 66 134 78 128 114 C126 96 118 86 106 84 C103 87 97 87 94 84 C82 86 74 96 72 114 Z" fill="#2E2A27"/>
+    <path d="M100 68 L100 84" stroke="#C9D0E4" stroke-width="1.4" stroke-linecap="round"/>
+    <!-- round spectacles -->
+    <circle cx="89" cy="106" r="8.5" fill="none" stroke="#2E2A27" stroke-width="2"/>
+    <circle cx="111" cy="106" r="8.5" fill="none" stroke="#2E2A27" stroke-width="2"/>
+    <path d="M97.5 105 Q100 103 102.5 105" stroke="#2E2A27" stroke-width="1.6" fill="none"/>
+    <circle data-anim="eye" cx="89" cy="107" r="2" fill="#2E2A27"/>
+    <circle data-anim="eye" cx="111" cy="107" r="2" fill="#2E2A27"/>
+    <!-- a composed half-smile -->
+    <path data-anim="mouth" d="M94 126 Q100 129 106 125" data-smile="M93 125 Q100 132 107 124" stroke="#E4592B" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+  </g>
+</svg>

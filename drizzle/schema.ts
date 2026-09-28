@@ -116,4 +116,30 @@ export const landmarksTable = mysqlTable("landmarks", {
 export type LandmarkRow = typeof landmarksTable.$inferSelect;
 export type InsertLandmarkRow = typeof landmarksTable.$inferInsert;
 
+/**
+ * Readers' proposals of places for the guide: a building or place of
+ * interest not yet in it, why it belongs, and up to four photographs
+ * (`photoUrls`, paths under /uploads). Reviewed by the editors.
+ * `userId` is the users.openId identity.
+ */
+export const proposals = mysqlTable("proposals", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: varchar("user_id", { length: 64 }).notNull(),
+  name: varchar("name", { length: 200 }).notNull(),
+  address: varchar("address", { length: 300 }).notNull(),
+  why: text("why").notNull(),
+  architect: varchar("architect", { length: 300 }),
+  yearBuilt: varchar("year_built", { length: 100 }),
+  style: varchar("style", { length: 200 }),
+  photoUrls: json("photo_urls").$type<string[]>(),
+  status: mysqlEnum("status", ["pending", "approved", "rejected"]).default("pending").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  reviewedAt: timestamp("reviewed_at"),
+  reviewedBy: varchar("reviewed_by", { length: 64 }),
+  reviewerNote: text("reviewer_note"),
+});
+
+export type Proposal = typeof proposals.$inferSelect;
+export type InsertProposal = typeof proposals.$inferInsert;
+
 // TODO: Add your tables here

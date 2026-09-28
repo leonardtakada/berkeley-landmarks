@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 240" width="200" height="240">
+  <defs><clipPath id="frame"><path d="M20 240 V100 L100 26 L180 100 V240 Z"/></clipPath></defs>
+  <!-- William Charles Hays: the gable, charcoal -->
+  <path d="M20 240 V100 L100 26 L180 100 V240 Z" fill="#2E2A27"/>
+  <g clip-path="url(#frame)">
+    <!-- tweed suit -->
+    <path d="M10 240 C18 200 54 186 100 184 C146 186 182 200 190 240 Z" fill="#0B2E8C"/>
+    <!-- shirt and tie -->
+    <path d="M86 184 L100 222 L114 184 Z" fill="#FDFAF2"/>
+    <path d="M96 188 H104 L108 222 L100 232 L92 222 Z" fill="#E4592B"/>
+    <!-- neck, ears, a long face -->
+    <path d="M90 150 H110 V186 H90 Z" fill="#F4CDB9"/>
+    <ellipse cx="70" cy="114" rx="7" ry="11" fill="#F4CDB9"/>
+    <ellipse cx="130" cy="114" rx="7" ry="11" fill="#F4CDB9"/>
+    <path d="M72 102 C70 138 84 160 100 162 C116 160 130 138 128 102 C126 80 114 70 100 70 C86 70 74 80 72 102 Z" fill="#F4CDB9"/>
+    <!-- grey hair, receding, combed straight back -->
+    <path d="M70 108 C64 84 76 62 100 58 C124 62 136 84 130 108 C128 96 125 88 120 84 C117 76 110 70 100 70 C90 70 83 76 80 84 C75 88 72 96 70 108 Z" fill="#D9D2C4"/>
+    <!-- brows -->
+    <path data-anim="brow" d="M80 102 C84 99 90 99 93 101 M107 101 C110 99 116 99 120 102" stroke="#7A6E62" stroke-width="2" fill="none" stroke-linecap="round"/>
+    <!-- oval wire spectacles -->
+    <ellipse cx="87" cy="112" rx="9.5" ry="7" fill="none" stroke="#2E2A27" stroke-width="1.6"/>
+    <ellipse cx="113" cy="112" rx="9.5" ry="7" fill="none" stroke="#2E2A27" stroke-width="1.6"/>
+    <path d="M96.5 111 Q100 109 103.5 111 M77.5 111 L71 109 M122.5 111 L129 109" stroke="#2E2A27" stroke-width="1.3" fill="none"/>
+    <circle data-anim="eye" cx="87" cy="113" r="2" fill="#2E2A27"/>
+    <circle data-anim="eye" cx="113" cy="113" r="2" fill="#2E2A27"/>
+    <!-- a strong nose, a straight mouth -->
+    <path d="M100 116 L96 134 L102 135" stroke="#2E2A27" stroke-width="1.7" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    <path data-anim="mouth" d="M92 145 Q100 145 108 145" data-smile="M91 143 Q100 150 109 143" stroke="#2E2A27" stroke-width="2" stroke-linecap="round" fill="none"/>
+  </g>
+</svg>

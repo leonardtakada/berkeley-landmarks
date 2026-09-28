@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 240" width="200" height="240">
+  <defs><clipPath id="frame"><path d="M60 22 H140 L180 62 V240 H20 V62 Z"/></clipPath></defs>
+  <!-- Henry Gutterson: the octagon, blue tint -->
+  <path d="M60 22 H140 L180 62 V240 H20 V62 Z" fill="#C9D0E4"/>
+  <g clip-path="url(#frame)">
+    <!-- a vermilion cardigan over shirt and tie -->
+    <path d="M10 240 C18 204 54 190 100 188 C146 190 182 204 190 240 Z" fill="#E4592B"/>
+    <path d="M84 188 L100 240 L116 188 Z" fill="#FDFAF2"/>
+    <path d="M95 190 H105 L107 222 L100 232 L93 222 Z" fill="#0B2E8C"/>
+    <circle cx="114" cy="214" r="2.6" fill="#FDFAF2"/>
+    <circle cx="111" cy="228" r="2.6" fill="#FDFAF2"/>
+    <!-- neck, ears, a round face -->
+    <path d="M90 146 H110 V174 H90 Z" fill="#F4CDB9"/>
+    <ellipse cx="66" cy="114" rx="7" ry="10" fill="#F4CDB9"/>
+    <ellipse cx="134" cy="114" rx="7" ry="10" fill="#F4CDB9"/>
+    <circle cx="100" cy="114" r="36" fill="#F4CDB9"/>
+    <!-- bald dome, dark hair at the sides -->
+    <path d="M65 124 C61 112 62 102 67 94 C70 104 73 111 77 116 Z M135 124 C139 112 138 102 133 94 C130 104 127 111 123 116 Z" fill="#2E2A27"/>
+    <!-- kindly eyes, half closed -->
+    <path data-anim="brow" d="M80 100 C84 97 90 97 93 99 M107 99 C110 97 116 97 120 100" stroke="#2E2A27" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+    <path data-anim="eye" d="M82 109 Q87 105 92 109 M108 109 Q113 105 118 109" stroke="#2E2A27" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+    <path d="M100 106 L96 122 L102 123" stroke="#2E2A27" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    <!-- and his pipe -->
+    <path data-anim="mouth" d="M92 135 Q98 135 104 135" data-smile="M91 133 Q97 138 104 135" stroke="#2E2A27" stroke-width="2" stroke-linecap="round" fill="none"/>
+    <path d="M104 136 C114 138 122 140 130 140" stroke="#2E2A27" stroke-width="4" stroke-linecap="round" fill="none"/>
+    <path d="M126 126 H142 V140 C142 147 126 147 126 140 Z" fill="#2E2A27"/>
+    <path data-anim="smoke" d="M131 122 C129 116 135 112 132 106 M137 120 C135 114 140 110 138 104" stroke="#FDFAF2" stroke-width="2" fill="none" stroke-linecap="round"/>
+  </g>
+</svg>

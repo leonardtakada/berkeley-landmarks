@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 240" width="200" height="240">
+  <defs><clipPath id="frame"><path d="M14 240 V100 H32 V78 H52 V56 H76 V36 H124 V56 H148 V78 H168 V100 H186 V240 Z"/></clipPath></defs>
+  <!-- James W. Plachek: the stepped Art Deco of his library, blue -->
+  <path d="M14 240 V100 H32 V78 H52 V56 H76 V36 H124 V56 H148 V78 H168 V100 H186 V240 Z" fill="#0B2E8C"/>
+  <g clip-path="url(#frame)">
+    <!-- double-breasted suit -->
+    <path d="M10 240 C18 202 54 188 100 186 C146 188 182 202 190 240 Z" fill="#2E2A27"/>
+    <path d="M100 190 L78 200 L96 240 M100 190 L122 200 L104 240" stroke="#C9D0E4" stroke-width="1.6" fill="none" stroke-linejoin="round"/>
+    <!-- shirt, tie and pocket square -->
+    <path d="M88 186 L100 214 L112 186 Z" fill="#FDFAF2"/>
+    <path d="M96 190 H104 L106 212 L100 220 L94 212 Z" fill="#E4592B"/>
+    <path d="M132 212 L140 204 L148 212 Z" fill="#FDFAF2"/>
+    <!-- neck, ears, a square jaw -->
+    <path d="M90 146 H110 V174 H90 Z" fill="#F4CDB9"/>
+    <ellipse cx="70" cy="108" rx="7" ry="10" fill="#F4CDB9"/>
+    <ellipse cx="130" cy="108" rx="7" ry="10" fill="#F4CDB9"/>
+    <path d="M72 96 C72 130 78 150 92 156 H108 C122 150 128 130 128 96 C126 74 114 64 100 64 C86 64 74 74 72 96 Z" fill="#F4CDB9"/>
+    <!-- slicked back, with a widow's peak -->
+    <path d="M70 104 C64 70 80 54 100 54 C120 54 136 70 130 104 C128 88 122 80 112 78 C107 78 103 82 100 89 C97 82 93 78 88 78 C78 80 72 88 70 104 Z" fill="#2E2A27"/>
+    <path data-anim="brow" d="M80 96 C84 93 90 93 94 95 M106 95 C110 93 116 93 120 96" stroke="#2E2A27" stroke-width="2.8" fill="none" stroke-linecap="round"/>
+    <circle data-anim="eye" cx="87" cy="104" r="2.4" fill="#2E2A27"/>
+    <circle data-anim="eye" cx="113" cy="104" r="2.4" fill="#2E2A27"/>
+    <path d="M100 102 L97 118 L102 119" stroke="#2E2A27" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    <!-- a confident smile -->
+    <path data-anim="mouth" d="M87 132 Q100 142 113 132" data-smile="M85 130 Q100 147 115 130" stroke="#2E2A27" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+  </g>
+</svg>

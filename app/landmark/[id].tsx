@@ -1,749 +1,681 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
-import React, { useMemo, useState, useCallback } from "react";
-import { ScrollView, Text, View, Pressable, StyleSheet, ActivityIndicator, Image, Modal, TextInput, Alert, FlatList, Platform } from "react-native";
+import React, { useCallback, useMemo, useState } from "react";
+import {
+  ActivityIndicator,
+  Alert,
+  KeyboardAvoidingView,
+  Modal,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+  useWindowDimensions,
+} from "react-native";
+import Animated from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { LinearGradient } from "expo-linear-gradient";
-import * as ImagePicker from "expo-image-picker";
-import { landmarks, CATEGORY_COLORS, CATEGORY_LABELS } from "@/data/landmarks";
-import { useColors } from "@/hooks/use-colors";
-import { useAuth } from "@/hooks/use-auth";
-import { IconSymbol } from "@/components/ui/icon-symbol";
-import { CategoryPlaceholder } from "@/components/category-placeholder";
-import { TippedInPlate } from "@/components/tipped-in-plate";
-import { PaperGrain } from "@/components/paper-grain";
-import { CornerTicks } from "@/components/hand-inked";
-import { trpc } from "@/lib/trpc";
-import { getApiBaseUrl } from "@/constants/api";
 
-export default function LandmarkDetailScreen() {
+import { ArchitectPortrait } from "@/components/architect-portrait";
+import { EntryPage, RunningHead } from "@/components/entry-page";
+import { PaperGrain } from "@/components/paper-grain";
+import { PhotoGallery, PhotoViewer, type GalleryPhoto } from "@/components/photo-gallery";
+import { Annotation, Arrow, Bar, Rule } from "@/components/print";
+import { ScrollClock, useScrollClockHandler } from "@/components/scroll-clock";
+import { DrawnPlate, TippedInPlate } from "@/components/tipped-in-plate";
+import { getApiBaseUrl } from "@/constants/api";
+import { FONT, INK, MARGIN, PAGE_TURN_MS, PAPER, TYPE } from "@/constants/book";
+import { CATEGORY_LABELS, landmarks, type Landmark } from "@/data/landmarks";
+import { useAuth } from "@/hooks/use-auth";
+import { ARCHITECTS, architectOf, worksBy } from "@/lib/architects";
+import { photoSource } from "@/lib/photo-source";
+import { pickPhotos } from "@/lib/photo-prep";
+import { trpc } from "@/lib/trpc";
+
+const EDITABLE_FIELDS: { key: keyof Landmark; label: string; multiline?: boolean }[] = [
+  { key: "name", label: "Name" },
+  { key: "address", label: "Address" },
+  { key: "architect", label: "Architect" },
+  { key: "yearBuilt", label: "Year built" },
+  { key: "style", label: "Style" },
+  { key: "neighborhood", label: "District" },
+  { key: "description", label: "Description", multiline: true },
+];
+
+function milesBetween(a: Landmark, b: Landmark) {
+  const R = 3958.8;
+  const toRad = (d: number) => (d * Math.PI) / 180;
+  const dLat = toRad(b.latitude - a.latitude);
+  const dLon = toRad(b.longitude - a.longitude);
+  const h =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(toRad(a.latitude)) * Math.cos(toRad(b.latitude)) * Math.sin(dLon / 2) ** 2;
+  return 2 * R * Math.asin(Math.sqrt(h));
+}
+
+function photoUri(url: string) {
+  return url.startsWith("http") ? url : `${getApiBaseUrl()}${url}`;
+}
+
+/**
+ * An entry in the registry, printed as a page of the guide: running head,
+ * the photograph as a one-ink plate (or, wanting one, a plate drawn after
+ * the building's style), the particulars, the architect (drawn,
+ * where the book has a drawing of them), the history, and what's nearby.
+ */
+export default function LandmarkEntryScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
-  const colors = useColors();
   const insets = useSafeAreaInsets();
+  const { width: screenW } = useWindowDimensions();
   const landmark = landmarks.find((l) => l.id === id);
 
   const { data: approvedPhotos } = trpc.photos.getForLandmark.useQuery(
     { landmarkId: id },
-    { enabled: !!id }
+    { enabled: !!id },
   );
-  const submitMutation = trpc.photos.submit.useMutation();
-  const submitEditMutation = trpc.submissions.submit.useMutation();
-  const { user: authUser } = useAuth({ autoFetch: true });
+  const submitPhoto = trpc.photos.submit.useMutation();
+  const submitEdit = trpc.submissions.submit.useMutation();
+  const { user } = useAuth({ autoFetch: true });
 
   const [uploading, setUploading] = useState(false);
-  const [scrolledPastHero, setScrolledPastHero] = useState(false);
-  const [uploadSuccess, setUploadSuccess] = useState(false);
-  const [viewerUri, setViewerUri] = useState<string | null>(null);
-
-  // --- Suggest an Edit state ---
-  const [editModalVisible, setEditModalVisible] = useState(false);
+  const [uploaded, setUploaded] = useState(0);
+  const [viewerAt, setViewerAt] = useState<number | null>(null);
+  const [editOpen, setEditOpen] = useState(false);
   const [editFields, setEditFields] = useState<Record<string, string>>({});
   const [editNote, setEditNote] = useState("");
-  const [editSuccess, setEditSuccess] = useState(false);
-  const [editSubmitting, setEditSubmitting] = useState(false);
+  const [editSending, setEditSending] = useState(false);
+  const [editSent, setEditSent] = useState(false);
+  const clock = useScrollClockHandler();
 
-  const EDITABLE_FIELDS: { key: string; label: string; multiline?: boolean }[] = [
-    { key: "name", label: "Name" },
-    { key: "address", label: "Address" },
-    { key: "architect", label: "Architect" },
-    { key: "yearBuilt", label: "Year Built" },
-    { key: "style", label: "Style" },
-    { key: "neighborhood", label: "Neighborhood" },
-    { key: "description", label: "Description", multiline: true },
-  ];
+  // Every photograph of the place: the lead plate, the guide's others, and
+  // those readers have sent in and the editors approved.
+  const gallery = useMemo<GalleryPhoto[]>(() => {
+    if (!landmark) return [];
+    const list: GalleryPhoto[] = [];
+    if (landmark.photoUrl) list.push({ uri: photoUri(landmark.photoUrl) });
+    for (const p of landmark.photos ?? []) list.push({ uri: photoUri(p.url), caption: p.caption, credit: p.credit });
+    for (const p of approvedPhotos ?? []) {
+      list.push({ uri: photoUri(p.photoUrl), caption: p.caption ?? "From a reader", credit: "Sent in by a reader" });
+    }
+    return list;
+  }, [landmark, approvedPhotos]);
 
-  const openEditModal = useCallback(() => {
-    if (!authUser) {
-      Alert.alert("Sign in required", "Please log in with your email to suggest edits.", [
-        { text: "Cancel", style: "cancel" },
-        { text: "Log in", onPress: () => router.push("/login") },
+  const nearby = useMemo(() => {
+    if (!landmark) return [];
+    return landmarks
+      .filter((l) => l.id !== landmark.id)
+      .map((l) => ({ l, miles: milesBetween(landmark, l) }))
+      .sort((a, b) => a.miles - b.miles)
+      .slice(0, 4);
+  }, [landmark]);
+
+  const openEdit = useCallback(() => {
+    if (!user) {
+      Alert.alert("Sign in to suggest a correction", "Corrections are reviewed before they go into the guide.", [
+        { text: "Not now", style: "cancel" },
+        { text: "Sign in", onPress: () => router.push("/login") },
       ]);
       return;
     }
     setEditFields({});
     setEditNote("");
-    setEditSuccess(false);
-    setEditModalVisible(true);
-  }, [authUser, router]);
+    setEditSent(false);
+    setEditOpen(true);
+  }, [user, router]);
 
-  const submitEdit = useCallback(async () => {
+  const sendEdit = useCallback(async () => {
     if (!landmark) return;
-    // Only submit fields the user actually filled in.
     const payload: Record<string, string> = {};
-    for (const [key, value] of Object.entries(editFields)) {
-      if (value.trim().length > 0) payload[key] = value.trim();
-    }
-    if (Object.keys(payload).length === 0) {
-      Alert.alert("No changes", "Fill in at least one field you'd like to correct.");
+    for (const [k, v] of Object.entries(editFields)) if (v.trim()) payload[k] = v.trim();
+    if (!Object.keys(payload).length) {
+      Alert.alert("Nothing to correct", "Write in at least one field you'd like changed.");
       return;
     }
-    setEditSubmitting(true);
+    setEditSending(true);
     try {
-      await submitEditMutation.mutateAsync({
+      await submitEdit.mutateAsync({
         landmarkId: landmark.id,
         type: "correction",
         payload,
         note: editNote.trim() || undefined,
       });
-      setEditSuccess(true);
-      setTimeout(() => {
-        setEditModalVisible(false);
-        setEditSuccess(false);
-      }, 1800);
+      setEditSent(true);
+      setTimeout(() => setEditOpen(false), 1600);
     } catch (e: any) {
-      Alert.alert("Submission failed", e.message ?? "Something went wrong");
+      Alert.alert("Couldn't send the correction", e?.message ?? "Something went wrong.");
     } finally {
-      setEditSubmitting(false);
+      setEditSending(false);
     }
-  }, [landmark, editFields, editNote, submitEditMutation]);
+  }, [landmark, editFields, editNote, submitEdit]);
 
-  const pickAndSubmit = useCallback(async () => {
+  const addPhotos = useCallback(async () => {
+    if (!user) {
+      Alert.alert("Sign in to add photographs", "Photographs are reviewed before they go into the guide.", [
+        { text: "Not now", style: "cancel" },
+        { text: "Sign in", onPress: () => router.push("/login") },
+      ]);
+      return;
+    }
     try {
-      const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ["images"],
-        quality: 0.8,
-        base64: true,
-      });
-      if (result.canceled || !result.assets[0]) return;
-
-      const asset = result.assets[0];
-      if (!asset.base64) return;
-
-      const mime = asset.mimeType === "image/png" ? "image/png" : "image/jpeg";
-
+      // The editors hold up to three of a reader's photographs per place.
+      const chosen = await pickPhotos(3);
+      if (!chosen.length) return;
       setUploading(true);
-      setUploadSuccess(false);
-
-      await submitMutation.mutateAsync({
-        landmarkId: id,
-        photoBase64: asset.base64,
-        mimeType: mime,
-        caption: undefined,
-      });
-
-      setUploadSuccess(true);
-      setTimeout(() => setUploadSuccess(false), 3000);
+      setUploaded(0);
+      let sent = 0;
+      for (const photo of chosen) {
+        await submitPhoto.mutateAsync({ landmarkId: id, photoBase64: photo.base64, mimeType: photo.mimeType });
+        sent += 1;
+      }
+      setUploaded(sent);
     } catch (e: any) {
-      Alert.alert("Upload failed", e.message ?? "Something went wrong");
+      Alert.alert("Couldn't add the photographs", e?.message ?? "Something went wrong.");
     } finally {
       setUploading(false);
     }
-  }, [id, submitMutation]);
-
-  const nearbyLandmarks = useMemo(() => {
-    if (!landmark) return [];
-    return landmarks
-      .filter((l) => l.id !== landmark.id)
-      .map((l) => ({
-        id: l.id,
-        name: l.name,
-        address: l.address,
-        category: l.category,
-        dist: Math.abs(l.latitude - landmark.latitude) + Math.abs(l.longitude - landmark.longitude),
-      }))
-      .sort((a, b) => a.dist - b.dist)
-      .slice(0, 4);
-  }, [id]);
+  }, [id, submitPhoto, user, router]);
 
   if (!landmark) {
     return (
-      <View style={[styles.container, { backgroundColor: colors.pageBackground, paddingTop: insets.top }]}>
-        <Text style={{ color: colors.foreground }}>Landmark not found</Text>
-      </View>
+      <EntryPage>
+        <RunningHead back="The Registry" />
+        <View style={styles.missing}>
+          <Annotation>This landmark isn&apos;t in the guide.</Annotation>
+        </View>
+      </EntryPage>
     );
   }
 
-  const catColor = CATEGORY_COLORS[landmark.category];
+  const architect = architectOf(landmark);
+  const number = landmark.landmarkNumber?.replace(/^#/, "");
+  const plateW = screenW - MARGIN.outer * 2 - 10;
+  const plateH = Math.round(plateW * 0.68);
+  // The paragraph opens on its first words in blue capitals, as a lead-in.
+  const words = landmark.description.split(" ");
+  const leadIn = words.slice(0, 3).join(" ");
+  const rest = words.slice(3).join(" ");
+
+  const particulars: [string, string][] = (
+    [
+      ["Architect", landmark.architect],
+      ["Built", landmark.yearBuilt],
+      ["Style", landmark.style],
+      ["District", landmark.neighborhood],
+      ["Registry", number ? `No. ${number}` : ""],
+      ["Designation", landmark.designationType !== "Landmark" ? landmark.designationType ?? "" : ""],
+      ["National Register", landmark.nationalRegister ? "Listed ※" : ""],
+    ] as [string, string][]
+  ).filter(([, v]) => v && !/^unknown$/i.test(v));
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.pageBackground }]}>
-      <PaperGrain />
-      <LinearGradient
-        colors={['rgba(0,0,0,0.5)', 'transparent']}
-        style={[styles.headerOverlay, { paddingTop: insets.top + 8 }]}
-      >
-        <View style={styles.header}>
-          <Pressable
-            onPress={() => router.back()}
-            style={({ pressed }) => [styles.backButton, { opacity: pressed ? 0.7 : 1 }]}
-          >
-            <IconSymbol name="arrow.left" size={20} color="#FFFFFF" />
-          </Pressable>
-          <Text style={[styles.headerTitle, { opacity: scrolledPastHero ? 1 : 0 }]} numberOfLines={1}>
-            {landmark.name}
-          </Text>
-          <View style={{ width: 40 }} />
-        </View>
-      </LinearGradient>
-
-      <ScrollView
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
+    <EntryPage>
+      <RunningHead back="The Registry" folio={number ? `No. ${number}` : undefined} />
+      <ScrollClock value={clock.offset}>
+      <Animated.ScrollView
+        onScroll={clock.onScroll}
         scrollEventThrottle={16}
-        onScroll={(e) => {
-          const y = e.nativeEvent.contentOffset.y;
-          const past = y > 150;
-          if (past !== scrolledPastHero) setScrolledPastHero(past);
-        }}
+        contentContainerStyle={{ paddingBottom: Math.max(insets.bottom, 16) + 48 }}
+        showsVerticalScrollIndicator={false}
       >
-        {/* Hero Banner — plain paper; the plate itself carries the image */}
-        <View style={styles.heroBanner}>
-          <View style={styles.heroGradient}>
-            {landmark.photoUrl ? (
-              <TippedInPlate
-                source={{
-                  uri: landmark.photoUrl.startsWith("http")
-                    ? landmark.photoUrl
-                    : `${getApiBaseUrl()}${landmark.photoUrl}`,
-                }}
-                index={1}
-                style={styles.heroImageFrame}
-                imageStyle={styles.heroImage}
-              />
-            ) : (
-              <CategoryPlaceholder
-                category={landmark.category}
-                color={catColor}
-                size={140}
-                iconSize={36}
-                style={styles.heroPlaceholder}
-              />
-            )}
-            <View style={[styles.categoryBadge, { borderColor: catColor }]}>
-              <Text style={[styles.categoryText, { color: catColor }]}>{CATEGORY_LABELS[landmark.category]}</Text>
-            </View>
-            <Text style={[styles.heroName, { color: colors.foreground }]}>{landmark.name}</Text>
-            <View style={styles.heroMeta}>
-              <IconSymbol name="mappin.and.ellipse" size={14} color={colors.muted} />
-              <Text style={[styles.heroAddress, { color: colors.muted }]}>{landmark.address}, Berkeley, CA</Text>
-            </View>
-          </View>
+        {/* The plate */}
+        <View style={styles.plate}>
+          {landmark.photoUrl ? (
+            <TippedInPlate
+              source={photoSource(photoUri(landmark.photoUrl))}
+              index={1}
+              caption={landmark.name}
+              width={plateW}
+              height={plateH}
+              onPress={() => setViewerAt(0)}
+            />
+          ) : (
+            <DrawnPlate subject={landmark} index={1} width={plateW + 10} />
+          )}
         </View>
 
-        {/* Quick Info Cards */}
-        <View style={styles.infoGrid}>
-          {[
-            { label: 'Architect', value: landmark.architect },
-            { label: 'Year Built', value: landmark.yearBuilt },
-            { label: 'Style', value: landmark.style },
-            ...(landmark.landmarkNumber ? [{ label: 'Landmark #', value: landmark.landmarkNumber }] : []),
-          ].map((info) => (
-            <View key={info.label} style={[styles.infoCard, { backgroundColor: colors.pageSurface, borderColor: colors.pageBorder }]}>
-              <CornerTicks color={colors.pageBorder} size={7} inset={2} />
-              <Text style={[styles.infoLabel, { color: colors.muted }]}>{info.label}</Text>
-              <Text style={[styles.infoValue, { color: colors.foreground }]}>{info.value}</Text>
+        {/* Title */}
+        <View style={styles.block}>
+          <Bar />
+          <Text style={[TYPE.kicker, styles.kicker]}>
+            {CATEGORY_LABELS[landmark.category]}
+            {number ? `  ·  Landmark No. ${number}` : ""}
+          </Text>
+          <Text style={styles.title}>{landmark.name}</Text>
+          <Text style={styles.address}>{landmark.address}, Berkeley</Text>
+        </View>
+
+        {/* Particulars */}
+        <View style={[styles.block, styles.table]}>
+          {particulars.map(([label, value], i) => (
+            <View key={label}>
+              <View style={styles.particular}>
+                <Text style={[TYPE.label, styles.particularLabel]}>{label}</Text>
+                <Text style={styles.particularValue}>
+                  {value.endsWith("※") ? (
+                    <>
+                      {value.slice(0, -1)}
+                      <Text style={styles.nr}>※</Text>
+                    </>
+                  ) : (
+                    value
+                  )}
+                </Text>
+              </View>
+              {i < particulars.length - 1 ? <Rule /> : null}
             </View>
           ))}
         </View>
 
-        {/* Status Badges */}
-        <View style={styles.badgeRow}>
-          {landmark.designationType && landmark.designationType !== 'Landmark' && (
-            <View style={[styles.statusBadge, { borderColor: colors.primary }]}>
-              <IconSymbol name="rosette" size={14} color={colors.primary} />
-              <Text style={[styles.statusText, { color: colors.primary }]}>{landmark.designationType}</Text>
-            </View>
-          )}
-          {landmark.nationalRegister && (
-            <View style={[styles.statusBadge, { borderColor: colors.primary }]}>
-              <IconSymbol name="star.fill" size={14} color={colors.primary} />
-              <Text style={[styles.statusText, { color: colors.primary }]}>National Register</Text>
-            </View>
-          )}
-          <View style={[styles.statusBadge, { borderColor: catColor, opacity: 0.9 }]}>
-            <IconSymbol name="mappin.and.ellipse" size={14} color={catColor} />
-            <Text style={[styles.statusText, { color: catColor }]}>{landmark.neighborhood}</Text>
-          </View>
-        </View>
-
-        {/* Photo Gallery */}
-        {(approvedPhotos && approvedPhotos.length > 0) && (
-          <View style={[styles.section, { backgroundColor: colors.pageSurface, borderColor: colors.pageBorder }]}>
-            <CornerTicks color={colors.pageBorder} />
-            <Text style={[styles.sectionTitle, { color: colors.foreground }]}>Community Photos</Text>
-            <FlatList
-              horizontal
-              data={approvedPhotos}
-              keyExtractor={(p) => String(p.id)}
-              showsHorizontalScrollIndicator={false}
-              renderItem={({ item, index }) => {
-                const baseUrl = getApiBaseUrl();
-                const uri = item.photoUrl.startsWith("http") ? item.photoUrl : `${baseUrl}${item.photoUrl}`;
-                return (
-                  <TippedInPlate
-                    source={{ uri }}
-                    index={index + 2}
-                    caption={landmark.name}
-                    onPress={() => setViewerUri(uri)}
-                    imageStyle={styles.photoThumb}
-                  />
-                );
-              }}
-              ItemSeparatorComponent={() => <View style={{ width: 8 }} />}
-            />
-          </View>
-        )}
-
-        {/* Add Photo Button */}
-        <View style={{ paddingHorizontal: 16, marginTop: 16 }}>
-          {uploadSuccess ? (
-            <View style={[styles.addPhotoBtn, { borderColor: colors.success }]}>
-              <Text style={{ color: colors.success, fontWeight: '600' }}>✓ Thank you! Your photo is pending review.</Text>
-            </View>
-          ) : uploading ? (
-            <View style={[styles.addPhotoBtn, { backgroundColor: colors.pageSurface }]}>
-              <ActivityIndicator size="small" color={colors.foreground} />
-              <Text style={{ marginLeft: 8, color: colors.muted }}>Uploading…</Text>
-            </View>
-          ) : (
-            <Pressable
-              onPress={pickAndSubmit}
-              style={({ pressed }) => [styles.addPhotoBtn, { backgroundColor: colors.pageSurface, borderColor: colors.pageBorder, opacity: pressed ? 0.7 : 1 }]}
-            >
-              <IconSymbol name="camera.fill" size={18} color={colors.foreground} />
-              <Text style={{ marginLeft: 8, color: colors.foreground, fontWeight: '600' }}>Add a Photo</Text>
-            </Pressable>
-          )}
-        </View>
-
-        {/* Suggest an Edit Button */}
-        <View style={{ paddingHorizontal: 16, marginTop: 12 }}>
-          {editSuccess ? (
-            <View style={[styles.addPhotoBtn, { borderColor: colors.success }]}>
-              <Text style={{ color: colors.success, fontWeight: '600' }}>✓ Thank you! Your edit is pending review.</Text>
-            </View>
-          ) : (
-            <Pressable
-              onPress={openEditModal}
-              style={({ pressed }) => [styles.addPhotoBtn, { backgroundColor: colors.pageSurface, borderColor: colors.pageBorder, opacity: pressed ? 0.7 : 1 }]}
-            >
-              <IconSymbol name="pencil" size={18} color={colors.foreground} />
-              <Text style={{ marginLeft: 8, color: colors.foreground, fontWeight: '600' }}>Suggest an Edit</Text>
-            </Pressable>
-          )}
-        </View>
-
-        {/* Suggest an Edit Modal */}
-        <Modal visible={editModalVisible} transparent animationType="slide" onRequestClose={() => setEditModalVisible(false)}>
-          <View style={styles.editModalOverlay}>
-            <View style={[styles.editModalCard, { backgroundColor: colors.pageBackground }]}>
-              <Text style={[styles.editModalTitle, { color: colors.foreground }]}>Suggest an Edit</Text>
-              <Text style={[styles.editModalSubtitle, { color: colors.muted }]}>
-                Leave a field blank to keep the current value. Changes are reviewed before going live.
-              </Text>
-              <ScrollView style={{ width: '100%' }} keyboardShouldPersistTaps="handled">
-                {EDITABLE_FIELDS.map((f) => (
-                  <View key={f.key} style={styles.editFieldGroup}>
-                    <Text style={[styles.editFieldLabel, { color: colors.muted }]}>
-                      {f.label}
-                      {landmark && landmark[f.key as keyof typeof landmark] ? '' : ''}
-                    </Text>
-                    <TextInput
-                      style={[styles.editInput, { borderColor: colors.border, color: colors.foreground }, f.multiline && styles.editInputMultiline]}
-                      placeholder={landmark ? String(landmark[f.key as keyof typeof landmark] ?? '') : ''}
-                      placeholderTextColor={colors.muted}
-                      value={editFields[f.key] ?? ""}
-                      onChangeText={(t) => setEditFields((prev) => ({ ...prev, [f.key]: t }))}
-                      multiline={f.multiline}
-                    />
-                  </View>
-                ))}
-                <View style={styles.editFieldGroup}>
-                  <Text style={[styles.editFieldLabel, { color: colors.muted }]}>Why this change? (optional)</Text>
-                  <TextInput
-                    style={[styles.editInput, { borderColor: colors.border, color: colors.foreground }]}
-                    placeholder="e.g. Found a typo in the architect name"
-                    placeholderTextColor={colors.muted}
-                    value={editNote}
-                    onChangeText={setEditNote}
-                  />
-                </View>
-              </ScrollView>
-              <View style={styles.editModalActions}>
-                <Pressable
-                  style={[styles.editModalBtn, styles.editModalBtnSecondary, { borderColor: colors.border }]}
-                  onPress={() => setEditModalVisible(false)}
-                  disabled={editSubmitting}
-                >
-                  <Text style={{ color: colors.foreground, fontWeight: '600' }}>Cancel</Text>
-                </Pressable>
-                <Pressable
-                  style={[styles.editModalBtn, styles.editModalBtnPrimary, { borderColor: colors.primary }, editSubmitting && { opacity: 0.6 }]}
-                  onPress={submitEdit}
-                  disabled={editSubmitting}
-                >
-                  {editSubmitting ? (
-                    <ActivityIndicator size="small" color={colors.primary} />
-                  ) : (
-                    <Text style={{ color: colors.primary, fontWeight: '600' }}>Submit for Review</Text>
-                  )}
-                </Pressable>
-              </View>
+        {/* The architect, drawn */}
+        {architect ? (
+          <View style={[styles.block, styles.architect]}>
+            <ArchitectPortrait architect={architect} width={108} delay={PAGE_TURN_MS} />
+            <View style={styles.architectText}>
+              <Text style={TYPE.label}>The Architect</Text>
+              <Text style={styles.architectName}>{ARCHITECTS[architect].name}</Text>
+              <Text style={[TYPE.label, styles.architectYears]}>{ARCHITECTS[architect].years}</Text>
+              <Text style={styles.architectNote}>{ARCHITECTS[architect].note}</Text>
+              <Pressable
+                onPress={() =>
+                  router.navigate({ pathname: "/registry", params: { q: ARCHITECTS[architect].surname } })
+                }
+                hitSlop={8}
+                style={({ pressed }) => [styles.linkRow, pressed && { opacity: 0.5 }]}
+              >
+                <Text style={styles.link}>{worksBy(architect).length - 1} more in the registry</Text>
+                <Arrow length={18} />
+              </Pressable>
             </View>
           </View>
-        </Modal>
+        ) : null}
 
-        {/* Photo Viewer Modal */}
-        <Modal visible={!!viewerUri} transparent animationType="fade">
-          <Pressable style={styles.viewerOverlay} onPress={() => setViewerUri(null)}>
-            {viewerUri && <Image source={{ uri: viewerUri }} style={styles.viewerImage} resizeMode="contain" />}
-          </Pressable>
-        </Modal>
-
-        {/* Description */}
-        <View style={[styles.section, { backgroundColor: colors.pageSurface, borderColor: colors.pageBorder }]}>
-          <CornerTicks color={colors.pageBorder} />
-          <Text style={[styles.sectionTitle, { color: colors.muted }]}>About</Text>
-          <Text style={[styles.description, { color: colors.foreground }]}>
-            <Text style={[styles.dropCap, { color: catColor }]}>{landmark.description.charAt(0)}</Text>
-            {landmark.description.slice(1)}
+        {/* History */}
+        <View style={styles.block}>
+          <Rule color={INK.charcoal} weight={1} style={styles.historyRule} />
+          <Text style={styles.history}>
+            <Text style={styles.leadIn}>{leadIn.toUpperCase()}</Text> {rest}
           </Text>
         </View>
 
-        {/* View on Map */}
+        {/* The map */}
         <Pressable
           onPress={() => router.push({ pathname: "/map", params: { landmarkId: landmark.id } })}
-          style={({ pressed }) => [
-            styles.viewOnMapButton,
-            { borderColor: catColor, opacity: pressed ? 0.7 : 1 },
-          ]}
+          style={({ pressed }) => [styles.block, styles.linkRow, pressed && { opacity: 0.5 }]}
+          accessibilityRole="link"
         >
-          <IconSymbol name="map" size={16} color={catColor} />
-          <Text style={[styles.viewOnMapText, { color: catColor }]}>View on Map</Text>
-          <IconSymbol name="arrow.up.right" size={14} color={catColor} />
+          <Text style={styles.link}>Find it on the map</Text>
+          <Arrow length={22} />
         </Pressable>
 
-        {/* Nearby Landmarks */}
-        <View style={[styles.section, { backgroundColor: colors.pageSurface, borderColor: colors.pageBorder }]}>
-          <CornerTicks color={colors.pageBorder} />
-          <Text style={[styles.sectionTitle, { color: colors.foreground }]}>Nearby Landmarks</Text>
-          {nearbyLandmarks.map((nearby) => (
-              <Pressable
-                key={nearby.id}
-                onPress={() => router.push(`/landmark/${nearby.id}`)}
-                style={({ pressed }) => [
-                  styles.nearbyItem,
-                  { borderBottomColor: colors.pageBorder, opacity: pressed ? 0.7 : 1 },
-                ]}
-              >
-                <View style={[styles.nearbyDot, { backgroundColor: CATEGORY_COLORS[nearby.category] }]} />
-                <View style={styles.nearbyInfo}>
-                  <Text style={[styles.nearbyName, { color: colors.foreground }]} numberOfLines={1}>
-                    {nearby.name}
-                  </Text>
-                  <Text style={[styles.nearbyAddress, { color: colors.muted }]} numberOfLines={1}>
-                    {nearby.address}
-                  </Text>
-                </View>
-                <IconSymbol name="chevron.right" size={16} color={colors.muted} />
-              </Pressable>
-            ))}
+        {/* The gallery: shown when there's more than the one plate */}
+        {gallery.length > 1 ? (
+          <View style={styles.block}>
+            <PhotoGallery photos={gallery} onOpen={setViewerAt} />
+          </View>
+        ) : null}
+
+        {/* Nearby */}
+        <View style={styles.block}>
+          <Text style={[TYPE.label, styles.subhead]}>Nearby in the registry</Text>
+          <Rule color={INK.charcoal} weight={1} />
+          {nearby.map(({ l, miles }, i) => (
+            <Pressable
+              key={l.id}
+              onPress={() => router.push(`/landmark/${l.id}`)}
+              style={({ pressed }) => [styles.nearby, pressed && { opacity: 0.5 }]}
+            >
+              <View style={styles.nearbyRow}>
+                <Text style={styles.nearbyName} numberOfLines={1}>
+                  {l.name}
+                </Text>
+                <Text style={styles.nearbyMiles}>
+                  {miles < 0.02
+                    ? "Next door"
+                    : miles < 0.1
+                      ? `${Math.max(100, Math.round((miles * 5280) / 50) * 50)} ft`
+                      : `${miles.toFixed(1)} mi`}
+                </Text>
+              </View>
+              <Text style={styles.nearbyAddr}>{l.address}</Text>
+              {i < nearby.length - 1 ? <Rule style={styles.nearbyRule} /> : null}
+            </Pressable>
+          ))}
         </View>
 
-        <View style={{ height: 40 }} />
-      </ScrollView>
-    </View>
+        {/* Contribute */}
+        <View style={[styles.block, styles.contribute]}>
+          <Text style={[TYPE.label, styles.subhead]}>Help complete the guide</Text>
+          {uploading ? (
+            <ActivityIndicator color={INK.blue} style={styles.contributeRow} />
+          ) : uploaded ? (
+            <Annotation style={styles.contributeRow}>
+              {uploaded === 1 ? "Your photograph is" : "Your photographs are"} with the editors.
+            </Annotation>
+          ) : (
+            <Pressable onPress={addPhotos} hitSlop={8} style={[styles.linkRow, styles.contributeRow]}>
+              <Text style={styles.link}>Add photographs</Text>
+              <Arrow length={18} />
+            </Pressable>
+          )}
+          <Pressable onPress={openEdit} hitSlop={8} style={[styles.linkRow, styles.contributeRow]}>
+            <Text style={styles.link}>Suggest a correction</Text>
+            <Arrow length={18} />
+          </Pressable>
+        </View>
+      </Animated.ScrollView>
+      </ScrollClock>
+
+      <CorrectionSheet
+        visible={editOpen}
+        landmark={landmark}
+        fields={editFields}
+        note={editNote}
+        sending={editSending}
+        sent={editSent}
+        onChangeField={(k, v) => setEditFields((f) => ({ ...f, [k]: v }))}
+        onChangeNote={setEditNote}
+        onCancel={() => setEditOpen(false)}
+        onSend={sendEdit}
+      />
+
+      <PhotoViewer photos={gallery} index={viewerAt} onClose={() => setViewerAt(null)} />
+    </EntryPage>
+  );
+}
+
+/** A correction sheet: a loose slip slid up over the page. */
+function CorrectionSheet({
+  visible,
+  landmark,
+  fields,
+  note,
+  sending,
+  sent,
+  onChangeField,
+  onChangeNote,
+  onCancel,
+  onSend,
+}: {
+  visible: boolean;
+  landmark: Landmark;
+  fields: Record<string, string>;
+  note: string;
+  sending: boolean;
+  sent: boolean;
+  onChangeField: (key: string, value: string) => void;
+  onChangeNote: (value: string) => void;
+  onCancel: () => void;
+  onSend: () => void;
+}) {
+  const insets = useSafeAreaInsets();
+  return (
+    <Modal visible={visible} transparent animationType="slide" onRequestClose={onCancel}>
+      <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} style={styles.sheetBackdrop}>
+        <View style={[styles.sheet, { paddingBottom: Math.max(insets.bottom, 16) + 8 }]}>
+          <PaperGrain />
+          <Bar />
+          <Text style={[TYPE.kicker, styles.kicker]}>A correction</Text>
+          <Text style={styles.sheetTitle}>{landmark.name}</Text>
+          <Text style={styles.sheetNote}>Fill in only what should change. Every correction is read by the editors.</Text>
+          <ScrollView style={styles.sheetFields} keyboardShouldPersistTaps="handled">
+            {EDITABLE_FIELDS.map((f) => (
+              <View key={f.key} style={styles.sheetField}>
+                <Text style={TYPE.label}>{f.label}</Text>
+                <TextInput
+                  value={fields[f.key] ?? ""}
+                  onChangeText={(t) => onChangeField(f.key, t)}
+                  placeholder={String(landmark[f.key] ?? "")}
+                  placeholderTextColor={INK.faded}
+                  multiline={f.multiline}
+                  style={[styles.sheetInput, f.multiline && styles.sheetInputMulti]}
+                />
+                <Rule color={INK.charcoal} weight={1} />
+              </View>
+            ))}
+            <View style={styles.sheetField}>
+              <Text style={TYPE.label}>Why the change</Text>
+              <TextInput
+                value={note}
+                onChangeText={onChangeNote}
+                placeholder="e.g. the architect's name is misspelt"
+                placeholderTextColor={INK.faded}
+                style={styles.sheetInput}
+              />
+              <Rule color={INK.charcoal} weight={1} />
+            </View>
+          </ScrollView>
+          <View style={styles.sheetActions}>
+            <Pressable onPress={onCancel} hitSlop={10} disabled={sending}>
+              <Text style={[styles.link, { color: INK.sepia }]}>Cancel</Text>
+            </Pressable>
+            {sent ? (
+              <Text style={styles.link}>Received — thank you</Text>
+            ) : sending ? (
+              <ActivityIndicator color={INK.blue} />
+            ) : (
+              <Pressable onPress={onSend} style={({ pressed }) => [styles.solidButton, pressed && { opacity: 0.8 }]}>
+                <Text style={styles.solidButtonText}>Send to the editors</Text>
+              </Pressable>
+            )}
+          </View>
+        </View>
+      </KeyboardAvoidingView>
+    </Modal>
   );
 }
 
 const styles = StyleSheet.create({
-  viewOnMapButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 8,
-    borderWidth: 1,
-    borderRadius: 8,
-    paddingVertical: 12,
-    marginTop: -10,
+  missing: {
+    padding: MARGIN.outer,
+    paddingTop: 60,
   },
-  viewOnMapText: {
-    fontSize: 14,
-    fontWeight: "700",
-    letterSpacing: 0.5,
+  plate: {
+    paddingTop: 12,
+    paddingHorizontal: MARGIN.outer,
   },
-  editModalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.55)',
-    justifyContent: 'flex-end',
+  block: {
+    paddingHorizontal: MARGIN.outer,
+    marginTop: 28,
   },
-  editModalCard: {
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    paddingTop: 20,
-    paddingHorizontal: 20,
-    paddingBottom: 32,
-    maxHeight: '85%',
+  kicker: {
+    marginTop: 12,
   },
-  editModalTitle: {
-    fontSize: 22,
-    fontWeight: '800',
-    fontFamily: Platform.select({ ios: 'ui-serif', default: 'serif' }),
-    marginBottom: 6,
+  title: {
+    fontFamily: FONT.light,
+    fontSize: 34,
+    lineHeight: 39,
+    letterSpacing: -0.3,
+    color: INK.charcoal,
+    marginTop: 6,
   },
-  editModalSubtitle: {
-    fontSize: 13,
-    lineHeight: 18,
-    marginBottom: 16,
-  },
-  editFieldGroup: {
-    marginBottom: 12,
-  },
-  editFieldLabel: {
-    fontSize: 11,
-    fontWeight: '600',
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-    marginBottom: 6,
-  },
-  editInput: {
-    borderWidth: StyleSheet.hairlineWidth,
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
+  address: {
+    fontFamily: FONT.regular,
     fontSize: 15,
-  },
-  editInputMultiline: {
-    minHeight: 90,
-    textAlignVertical: 'top',
-  },
-  editModalActions: {
-    flexDirection: 'row',
-    gap: 10,
+    color: INK.sepia,
     marginTop: 8,
   },
-  editModalBtn: {
-    flex: 1,
-    height: 48,
-    borderRadius: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
+  table: {
+    borderTopWidth: 1.5,
+    borderTopColor: INK.blue,
+    marginHorizontal: MARGIN.outer,
+    paddingHorizontal: 0,
   },
-  editModalBtnSecondary: {
-    borderWidth: StyleSheet.hairlineWidth,
-  },
-  editModalBtnPrimary: {
-    borderWidth: 1.5,
-    backgroundColor: 'transparent',
-  },
-  container: { flex: 1 },
-  headerOverlay: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    zIndex: 10,
-  },
-  header: {
+  particular: {
     flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 16,
-    paddingBottom: 12,
+    alignItems: "baseline",
+    justifyContent: "space-between",
+    gap: 16,
+    paddingVertical: 11,
   },
-  backButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: 'rgba(0,0,0,0.3)',
-    alignItems: "center",
-    justifyContent: "center",
+  particularLabel: {
+    flexShrink: 0,
   },
-  headerTitle: {
-    flex: 1,
-    fontSize: 17,
-    fontWeight: "600",
-    textAlign: "center",
-    marginHorizontal: 8,
-    color: "#FFFFFF",
+  particularValue: {
+    flexShrink: 1,
+    fontFamily: FONT.regular,
+    fontSize: 15,
+    color: INK.charcoal,
+    textAlign: "right",
   },
-  scrollContent: { paddingBottom: 20 },
-  heroBanner: {
-    overflow: 'hidden',
-    alignItems: 'center',
+  nr: {
+    color: INK.vermilion,
   },
-  heroImageFrame: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    width: "100%",
-  },
-  heroImage: {
-    width: "100%",
-    height: 240,
-  },
-
-  heroPlaceholder: {
-    marginBottom: 16,
-  },
-  heroGradient: {
-    padding: 24,
-    paddingTop: 60,
-    paddingBottom: 32,
-    minHeight: 240,
-    justifyContent: 'center',
-  },
-  categoryBadge: {
-    alignSelf: "flex-start",
-    paddingHorizontal: 12,
-    paddingVertical: 5,
-    borderRadius: 4,
-    borderWidth: StyleSheet.hairlineWidth,
-    marginBottom: 12,
-  },
-  categoryText: {
-    fontSize: 12,
-    fontWeight: "700",
-    textTransform: "uppercase",
-    letterSpacing: 0.8,
-    fontFamily: Platform.select({ ios: "Georgia", default: "serif" }),
-  },
-  heroName: {
-    fontSize: 30,
-    fontWeight: "800",
-    fontFamily: Platform.select({ ios: "ui-serif", default: "serif" }),
-    lineHeight: 36,
-    letterSpacing: -0.3,
-    marginBottom: 8,
-  },
-  heroMeta: {
+  architect: {
     flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
+    alignItems: "flex-start",
+    gap: 18,
+    marginTop: 34,
   },
-  heroAddress: {
+  architectText: {
+    flex: 1,
+    paddingTop: 2,
+  },
+  architectName: {
+    fontFamily: FONT.regular,
+    fontSize: 20,
+    lineHeight: 24,
+    color: INK.charcoal,
+    marginTop: 6,
+  },
+  architectYears: {
+    marginTop: 4,
+  },
+  architectNote: {
+    fontFamily: FONT.regular,
     fontSize: 14,
     lineHeight: 20,
-    fontStyle: "italic",
-    letterSpacing: 0.4,
-    fontFamily: Platform.select({ ios: "Georgia", default: "serif" }),
+    color: INK.charcoal,
+    marginTop: 10,
   },
-  infoGrid: {
+  linkRow: {
     flexDirection: "row",
-    flexWrap: "wrap",
-    paddingHorizontal: 16,
+    alignItems: "center",
     gap: 10,
-    marginTop: 16,
+    marginTop: 12,
   },
-  infoCard: {
-    width: "47%",
-    padding: 14,
-    borderRadius: 6,
-    borderWidth: StyleSheet.hairlineWidth,
-    // borderColor set dynamically
-  },
-  infoLabel: {
-    fontSize: 11,
-    fontWeight: "600",
+  link: {
+    fontFamily: FONT.medium,
+    fontSize: 11.5,
+    letterSpacing: 1.8,
     textTransform: "uppercase",
-    letterSpacing: 0.8,
-    marginBottom: 4,
-    fontFamily: Platform.select({ ios: "Georgia", default: "serif" }),
+    color: INK.blue,
   },
-  infoValue: {
-    fontSize: 15,
-    fontWeight: "600",
-    lineHeight: 20,
-    fontFamily: "SourceSerif4_600SemiBold",
+  historyRule: {
+    marginBottom: 18,
   },
-  badgeRow: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    paddingHorizontal: 16,
-    gap: 8,
-    marginTop: 16,
+  history: {
+    fontFamily: FONT.regular,
+    fontSize: 16,
+    lineHeight: 26,
+    color: INK.charcoal,
   },
-  statusBadge: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 16,
-    borderWidth: StyleSheet.hairlineWidth,
-    backgroundColor: "transparent",
-  },
-  statusText: {
+  leadIn: {
+    fontFamily: FONT.medium,
     fontSize: 13,
-    fontWeight: "600",
-    fontFamily: Platform.select({ ios: "Georgia", default: "serif" }),
+    letterSpacing: 1.6,
+    color: INK.blue,
   },
-  section: {
-    marginHorizontal: 16,
-    marginTop: 16,
-    padding: 18,
-    borderRadius: 6,
-    borderWidth: StyleSheet.hairlineWidth,
-    // borderColor set dynamically
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: "700",
-    fontFamily: Platform.select({ ios: "ui-serif", default: "serif" }),
+  subhead: {
     marginBottom: 10,
-    transform: [{ rotate: "-0.35deg" }],
   },
-  dropCap: {
-    fontSize: 44,
-    lineHeight: 48,
-    fontWeight: "600",
-    fontFamily: Platform.select({ ios: "ui-serif", default: "serif" }),
-    paddingRight: 6,
+  nearby: {
+    paddingTop: 12,
   },
-  description: {
-    fontSize: 15,
-    lineHeight: 24,
-  },
-  nearbyItem: {
+  nearbyRow: {
     flexDirection: "row",
-    alignItems: "center",
-    paddingVertical: 12,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderStyle: "dashed" as const,
+    alignItems: "baseline",
+    justifyContent: "space-between",
     gap: 12,
   },
-  nearbyDot: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-  },
-  nearbyInfo: {
-    flex: 1,
-  },
   nearbyName: {
-    fontSize: 15,
-    fontWeight: "600",
-    lineHeight: 20,
+    flexShrink: 1,
+    fontFamily: FONT.regular,
+    fontSize: 16,
+    color: INK.charcoal,
   },
-  nearbyAddress: {
+  nearbyMiles: {
+    fontFamily: FONT.medium,
+    fontSize: 11,
+    letterSpacing: 1.2,
+    color: INK.blue,
+  },
+  nearbyAddr: {
+    fontFamily: FONT.regular,
     fontSize: 13,
-    lineHeight: 18,
+    color: INK.sepia,
     marginTop: 2,
   },
-  photoThumb: {
-    width: 100,
-    height: 100,
-    borderRadius: 10,
-    backgroundColor: '#eee',
+  nearbyRule: {
+    marginTop: 12,
   },
-  addPhotoBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 14,
-    borderRadius: 6,
-    borderWidth: StyleSheet.hairlineWidth,
-    // borderColor set dynamically
+  contribute: {
+    marginTop: 40,
   },
-  viewerOverlay: {
+  contributeRow: {
+    marginTop: 8,
+    alignSelf: "flex-start",
+  },
+  sheetBackdrop: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.9)',
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "flex-end",
+    backgroundColor: "rgba(28,22,16,0.35)",
   },
-  viewerImage: {
-    width: '90%',
-    height: '80%',
-    borderRadius: 12,
+  sheet: {
+    maxHeight: "88%",
+    backgroundColor: PAPER.slip,
+    paddingHorizontal: MARGIN.outer,
+    paddingTop: 26,
+    overflow: "hidden",
+  },
+  sheetTitle: {
+    fontFamily: FONT.light,
+    fontSize: 28,
+    lineHeight: 32,
+    color: INK.charcoal,
+    marginTop: 6,
+  },
+  sheetNote: {
+    fontFamily: FONT.regular,
+    fontSize: 14,
+    lineHeight: 20,
+    color: INK.sepia,
+    marginTop: 8,
+    marginBottom: 6,
+  },
+  sheetFields: {
+    flexGrow: 0,
+  },
+  sheetField: {
+    marginTop: 18,
+  },
+  sheetInput: {
+    fontFamily: FONT.regular,
+    fontSize: 16,
+    color: INK.charcoal,
+    paddingVertical: 8,
+  },
+  sheetInputMulti: {
+    minHeight: 72,
+    textAlignVertical: "top",
+  },
+  sheetActions: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginTop: 20,
+  },
+  solidButton: {
+    backgroundColor: INK.blue,
+    paddingHorizontal: 20,
+    paddingVertical: 13,
+  },
+  solidButtonText: {
+    fontFamily: FONT.medium,
+    fontSize: 12,
+    letterSpacing: 2,
+    textTransform: "uppercase",
+    color: PAPER.cover,
   },
 });

@@ -33,18 +33,19 @@ export interface MapUnfoldProps {
  * The animated values settle exactly to identity (scaleX 1, rotateY 0,
  * opacity 1) so map gestures keep working after the animation, and the
  * crease overlay is pointerEvents="none" and unmounts when done.
+ *
+ * Whether to animate is decided once, on mount, and the wrapper keeps the
+ * same tree either way: a change of structure would remount the map inside
+ * it (and drop any camera move waiting for the map to load).
  */
 export function MapUnfold({ children, animated }: MapUnfoldProps) {
   const reduceMotion = useReducedMotion();
-  const shouldAnimate = animated && !reduceMotion;
-  const progress = useSharedValue(0);
+  const [shouldAnimate] = useState(() => animated && !reduceMotion);
+  const progress = useSharedValue(shouldAnimate ? 0 : 1);
   const [creasesVisible, setCreasesVisible] = useState(shouldAnimate);
 
   useEffect(() => {
-    if (!shouldAnimate) {
-      setCreasesVisible(false);
-      return;
-    }
+    if (!shouldAnimate) return;
     progress.value = 0;
     progress.value = withTiming(
       1,
@@ -76,10 +77,6 @@ export function MapUnfold({ children, animated }: MapUnfoldProps) {
     // Creases read as fresh fold marks that relax away as it opens.
     opacity: 0.55 * (1 - progress.value),
   }));
-
-  if (!shouldAnimate) {
-    return <View style={styles.wrapper}>{children}</View>;
-  }
 
   return (
     <View style={styles.wrapper}>

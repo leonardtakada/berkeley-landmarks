@@ -15,7 +15,17 @@ export interface Landmark {
   nationalRegister: boolean;
   neighborhood: string;
   designationType?: 'Landmark' | 'Structure of Merit' | 'Historic District' | 'Notable';
+  /** The lead photograph, printed as the entry's plate. */
   photoUrl?: string;
+  /** More photographs, for the entry's gallery. */
+  photos?: LandmarkPhoto[];
+}
+
+export interface LandmarkPhoto {
+  url: string;
+  caption?: string;
+  /** Who took it and on what licence. */
+  credit?: string;
 }
 
 export const CATEGORY_COLORS: Record<LandmarkCategory, string> = {
@@ -55,7 +65,10 @@ export const landmarks: Landmark[] = [
     style: 'Arts & Crafts / Byzantine Revival',
     nationalRegister: true,
     neighborhood: 'Southside',
-    photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e2/First_Church_of_Christ%2C_Scientist_%28Berkeley%2C_California%29_-_IMG_6579.JPG/800px-First_Church_of_Christ%2C_Scientist_%28Berkeley%2C_California%29_-_IMG_6579.JPG',
+    photoUrl: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/6/6c/First_Church_of_Christ%2C_Scientist_%28Berkeley%2C_CA%29.JPG/960px-First_Church_of_Christ%2C_Scientist_%28Berkeley%2C_CA%29.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail',
+    photos: [
+      { url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/13/First_Church_of_Christ_Scientist.jpg/960px-First_Church_of_Christ_Scientist.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", credit: "Coro · CC BY-SA 3.0 · Wikimedia Commons" },
+    ],
     designationType: 'Landmark',
   },
   {
@@ -72,7 +85,12 @@ export const landmarks: Landmark[] = [
     style: 'Gothic Revival',
     nationalRegister: true,
     neighborhood: 'West Berkeley',
-    photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4c/Episcopal_Church_of_the_Good_Shepherd%2C_Berkeley%2C_CA.JPG/800px-Episcopal_Church_of_the_Good_Shepherd%2C_Berkeley%2C_CA.JPG',
+    photoUrl: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/4/46/Church_of_the_Good_Shepherd_%28Berkeley%2C_CA%29.JPG/960px-Church_of_the_Good_Shepherd_%28Berkeley%2C_CA%29.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail',
+    photos: [
+      { url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/01/USA-Berkeley-Episcopal_Church_of_the_Good_Shepherd-1.jpg/960px-USA-Berkeley-Episcopal_Church_of_the_Good_Shepherd-1.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", credit: "Eugene Zelenko · CC BY-SA 4.0 · Wikimedia Commons" },
+      { url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/68/USA-Berkeley-Episcopal_Church_of_the_Good_Shepherd-10.jpg/960px-USA-Berkeley-Episcopal_Church_of_the_Good_Shepherd-10.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", credit: "Eugene Zelenko · CC BY-SA 4.0 · Wikimedia Commons" },
+      { url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/af/USA-Berkeley-Episcopal_Church_of_the_Good_Shepherd-12.jpg/960px-USA-Berkeley-Episcopal_Church_of_the_Good_Shepherd-12.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", credit: "Eugene Zelenko · CC BY-SA 4.0 · Wikimedia Commons" },
+    ],
     designationType: 'Landmark',
   },
   {
@@ -105,7 +123,7 @@ export const landmarks: Landmark[] = [
     style: 'Arts & Crafts',
     nationalRegister: true,
     neighborhood: 'Elmwood',
-    photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/St._John%27s_Presbyterian_Church_%28Berkeley%2C_CA%29.JPG/800px-St._John%27s_Presbyterian_Church_%28Berkeley%2C_CA%29.JPG',
+    photoUrl: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/7/75/St._John%27s_Presbyterian_Church_%28Berkeley%2C_CA%29.JPG/960px-St._John%27s_Presbyterian_Church_%28Berkeley%2C_CA%29.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail',
     designationType: 'Landmark',
   },
   {
@@ -122,7 +140,12 @@ export const landmarks: Landmark[] = [
     style: 'Moorish / Gothic Revival',
     nationalRegister: true,
     neighborhood: 'Southside',
-    photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5a/Berkeley_Women%27s_City_Club_%28Berkeley%2C_CA%29.JPG/800px-Berkeley_Women%27s_City_Club_%28Berkeley%2C_CA%29.JPG',
+    photoUrl: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/5/54/Berkeley_Women%27s_City_Club_%28Berkeley%2C_CA%29.JPG/960px-Berkeley_Women%27s_City_Club_%28Berkeley%2C_CA%29.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail',
+    photos: [
+      { url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/78/Berkeley_Women%27s_City_Club_%28Berkeley%2C_CA%29_%28cropped%29.JPG/960px-Berkeley_Women%27s_City_Club_%28Berkeley%2C_CA%29_%28cropped%29.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", credit: "Sanfranman59 · CC BY-SA 3.0 · Wikimedia Commons" },
+      { url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/ea/Berkeley_City_Club_%286342624681%29.jpg/960px-Berkeley_City_Club_%286342624681%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", credit: "Sasquatch I · CC BY 2.0 · Wikimedia Commons" },
+      { url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/14/Berkeley_City_Club_%286343375254%29.jpg/960px-Berkeley_City_Club_%286343375254%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", credit: "Sasquatch I · CC BY 2.0 · Wikimedia Commons" },
+    ],
     designationType: 'Landmark',
   },
   {
@@ -155,7 +178,12 @@ export const landmarks: Landmark[] = [
     style: 'Beaux-Arts',
     nationalRegister: true,
     neighborhood: 'Downtown',
-    photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a3/Old_City_Hall_%28Berkeley%2C_CA%29.JPG/800px-Old_City_Hall_%28Berkeley%2C_CA%29.JPG',
+    photoUrl: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/7/70/Old_City_Hall_%28Berkeley%2C_CA%29.JPG/960px-Old_City_Hall_%28Berkeley%2C_CA%29.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail',
+    photos: [
+      { url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b7/Berkeley_City_Hall-2.jpg/960px-Berkeley_City_Hall-2.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", credit: "Almonroth · CC BY-SA 3.0 · Wikimedia Commons" },
+      { url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/df/Berkeley_City_Hall-4.jpg/960px-Berkeley_City_Hall-4.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", credit: "Almonroth · CC BY-SA 3.0 · Wikimedia Commons" },
+      { url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d8/Berkeley_City_Hall-3.jpg/960px-Berkeley_City_Hall-3.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", credit: "Almonroth · CC BY-SA 3.0 · Wikimedia Commons" },
+    ],
     designationType: 'Landmark',
   },
   {
@@ -172,7 +200,11 @@ export const landmarks: Landmark[] = [
     style: 'American Craftsman',
     nationalRegister: true,
     neighborhood: 'Southside',
-    photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5f/Thorsen_House.jpg/800px-Thorsen_House.jpg',
+    photoUrl: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/4/4c/Thorsen_House.jpg/960px-Thorsen_House.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail',
+    photos: [
+      { url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/fb/Thorsen_House_%28Sigma_Phi%29_detail.jpg/960px-Thorsen_House_%28Sigma_Phi%29_detail.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", credit: "Eekiv · CC BY-SA 3.0 · Wikimedia Commons" },
+      { url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/ba/Thorsen_House_%28Sigma_Phi%29_entrance_tall.jpg/960px-Thorsen_House_%28Sigma_Phi%29_entrance_tall.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", credit: "Eekiv · CC BY-SA 3.0 · Wikimedia Commons" },
+    ],
     designationType: 'Landmark',
   },
   {
@@ -189,7 +221,7 @@ export const landmarks: Landmark[] = [
     style: 'Arts & Crafts',
     nationalRegister: false,
     neighborhood: 'Northside',
-    photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3e/Rose_Walk%2C_Berkeley%2C_California.png/800px-Rose_Walk%2C_Berkeley%2C_California.png',
+    photoUrl: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/9/91/Rose_Walk%2C_Berkeley%2C_California.png/960px-Rose_Walk%2C_Berkeley%2C_California.png?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail',
     designationType: 'Landmark',
   },
   {
@@ -206,7 +238,7 @@ export const landmarks: Landmark[] = [
     style: 'Spanish Colonial Revival',
     nationalRegister: true,
     neighborhood: 'West Berkeley',
-    photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/76/Berkeley_Day_Nursery_%28Berkeley%2C_CA%29.jpg/800px-Berkeley_Day_Nursery_%28Berkeley%2C_CA%29.jpg',
+    photoUrl: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/7/76/Berkeley_Day_Nursery_%28Berkeley%2C_CA%29.jpg/960px-Berkeley_Day_Nursery_%28Berkeley%2C_CA%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail',
     designationType: 'Landmark',
   },
   {
@@ -239,7 +271,7 @@ export const landmarks: Landmark[] = [
     style: 'Commercial Vernacular',
     nationalRegister: true,
     neighborhood: 'Downtown',
-    photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3b/Golden_Sheaf_Bakery_%28Berkeley%2C_CA%29.JPG/800px-Golden_Sheaf_Bakery_%28Berkeley%2C_CA%29.JPG',
+    photoUrl: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/7/7c/Golden_Sheaf_Bakery_%28Berkeley%2C_CA%29.JPG/960px-Golden_Sheaf_Bakery_%28Berkeley%2C_CA%29.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail',
     designationType: 'Landmark',
   },
   {
@@ -256,7 +288,7 @@ export const landmarks: Landmark[] = [
     style: 'Spanish Colonial Revival',
     nationalRegister: true,
     neighborhood: 'West Berkeley',
-    photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c0/Fox_Court_%28Berkeley%2C_CA%29.JPG/800px-Fox_Court_%28Berkeley%2C_CA%29.JPG',
+    photoUrl: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/3/33/Fox_Court_%28Berkeley%2C_CA%29.JPG/960px-Fox_Court_%28Berkeley%2C_CA%29.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail',
     designationType: 'Landmark',
   },
   {
@@ -273,7 +305,7 @@ export const landmarks: Landmark[] = [
     style: 'Mediterranean Revival',
     nationalRegister: true,
     neighborhood: 'Southside',
-    photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a2/College_Women%27s_Club_%28Berkeley%2C_CA%29.JPG/800px-College_Women%27s_Club_%28Berkeley%2C_CA%29.JPG',
+    photoUrl: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d7/College_Women%27s_Club_%28Berkeley%2C_CA%29.JPG/960px-College_Women%27s_Club_%28Berkeley%2C_CA%29.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail',
     designationType: 'Landmark',
   },
   {
@@ -290,7 +322,12 @@ export const landmarks: Landmark[] = [
     style: 'Classical Revival',
     nationalRegister: true,
     neighborhood: 'Downtown',
-    photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4e/Masonic_Temple_%28Berkeley%2C_CA%29.JPG/800px-Masonic_Temple_%28Berkeley%2C_CA%29.JPG',
+    photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/6/64/Masonic_Temple_%28Berkeley%2C_CA%29.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled',
+    photos: [
+      { url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/ae/Berkeley_Masonic_Temple-4.jpg/960px-Berkeley_Masonic_Temple-4.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", credit: "Almonroth · CC BY-SA 3.0 · Wikimedia Commons" },
+      { url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/06/Berkeley_Masonic_Temple-2.jpg/960px-Berkeley_Masonic_Temple-2.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", credit: "Almonroth · CC BY-SA 3.0 · Wikimedia Commons" },
+      { url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/17/Berkeley_Masonic_Temple-5.jpg/960px-Berkeley_Masonic_Temple-5.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", credit: "Almonroth · CC BY-SA 3.0 · Wikimedia Commons" },
+    ],
     designationType: 'Landmark',
   },
   {
@@ -307,7 +344,12 @@ export const landmarks: Landmark[] = [
     style: 'Storybook / Tudor Revival',
     nationalRegister: true,
     neighborhood: 'Downtown',
-    photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f3/Tupper_%26_Reed_Building_%28Berkeley%2C_CA%29.jpg/800px-Tupper_%26_Reed_Building_%28Berkeley%2C_CA%29.jpg',
+    photoUrl: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/0/08/Tupper_and_Reed_Building-2.jpg/960px-Tupper_and_Reed_Building-2.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail',
+    photos: [
+      { url: "https://upload.wikimedia.org/wikipedia/commons/f/fc/Tupper_%26_Reed_Building_%28Berkeley%2C_CA%29.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled", credit: "Sanfranman59 · CC BY-SA 3.0 · Wikimedia Commons" },
+      { url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/9c/Tupper_%26_Reed_Building_-_Sarah_Stierch_-_6.jpg/960px-Tupper_%26_Reed_Building_-_Sarah_Stierch_-_6.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", credit: "SarahStierch · Public domain · Wikimedia Commons" },
+      { url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/dc/Tupper_Reed_Building_-_3_-_Stierch.jpg/960px-Tupper_Reed_Building_-_3_-_Stierch.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", credit: "Sarah Stierch · CC BY 4.0 · Wikimedia Commons" },
+    ],
     designationType: 'Landmark',
   },
   {
@@ -324,7 +366,12 @@ export const landmarks: Landmark[] = [
     style: 'Art Deco',
     nationalRegister: true,
     neighborhood: 'Downtown',
-    photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5d/Berkeley_Public_Library.jpg/800px-Berkeley_Public_Library.jpg',
+    photoUrl: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/1/1b/Berkeley_Public_Library.jpg/960px-Berkeley_Public_Library.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail',
+    photos: [
+      { url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c6/Berkeley_Public_Library_%28Kittredge_St.%2C_Berkeley%2C_CA%29.JPG/960px-Berkeley_Public_Library_%28Kittredge_St.%2C_Berkeley%2C_CA%29.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", credit: "Sanfranman59 · CC BY-SA 3.0 · Wikimedia Commons" },
+      { url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/7c/Berkeley_Public_Library_-_A_-_Sarah_Stierch.jpg/960px-Berkeley_Public_Library_-_A_-_Sarah_Stierch.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", credit: "Sarah Stierch · CC BY 4.0 · Wikimedia Commons" },
+      { url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/29/Berkeley_Public_Library_-_3_-_Sarah_Stierch.jpg/960px-Berkeley_Public_Library_-_3_-_Sarah_Stierch.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", credit: "SarahStierch · CC BY 4.0 · Wikimedia Commons" },
+    ],
     designationType: 'Landmark',
   },
   {
@@ -341,7 +388,11 @@ export const landmarks: Landmark[] = [
     style: 'Classical Revival',
     nationalRegister: true,
     neighborhood: 'Downtown',
-    photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b4/Chamber_of_Commerce_Building_%28Berkeley%2C_CA%29.JPG/800px-Chamber_of_Commerce_Building_%28Berkeley%2C_CA%29.JPG',
+    photoUrl: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/e/ed/Chamber_of_Commerce_Building%2C_%28Berkeley%2C_CA%29.JPG/960px-Chamber_of_Commerce_Building%2C_%28Berkeley%2C_CA%29.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail',
+    photos: [
+      { url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/ad/Berkeley_Chamber_of_Commerce_Building-3.jpg/960px-Berkeley_Chamber_of_Commerce_Building-3.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", credit: "Almonroth · CC BY-SA 3.0 · Wikimedia Commons" },
+      { url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/7b/Berkeley_Chamber_of_Commerce_Building-4.jpg/960px-Berkeley_Chamber_of_Commerce_Building-4.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", credit: "Almonroth · CC BY-SA 3.0 · Wikimedia Commons" },
+    ],
     designationType: 'Landmark',
   },
   {
@@ -358,7 +409,7 @@ export const landmarks: Landmark[] = [
     style: 'Commercial Vernacular',
     nationalRegister: true,
     neighborhood: 'Downtown',
-    photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4e/Studio_Building_%28Berkeley%2C_CA%29.JPG/800px-Studio_Building_%28Berkeley%2C_CA%29.JPG',
+    photoUrl: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/4/4e/Studio_Building_%28Berkeley%2C_CA%29.JPG/960px-Studio_Building_%28Berkeley%2C_CA%29.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail',
     designationType: 'Landmark',
   },
   {
@@ -375,7 +426,6 @@ export const landmarks: Landmark[] = [
     style: 'Storybook / Norman Revival',
     nationalRegister: false,
     neighborhood: 'Northside',
-    photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0b/Normandy_Village_%28Berkeley%2C_CA%29.JPG/800px-Normandy_Village_%28Berkeley%2C_CA%29.JPG',
     designationType: 'Landmark',
   },
   {
@@ -392,7 +442,12 @@ export const landmarks: Landmark[] = [
     style: 'Classical Revival',
     nationalRegister: true,
     neighborhood: 'Northside',
-    photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/Cloyne_Court_Hotel_%28Berkeley%2C_CA%29.JPG/800px-Cloyne_Court_Hotel_%28Berkeley%2C_CA%29.JPG',
+    photoUrl: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/8/84/Cloyne_Court_Hotel_%28Berkeley%2C_CA%29.JPG/960px-Cloyne_Court_Hotel_%28Berkeley%2C_CA%29.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail',
+    photos: [
+      { url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/41/Cloyne_Court_Hotel_front_2005-03_1.JPG/960px-Cloyne_Court_Hotel_front_2005-03_1.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", credit: "BrokenSphere · CC BY-SA 3.0 · Wikimedia Commons" },
+      { url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/75/Cloyne_Court_Hotel_front_2005-03_2.JPG/960px-Cloyne_Court_Hotel_front_2005-03_2.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", credit: "BrokenSphere · CC BY-SA 3.0 · Wikimedia Commons" },
+      { url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/1b/Cloyne_Court_Hotel_landmark_plaques.JPG/960px-Cloyne_Court_Hotel_landmark_plaques.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", credit: "BrokenSphere · CC BY-SA 3.0 · Wikimedia Commons" },
+    ],
     designationType: 'Landmark',
   },
   {
@@ -409,7 +464,10 @@ export const landmarks: Landmark[] = [
     style: 'Beaux-Arts',
     nationalRegister: false,
     neighborhood: 'Downtown',
-    photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4a/Hotel_Shattuck_Plaza.jpg/800px-Hotel_Shattuck_Plaza.jpg',
+    photoUrl: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/2/2f/Shattuck_Hotel.jpg/960px-Shattuck_Hotel.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail',
+    photos: [
+      { url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/3b/Downtown_Berkeley_Shattuck_Hotel.jpg/960px-Downtown_Berkeley_Shattuck_Hotel.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", credit: "Alfred Twu · CC0 · Wikimedia Commons" },
+    ],
     designationType: 'Landmark',
   },
   {
@@ -427,7 +485,7 @@ export const landmarks: Landmark[] = [
     nationalRegister: false,
     neighborhood: 'Southside',
     designationType: 'Landmark',
-      photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/36/Banner_at_City_hall_%2836490644160%29.jpg/960px-Banner_at_City_hall_%2836490644160%29.jpg',
+      photoUrl: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/3/36/Banner_at_City_hall_%2836490644160%29.jpg/960px-Banner_at_City_hall_%2836490644160%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail',
 },
   {
     id: 'lm-24',
@@ -443,7 +501,11 @@ export const landmarks: Landmark[] = [
     style: 'Classical Revival',
     nationalRegister: true,
     neighborhood: 'Downtown',
-    photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f5/Veterans_Memorial_Building_%28Berkeley%2C_CA%29.JPG/800px-Veterans_Memorial_Building_%28Berkeley%2C_CA%29.JPG',
+    photoUrl: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/6/6f/USA-Berkeley-Veterans_Memorial_Building-1.jpg/960px-USA-Berkeley-Veterans_Memorial_Building-1.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail',
+    photos: [
+      { url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/2d/USA-Berkeley-Veterans_Memorial_Building-3.jpg/960px-USA-Berkeley-Veterans_Memorial_Building-3.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", credit: "Eugene Zelenko · CC BY-SA 4.0 · Wikimedia Commons" },
+      { url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f9/Veterans_Buiding%2C_Berkeley_-_Stierch_1.jpg/960px-Veterans_Buiding%2C_Berkeley_-_Stierch_1.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", credit: "Sarah Stierch · CC BY 4.0 · Wikimedia Commons" },
+    ],
     designationType: 'Landmark',
   },
   {
@@ -493,7 +555,7 @@ export const landmarks: Landmark[] = [
     nationalRegister: true,
     neighborhood: 'Northside',
     designationType: 'Landmark',
-      photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/04/Hillside_School_%28Berkeley%2C_CA%29.JPG/960px-Hillside_School_%28Berkeley%2C_CA%29.JPG',
+      photoUrl: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/0/04/Hillside_School_%28Berkeley%2C_CA%29.JPG/960px-Hillside_School_%28Berkeley%2C_CA%29.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail',
 },
   {
     id: 'lm-28',
@@ -509,7 +571,7 @@ export const landmarks: Landmark[] = [
     style: 'Beaux-Arts / Classical',
     nationalRegister: true,
     neighborhood: 'Downtown',
-    photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3e/US_Post_Office_%28Berkeley%2C_CA%29.JPG/800px-US_Post_Office_%28Berkeley%2C_CA%29.JPG',
+    photoUrl: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/7/71/Berkeley_-_US_Post_Office-19.jpg/960px-Berkeley_-_US_Post_Office-19.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail',
     designationType: 'Landmark',
   },
   {
@@ -560,7 +622,7 @@ export const landmarks: Landmark[] = [
     nationalRegister: false,
     neighborhood: 'Downtown',
     designationType: 'Landmark',
-      photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/a/a4/Kressberkeley.jpg',
+      photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/a/a4/Kressberkeley.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled',
 },
   {
     id: 'lm-32',
@@ -576,7 +638,10 @@ export const landmarks: Landmark[] = [
     style: 'Shingle / Colonial Revival',
     nationalRegister: true,
     neighborhood: 'Southside',
-    photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/7c/Anna_Head_School_%28Berkeley%2C_CA%29.JPG/800px-Anna_Head_School_%28Berkeley%2C_CA%29.JPG',
+    photoUrl: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/6/69/Anna_Head_School_for_Girls_%28Berkeley%2C_CA%29.JPG/960px-Anna_Head_School_for_Girls_%28Berkeley%2C_CA%29.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail',
+    photos: [
+      { url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/03/Head-Royce_School.jpg/960px-Head-Royce_School.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", credit: "Nomadic.intelligentsia · CC BY-SA 3.0 · Wikimedia Commons" },
+    ],
     designationType: 'Landmark',
   },
   {
@@ -593,7 +658,7 @@ export const landmarks: Landmark[] = [
     style: 'Romanesque Revival',
     nationalRegister: true,
     neighborhood: 'Southside',
-    photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/85/First_Unitarian_Church_%28Berkeley%2C_CA%29.JPG/800px-First_Unitarian_Church_%28Berkeley%2C_CA%29.JPG',
+    photoUrl: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/9/91/First_Unitarian_Church_%28Berkeley%2C_CA%29.JPG/960px-First_Unitarian_Church_%28Berkeley%2C_CA%29.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail',
     designationType: 'Landmark',
   },
   {
@@ -610,7 +675,7 @@ export const landmarks: Landmark[] = [
     style: 'Classical Revival',
     nationalRegister: true,
     neighborhood: 'Northside',
-    photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/Phi_Delta_Theta_%28Berkeley%2C_CA%29.JPG/800px-Phi_Delta_Theta_%28Berkeley%2C_CA%29.JPG',
+    photoUrl: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/9/9e/Phi_Delta_Theta_Chapter_House_%28Berkeley%2C_CA%29.JPG/960px-Phi_Delta_Theta_Chapter_House_%28Berkeley%2C_CA%29.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail',
     designationType: 'Landmark',
   },
   {
@@ -644,7 +709,10 @@ export const landmarks: Landmark[] = [
     style: 'Mediterranean Revival',
     nationalRegister: false,
     neighborhood: 'Claremont',
-    photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0d/Claremont_Hotel_%26_Spa.jpg/800px-Claremont_Hotel_%26_Spa.jpg',
+    photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/4/4c/Berkeley_CA_-_Hotel_Claremont_%28NBY_431525%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled',
+    photos: [
+      { url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d8/1915_Claremont_Hotel_I0025726A.jpg/960px-1915_Claremont_Hotel_I0025726A.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", credit: "Unknown / uncredited photographer(s) · Public domain · Wikimedia Commons" },
+    ],
     designationType: 'Landmark',
   },
   {
@@ -661,7 +729,12 @@ export const landmarks: Landmark[] = [
     style: 'Beaux-Arts / Venetian',
     nationalRegister: true,
     neighborhood: 'UC Campus',
-    photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6a/Sather_Tower1.jpg/800px-Sather_Tower1.jpg',
+    photoUrl: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/7/77/Sather_tower-Berkeley-cropped.jpg/960px-Sather_tower-Berkeley-cropped.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail',
+    photos: [
+      { url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/26/Sather_Tower%2C_Campanile_University_Berkeley.jpg/960px-Sather_Tower%2C_Campanile_University_Berkeley.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", credit: "Burkhard Mücke · CC BY-SA 4.0 · Wikimedia Commons" },
+      { url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/70/Sather_Tower_and_Campanile_-_Michael_Pihulic_04.jpg/960px-Sather_Tower_and_Campanile_-_Michael_Pihulic_04.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", credit: "Michael Pihulic · CC BY-SA 4.0 · Wikimedia Commons" },
+      { url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/df/Sather_Tower_and_Campanile_-_Michael_Pihulic_02.jpg/960px-Sather_Tower_and_Campanile_-_Michael_Pihulic_02.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", credit: "Michael Pihulic · CC BY-SA 4.0 · Wikimedia Commons" },
+    ],
     designationType: 'Landmark',
   },
   {
@@ -678,7 +751,7 @@ export const landmarks: Landmark[] = [
     style: 'Classical / Greek Revival',
     nationalRegister: true,
     neighborhood: 'UC Campus',
-    photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f4/Greek_Theater_%28UC_Berkeley%29.JPG/800px-Greek_Theater_%28UC_Berkeley%29.JPG',
+    photoUrl: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/0/0f/Hearst_Greek_Theatre_%28Berkeley%2C_CA%29.JPG/960px-Hearst_Greek_Theatre_%28Berkeley%2C_CA%29.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail',
     designationType: 'Landmark',
   },
   {
@@ -695,7 +768,12 @@ export const landmarks: Landmark[] = [
     style: 'Beaux-Arts',
     nationalRegister: true,
     neighborhood: 'UC Campus',
-    photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/39/Doe_Memorial_Library_-_University_of_California%2C_Berkeley_-_DSC04681.JPG/800px-Doe_Memorial_Library_-_University_of_California%2C_Berkeley_-_DSC04681.JPG',
+    photoUrl: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/1/12/UCB-University-Library.jpg/960px-UCB-University-Library.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail',
+    photos: [
+      { url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/6c/Doe_Library_north_side.JPG/960px-Doe_Library_north_side.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", credit: "EncycloPetey · CC BY-SA 3.0 · Wikimedia Commons" },
+      { url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/85/UCB_Doe_Memorial_Library_oblique_view_dllu.jpg/960px-UCB_Doe_Memorial_Library_oblique_view_dllu.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", credit: "Daniel L. Lu (user:dllu) · CC BY-SA 4.0 · Wikimedia Commons" },
+      { url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/9a/Doe_Library%2C_main_facade%2C_July_2018.jpg/960px-Doe_Library%2C_main_facade%2C_July_2018.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", credit: "Louis H. G. · CC BY-SA 4.0 · Wikimedia Commons" },
+    ],
     designationType: 'Landmark',
   },
   {
@@ -712,7 +790,11 @@ export const landmarks: Landmark[] = [
     style: 'Beaux-Arts',
     nationalRegister: true,
     neighborhood: 'UC Campus',
-    photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/9a/Sather_Gate_and_Bridge%2C_UC_Berkeley.JPG/800px-Sather_Gate_and_Bridge%2C_UC_Berkeley.JPG',
+    photoUrl: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/9/95/Sather_Gate_-_University_of_California%2C_Berkeley_-_DSC04925.JPG/960px-Sather_Gate_-_University_of_California%2C_Berkeley_-_DSC04925.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail',
+    photos: [
+      { url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/6f/Sather_Gate_at_University_of_California%2C_Berkeley%2C_California_LCCN2013633500_%28edited%29.jpg/960px-Sather_Gate_at_University_of_California%2C_Berkeley%2C_California_LCCN2013633500_%28edited%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", credit: "Public domainPublic domainfalsefalse This work is from the Carol M. Highsmith Ar · Public domain · Wikimedia Commons" },
+      { url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/16/Sather_Gate_-_The_Daily_Californian.jpg/960px-Sather_Gate_-_The_Daily_Californian.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", credit: "Mike Miller / The Daily Californian archives · MIT · Wikimedia Commons" },
+    ],
     designationType: 'Landmark',
   },
   {
@@ -729,7 +811,7 @@ export const landmarks: Landmark[] = [
     style: 'Natural Landmark',
     nationalRegister: false,
     neighborhood: 'UC Campus',
-    photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2e/FoundersRock.JPG/800px-FoundersRock.JPG',
+    photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/9/92/FoundersRock.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled',
     designationType: 'Landmark',
   },
   {
@@ -764,7 +846,7 @@ export const landmarks: Landmark[] = [
     nationalRegister: true,
     neighborhood: 'West Berkeley',
     designationType: 'Landmark',
-      photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6b/Toveri_Tupa_%28Berkeley%2C_CA%29.JPG/960px-Toveri_Tupa_%28Berkeley%2C_CA%29.JPG',
+      photoUrl: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/6/6b/Toveri_Tupa_%28Berkeley%2C_CA%29.JPG/960px-Toveri_Tupa_%28Berkeley%2C_CA%29.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail',
 },
   {
     id: 'lm-44',
@@ -814,7 +896,11 @@ export const landmarks: Landmark[] = [
     nationalRegister: true,
     neighborhood: 'Downtown',
     designationType: 'Landmark',
-      photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/48/Corder_Building_%28Berkeley%2C_CA%29.JPG/960px-Corder_Building_%28Berkeley%2C_CA%29.JPG',
+      photoUrl: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/4/48/Corder_Building_%28Berkeley%2C_CA%29.JPG/960px-Corder_Building_%28Berkeley%2C_CA%29.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail',
+    photos: [
+      { url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/87/Corder_Building-4.jpg/960px-Corder_Building-4.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", credit: "Almonroth · CC BY-SA 3.0 · Wikimedia Commons" },
+      { url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a5/Corder_Building-2.jpg/960px-Corder_Building-2.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", credit: "Almonroth · CC BY-SA 3.0 · Wikimedia Commons" },
+    ],
 },
   {
     id: 'lm-47',
@@ -947,7 +1033,7 @@ export const landmarks: Landmark[] = [
     style: 'Prairie / Arts & Crafts',
     nationalRegister: true,
     neighborhood: 'Northside',
-    photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5a/Loring_House_%28Berkeley%2C_CA%29.JPG/800px-Loring_House_%28Berkeley%2C_CA%29.JPG',
+    photoUrl: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/3/3a/Loring_House_%28Berkeley%2C_CA%29.JPG/960px-Loring_House_%28Berkeley%2C_CA%29.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail',
     designationType: 'Landmark',
   },
   {
@@ -997,7 +1083,11 @@ export const landmarks: Landmark[] = [
     style: 'Classical / Open-Air',
     nationalRegister: false,
     neighborhood: 'Buena Vista',
-    photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a2/Temple_of_Wings_%28Berkeley%2C_CA%29.JPG/800px-Temple_of_Wings_%28Berkeley%2C_CA%29.JPG',
+    photoUrl: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/f/fc/Temple_of_Wings%2C_Berkeley.png/960px-Temple_of_Wings%2C_Berkeley.png?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail',
+    photos: [
+      { url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/64/Temple_of_Wings%2C_Berkeley%2C_area_leading_to_courtyard.png/960px-Temple_of_Wings%2C_Berkeley%2C_area_leading_to_courtyard.png?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", credit: "Richard Guy Wilson · CC BY 4.0 · Wikimedia Commons" },
+      { url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/8f/Temple_of_Wings%2C_interior.png/960px-Temple_of_Wings%2C_interior.png?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", credit: "Unknown authorUnknown author · Public domain · Wikimedia Commons" },
+    ],
     designationType: 'Landmark',
   },
   {
@@ -1031,7 +1121,11 @@ export const landmarks: Landmark[] = [
     style: 'Classical Revival',
     nationalRegister: false,
     neighborhood: 'Downtown',
-    photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/bf/USA-Berkeley-Young_Men%27s_Christian_Association.jpg/960px-USA-Berkeley-Young_Men%27s_Christian_Association.jpg',
+    photoUrl: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/b/bf/USA-Berkeley-Young_Men%27s_Christian_Association.jpg/960px-USA-Berkeley-Young_Men%27s_Christian_Association.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail',
+    photos: [
+      { url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/24/Berkeley_Historic_Civic_Center_District-2.jpg/960px-Berkeley_Historic_Civic_Center_District-2.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", credit: "Almonroth · CC BY-SA 3.0 · Wikimedia Commons" },
+      { url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/ab/Berkeley_Historic_Civic_Center_District.jpg/960px-Berkeley_Historic_Civic_Center_District.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", credit: "Almonroth · CC BY-SA 3.0 · Wikimedia Commons" },
+    ],
     designationType: 'Landmark',
   },
   {
@@ -1048,7 +1142,7 @@ export const landmarks: Landmark[] = [
     style: 'Gothic Revival',
     nationalRegister: true,
     neighborhood: 'UC Campus',
-    photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4b/Bowles_Hall_%28UC_Berkeley%29.JPG/800px-Bowles_Hall_%28UC_Berkeley%29.JPG',
+    photoUrl: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b0/Bowles_Hall_exterior_1.JPG/960px-Bowles_Hall_exterior_1.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail',
     designationType: 'Landmark',
   },
   {
@@ -1065,7 +1159,12 @@ export const landmarks: Landmark[] = [
     style: 'Beaux-Arts',
     nationalRegister: true,
     neighborhood: 'UC Campus',
-    photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3c/Hearst_Memorial_Mining_Building_%28Berkeley%2C_CA%29.JPG/800px-Hearst_Memorial_Mining_Building_%28Berkeley%2C_CA%29.JPG',
+    photoUrl: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/2/2b/Hearst_Memorial_Mining_Building_%28Berkeley%2C_CA%29.JPG/960px-Hearst_Memorial_Mining_Building_%28Berkeley%2C_CA%29.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail',
+    photos: [
+      { url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/aa/Hearst_Mining_Building.jpg/960px-Hearst_Mining_Building.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", credit: "Unknown · CC BY-SA 4.0 · Wikimedia Commons" },
+      { url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/0c/Hearst_Mining_Building_-_Flickr_-_Joe_Parks.jpg/960px-Hearst_Mining_Building_-_Flickr_-_Joe_Parks.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", credit: "Joe Parks from Berkeley, CA · CC BY 2.0 · Wikimedia Commons" },
+      { url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/ce/Hearst_Mining_Building_Christmas_-_Flickr_-_Joe_Parks.jpg/960px-Hearst_Mining_Building_Christmas_-_Flickr_-_Joe_Parks.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", credit: "Joe Parks from Berkeley, CA · CC BY 2.0 · Wikimedia Commons" },
+    ],
     designationType: 'Landmark',
   },
   {
@@ -1082,7 +1181,13 @@ export const landmarks: Landmark[] = [
     style: 'Second Empire',
     nationalRegister: true,
     neighborhood: 'UC Campus',
-    photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8d/South_Hall_%28UC_Berkeley%29.JPG/800px-South_Hall_%28UC_Berkeley%29.JPG',
+    photoUrl: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d4/South_Hall_at_UC_Berkeley.jpg/960px-South_Hall_at_UC_Berkeley.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail',
+    photos: [
+      { url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/40/South_Hall.JPG/960px-South_Hall.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", credit: "No machine-readable author provided. Lrd1rocha~commonswiki assumed (based on cop · Public domain · Wikimedia Commons" },
+      { url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/70/South_Hall--UC_Berkeley--Panoramic.jpg/960px-South_Hall--UC_Berkeley--Panoramic.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", credit: "User:Falcorian · CC BY-SA 4.0 · Wikimedia Commons" },
+      { url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e8/South_Hall_UC_Berkeley.jpg/960px-South_Hall_UC_Berkeley.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", credit: "Brad Herman from San Francisco, California, USA · CC BY-SA 2.0 · Wikimedia Commons" },
+      { url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d8/South_Hall_-_University_of_California%2C_Berkeley_-_DSC04885.JPG/960px-South_Hall_-_University_of_California%2C_Berkeley_-_DSC04885.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", credit: "Daderot · CC0 · Wikimedia Commons" },
+    ],
     designationType: 'Landmark',
   },
   {
@@ -1099,7 +1204,12 @@ export const landmarks: Landmark[] = [
     style: 'Beaux-Arts',
     nationalRegister: true,
     neighborhood: 'UC Campus',
-    photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Wheeler_Hall_%28Berkeley%2C_CA%29.JPG/800px-Wheeler_Hall_%28Berkeley%2C_CA%29.JPG',
+    photoUrl: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/1/1c/Wheeler_Hall%2C_University_of_California%2C_Berkeley.jpg/960px-Wheeler_Hall%2C_University_of_California%2C_Berkeley.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail',
+    photos: [
+      { url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/09/Wheeler_Hall--UC_Berkeley--Panoramic.jpg/960px-Wheeler_Hall--UC_Berkeley--Panoramic.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", credit: "Unknown · CC BY-SA 4.0 · Wikimedia Commons" },
+      { url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/bd/Wheeler_Hall.jpg/960px-Wheeler_Hall.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", credit: "Malcolm Tredinnick · CC BY 2.0 · Wikimedia Commons" },
+      { url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/65/Wheeler_Hall_-_panoramio.jpg/960px-Wheeler_Hall_-_panoramio.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", credit: "Alexander Gude · CC BY-SA 3.0 · Wikimedia Commons" },
+    ],
     designationType: 'Landmark',
   },
   {
@@ -1295,7 +1405,7 @@ export const landmarks: Landmark[] = [
     nationalRegister: false,
     neighborhood: 'Downtown',
     designationType: 'Landmark',
-      photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8f/Old_Berkeley_High_School_%28Berkeley%2C_CA%29.JPG/960px-Old_Berkeley_High_School_%28Berkeley%2C_CA%29.JPG',
+      photoUrl: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/8/8f/Old_Berkeley_High_School_%28Berkeley%2C_CA%29.JPG/960px-Old_Berkeley_High_School_%28Berkeley%2C_CA%29.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail',
 },
   {
     id: 'lm-118',
@@ -1458,7 +1568,7 @@ export const landmarks: Landmark[] = [
     nationalRegister: false,
     neighborhood: 'Southside',
     designationType: 'Landmark',
-      photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3e/ICW_Bancroft.JPG/960px-ICW_Bancroft.JPG',
+      photoUrl: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/3/3e/ICW_Bancroft.JPG/960px-ICW_Bancroft.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail',
 },
   {
     id: 'lm-128',
@@ -1506,7 +1616,12 @@ export const landmarks: Landmark[] = [
     style: 'Classical Revival',
     nationalRegister: false,
     neighborhood: 'Southside',
-    photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/64/California_Memorial_Stadium_concourse.jpg/960px-California_Memorial_Stadium_concourse.jpg',
+    photoUrl: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/6/64/California_Memorial_Stadium_concourse.jpg/960px-California_Memorial_Stadium_concourse.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail',
+    photos: [
+      { url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/ff/California_Memorial_Stadium.jpg/960px-California_Memorial_Stadium.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", credit: "Roman Fuchs · CC BY-SA 3.0 · Wikimedia Commons" },
+      { url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/09/California_Memorial_Stadium_2015.jpg/960px-California_Memorial_Stadium_2015.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", credit: "Rybkovich · CC BY-SA 4.0 · Wikimedia Commons" },
+      { url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/cb/California_memorial_stadium_view_from_the_north.jpg/960px-California_memorial_stadium_view_from_the_north.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", credit: "Rybkovich · CC BY-SA 4.0 · Wikimedia Commons" },
+    ],
     designationType: 'Landmark',
   },
   {
@@ -1540,7 +1655,11 @@ export const landmarks: Landmark[] = [
     nationalRegister: false,
     neighborhood: 'Southside',
     designationType: 'Landmark',
-      photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d0/Interior_view_-_Berkeley_Art_Museum_and_Pacific_Film_Archive_-_DSC03956.JPG/960px-Interior_view_-_Berkeley_Art_Museum_and_Pacific_Film_Archive_-_DSC03956.JPG',
+      photoUrl: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d0/Interior_view_-_Berkeley_Art_Museum_and_Pacific_Film_Archive_-_DSC03956.JPG/960px-Interior_view_-_Berkeley_Art_Museum_and_Pacific_Film_Archive_-_DSC03956.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail',
+    photos: [
+      { url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/3b/Interior_view_-_Berkeley_Art_Museum_and_Pacific_Film_Archive_-_DSC04192.JPG/960px-Interior_view_-_Berkeley_Art_Museum_and_Pacific_Film_Archive_-_DSC04192.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", credit: "Daderot · CC0 · Wikimedia Commons" },
+      { url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/74/Interior_view_-_Berkeley_Art_Museum_and_Pacific_Film_Archive_-_DSC03953.JPG/960px-Interior_view_-_Berkeley_Art_Museum_and_Pacific_Film_Archive_-_DSC03953.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", credit: "Daderot · CC0 · Wikimedia Commons" },
+    ],
 },
   {
     id: 'lm-133',
@@ -1749,7 +1868,10 @@ export const landmarks: Landmark[] = [
     nationalRegister: false,
     neighborhood: 'Southside',
     designationType: 'Landmark',
-      photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/69/Anna_Head_School_for_Girls_%28Berkeley%2C_CA%29.JPG/960px-Anna_Head_School_for_Girls_%28Berkeley%2C_CA%29.JPG',
+      photoUrl: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/6/69/Anna_Head_School_for_Girls_%28Berkeley%2C_CA%29.JPG/960px-Anna_Head_School_for_Girls_%28Berkeley%2C_CA%29.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail',
+    photos: [
+      { url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/03/Head-Royce_School.jpg/960px-Head-Royce_School.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", credit: "Nomadic.intelligentsia · CC BY-SA 3.0 · Wikimedia Commons" },
+    ],
 },
   {
     id: 'lm-146',
@@ -1806,7 +1928,7 @@ export const landmarks: Landmark[] = [
     address: '2138 Cedar Street',
     latitude: 37.8785325,
     longitude: -122.2674559,
-    architect: 'James L. Plachek',
+    architect: 'James W. Plachek',
     yearBuilt: '1913',
     category: 'religious',
     landmarkNumber: '#76',
@@ -1831,7 +1953,11 @@ export const landmarks: Landmark[] = [
     style: 'Period Revival',
     nationalRegister: false,
     neighborhood: 'North Berkeley',
-    photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/42/Berkeley_Hillside_Club_%28Berkeley%2C_CA%29.JPG/960px-Berkeley_Hillside_Club_%28Berkeley%2C_CA%29.JPG',
+    photoUrl: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/4/42/Berkeley_Hillside_Club_%28Berkeley%2C_CA%29.JPG/960px-Berkeley_Hillside_Club_%28Berkeley%2C_CA%29.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail',
+    photos: [
+      { url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/81/Hillside_Club%2C_Berkeley_exterior_2.JPG/960px-Hillside_Club%2C_Berkeley_exterior_2.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", credit: "BrokenSphere · CC BY 3.0 · Wikimedia Commons" },
+      { url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d0/Hillside_Club%2C_Berkeley_exterior_1.JPG/960px-Hillside_Club%2C_Berkeley_exterior_1.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", credit: "BrokenSphere · CC BY 3.0 · Wikimedia Commons" },
+    ],
     designationType: 'Landmark',
   },
   {
@@ -1921,7 +2047,7 @@ export const landmarks: Landmark[] = [
     address: '2521 Channing Way',
     latitude: 37.8671955,
     longitude: -122.2574346,
-    architect: 'James L. Plachek',
+    architect: 'James W. Plachek',
     yearBuilt: '1927',
     category: 'residential',
     landmarkNumber: '#87',
@@ -1994,7 +2120,7 @@ export const landmarks: Landmark[] = [
     style: 'Arts & Crafts',
     nationalRegister: false,
     neighborhood: 'Northside',
-    photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/Rose_Walk%2C_Berkeley%2C_California.png/960px-Rose_Walk%2C_Berkeley%2C_California.png',
+    photoUrl: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/9/91/Rose_Walk%2C_Berkeley%2C_California.png/960px-Rose_Walk%2C_Berkeley%2C_California.png?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail',
     designationType: 'Landmark',
   },
   {
@@ -2094,7 +2220,7 @@ export const landmarks: Landmark[] = [
     nationalRegister: false,
     neighborhood: 'UC Campus',
     designationType: 'Landmark',
-      photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b3/Bevatron_interior_%284675235347%29.jpg/960px-Bevatron_interior_%284675235347%29.jpg',
+      photoUrl: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b3/Bevatron_interior_%284675235347%29.jpg/960px-Bevatron_interior_%284675235347%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail',
 },
   {
     id: 'lm-167',
@@ -2160,7 +2286,7 @@ export const landmarks: Landmark[] = [
     nationalRegister: false,
     neighborhood: 'Southside',
     designationType: 'Landmark',
-      photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e7/Boone%27s_University_School_%28Berkeley%2C_CA%29.JPG/960px-Boone%27s_University_School_%28Berkeley%2C_CA%29.JPG',
+      photoUrl: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e7/Boone%27s_University_School_%28Berkeley%2C_CA%29.JPG/960px-Boone%27s_University_School_%28Berkeley%2C_CA%29.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail',
 },
   {
     id: 'lm-171',
@@ -2372,7 +2498,12 @@ export const landmarks: Landmark[] = [
     nationalRegister: false,
     neighborhood: 'South Berkeley',
     designationType: 'Landmark',
-      photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f4/FRONT_OF_DAVIS-BYRNE_BUILDING_FROM_ACROSS_DWIGHT_WAY%2C_LOOKING_SOUTH._-_Davis-Byrne_Building%2C_2134-2140_Dwight_Way%2C_Berkeley%2C_Alameda_County%2C_CA_HABS_CAL%2C1-BERK%2C3-2.tif/lossy-page1-960px-thumbnail.tif.jpg',
+      photoUrl: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f4/FRONT_OF_DAVIS-BYRNE_BUILDING_FROM_ACROSS_DWIGHT_WAY%2C_LOOKING_SOUTH._-_Davis-Byrne_Building%2C_2134-2140_Dwight_Way%2C_Berkeley%2C_Alameda_County%2C_CA_HABS_CAL%2C1-BERK%2C3-2.tif/lossy-page1-960px-thumbnail.tif.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail',
+    photos: [
+      { url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f4/FRONT_OF_DAVIS-BYRNE_BUILDING_FROM_ACROSS_DWIGHT_WAY%2C_LOOKING_SOUTH._-_Davis-Byrne_Building%2C_2134-2140_Dwight_Way%2C_Berkeley%2C_Alameda_County%2C_CA_HABS_CAL%2C1-BERK%2C3-2.tif/lossy-page1-960px-thumbnail.tif.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", credit: "Related names: Davis, Glennie Byrne, Napolean Bonaparte Anderson and Greig Mohr  · Public domain · Wikimedia Commons" },
+      { url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/96/DWIGHT_WAY_STREETSCAPE%2C_WITH_DAVIS-BYRNE_BUILDING_AT_LEFT%2C_LOOKING_SOUTHWEST_TO_SHATTUCK_AVENUE._-_Davis-Byrne_Building%2C_2134-2140_Dwight_Way%2C_Berkeley%2C_Alameda_County%2C_CA_HABS_CAL%2C1-BERK%2C3-1.tif/lossy-page1-960px-thumbnail.tif.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", credit: "Related names: Davis, Glennie Byrne, Napolean Bonaparte Anderson and Greig Mohr  · Public domain · Wikimedia Commons" },
+      { url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/90/OBLIQUE_VIEW_OF_SIDEWALK_ENTRY_TO_UPPER_STORY_ROOMS%2C_SHOWING_GABLE%2C_UNDERSIDES_OF_BAY_WINDOWS%2C_AND_STEPPED_SIDEWALK_LINE._VIEW_TO_SOUTHEAST._-_Davis-Byrne_Building%2C_2134-2140_HABS_CAL%2C1-BERK%2C3-7.tif/lossy-page1-960px-thumbnail.tif.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", credit: "Unknown · Public domain · Wikimedia Commons" },
+    ],
 },
   {
     id: 'lm-184',
@@ -2404,7 +2535,7 @@ export const landmarks: Landmark[] = [
     style: 'Art Deco',
     nationalRegister: false,
     neighborhood: 'Northside',
-    photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/ca/Berkeley_Rose_Garden.jpg/960px-Berkeley_Rose_Garden.jpg',
+    photoUrl: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/c/ca/Berkeley_Rose_Garden.jpg/960px-Berkeley_Rose_Garden.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail',
     designationType: 'Landmark',
   },
   {
@@ -2502,7 +2633,7 @@ export const landmarks: Landmark[] = [
     nationalRegister: false,
     neighborhood: 'West Berkeley',
     designationType: 'Landmark',
-      photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/ce/Spengers_Fish_Grotto.jpg/960px-Spengers_Fish_Grotto.jpg',
+      photoUrl: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/c/ce/Spengers_Fish_Grotto.jpg/960px-Spengers_Fish_Grotto.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail',
 },
   {
     id: 'lm-192',
@@ -2728,7 +2859,7 @@ export const landmarks: Landmark[] = [
     nationalRegister: false,
     neighborhood: 'Southside',
     designationType: 'Landmark',
-      photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c6/Berkeley_Public_Library_%28Kittredge_St.%2C_Berkeley%2C_CA%29.JPG/960px-Berkeley_Public_Library_%28Kittredge_St.%2C_Berkeley%2C_CA%29.JPG',
+      photoUrl: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c6/Berkeley_Public_Library_%28Kittredge_St.%2C_Berkeley%2C_CA%29.JPG/960px-Berkeley_Public_Library_%28Kittredge_St.%2C_Berkeley%2C_CA%29.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail',
 },
   {
     id: 'lm-206',
@@ -2906,7 +3037,12 @@ export const landmarks: Landmark[] = [
     nationalRegister: false,
     neighborhood: 'West Berkeley',
     designationType: 'Landmark',
-      photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/46/Church_of_the_Good_Shepherd_%28Berkeley%2C_CA%29.JPG/960px-Church_of_the_Good_Shepherd_%28Berkeley%2C_CA%29.JPG',
+      photoUrl: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/4/46/Church_of_the_Good_Shepherd_%28Berkeley%2C_CA%29.JPG/960px-Church_of_the_Good_Shepherd_%28Berkeley%2C_CA%29.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail',
+    photos: [
+      { url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/01/USA-Berkeley-Episcopal_Church_of_the_Good_Shepherd-1.jpg/960px-USA-Berkeley-Episcopal_Church_of_the_Good_Shepherd-1.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", credit: "Eugene Zelenko · CC BY-SA 4.0 · Wikimedia Commons" },
+      { url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/68/USA-Berkeley-Episcopal_Church_of_the_Good_Shepherd-10.jpg/960px-USA-Berkeley-Episcopal_Church_of_the_Good_Shepherd-10.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", credit: "Eugene Zelenko · CC BY-SA 4.0 · Wikimedia Commons" },
+      { url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/af/USA-Berkeley-Episcopal_Church_of_the_Good_Shepherd-12.jpg/960px-USA-Berkeley-Episcopal_Church_of_the_Good_Shepherd-12.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", credit: "Eugene Zelenko · CC BY-SA 4.0 · Wikimedia Commons" },
+    ],
 },
   {
     id: 'lm-217',
@@ -3066,7 +3202,7 @@ export const landmarks: Landmark[] = [
     style: 'Arts & Crafts',
     nationalRegister: false,
     neighborhood: 'Downtown',
-    photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/07/California_Theatre_in_Berkeley%2C_California.jpg/960px-California_Theatre_in_Berkeley%2C_California.jpg',
+    photoUrl: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/0/07/California_Theatre_in_Berkeley%2C_California.jpg/960px-California_Theatre_in_Berkeley%2C_California.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail',
     designationType: 'Landmark',
   },
   {
@@ -3101,7 +3237,7 @@ export const landmarks: Landmark[] = [
     nationalRegister: false,
     neighborhood: 'La Loma Historic District',
     designationType: 'Landmark',
-      photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/fa/Kingman_Hall_-_Theta_Xi.png/960px-Kingman_Hall_-_Theta_Xi.png',
+      photoUrl: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/f/fa/Kingman_Hall_-_Theta_Xi.png/960px-Kingman_Hall_-_Theta_Xi.png?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail',
 },
   {
     id: 'lm-229',
@@ -3182,7 +3318,7 @@ export const landmarks: Landmark[] = [
     nationalRegister: false,
     neighborhood: 'North Berkeley',
     designationType: 'Landmark',
-      photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/Rose_Walk%2C_Berkeley%2C_California.png/960px-Rose_Walk%2C_Berkeley%2C_California.png',
+      photoUrl: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/9/91/Rose_Walk%2C_Berkeley%2C_California.png/960px-Rose_Walk%2C_Berkeley%2C_California.png?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail',
 },
   {
     id: 'lm-234',
@@ -3295,7 +3431,12 @@ export const landmarks: Landmark[] = [
     style: 'Beaux-Arts',
     nationalRegister: false,
     neighborhood: 'Civic Center Historic District',
-    photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6d/Old_City_Hall_%28Berkeley%2C_CA%29_%28cropped%29.JPG/960px-Old_City_Hall_%28Berkeley%2C_CA%29_%28cropped%29.JPG',
+    photoUrl: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/6/6d/Old_City_Hall_%28Berkeley%2C_CA%29_%28cropped%29.JPG/960px-Old_City_Hall_%28Berkeley%2C_CA%29_%28cropped%29.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail',
+    photos: [
+      { url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b7/Berkeley_City_Hall-2.jpg/960px-Berkeley_City_Hall-2.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", credit: "Almonroth · CC BY-SA 3.0 · Wikimedia Commons" },
+      { url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/df/Berkeley_City_Hall-4.jpg/960px-Berkeley_City_Hall-4.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", credit: "Almonroth · CC BY-SA 3.0 · Wikimedia Commons" },
+      { url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d8/Berkeley_City_Hall-3.jpg/960px-Berkeley_City_Hall-3.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", credit: "Almonroth · CC BY-SA 3.0 · Wikimedia Commons" },
+    ],
     designationType: 'Landmark',
   },
   {
@@ -3313,7 +3454,7 @@ export const landmarks: Landmark[] = [
     nationalRegister: false,
     neighborhood: 'Civic Center Historic District',
     designationType: 'Landmark',
-      photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/2/26/Berkeley_Community_Theater.jpg',
+      photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/2/26/Berkeley_Community_Theater.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled',
 },
   {
     id: 'lm-242',
@@ -3348,6 +3489,9 @@ export const landmarks: Landmark[] = [
     neighborhood: 'North Berkeley',
     designationType: 'Landmark',
       photoUrl: 'https://berkeleyplaques.org/wp-content/uploads/2023/11/Whittier-School-Plaque.jpg',
+    photos: [
+      { url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/cc/Berkeley_Arts_Magnet_at_Whittier%2C_exterior%2C_Berkeley_%28August_2025%29.jpg/960px-Berkeley_Arts_Magnet_at_Whittier%2C_exterior%2C_Berkeley_%28August_2025%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", credit: "BriefEdits · CC BY-SA 4.0 · Wikimedia Commons" },
+    ],
 },
   {
     id: 'lm-244',
@@ -3355,7 +3499,7 @@ export const landmarks: Landmark[] = [
     address: '2180 Milvia Street',
     latitude: 37.8694472,
     longitude: -122.2707951,
-    architect: 'James L. Plachek',
+    architect: 'James W. Plachek',
     yearBuilt: '1938',
     category: 'residential',
     landmarkNumber: '#256',
@@ -3364,7 +3508,7 @@ export const landmarks: Landmark[] = [
     nationalRegister: false,
     neighborhood: 'Civic Center Historic District',
     designationType: 'Landmark',
-      photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0e/Martin_Luther_King_Jr_Civic_Center_%28Berkeley%2C_CA%29.JPG/960px-Martin_Luther_King_Jr_Civic_Center_%28Berkeley%2C_CA%29.JPG',
+      photoUrl: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/0/0e/Martin_Luther_King_Jr_Civic_Center_%28Berkeley%2C_CA%29.JPG/960px-Martin_Luther_King_Jr_Civic_Center_%28Berkeley%2C_CA%29.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail',
 },
   {
     id: 'lm-245',
@@ -3381,7 +3525,7 @@ export const landmarks: Landmark[] = [
     nationalRegister: false,
     neighborhood: 'Southside',
     designationType: 'Landmark',
-      photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/dd/UC_Theatre%2CBerkeley.jpg/960px-UC_Theatre%2CBerkeley.jpg',
+      photoUrl: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/d/dd/UC_Theatre%2CBerkeley.jpg/960px-UC_Theatre%2CBerkeley.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail',
 },
   {
     id: 'lm-246',
@@ -3607,7 +3751,7 @@ export const landmarks: Landmark[] = [
     nationalRegister: false,
     neighborhood: 'Northside',
     designationType: 'Landmark',
-      photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/Rose_Walk%2C_Berkeley%2C_California.png/960px-Rose_Walk%2C_Berkeley%2C_California.png',
+      photoUrl: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/9/91/Rose_Walk%2C_Berkeley%2C_California.png/960px-Rose_Walk%2C_Berkeley%2C_California.png?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail',
 },
   {
     id: 'lm-260',
@@ -3624,7 +3768,7 @@ export const landmarks: Landmark[] = [
     nationalRegister: false,
     neighborhood: 'Northside',
     designationType: 'Landmark',
-      photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/Rose_Walk%2C_Berkeley%2C_California.png/960px-Rose_Walk%2C_Berkeley%2C_California.png',
+      photoUrl: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/9/91/Rose_Walk%2C_Berkeley%2C_California.png/960px-Rose_Walk%2C_Berkeley%2C_California.png?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail',
 },
   {
     id: 'lm-261',
@@ -3641,7 +3785,7 @@ export const landmarks: Landmark[] = [
     nationalRegister: false,
     neighborhood: 'Northside',
     designationType: 'Landmark',
-      photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/Rose_Walk%2C_Berkeley%2C_California.png/960px-Rose_Walk%2C_Berkeley%2C_California.png',
+      photoUrl: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/9/91/Rose_Walk%2C_Berkeley%2C_California.png/960px-Rose_Walk%2C_Berkeley%2C_California.png?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail',
 },
   {
     id: 'lm-262',
@@ -3658,7 +3802,7 @@ export const landmarks: Landmark[] = [
     nationalRegister: false,
     neighborhood: 'Northside',
     designationType: 'Landmark',
-      photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/Rose_Walk%2C_Berkeley%2C_California.png/960px-Rose_Walk%2C_Berkeley%2C_California.png',
+      photoUrl: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/9/91/Rose_Walk%2C_Berkeley%2C_California.png/960px-Rose_Walk%2C_Berkeley%2C_California.png?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail',
 },
   {
     id: 'lm-263',
@@ -3707,7 +3851,7 @@ export const landmarks: Landmark[] = [
     nationalRegister: false,
     neighborhood: 'North Berkeley',
     designationType: 'Landmark',
-      photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e8/Donald_and_Helen_Olsen_House.jpg/960px-Donald_and_Helen_Olsen_House.jpg',
+      photoUrl: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e8/Donald_and_Helen_Olsen_House.jpg/960px-Donald_and_Helen_Olsen_House.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail',
 },
   {
     id: 'lm-266',
@@ -3724,7 +3868,7 @@ export const landmarks: Landmark[] = [
     nationalRegister: false,
     neighborhood: 'West Berkeley',
     designationType: 'Landmark',
-      photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/81/Hillside_Club%2C_Berkeley_exterior_2.JPG/960px-Hillside_Club%2C_Berkeley_exterior_2.JPG',
+      photoUrl: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/8/81/Hillside_Club%2C_Berkeley_exterior_2.JPG/960px-Hillside_Club%2C_Berkeley_exterior_2.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail',
 },
   {
     id: 'lm-267',
@@ -3860,7 +4004,7 @@ export const landmarks: Landmark[] = [
     address: '2014 Shattuck Avenue',
     latitude: 37.8716358,
     longitude: -122.2687074,
-    architect: 'James L. Plachek',
+    architect: 'James W. Plachek',
     yearBuilt: '1917',
     category: 'commercial',
     landmarkNumber: '#309',
@@ -3885,7 +4029,7 @@ export const landmarks: Landmark[] = [
     style: 'Arts & Crafts',
     nationalRegister: false,
     neighborhood: 'Downtown',
-    photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5c/Downtown_Berkeley%2C_Shattuck_and_University_Ave%2C_looking_northeast.jpg/960px-Downtown_Berkeley%2C_Shattuck_and_University_Ave%2C_looking_northeast.jpg',
+    photoUrl: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/5/5c/Downtown_Berkeley%2C_Shattuck_and_University_Ave%2C_looking_northeast.jpg/960px-Downtown_Berkeley%2C_Shattuck_and_University_Ave%2C_looking_northeast.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail',
     designationType: 'Landmark',
   },
   {
@@ -3967,7 +4111,12 @@ export const landmarks: Landmark[] = [
     nationalRegister: false,
     neighborhood: 'Downtown',
     designationType: 'Landmark',
-      photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/6/64/Masonic_Temple_%28Berkeley%2C_CA%29.JPG',
+      photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/6/64/Masonic_Temple_%28Berkeley%2C_CA%29.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled',
+    photos: [
+      { url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/ae/Berkeley_Masonic_Temple-4.jpg/960px-Berkeley_Masonic_Temple-4.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", credit: "Almonroth · CC BY-SA 3.0 · Wikimedia Commons" },
+      { url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/06/Berkeley_Masonic_Temple-2.jpg/960px-Berkeley_Masonic_Temple-2.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", credit: "Almonroth · CC BY-SA 3.0 · Wikimedia Commons" },
+      { url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/17/Berkeley_Masonic_Temple-5.jpg/960px-Berkeley_Masonic_Temple-5.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", credit: "Almonroth · CC BY-SA 3.0 · Wikimedia Commons" },
+    ],
 },
   {
     id: 'lm-282',
@@ -3975,7 +4124,7 @@ export const landmarks: Landmark[] = [
     address: '2300 Shattuck Avenue',
     latitude: 37.867409,
     longitude: -122.268089,
-    architect: 'James L. Plachek',
+    architect: 'James W. Plachek',
     yearBuilt: '1921',
     category: 'residential',
     landmarkNumber: '#322',
@@ -3984,7 +4133,7 @@ export const landmarks: Landmark[] = [
     nationalRegister: false,
     neighborhood: 'Downtown',
     designationType: 'Landmark',
-      photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/48/Corder_Building_%28Berkeley%2C_CA%29.JPG/960px-Corder_Building_%28Berkeley%2C_CA%29.JPG',
+      photoUrl: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/4/48/Corder_Building_%28Berkeley%2C_CA%29.JPG/960px-Corder_Building_%28Berkeley%2C_CA%29.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail',
 },
   {
     id: 'lm-283',
@@ -4048,7 +4197,11 @@ export const landmarks: Landmark[] = [
     style: 'Arts & Crafts',
     nationalRegister: false,
     neighborhood: 'Downtown',
-    photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b9/Berkeley%2C_California_%287044222865%29.jpg/960px-Berkeley%2C_California_%287044222865%29.jpg',
+    photoUrl: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b9/Berkeley%2C_California_%287044222865%29.jpg/960px-Berkeley%2C_California_%287044222865%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail',
+    photos: [
+      { url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/2f/Shattuck_Hotel.jpg/960px-Shattuck_Hotel.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", credit: "Noah Salzman · CC BY-SA 3.0 · Wikimedia Commons" },
+      { url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/3b/Downtown_Berkeley_Shattuck_Hotel.jpg/960px-Downtown_Berkeley_Shattuck_Hotel.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", credit: "Alfred Twu · CC0 · Wikimedia Commons" },
+    ],
     designationType: 'Landmark',
   },
   {
@@ -4132,7 +4285,7 @@ export const landmarks: Landmark[] = [
     nationalRegister: false,
     neighborhood: 'West Berkeley',
     designationType: 'Landmark',
-      photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/cc/USA-Berkeley-1614_Sixth_Street.jpg/960px-USA-Berkeley-1614_Sixth_Street.jpg',
+      photoUrl: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/c/cc/USA-Berkeley-1614_Sixth_Street.jpg/960px-USA-Berkeley-1614_Sixth_Street.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail',
 },
   {
     id: 'lm-292',
@@ -4180,7 +4333,10 @@ export const landmarks: Landmark[] = [
     style: 'Period Revival',
     nationalRegister: false,
     neighborhood: 'North Berkeley',
-    photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b2/Oaks_Theatre%2C_exterior%2C_Berkeley_%28April_2024%29.jpg/960px-Oaks_Theatre%2C_exterior%2C_Berkeley_%28April_2024%29.jpg',
+    photoUrl: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b2/Oaks_Theatre%2C_exterior%2C_Berkeley_%28April_2024%29.jpg/960px-Oaks_Theatre%2C_exterior%2C_Berkeley_%28April_2024%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail',
+    photos: [
+      { url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/ba/The_Oaks_Climbing.jpg/960px-The_Oaks_Climbing.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", credit: "Elharaty · CC BY-SA 3.0 · Wikimedia Commons" },
+    ],
     designationType: 'Landmark',
   },
   {
@@ -4197,7 +4353,11 @@ export const landmarks: Landmark[] = [
     style: 'Period Revival',
     nationalRegister: false,
     neighborhood: 'North Berkeley',
-    photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0b/Looking_down_staircase_into_John_Hinkel_Park_from_San_Diego_Rd.jpg/960px-Looking_down_staircase_into_John_Hinkel_Park_from_San_Diego_Rd.jpg',
+    photoUrl: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/0/0b/Looking_down_staircase_into_John_Hinkel_Park_from_San_Diego_Rd.jpg/960px-Looking_down_staircase_into_John_Hinkel_Park_from_San_Diego_Rd.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail',
+    photos: [
+      { url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/8c/John_Hinkel_Park_from_San_Diego_Rd_in_Berkeley.jpg/960px-John_Hinkel_Park_from_San_Diego_Rd_in_Berkeley.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", credit: "Chiara Coetzee · CC0 · Wikimedia Commons" },
+      { url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f3/John_Hinkel_Park%2C_Berkeley.jpg/960px-John_Hinkel_Park%2C_Berkeley.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", credit: "~jar{} · CC BY 2.0 · Wikimedia Commons" },
+    ],
     designationType: 'Landmark',
   },
   {
@@ -4415,7 +4575,7 @@ export const landmarks: Landmark[] = [
     address: '1170 The Alameda',
     latitude: 37.8854519,
     longitude: -122.2754378,
-    architect: 'James L. Plachek',
+    architect: 'James W. Plachek',
     yearBuilt: '1936',
     category: 'civic',
     landmarkNumber: '#363',
@@ -4424,7 +4584,7 @@ export const landmarks: Landmark[] = [
     nationalRegister: false,
     neighborhood: 'North Berkeley',
     designationType: 'Landmark',
-      photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/54/North_Branch_Library.jpg/960px-North_Branch_Library.jpg',
+      photoUrl: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/5/54/North_Branch_Library.jpg/960px-North_Branch_Library.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail',
 },
   {
     id: 'lm-310',
@@ -4458,7 +4618,7 @@ export const landmarks: Landmark[] = [
     nationalRegister: false,
     neighborhood: 'UC Campus',
     designationType: 'Landmark',
-      photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e6/UC_Berkeley_Naval_Architecture_Building_-_back_-_2015-07-25.JPG/960px-UC_Berkeley_Naval_Architecture_Building_-_back_-_2015-07-25.JPG',
+      photoUrl: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e6/UC_Berkeley_Naval_Architecture_Building_-_back_-_2015-07-25.JPG/960px-UC_Berkeley_Naval_Architecture_Building_-_back_-_2015-07-25.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail',
 },
   {
     id: 'lm-312',
@@ -4475,7 +4635,7 @@ export const landmarks: Landmark[] = [
     nationalRegister: false,
     neighborhood: 'UC Campus',
     designationType: 'Landmark',
-      photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/7c/North_Gate_Hall%2C_UC_Berkeley.jpg/960px-North_Gate_Hall%2C_UC_Berkeley.jpg',
+      photoUrl: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/7/7c/North_Gate_Hall%2C_UC_Berkeley.jpg/960px-North_Gate_Hall%2C_UC_Berkeley.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail',
 },
   {
     id: 'lm-313',
@@ -4491,7 +4651,10 @@ export const landmarks: Landmark[] = [
     style: 'Classical Revival',
     nationalRegister: false,
     neighborhood: 'UC Campus',
-    photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d1/Haviland_Hall_main_entrance.JPG/960px-Haviland_Hall_main_entrance.JPG',
+    photoUrl: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d1/Haviland_Hall_main_entrance.JPG/960px-Haviland_Hall_main_entrance.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail',
+    photos: [
+      { url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/08/Haviland_Hall_%28Berkeley%2C_CA%29.JPG/960px-Haviland_Hall_%28Berkeley%2C_CA%29.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", credit: "Sanfranman59 · CC BY-SA 3.0 · Wikimedia Commons" },
+    ],
     designationType: 'Landmark',
   },
   {
@@ -4524,7 +4687,7 @@ export const landmarks: Landmark[] = [
     style: 'Classical Revival',
     nationalRegister: false,
     neighborhood: 'UC Campus',
-    photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/d/de/Sather_Tower_%28Campanile%29.jpg',
+    photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/d/de/Sather_Tower_%28Campanile%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled',
     designationType: 'Landmark',
   },
   {
@@ -4541,7 +4704,7 @@ export const landmarks: Landmark[] = [
     style: 'Classical Revival',
     nationalRegister: false,
     neighborhood: 'UC Campus',
-    photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/9f/Durant_Hall_lion_statues_-_2015-07-25.JPG/960px-Durant_Hall_lion_statues_-_2015-07-25.JPG',
+    photoUrl: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/9/9f/Durant_Hall_lion_statues_-_2015-07-25.JPG/960px-Durant_Hall_lion_statues_-_2015-07-25.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail',
     designationType: 'Landmark',
   },
   {
@@ -4558,7 +4721,7 @@ export const landmarks: Landmark[] = [
     style: 'Arts & Crafts',
     nationalRegister: false,
     neighborhood: 'UC Campus',
-    photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b4/Entrance_to_the_Women%27s_Faculty_Club.jpg/960px-Entrance_to_the_Women%27s_Faculty_Club.jpg',
+    photoUrl: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b4/Entrance_to_the_Women%27s_Faculty_Club.jpg/960px-Entrance_to_the_Women%27s_Faculty_Club.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail',
     designationType: 'Landmark',
   },
   {
@@ -4575,7 +4738,11 @@ export const landmarks: Landmark[] = [
     style: 'Classical Revival',
     nationalRegister: false,
     neighborhood: 'UC Campus',
-    photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5f/MooreGreekTheaterUCBerkeley.JPG/960px-MooreGreekTheaterUCBerkeley.JPG',
+    photoUrl: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/5/5f/MooreGreekTheaterUCBerkeley.JPG/960px-MooreGreekTheaterUCBerkeley.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail',
+    photos: [
+      { url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c7/Hearst_Greek_Theater_graduation.jpg/960px-Hearst_Greek_Theater_graduation.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", credit: "Andris at English Wikipedia · Public domain · Wikimedia Commons" },
+      { url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e0/UCB_Greek_Theater_1903-05.jpg/960px-UCB_Greek_Theater_1903-05.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", credit: "Otto von Geldern · Public domain · Wikimedia Commons" },
+    ],
     designationType: 'Landmark',
   },
   {
@@ -4592,7 +4759,13 @@ export const landmarks: Landmark[] = [
     style: 'Classical Revival',
     nationalRegister: false,
     neighborhood: 'UC Campus',
-    photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/ff/Hearst_Memorial_Mining_Building_-_The_Daily_Californian.jpg/960px-Hearst_Memorial_Mining_Building_-_The_Daily_Californian.jpg',
+    photoUrl: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/f/ff/Hearst_Memorial_Mining_Building_-_The_Daily_Californian.jpg/960px-Hearst_Memorial_Mining_Building_-_The_Daily_Californian.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail',
+    photos: [
+      { url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/aa/Hearst_Mining_Building.jpg/960px-Hearst_Mining_Building.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", credit: "Unknown · CC BY-SA 4.0 · Wikimedia Commons" },
+      { url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/2b/Hearst_Memorial_Mining_Building_%28Berkeley%2C_CA%29.JPG/960px-Hearst_Memorial_Mining_Building_%28Berkeley%2C_CA%29.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", credit: "Sanfranman59 · CC BY-SA 3.0 · Wikimedia Commons" },
+      { url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/0c/Hearst_Mining_Building_-_Flickr_-_Joe_Parks.jpg/960px-Hearst_Mining_Building_-_Flickr_-_Joe_Parks.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", credit: "Joe Parks from Berkeley, CA · CC BY 2.0 · Wikimedia Commons" },
+      { url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/ce/Hearst_Mining_Building_Christmas_-_Flickr_-_Joe_Parks.jpg/960px-Hearst_Mining_Building_Christmas_-_Flickr_-_Joe_Parks.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", credit: "Joe Parks from Berkeley, CA · CC BY 2.0 · Wikimedia Commons" },
+    ],
     designationType: 'Landmark',
   },
   {
@@ -4610,7 +4783,7 @@ export const landmarks: Landmark[] = [
     nationalRegister: false,
     neighborhood: 'UC Campus',
     designationType: 'Landmark',
-      photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e9/Senior_Hall_%28Berkeley%2C_CA%29.JPG/960px-Senior_Hall_%28Berkeley%2C_CA%29.JPG',
+      photoUrl: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e9/Senior_Hall_%28Berkeley%2C_CA%29.JPG/960px-Senior_Hall_%28Berkeley%2C_CA%29.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail',
 },
   {
     id: 'lm-331',
@@ -4626,7 +4799,7 @@ export const landmarks: Landmark[] = [
     style: 'Classical Revival',
     nationalRegister: false,
     neighborhood: 'UC Campus',
-    photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/7e/Gilman_Hall_from_Sather_Tower_%2852080995298%29.jpg/960px-Gilman_Hall_from_Sather_Tower_%2852080995298%29.jpg',
+    photoUrl: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/7/7e/Gilman_Hall_from_Sather_Tower_%2852080995298%29.jpg/960px-Gilman_Hall_from_Sather_Tower_%2852080995298%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail',
     designationType: 'Landmark',
   },
   {
@@ -4643,7 +4816,7 @@ export const landmarks: Landmark[] = [
     style: 'Classical Revival',
     nationalRegister: false,
     neighborhood: 'UC Campus',
-    photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/16/Sather_Gate_-_The_Daily_Californian.jpg/960px-Sather_Gate_-_The_Daily_Californian.jpg',
+    photoUrl: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/1/16/Sather_Gate_-_The_Daily_Californian.jpg/960px-Sather_Gate_-_The_Daily_Californian.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail',
     designationType: 'Landmark',
   },
   {
@@ -4661,7 +4834,7 @@ export const landmarks: Landmark[] = [
     nationalRegister: false,
     neighborhood: 'UC Campus',
     designationType: 'Landmark',
-      photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a4/Haas_Pavilion_Exterior.jpg/960px-Haas_Pavilion_Exterior.jpg',
+      photoUrl: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a4/Haas_Pavilion_Exterior.jpg/960px-Haas_Pavilion_Exterior.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail',
 },
   {
     id: 'lm-336',
@@ -4710,7 +4883,7 @@ export const landmarks: Landmark[] = [
     nationalRegister: false,
     neighborhood: 'West Berkeley',
     designationType: 'Landmark',
-      photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4f/Berkeley_station_building%2C_June_2018.JPG/960px-Berkeley_station_building%2C_June_2018.JPG',
+      photoUrl: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/4/4f/Berkeley_station_building%2C_June_2018.JPG/960px-Berkeley_station_building%2C_June_2018.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail',
 },
   {
     id: 'lm-339',
@@ -4759,7 +4932,7 @@ export const landmarks: Landmark[] = [
     nationalRegister: false,
     neighborhood: 'West Berkeley',
     designationType: 'Landmark',
-      photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b4/Berkeley_ATSF_station%2C_June_2018.JPG/960px-Berkeley_ATSF_station%2C_June_2018.JPG',
+      photoUrl: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b4/Berkeley_ATSF_station%2C_June_2018.JPG/960px-Berkeley_ATSF_station%2C_June_2018.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail',
 },
   {
     id: 'lm-343',
@@ -4776,7 +4949,7 @@ export const landmarks: Landmark[] = [
     nationalRegister: false,
     neighborhood: 'Downtown',
     designationType: 'Landmark',
-      photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/33/Fox_Court_%28Berkeley%2C_CA%29.JPG/960px-Fox_Court_%28Berkeley%2C_CA%29.JPG',
+      photoUrl: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/3/33/Fox_Court_%28Berkeley%2C_CA%29.JPG/960px-Fox_Court_%28Berkeley%2C_CA%29.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail',
 },
   {
     id: 'lm-344',
@@ -4896,7 +5069,7 @@ export const landmarks: Landmark[] = [
     address: '2018-36 University Avenue',
     latitude: 37.8673129,
     longitude: -122.3012557,
-    architect: 'James L. Plachek',
+    architect: 'James W. Plachek',
     yearBuilt: '1916',
     category: 'commercial',
     landmarkNumber: '#408',
@@ -4904,7 +5077,7 @@ export const landmarks: Landmark[] = [
     style: 'Art Deco',
     nationalRegister: false,
     neighborhood: 'West Berkeley',
-    photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/25/UC_Theater_Building_%284707620929%29.jpg/960px-UC_Theater_Building_%284707620929%29.jpg',
+    photoUrl: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/2/25/UC_Theater_Building_%284707620929%29.jpg/960px-UC_Theater_Building_%284707620929%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail',
     designationType: 'Landmark',
   },
   {
@@ -4937,7 +5110,7 @@ export const landmarks: Landmark[] = [
     style: 'First Bay Region Tradition',
     nationalRegister: false,
     neighborhood: 'North Berkeley',
-    photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b2/Garfield_Intermediate_School_%28Berkeley%2C_CA%29.JPG/960px-Garfield_Intermediate_School_%28Berkeley%2C_CA%29.JPG',
+    photoUrl: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b2/Garfield_Intermediate_School_%28Berkeley%2C_CA%29.JPG/960px-Garfield_Intermediate_School_%28Berkeley%2C_CA%29.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail',
     designationType: 'Landmark',
   },
   {
@@ -4954,7 +5127,11 @@ export const landmarks: Landmark[] = [
     style: 'Arts & Crafts',
     nationalRegister: false,
     neighborhood: 'Southside',
-    photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b6/State_Institution_for_the_Deaf_and_Dumb%2C_and_Blind%3B_Berkeley%2C_looking_north_%28NYPL_b11707279-G89F342_009F%29.tiff/lossy-page1-800px-State_Institution_for_the_Deaf_and_Dumb%2C_and_Blind%3B_Berkeley%2C_looking_north_%28NYPL_b11707279-G89F342_009F%29.tiff.jpg',
+    photoUrl: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b6/State_Institution_for_the_Deaf_and_Dumb%2C_and_Blind%3B_Berkeley%2C_looking_north_%28NYPL_b11707279-G89F342_009F%29.tiff/lossy-page1-960px-State_Institution_for_the_Deaf_and_Dumb%2C_and_Blind%3B_Berkeley%2C_looking_north_%28NYPL_b11707279-G89F342_009F%29.tiff.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail',
+    photos: [
+      { url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/48/State_Asylum_for_the_Deaf%2C_Dumb_%26_Blind_%28Berkeley%2C_CA%29.JPG/960px-State_Asylum_for_the_Deaf%2C_Dumb_%26_Blind_%28Berkeley%2C_CA%29.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", credit: "Sanfranman59 · CC BY-SA 3.0 · Wikimedia Commons" },
+      { url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b6/State_Institution_for_the_Deaf_and_Dumb%2C_and_Blind%3B_Berkeley%2C_looking_north_%28NYPL_b11707279-G89F342_009F%29.tiff/lossy-page1-960px-State_Institution_for_the_Deaf_and_Dumb%2C_and_Blind%3B_Berkeley%2C_looking_north_%28NYPL_b11707279-G89F342_009F%29.tiff.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", credit: "Scan by NYPL · Public domain · Wikimedia Commons" },
+    ],
     designationType: 'Landmark',
   },
   {
@@ -4987,7 +5164,7 @@ export const landmarks: Landmark[] = [
     style: 'Beaux-Arts',
     nationalRegister: true,
     neighborhood: 'UC Campus',
-    photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1c/Wheeler_Hall%2C_University_of_California%2C_Berkeley.jpg/800px-Wheeler_Hall%2C_University_of_California%2C_Berkeley.jpg',
+    photoUrl: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/1/1c/Wheeler_Hall%2C_University_of_California%2C_Berkeley.jpg/960px-Wheeler_Hall%2C_University_of_California%2C_Berkeley.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail',
     designationType: 'Landmark',
   },
   {
@@ -5005,7 +5182,10 @@ export const landmarks: Landmark[] = [
     nationalRegister: true,
     neighborhood: 'UC Campus',
     designationType: 'Landmark',
-      photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/71/Faculty_Club_%28Berkeley%2C_CA%29.jpg/960px-Faculty_Club_%28Berkeley%2C_CA%29.jpg',
+      photoUrl: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/7/71/Faculty_Club_%28Berkeley%2C_CA%29.jpg/960px-Faculty_Club_%28Berkeley%2C_CA%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail',
+    photos: [
+      { url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/26/LSU_Faculty_Club%2C_Louisiana_State_University%2C_Baton_Rouge%2C_Louisiana.jpg/960px-LSU_Faculty_Club%2C_Louisiana_State_University%2C_Baton_Rouge%2C_Louisiana.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", credit: "Nolanwebb · CC BY-SA 4.0 · Wikimedia Commons" },
+    ],
 },
   {
     id: 'lm-66',
@@ -5021,7 +5201,12 @@ export const landmarks: Landmark[] = [
     style: 'Beaux-Arts',
     nationalRegister: true,
     neighborhood: 'UC Campus',
-    photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/1/14/Hilgard_Hall%2C_Berkeley%2C_California%2C_c._1924.png',
+    photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/1/14/Hilgard_Hall%2C_Berkeley%2C_California%2C_c._1924.png?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled',
+    photos: [
+      { url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/27/Hilgard_Hall_%28Berkeley%2C_CA%29.JPG/960px-Hilgard_Hall_%28Berkeley%2C_CA%29.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", credit: "Sanfranman59 · CC BY-SA 3.0 · Wikimedia Commons" },
+      { url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a7/Hilgard_Hall-12.jpg/960px-Hilgard_Hall-12.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", credit: "Almonroth · CC BY-SA 3.0 · Wikimedia Commons" },
+      { url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/ff/Hilgard_Hall-10.jpg/960px-Hilgard_Hall-10.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", credit: "Almonroth · CC BY-SA 3.0 · Wikimedia Commons" },
+    ],
     designationType: 'Landmark',
   },
   {
@@ -5072,7 +5257,12 @@ export const landmarks: Landmark[] = [
     nationalRegister: true,
     neighborhood: 'Piedmont',
     designationType: 'Landmark',
-      photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/8/8c/Piedmont_Ave1915.jpg',
+      photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/8/8c/Piedmont_Ave1915.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled',
+    photos: [
+      { url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/3f/DETAIL_VIEW_OF_SIDEWALK%2C_EAST_SIDE_OF_PIEDMONT_AVENUE._LOOKING_SW.%3B_Photograph_by_Fredrica_Drotos_and_Michael_Kelly%2C_July_8%2C_2006_-_Piedmont_Way_and_the_Berkeley_Property_Tract%2C_East_of_HALS_CA-2-4.tif/lossy-page1-960px-thumbnail.tif.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", credit: "Related names: Olmsted, Frederick L; College of California; Boardman, William F; · Public domain · Wikimedia Commons" },
+      { url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b2/DETAIL_VIEW_OF_SIDEWALK_AND_STONE_WALL_EAST_SIDE_OF_PIEDMONT_AVENUE_ADJACENT_TO_OAK_GROVE_AND_FOOTBALL_STADIUM._NOTE_STEPS_TO_STADIUM._LOOKING_NORTH._Photograph_by_Brian_Grogan%2C_July_8%2C%3B_HALS_CA-2-33.tif/lossy-page1-960px-thumbnail.tif.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", credit: "Related names: Olmsted, Frederick L; College of California; Boardman, William F; · Public domain · Wikimedia Commons" },
+      { url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/9f/NORTH_END_OF_PIEDMONT_AVENUE._STADIUM_AT_LEFT_REAR._SEEN_FROM_WEST_SIDE_OF_PIEDMONT_LOOKING_SE._Photograph_by_Brian_Grogan%2C_July_8%2C_2007_-_Piedmont_Way_and_the_Berkeley_Property_Tract%2C_HALS_CA-2-37.tif/lossy-page1-960px-thumbnail.tif.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", credit: "Unknown · Public domain · Wikimedia Commons" },
+    ],
 },
   {
     id: 'lm-70',
@@ -5089,7 +5279,7 @@ export const landmarks: Landmark[] = [
     nationalRegister: false,
     neighborhood: 'Piedmont',
     designationType: 'Landmark',
-      photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/10/Sigma_PI_House_in_Piedmont.jpg/960px-Sigma_PI_House_in_Piedmont.jpg',
+      photoUrl: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/1/10/Sigma_PI_House_in_Piedmont.jpg/960px-Sigma_PI_House_in_Piedmont.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail',
 },
   {
     id: 'lm-71',
@@ -5106,7 +5296,7 @@ export const landmarks: Landmark[] = [
     nationalRegister: false,
     neighborhood: 'Northside',
     designationType: 'Landmark',
-      photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/27/Weltevreden_postcard_%28front%29.jpg/960px-Weltevreden_postcard_%28front%29.jpg',
+      photoUrl: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/2/27/Weltevreden_postcard_%28front%29.jpg/960px-Weltevreden_postcard_%28front%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail',
 },
   {
     id: 'lm-72',
@@ -5123,7 +5313,10 @@ export const landmarks: Landmark[] = [
     nationalRegister: false,
     neighborhood: 'South Berkeley',
     designationType: 'Landmark',
-      photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/de/Kala_Art_Institute.jpg/960px-Kala_Art_Institute.jpg',
+      photoUrl: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/d/de/Kala_Art_Institute.jpg/960px-Kala_Art_Institute.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail',
+    photos: [
+      { url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b8/Kala_Art_Institute_gallery.jpg/960px-Kala_Art_Institute_gallery.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", credit: "PigeonChickenFish · CC BY-SA 4.0 · Wikimedia Commons" },
+    ],
 },
   {
     id: 'lm-73',
@@ -5140,7 +5333,11 @@ export const landmarks: Landmark[] = [
     nationalRegister: false,
     neighborhood: 'Southside',
     designationType: 'Landmark',
-      photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/49/Hotel_Durant_in_Berkeley.jpg/960px-Hotel_Durant_in_Berkeley.jpg',
+      photoUrl: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/4/49/Hotel_Durant_in_Berkeley.jpg/960px-Hotel_Durant_in_Berkeley.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail',
+    photos: [
+      { url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/92/Flint_July_2018_01_%28The_Durant_-_Hotel_Durant%29.jpg/960px-Flint_July_2018_01_%28The_Durant_-_Hotel_Durant%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", credit: "Michael Barera · CC BY-SA 4.0 · Wikimedia Commons" },
+      { url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/46/Flint_July_2018_06_%28McFarlan_Veterans_Memorial_Park_and_The_Durant_-_Hotel_Durant%29.jpg/960px-Flint_July_2018_06_%28McFarlan_Veterans_Memorial_Park_and_The_Durant_-_Hotel_Durant%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", credit: "Michael Barera · CC BY-SA 4.0 · Wikimedia Commons" },
+    ],
 },
   {
     id: 'lm-74',
@@ -5173,7 +5370,10 @@ export const landmarks: Landmark[] = [
     style: 'Vernacular / Adaptive Reuse',
     nationalRegister: false,
     neighborhood: 'West Berkeley',
-    photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/46/Ashkenaz_Hosanna.jpg/960px-Ashkenaz_Hosanna.jpg',
+    photoUrl: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/4/46/Ashkenaz_Hosanna.jpg/960px-Ashkenaz_Hosanna.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail',
+    photos: [
+      { url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/07/Ashkenaz_Music_and_Dance_Community_Center_at_Night.jpg/960px-Ashkenaz_Music_and_Dance_Community_Center_at_Night.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", credit: "RaymondYee · CC BY-SA 4.0 · Wikimedia Commons" },
+    ],
     designationType: 'Landmark',
   },
   {
@@ -5191,7 +5391,10 @@ export const landmarks: Landmark[] = [
     nationalRegister: false,
     neighborhood: 'Downtown',
     designationType: 'Landmark',
-      photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/2/26/Berkeley_Community_Theater.jpg',
+      photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/2/26/Berkeley_Community_Theater.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled',
+    photos: [
+      { url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/77/Berkeley_Historic_Civic_Center_District-6.jpg/960px-Berkeley_Historic_Civic_Center_District-6.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", credit: "Almonroth · CC BY-SA 3.0 · Wikimedia Commons" },
+    ],
 },
   {
     id: 'lm-77',
@@ -5224,7 +5427,7 @@ export const landmarks: Landmark[] = [
     nationalRegister: false,
     neighborhood: 'West Berkeley',
     designationType: 'Landmark',
-      photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2e/Manasse-Block-001.JPG/960px-Manasse-Block-001.JPG',
+      photoUrl: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/2/2e/Manasse-Block-001.JPG/960px-Manasse-Block-001.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail',
 },
   {
     id: 'lm-79',
@@ -5387,7 +5590,10 @@ export const landmarks: Landmark[] = [
     nationalRegister: false,
     neighborhood: 'UC Campus',
     designationType: 'Landmark',
-      photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/95/Edwards_Stadium.jpg/960px-Edwards_Stadium.jpg',
+      photoUrl: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/9/95/Edwards_Stadium.jpg/960px-Edwards_Stadium.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail',
+    photos: [
+      { url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f4/George_C._Edwards_Stadium_%28Berkeley%2C_CA%29.jpg/960px-George_C._Edwards_Stadium_%28Berkeley%2C_CA%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", credit: "Sanfranman59 · CC BY-SA 3.0 · Wikimedia Commons" },
+    ],
 },
   {
     id: 'lm-89',
@@ -5404,7 +5610,11 @@ export const landmarks: Landmark[] = [
     nationalRegister: true,
     neighborhood: 'UC Campus',
     designationType: 'Landmark',
-      photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/41/Giannini_Hall_%28Berkeley%2C_CA%29.JPG/960px-Giannini_Hall_%28Berkeley%2C_CA%29.JPG',
+      photoUrl: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/4/41/Giannini_Hall_%28Berkeley%2C_CA%29.JPG/960px-Giannini_Hall_%28Berkeley%2C_CA%29.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail',
+    photos: [
+      { url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b8/Giannini_Hall.jpg/960px-Giannini_Hall.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", credit: "Almonroth · CC BY-SA 3.0 · Wikimedia Commons" },
+      { url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/79/Giannini_Hall-2.jpg/960px-Giannini_Hall-2.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", credit: "Almonroth · CC BY-SA 3.0 · Wikimedia Commons" },
+    ],
 },
   {
     id: 'lm-90',
@@ -5421,7 +5631,11 @@ export const landmarks: Landmark[] = [
     nationalRegister: true,
     neighborhood: 'UC Campus',
     designationType: 'Landmark',
-      photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/9b/University_House_%28Berkeley%2C_CA%29.JPG/960px-University_House_%28Berkeley%2C_CA%29.JPG',
+      photoUrl: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/9/9b/University_House_%28Berkeley%2C_CA%29.JPG/960px-University_House_%28Berkeley%2C_CA%29.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail',
+    photos: [
+      { url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a9/University_House_UC_Berkeley.jpg/960px-University_House_UC_Berkeley.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", credit: "Unknown · CC BY-SA 4.0 · Wikimedia Commons" },
+      { url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/72/University_House_%28Berkeley%2C_California%29_02.jpg/960px-University_House_%28Berkeley%2C_California%29_02.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", credit: "HarshLight · CC BY 2.0 · Wikimedia Commons" },
+    ],
 },
   {
     id: 'lm-91',
@@ -5438,7 +5652,11 @@ export const landmarks: Landmark[] = [
     nationalRegister: true,
     neighborhood: 'UC Campus',
     designationType: 'Landmark',
-      photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/26/Wellman_Hall_%28Berkeley%2C_CA%29.JPG/960px-Wellman_Hall_%28Berkeley%2C_CA%29.JPG',
+      photoUrl: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/2/26/Wellman_Hall_%28Berkeley%2C_CA%29.JPG/960px-Wellman_Hall_%28Berkeley%2C_CA%29.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail',
+    photos: [
+      { url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/ad/Wellman_Hall.JPG/960px-Wellman_Hall.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", credit: "Unknown · Public domain · Wikimedia Commons" },
+      { url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/73/Berkeley_Wellman_Hall_03.jpg/960px-Berkeley_Wellman_Hall_03.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", credit: "Almonroth · CC BY-SA 3.0 · Wikimedia Commons" },
+    ],
 },
   {
     id: 'lm-92',
@@ -5455,7 +5673,7 @@ export const landmarks: Landmark[] = [
     nationalRegister: true,
     neighborhood: 'UC Campus',
     designationType: 'Landmark',
-      photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/7d/Cal%2C_Hearst_Gym_-_52784031981.jpg/960px-Cal%2C_Hearst_Gym_-_52784031981.jpg',
+      photoUrl: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/7/7d/Cal%2C_Hearst_Gym_-_52784031981.jpg/960px-Cal%2C_Hearst_Gym_-_52784031981.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail',
 },
   {
     id: 'lm-93',
@@ -5535,7 +5753,12 @@ export const landmarks: Landmark[] = [
     style: 'Vernacular / Commercial',
     nationalRegister: false,
     neighborhood: 'West Berkeley',
-    photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/77/Spenger%27s_Fish_Grotto%2C_Berkeley.jpg/960px-Spenger%27s_Fish_Grotto%2C_Berkeley.jpg',
+    photoUrl: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/7/77/Spenger%27s_Fish_Grotto%2C_Berkeley.jpg/960px-Spenger%27s_Fish_Grotto%2C_Berkeley.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail',
+    photos: [
+      { url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/ce/Spengers_Fish_Grotto.jpg/960px-Spengers_Fish_Grotto.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", credit: "Cullen328 · CC BY-SA 3.0 · Wikimedia Commons" },
+      { url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/4b/Spengers_Fresh_Fish_Grotto_2.jpg/960px-Spengers_Fresh_Fish_Grotto_2.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", credit: "ChesPal (Debra Heaphy) · CC BY-SA 3.0 · Wikimedia Commons" },
+      { url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c5/Spenger%27s_Fish_Grotto_in_Berkeley%2C_California.jpg/960px-Spenger%27s_Fish_Grotto_in_Berkeley%2C_California.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", credit: "Sharon Hahn Darlin · CC BY 2.0 · Wikimedia Commons" },
+    ],
     designationType: 'Landmark',
   },
   {
@@ -5568,7 +5791,7 @@ export const landmarks: Landmark[] = [
     style: 'Arts & Crafts',
     nationalRegister: false,
     neighborhood: 'Northside',
-    photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/21/Orchard_lane_plaque_panoramic_way_berkeley.JPG/960px-Orchard_lane_plaque_panoramic_way_berkeley.JPG',
+    photoUrl: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/2/21/Orchard_lane_plaque_panoramic_way_berkeley.JPG/960px-Orchard_lane_plaque_panoramic_way_berkeley.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail',
     designationType: 'Landmark',
   },
   {
@@ -5618,7 +5841,12 @@ export const landmarks: Landmark[] = [
     nationalRegister: false,
     neighborhood: 'Southside',
     designationType: 'Landmark',
-    photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f4/FRONT_OF_DAVIS-BYRNE_BUILDING_FROM_ACROSS_DWIGHT_WAY%2C_LOOKING_SOUTH._-_Davis-Byrne_Building%2C_2134-2140_Dwight_Way%2C_Berkeley%2C_Alameda_County%2C_CA_HABS_CAL%2C1-BERK%2C3-2.tif/lossy-page1-960px-thumbnail.tif.jpg',
+    photoUrl: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f4/FRONT_OF_DAVIS-BYRNE_BUILDING_FROM_ACROSS_DWIGHT_WAY%2C_LOOKING_SOUTH._-_Davis-Byrne_Building%2C_2134-2140_Dwight_Way%2C_Berkeley%2C_Alameda_County%2C_CA_HABS_CAL%2C1-BERK%2C3-2.tif/lossy-page1-960px-thumbnail.tif.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail',
+    photos: [
+      { url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f4/FRONT_OF_DAVIS-BYRNE_BUILDING_FROM_ACROSS_DWIGHT_WAY%2C_LOOKING_SOUTH._-_Davis-Byrne_Building%2C_2134-2140_Dwight_Way%2C_Berkeley%2C_Alameda_County%2C_CA_HABS_CAL%2C1-BERK%2C3-2.tif/lossy-page1-960px-thumbnail.tif.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", credit: "Related names: Davis, Glennie Byrne, Napolean Bonaparte Anderson and Greig Mohr  · Public domain · Wikimedia Commons" },
+      { url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/96/DWIGHT_WAY_STREETSCAPE%2C_WITH_DAVIS-BYRNE_BUILDING_AT_LEFT%2C_LOOKING_SOUTHWEST_TO_SHATTUCK_AVENUE._-_Davis-Byrne_Building%2C_2134-2140_Dwight_Way%2C_Berkeley%2C_Alameda_County%2C_CA_HABS_CAL%2C1-BERK%2C3-1.tif/lossy-page1-960px-thumbnail.tif.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", credit: "Related names: Davis, Glennie Byrne, Napolean Bonaparte Anderson and Greig Mohr  · Public domain · Wikimedia Commons" },
+      { url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/90/OBLIQUE_VIEW_OF_SIDEWALK_ENTRY_TO_UPPER_STORY_ROOMS%2C_SHOWING_GABLE%2C_UNDERSIDES_OF_BAY_WINDOWS%2C_AND_STEPPED_SIDEWALK_LINE._VIEW_TO_SOUTHEAST._-_Davis-Byrne_Building%2C_2134-2140_HABS_CAL%2C1-BERK%2C3-7.tif/lossy-page1-960px-thumbnail.tif.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", credit: "Unknown · Public domain · Wikimedia Commons" },
+    ],
     },
   {
     id: 'lm-103',
@@ -5940,7 +6168,13 @@ export const landmarks: Landmark[] = [
     nationalRegister: false,
     neighborhood: 'West Berkeley',
     designationType: 'Historic District',
-    photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d7/Delaware_Street_Historic_District.jpg/960px-Delaware_Street_Historic_District.jpg',
+    photoUrl: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d7/Delaware_Street_Historic_District.jpg/960px-Delaware_Street_Historic_District.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail',
+    photos: [
+      { url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/76/USA-Berkeley-835_Delaware_Street.jpg/960px-USA-Berkeley-835_Delaware_Street.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", credit: "Eugene Zelenko · CC BY-SA 4.0 · Wikimedia Commons" },
+      { url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/89/USA-Berkeley-815_Delaware_Street.jpg/960px-USA-Berkeley-815_Delaware_Street.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", credit: "Eugene Zelenko · CC BY-SA 4.0 · Wikimedia Commons" },
+      { url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/bf/USA-Berkeley-807_Delaware_Street.jpg/960px-USA-Berkeley-807_Delaware_Street.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", credit: "Eugene Zelenko · CC BY-SA 4.0 · Wikimedia Commons" },
+      { url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e1/Delaware_Street_Historic_District%2C_Berkeley.jpg/960px-Delaware_Street_Historic_District%2C_Berkeley.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", credit: "PigeonChickenFish · CC BY-SA 4.0 · Wikimedia Commons" },
+    ],
     },
   {
     id: 'lm-373',
@@ -6025,7 +6259,7 @@ export const landmarks: Landmark[] = [
   {
     id: 'lm-378',
     name: 'Civic Center Park and Fountain',
-    photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b7/Civic_Center_Park.jpg/800px-Civic_Center_Park.jpg',
+    photoUrl: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b7/Civic_Center_Park.jpg/960px-Civic_Center_Park.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail',
     address: '2100 Martin Luther King Jr Way',
     latitude: 37.870176,
     longitude: -122.2733364,

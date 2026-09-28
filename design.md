@@ -1,113 +1,168 @@
-# Berkeley Landmarks App - Interface Design
+# Berkeley Tours — Design
 
-## Overview
-A mobile app for exploring Berkeley, California's architectural landmarks and historic properties, with content sourced from BAHA (Berkeley Architectural Heritage Association).
+## Concept: a guide, after Showa Modern
+The app is a printed field guide to the city in the manner of 1920s–30s
+Japanese commercial print (reference: *Showa Modern*, in
+`Reference/Japanese Print/`). Flat planes of two inks, geometric type,
+confident composition — modern, not antique. No faux-aged ornament.
 
-### Design Concept: "A Book, Not a Map"
-Inspired by the Showa design books shared during ideation. The app reads like a beautifully typeset book about Berkeley's landmarks and their history:
-- **Landmarks and their stories are the product** — the map is a supporting reference, not the home
-- Editorial, page-like layouts: generous margins, strong typography, chapter-like navigation (tours read as chapters, landmarks as entries)
-- The map is never a top-level destination — it's reachable from a landmark or tour when you ask "where is this?"
+The copy calls it a guide — never a book, a copy or an edition — and the
+walks are Walk 01, 02 … (The print vocabulary lives on in the code:
+`constants/book.ts`, ribbons, pages.) Credit: created by Leonard Takada,
+Auto Indicator LLC — in the Appendix only, never on the cover.
 
-## Color Palette
-- **Primary**: `#1B4332` (Deep Forest Green) — evokes Berkeley's tree-lined streets and parks
-- **Primary Light**: `#2D6A4F` — lighter green for accents
-- **Accent**: `#D4A373` (Warm Sandstone) — references Berkeley's historic building materials
-- **Background Light**: `#FEFAE0` (Warm Cream) — warm, inviting, heritage feel
-- **Background Dark**: `#1A1A1A` (Near Black)
-- **Surface Light**: `#FFFFFF`
-- **Surface Dark**: `#2A2A2A`
-- **Foreground Light**: `#1B1B1B`
-- **Foreground Dark**: `#F5F5DC`
-- **Muted Light**: `#6B705C` (Sage)
-- **Muted Dark**: `#A3A380`
-- **Border Light**: `#DDA15E33` (Translucent gold)
-- **Border Dark**: `#3D405B`
+## Press sheet — `constants/book.ts`
+- **Paper**: cream `#F2F0E6`; interior leaves `#FAF6EC`; loose slips
+  `#FDFAF2`. Never stark white. The paper tooth is quiet
+  (`scripts/paper-stock.mjs`). The cover board is solid blue `#0A2C8D`, the
+  same as the launch screen.
+- **Inks** (taken from the logo): blue `#0B2E8C` — titles, rules, ribbons,
+  markers; vermilion `#E4592B` — accents, the route line, section bars; each
+  also as a flat tint (`blueTint`, `vermilionTint`). Charcoal for text, sepia
+  for secondary text. Flat ink areas carry a faint laydown texture
+  (`InkPlane`).
+- **Type**: Jost (a Futura revival — the face of the Showa Modern book).
+  Hairline for big numerals, medium tracked capitals for kickers and labels,
+  regular for text. The four big titles — BERKELEY TOURS, THE TOURS, THE
+  REGISTRY, THE ARCHITECTS — are set in **Berkeley Post**, the guide's own
+  display face: heavy cut-paper capitals after a Showa poster's POST
+  lettering, built by `python3 scripts/build-title-font.py`
+  (→ `assets/fonts/BerkeleyPost.otf`; needs fontTools and skia-pathops).
+  Lower case sets as small capitals; the app sets titles in capitals. No Japanese text anywhere. Walks are
+  numbered 01, 02 …
 
-## Screen List
+## Structure
+- **Cover**: solid blue board with the blue-background logo
+  (`assets/images/logo-on-blue.png`, cut out by `scripts/ink-logo.mjs`) and
+  the title in cream.
+- **Launch screen**: one full sheet — the board, the same laydown texture as
+  the cover, the device on top — so there's no square around the logo
+  (`node scripts/splash.mjs` writes it and the iOS imageset; the storyboard
+  aspect-fills it; Android shows the cut-out logo on flat blue).
+- **Ribbons** (`components/bookmark-ribbons.tsx`): flat, square-cut tapes
+  (54pt wide) under a thin solid blue head-band, in book order: Tours,
+  Landmarks, Appendix. The open section is solid blue and drawn out further;
+  the rest are blue tint. Eased motion, no bounce.
+- **Sections**: leaves bound at the left spine, ~650ms page turn
+  (`components/book-pages.tsx`). Part One The Tours, Part Two The Registry,
+  Appendix.
+- **Entries**: leaves laid over the book, hinged at the right
+  (`lib/page-turn.ts`); swipe back from the left edge.
+- **Map** (`app/map.tsx`): the live canvas has no texture; its chrome is
+  flat slips. The camera follows the reader: a landmark flies in above its
+  sheet; "the large map" frames the whole walk; "set out on foot" starts at
+  stop 1, and each step frames the leg of the route between two stops
+  (`lib/route-legs.ts`). Camera moves wait for the map to load.
+- **Fold-out map** (`components/fold-out-map.tsx`): folded, a blue cover
+  naming the walk, its length, the streets it follows and a locator; open,
+  the route over the street plan (baked per walk from OpenStreetMap by
+  `scripts/bake-walk-streets.ts`), with street names, numbered stops, start
+  and finish, a locator, scale and north point.
 
-### 1. Landmarks Screen (Home / Tab 1)
-- Book-style searchable, filterable list of all landmarks (the "index" of the book)
-- Sort by: name, year built, architect, neighborhood
-- Each landmark entry shows: name, address, architect, year, category icon
-- Tapping an entry opens Landmark Detail ("View on Map" lives there)
+## Print primitives — `components/print.tsx`
+`InkPlane`, `Rule`, `DotRule`, `Bar`, `Arrow`, `Label`, `Annotation`.
+Photographs print as one-ink duotones with a vermilion block set out of
+register (`components/tipped-in-plate.tsx`). Travel stamps are geometric
+labels — circle, square, arch, triangle.
 
-### 2. Tours Screen (Tab 2)
-- Book-style list of BAHA walking tours organized by neighborhood (tours read like chapters)
-- Each tour card shows: tour name, neighborhood, number of stops, estimated distance/time
-- Tapping a tour navigates to Tour Detail
+## Illustration
+Flat cut-paper prints after the Showa travel labels: a handful of shapes in
+blue, vermilion, their tints, charcoal and the paper; suns, hills, trees and
+buildings cut as silhouettes, windows as knocked-out grids. Every path gets a
+slight seeded wobble so edges read as cut. The drawing kit is
+`lib/cut-paper.ts`.
+- **Walk labels** (`components/walk-label.tsx`): one scene per walk on a
+  label shape — the Campanile against the sunset for the campus, the
+  Claremont lit at night, Rose Walk up the hill. On the Tours contents
+  (alternating sides down the page, the guide's portrait tucked against
+  the label) and each walk's opener.
+- **Registry frieze**: a street of Berkeley buildings in cream line knocked
+  out of a blue band, under the Registry's opener.
+- Both are baked by `npx tsx scripts/build-print-art.ts`
+  (→ `components/print-art.generated.ts`; `--preview <png>` for a sheet).
+- **Index letters**: each letter of the Registry cut out of a block of ink,
+  the shapes running circle, square, arch, gable.
+- **Drawn plates** (`lib/building-plate.ts`): a landmark without a
+  photograph gets a plate drawn at run time — a building of its style and
+  kind (Arts & Crafts, bungalow, Period Revival, Victorian, Queen Anne,
+  Classical, Mediterranean, Art Deco, Modern, storefront, industrial,
+  church, Collegiate Gothic, shellmound; historic districts as a row of
+  three), its colours, sun and trees seeded by the landmark's id. Captioned
+  as an impression, never passed off as the building.
 
-### 3. Map Screen (Push only — NOT a tab)
-- Full-screen interactive map centered on Berkeley (37.8716, -122.2727)
-- Reached from Landmark Detail ("View on Map") or Tour Detail ("Start Tour")
-- Colored markers for landmarks by category (civic, residential, religious, commercial, educational)
-- Tour route polylines shown when opened from a tour
-- Bottom sheet with landmark quick-preview when marker tapped
-- "My Location" button
-- Back navigation returns to the landmark/tour the user came from
+## Architects
+Flat cut-paper figures on geometric label shapes
+(`scripts/portraits/*.svg`, baked by `node scripts/build-portraits.mjs`):
+Maybeck (arch), Morgan (circle), Howard (tall panel), Ratcliff (square),
+Hays (gable), and six more on shapes from their own work: Coxhead (Gothic
+lancet), John Hudson Thomas (notched Secession square), Plachek (Art Deco
+ziggurat), Gutterson (octagon), Yelland (storybook gable), Esherick (Sea
+Ranch shed roof). No photographs of the later six were to hand, so theirs
+are period caricatures rather than likenesses.
+Shown on their entries, the walks they lead, index headings and the
+Appendix; matching in `lib/architects.ts`.
 
-### 4. Landmark Detail Screen (Push from Map/Landmarks)
-- Hero section with landmark name, address, and category badge
-- Info section: architect, year built, architectural style, landmark designation number
-- Description/history text
-- "View on Map" button
-- BAHA notes and National Register status if applicable
-- Nearby landmarks section
+## Photographs
+An entry's lead photograph prints as its plate; when it has more — the
+guide's own (`photos` on the landmark) and readers' approved ones — a
+gallery of small numbered plates scrolls sideways above "Nearby", and any
+photograph opens full size, in colour, to swipe through with its credit.
+`node scripts/fetch-gallery-photos.mjs` finds candidates on Commons for
+review; `--apply picks.json` writes the chosen ones in.
 
-### 5. Tour Detail Screen (Push from Tours)
-- Tour name and neighborhood header
-- Tour description and author
-- List of stops in order with distance between each
-- "Start Tour" button that switches to map view with route highlighted
-- Estimated total walking time and distance
+Signed-in readers can add up to three photographs to an entry, suggest a
+correction, and propose a new place from the Appendix (name, address, why it
+belongs, up to four photographs) — `app/propose.tsx`,
+`server/proposalsRouter.ts`, checked by `shared/proposals.ts`. The editors
+review all three in `/admin`, which answers only a signed-in admin.
 
-## Primary Content and Functionality
+Landmark photos are Wikimedia Commons thumbnails at a width Commons serves
+(landmarks without one get a drawn plate, above);
+`node scripts/fix-photo-urls.mjs` re-resolves them through the Commons API
+and checks every link (`--check` to only check).
 
-### Map Screen
-- MapView with Apple Maps (default, no API key needed for Expo Go)
-- Custom markers with category-based colors
-- Polyline overlays for tour routes
-- Bottom sheet for landmark preview on marker tap
-- Category filter chips
+## Motion
+Page turns, entry leaves, ribbons drawn out, cover printing, printed matter
+fading up on reveal (labels and the frieze with it), labels and portraits
+laid down as an entry settles, the fold-out map. Eased curves, no springs or bounce.
+Reduce Motion swaps turns for dissolves and skips the rest.
 
-### Tours Screen
-- FlatList of tour cards
-- Each tour has: id, name, neighborhood, stops (array of landmark IDs), route coordinates
-- Tour data from BAHA's 41 Walking Tours
-
-### Landmarks Screen
-- FlatList with search bar
-- Filter by: category, architect, decade, neighborhood
-- 50+ landmarks with full data
-
-### Landmark Detail
-- ScrollView with all property information
-- Navigation to map centered on landmark
-
-### Tour Detail
-- Tour metadata + ordered stop list
-- Navigate to map with tour route overlay
-
-## Key User Flows
-
-### Flow 1: Read the Landmarks
-1. User opens app → Landmarks screen (the book's index)
-2. User taps an entry → Landmark Detail with history, photos, and BAHA notes
-3. User taps "View on Map" → Pushes Map screen centered on that landmark
-4. Back returns to the detail page
-
-### Flow 2: Read a Tour (Chapter)
-1. User taps Tours tab → Book-style list of walking tours
-2. User taps a tour → Tour Detail with stops
-3. User taps "Start Tour" → Pushes Map screen with tour route highlighted and stops numbered
-
-### Flow 3: Search Landmarks
-1. User taps Landmarks tab → Full list with search bar
-2. User types architect name or landmark name → Filtered results
-3. User taps a landmark → Landmark Detail screen
-
-## Tab Bar Configuration
-| Tab | Icon | Label |
-|-----|------|-------|
-| Landmarks | `building.columns.fill` / `account-balance` | Landmarks |
-| Tours | `figure.walk` / `directions-walk` | Tours |
+### Living illustrations
+The art moves the way a paper toy does: pieces slide, fold and swap; nothing
+wobbles or morphs into something else.
+- **The page's scroll is the clock** (`components/scroll-clock.tsx`): every
+  scrolling page (the Tours, a walk, an entry, the Registry, the Appendix)
+  provides its offset, and the art on it follows.
+- **Architects**: every so far down (or up) the page, each on-screen portrait
+  plays the next gesture in its own loop — a blink or a double blink, a
+  smile (the mouth swapped for its smiling piece, the eyes narrowing), raised
+  brows, a glance aside (`LIFE` in `components/architect-portrait.tsx`;
+  Maybeck smiles most, Howard hardly at all). Gutterson's pipe puffs. They
+  blink once when they're laid down, and are still between gestures. The
+  moving parts are marked in the portrait sources (`data-anim="eye" | "brow"
+  | "mouth" | "smoke"`, the smile as `data-smile`, a path of the same shape
+  as the mouth).
+- **Walk labels**: the sun or moon crosses the label's sky as the label
+  travels up the screen — rising from behind the scenery, standing where it
+  was drawn at mid-screen, setting on the far side (Piedmont's sinks straight
+  into its vanishing point); clouds drift. Marked `data-anim="sky" | "cloud"`
+  by `sun()`, `moon()` and `cloud()` in `scripts/build-print-art.ts`.
+- **The cover**: the architects, drawn a little larger than the device's own
+  scale, walk the streets of the Campanile device — stepping up from a
+  street's end at the slab's rim, turning at crossings at random, stopping
+  now and then, passing behind the tower, stepping off again; never more than
+  five at once (`components/logo-walkers.tsx`). The street network and a
+  tower-only print to lay over anyone behind it are read off the artwork by
+  `python3 scripts/logo-streets.py`.
+- **How it stays smooth**: a drawing is printed as a stack of sheets
+  (`splitSheets` in `lib/svg-tree.ts`, drawn by `components/living-svg.tsx`)
+  — scenery on its own sheets, each moving part on a small sheet of its own —
+  and the moving sheets are slid, squashed and faded as views, so nothing is
+  redrawn as they move. (Animating SVG attributes instead sends every frame
+  through a full React Native commit; a page of portraits doing that dropped
+  to ~45 fps while scrolling.) Only a sun, which must stay inside its label's
+  shape, moves by its SVG attributes, and only while its label is on screen.
+  Portraits off screen skip their gestures.
+- Worklets keep their logic in module-level functions: the React Compiler
+  lifts small inline callbacks out of component code, which breaks them on
+  the UI thread.
