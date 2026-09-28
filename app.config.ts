@@ -44,7 +44,7 @@ const config: ExpoConfig = {
   ios: {
     supportsTablet: true,
     bundleIdentifier: env.iosBundleId,
-    buildNumber: "3",
+    buildNumber: "9",
     "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       }
@@ -91,11 +91,20 @@ const config: ExpoConfig = {
     [
       "expo-splash-screen",
       {
-        image: "./assets/images/splash-icon.png",
+        // Android shows a centred device on flat blue: the cut-out logo, so
+        // there's no square of textured blue around it.
+        image: "./assets/images/logo-on-blue.png",
         imageWidth: 200,
         resizeMode: "contain",
         backgroundColor: "#0A2C8D",
         dark: {
+          backgroundColor: "#0A2C8D",
+        },
+        // iOS shows the whole textured board as one sheet (scripts/splash.mjs).
+        ios: {
+          image: "./assets/images/splash-full.png",
+          resizeMode: "cover",
+          enableFullScreenImage_legacy: true,
           backgroundColor: "#0A2C8D",
         },
       },
