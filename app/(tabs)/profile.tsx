@@ -154,9 +154,8 @@ export default function AppendixScreen() {
           <Rule color={INK.charcoal} weight={1} />
           <Text style={[TYPE.kicker, styles.colophonHead]}>Colophon</Text>
           <Text style={styles.colophonBody}>
-            Berkeley Tours, a guide to the city&apos;s landmarks and walks, after the commercial print of
-            Showa-era Japan. Set in Jost, a revival of Paul Renner&apos;s Futura, with titles in Berkeley Post,
-            cut for this guide after Showa poster lettering. Printed in two inks — the blue and vermilion of the
+            Berkeley Tours, a guide to the city&apos;s landmarks and walks. Set in Jost, a revival of Paul Renner&apos;s Futura,
+            with titles in Berkeley Post, cut for this guide. Printed in two inks — the blue and vermilion of the
             Campanile device — on cream stock.
           </Text>
           <Text style={styles.colophonBody}>

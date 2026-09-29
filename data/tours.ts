@@ -23,7 +23,7 @@ export const tours: Tour[] = [
     name: 'Downtown Berkeley',
     neighborhood: 'Downtown',
     description: 'Explore the commercial heart of Berkeley, from the grand Shattuck Hotel to the Art Deco Public Library. This walk covers the major civic and commercial buildings that define the city center.',
-    author: 'Anthony Bruce',
+    author: 'Berkeley Tours',
     stops: [
       { landmarkId: 'lm-7', order: 1, note: 'Start at Old City Hall' },
       { landmarkId: 'lm-24', order: 2, note: 'Veterans Memorial' },
@@ -415,7 +415,7 @@ export const tours: Tour[] = [
     name: 'Elmwood & Claremont',
     neighborhood: 'Elmwood / Claremont',
     description: 'Stroll through two of Berkeley\'s most charming residential neighborhoods. The Elmwood district features a vibrant village center, while the Claremont area offers grand homes and the iconic Claremont Hotel.',
-    author: 'Anthony Bruce',
+    author: 'Berkeley Tours',
     stops: [
       { landmarkId: 'lm-50', order: 1, note: 'Julia Morgan residence' },
       { landmarkId: 'lm-94', order: 2, note: 'Victorian residence' },
@@ -482,7 +482,7 @@ export const tours: Tour[] = [
     name: 'Historic Landmarks Walk',
     neighborhood: 'Various',
     description: 'A curated walk through Berkeley\'s most significant designated landmarks, covering the key architectural highlights from the BAHA guidebook. This tour hits the must-see buildings that define Berkeley\'s architectural identity.',
-    author: 'BAHA',
+    author: 'Berkeley Tours',
     stops: [
       { landmarkId: 'lm-8', order: 1, note: 'Greene & Greene masterpiece' },
       { landmarkId: 'lm-1', order: 2, note: 'National Historic Landmark' },
@@ -571,7 +571,7 @@ export const tours: Tour[] = [
     name: 'Bernard Maybeck Trail',
     neighborhood: 'Various',
     description: 'Follow Berkeley\'s most famous architect, Bernard Maybeck, from his clubhouse and masterpiece church south of campus, through the University, to Highland Place, where he built his first house, and up into La Loma Park, the hillside he made his own: Rose Walk, the Lawson House, the family\'s houses on Maybeck Twin Drive and, at the top, the Temple of Wings.',
-    author: 'BAHA',
+    author: 'Berkeley Tours',
     stops: [
       { landmarkId: 'lm-6', order: 1, note: 'A shingled clubhouse (1899)' },
       { landmarkId: 'lm-1', order: 2, note: 'His masterpiece church (1910)' },
@@ -714,7 +714,7 @@ export const tours: Tour[] = [
     name: 'Julia Morgan Legacy',
     neighborhood: 'Various',
     description: 'Celebrate the works of Julia Morgan, California\'s first licensed female architect. From her early church design to the grand Berkeley City Club, this tour showcases the range and brilliance of one of America\'s most prolific architects.',
-    author: 'BAHA',
+    author: 'Berkeley Tours',
     stops: [
       { landmarkId: 'lm-4', order: 1, note: 'St. John\'s Church (1908)' },
       { landmarkId: 'lm-181', order: 2, note: 'Baptist Divinity School (1919)' },
@@ -763,7 +763,7 @@ export const tours: Tour[] = [
     name: 'Buena Vista & Hilltop',
     neighborhood: 'Buena Vista',
     description: 'Ascend into the Berkeley Hills to discover extraordinary hilltop residences and panoramic views. This tour features some of Berkeley\'s most dramatic architecture, including the open-air Temple of Wings and the medieval-inspired Hume Castle.',
-    author: 'BAHA',
+    author: 'Berkeley Tours',
     stops: [
       { landmarkId: 'lm-53', order: 1, note: 'Coxhead\'s hillside design' },
       { landmarkId: 'lm-55', order: 2, note: 'Maybeck photo studio' },
@@ -845,7 +845,7 @@ export const tours: Tour[] = [
     name: 'Industrial Heritage',
     neighborhood: 'West Berkeley',
     description: 'Discover Berkeley\'s industrial past through its surviving factories, mills, and workshops. West Berkeley was once a thriving manufacturing district, and this tour reveals the buildings that powered the local economy from the 1890s through the mid-20th century.',
-    author: 'BAHA',
+    author: 'Berkeley Tours',
     stops: [
       { landmarkId: 'lm-77', order: 1, note: 'Woodworking & photoplayer' },
       { landmarkId: 'lm-72', order: 2, note: 'Albert Kahn factory' },
@@ -916,7 +916,7 @@ export const tours: Tour[] = [
     name: 'Piedmont Avenue Stroll',
     neighborhood: 'Piedmont',
     description: 'Walk the tree-lined boulevard Frederick Law Olmsted laid out beside the College of California in 1865, past fraternity row and the Greene brothers\' Thorsen House, to John Galen Howard\'s Memorial Stadium and up the hill to Bowles Hall.',
-    author: 'BAHA',
+    author: 'Berkeley Tours',
     stops: [
       { landmarkId: 'lm-70', order: 1, note: 'Fraternity row' },
       { landmarkId: 'lm-69', order: 2, note: 'Olmsted\'s boulevard' },
