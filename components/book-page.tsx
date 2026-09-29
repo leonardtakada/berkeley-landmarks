@@ -15,7 +15,7 @@ import { useIsFocused } from "expo-router";
 import { RIBBON_COLUMN, useBookHead } from "@/components/bookmark-ribbons";
 import { PaperSheet } from "@/components/paper-grain";
 import { Bar, DotRule } from "@/components/print";
-import { FONT, INK, MARGIN, PAGE_TURN_MS, PAPER, TYPE } from "@/constants/book";
+import { FONT, INK, MARGIN, PAGE_TURN_DELAY_MS, PAGE_TURN_MS, PAPER, TYPE } from "@/constants/book";
 
 /**
  * A section leaf of the book: paper stock, with content beginning just
@@ -57,7 +57,7 @@ export function useFirstReveal(duration = 800): SharedValue<number> {
       return;
     }
     reveal.value = withDelay(
-      Math.round(PAGE_TURN_MS * 0.45),
+      PAGE_TURN_DELAY_MS + Math.round(PAGE_TURN_MS * 0.45),
       withTiming(1, { duration, easing: Easing.bezier(0.3, 0, 0.1, 1) }),
     );
   }, [focused, duration, reduceMotion, reveal]);

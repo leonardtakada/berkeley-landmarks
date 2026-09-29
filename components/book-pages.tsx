@@ -6,12 +6,16 @@ import Animated, {
   useAnimatedStyle,
   useReducedMotion,
   useSharedValue,
+  withDelay,
   withTiming,
   type SharedValue,
 } from "react-native-reanimated";
 import { LinearGradient } from "expo-linear-gradient";
 
-import { PAGE_TURN_MS } from "@/constants/book";
+import { useBookHead } from "@/components/bookmark-ribbons";
+import { PaperSheet } from "@/components/paper-grain";
+import { InkPlane } from "@/components/print";
+import { PAGE_TURN_DELAY_MS, PAGE_TURN_MS, PAPER } from "@/constants/book";
 import { PERSPECTIVE, projectedFreeEdge } from "@/lib/page-turn";
 
 type Route = { key: string; name: string };
@@ -28,12 +32,18 @@ const DISSOLVE_MS = 200;
 /**
  * The section pages of the book, bound at the left spine.
  *
- * Turning forward (cover → registry → tours → appendix) lifts the current
+ * Turning forward (cover → tours → registry → appendix) lifts the current
  * leaf off by its free edge and swings it over the spine, revealing the next
  * page underneath; turning back brings the previous leaf down over the
  * current one. Both pages are live during the ~650ms turn: the moving leaf
  * darkens as it tilts from the light, and casts a travelling shadow onto the
  * page beneath.
+ *
+ * The book begins at the head-band. Above it (the status bar's strip) is
+ * not the book: it stays put in the colour of the open page while the
+ * leaves turn below, and a turning leaf's top edge runs along the band
+ * rather than rising past it — so the ribbons, hung from the band, always
+ * hang over the page.
  *
  * `progress` idles at 0 between turns. At 0 every role already looks right
  * for the first frame of a new turn (a forward leaf lies flat, a backward
@@ -55,6 +65,7 @@ export function BookPages({
 }) {
   const reduceMotion = useReducedMotion();
   const { width } = useWindowDimensions();
+  const { top } = useBookHead();
   const focusedKey = routes[index].key;
   const pageOf = (key: string) => order.indexOf(routes.find((r) => r.key === key)?.name ?? "");
 
@@ -104,37 +115,80 @@ export function BookPages({
       return;
     }
     const id = turn.id;
-    progress.value = withTiming(
-      1,
-      { duration: reduceMotion ? DISSOLVE_MS : PAGE_TURN_MS, easing: EASE },
-      (finished) => {
+    // (A beat behind the ribbon curling up out of its way.)
+    progress.value = withDelay(
+      reduceMotion ? 0 : PAGE_TURN_DELAY_MS,
+      withTiming(1, { duration: reduceMotion ? DISSOLVE_MS : PAGE_TURN_MS, easing: EASE }, (finished) => {
         if (finished) runOnJS(finish)(id);
-      },
+      }),
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [turn?.id]);
 
+  const isCover = (key: string) => pageOf(key) === 0;
   return (
     <View style={StyleSheet.absoluteFill}>
-      {routes.map((route) => {
-        if (!loaded.includes(route.key)) return null;
-        let role: Role = "hidden";
-        if (!turn) role = route.key === settled ? "rest" : "hidden";
-        else if (route.key === turn.from) role = turn.forward ? "moving" : "beneath";
-        else if (route.key === turn.to) role = turn.forward ? "beneath" : "moving";
-        return (
-          <Leaf
-            key={route.key}
-            role={role}
-            forward={turn?.forward ?? true}
-            progress={progress}
-            width={width}
-            dissolve={reduceMotion}
-          >
-            {descriptors[route.key].render()}
-          </Leaf>
-        );
-      })}
+      <HeadStrip
+        height={top}
+        progress={progress}
+        from={isCover(turn ? turn.from : settled)}
+        to={isCover(turn ? turn.to : settled)}
+      />
+      {/* The book, from the head-band down. A real view that clips, so a
+          lifted leaf is drawn within it and never over the ribbons. */}
+      <View collapsable={false} style={[styles.book, { top }]}>
+        {routes.map((route) => {
+          if (!loaded.includes(route.key)) return null;
+          let role: Role = "hidden";
+          if (!turn) role = route.key === settled ? "rest" : "hidden";
+          else if (route.key === turn.from) role = turn.forward ? "moving" : "beneath";
+          else if (route.key === turn.to) role = turn.forward ? "beneath" : "moving";
+          return (
+            <Leaf
+              key={route.key}
+              role={role}
+              forward={turn?.forward ?? true}
+              progress={progress}
+              width={width}
+              head={top}
+              dissolve={reduceMotion}
+            >
+              {descriptors[route.key].render()}
+            </Leaf>
+          );
+        })}
+      </View>
+    </View>
+  );
+}
+
+/**
+ * The strip above the head-band, which isn't part of the book: paper when a
+ * section is open, the cover board on the cover, and between the two while
+ * the cover turns.
+ */
+function HeadStrip({
+  height,
+  progress,
+  from,
+  to,
+}: {
+  height: number;
+  progress: SharedValue<number>;
+  /** Whether the page turned from (or the settled page) is the cover. */
+  from: boolean;
+  to: boolean;
+}) {
+  const board = useAnimatedStyle(() => {
+    const p = progress.value;
+    return { opacity: (from ? 1 - p : 0) + (to ? p : 0) };
+  }, [from, to]);
+  return (
+    <View pointerEvents="none" style={[styles.strip, { height }]}>
+      <PaperSheet stock="page" />
+      <Animated.View style={[StyleSheet.absoluteFill, board]}>
+        <InkPlane color={PAPER.board} texture={0.18} style={StyleSheet.absoluteFill} />
+      </Animated.View>
     </View>
   );
 }
@@ -144,6 +198,7 @@ function Leaf({
   forward,
   progress,
   width,
+  head,
   dissolve,
   children,
 }: {
@@ -151,11 +206,14 @@ function Leaf({
   forward: boolean;
   progress: SharedValue<number>;
   width: number;
+  /** Where the book begins (the head-band), from the top of the screen. */
+  head: number;
   dissolve: boolean;
   children: React.ReactNode;
 }) {
   const moving = role === "moving";
   const beneath = role === "beneath";
+  const hidden = role === "hidden";
 
   /** How far the moving leaf is lifted: 0 flat on the book, 1 edge-on. */
   const liftOf = (p: number) => {
@@ -163,7 +221,11 @@ function Leaf({
     return forward ? p : 1 - p;
   };
 
+  // A changed role reaches this style a frame after the page is shown, so a
+  // hidden page is hidden here too: turned back to, it stays unseen until
+  // the frame it's first drawn edge-on, instead of flashing up flat.
   const leafStyle = useAnimatedStyle(() => {
+    if (hidden) return { opacity: 0, transform: [] };
     if (!moving) return { opacity: 1, transform: [] };
     const lift = liftOf(progress.value);
     if (dissolve) return { opacity: 1 - lift, transform: [] };
@@ -176,7 +238,7 @@ function Leaf({
         { translateX: width / 2 },
       ],
     };
-  }, [moving, forward, width, dissolve]);
+  }, [hidden, moving, forward, width, dissolve]);
 
   // The lifted leaf turns away from the light, darkest toward its free edge.
   const tiltShade = useAnimatedStyle(() => {
@@ -206,43 +268,43 @@ function Leaf({
   }, [beneath, forward, width, dissolve]);
 
   // Always the same element type, so hiding a page never remounts it (its
-  // scroll position and state survive being turned past).
+  // scroll position and state survive being turned past). The leaf is laid
+  // out full-screen, as the screens expect, with the strip above the band
+  // cut away; it turns in perspective about its top edge, so that edge stays
+  // on the band as the leaf lifts.
   return (
     <Animated.View
       pointerEvents={role === "rest" ? "auto" : "none"}
       style={[
-        StyleSheet.absoluteFill,
-        { zIndex: moving ? 2 : 1 },
+        styles.leaf,
+        { top: -head, transformOrigin: [width / 2, head, 0], zIndex: moving ? 2 : 1 },
         role === "hidden" && styles.hidden,
         leafStyle,
       ]}
     >
       {children}
-      {beneath ? (
-        <>
-          <Animated.View pointerEvents="none" style={[StyleSheet.absoluteFill, styles.dim, underDim]} />
-          <Animated.View pointerEvents="none" style={[styles.cast, castShadow]}>
-            <LinearGradient
-              colors={["rgba(28,20,12,0.42)", "rgba(28,20,12,0.14)", "rgba(28,20,12,0)"]}
-              locations={[0, 0.35, 1]}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 0 }}
-              style={StyleSheet.absoluteFill}
-            />
-          </Animated.View>
-        </>
-      ) : null}
-      {moving ? (
-        <Animated.View pointerEvents="none" style={[StyleSheet.absoluteFill, tiltShade]}>
-          <LinearGradient
-            colors={["rgba(40,30,18,0.05)", "rgba(40,30,18,0.2)", "rgba(40,30,18,0.5)"]}
-            locations={[0, 0.6, 1]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 0 }}
-            style={StyleSheet.absoluteFill}
-          />
-        </Animated.View>
-      ) : null}
+      {/* Always mounted, so each shows its own opacity from the first frame
+          of a turn: a shade mounted mid-turn would show, until the page
+          moved, whatever its style first worked out. */}
+      <Animated.View pointerEvents="none" style={[StyleSheet.absoluteFill, styles.dim, underDim]} />
+      <Animated.View pointerEvents="none" style={[styles.cast, castShadow]}>
+        <LinearGradient
+          colors={["rgba(28,20,12,0.42)", "rgba(28,20,12,0.14)", "rgba(28,20,12,0)"]}
+          locations={[0, 0.35, 1]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 0 }}
+          style={StyleSheet.absoluteFill}
+        />
+      </Animated.View>
+      <Animated.View pointerEvents="none" style={[StyleSheet.absoluteFill, tiltShade]}>
+        <LinearGradient
+          colors={["rgba(40,30,18,0.05)", "rgba(40,30,18,0.2)", "rgba(40,30,18,0.5)"]}
+          locations={[0, 0.6, 1]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 0 }}
+          style={StyleSheet.absoluteFill}
+        />
+      </Animated.View>
     </Animated.View>
   );
 }
@@ -250,6 +312,25 @@ function Leaf({
 const CAST_W = 110;
 
 const styles = StyleSheet.create({
+  strip: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+  },
+  book: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    bottom: 0,
+    overflow: "hidden",
+  },
+  leaf: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    bottom: 0,
+  },
   hidden: {
     display: "none",
   },

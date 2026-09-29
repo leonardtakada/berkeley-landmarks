@@ -66,26 +66,30 @@ interface Life {
  * label — arch, circle, tall panel or square — after the Showa-era travel
  * labels. With `animated`, it is laid down as the page settles; on a page
  * that scrolls, it comes alive as the reader scrolls — looking about,
- * blinking, smiling, raising its brows.
+ * blinking, smiling, raising its brows. With `loop`, it goes through its
+ * gestures on its own, one every couple of seconds, for a portrait held
+ * still at the head of a page.
  */
 export function ArchitectPortrait({
   architect,
   width = 132,
   animated = true,
   delay = 250,
+  loop = false,
   style,
 }: {
   architect: ArchitectKey;
   width?: number;
   animated?: boolean;
   delay?: number;
+  loop?: boolean;
   style?: StyleProp<ViewStyle>;
 }) {
   const reduceMotion = useReducedMotion();
   const shouldAnimate = animated && !reduceMotion;
   const t = useSharedValue(shouldAnimate ? 0 : 1);
   const ref = useAnimatedRef<Animated.View>();
-  const life = useLife(architect, !reduceMotion, shouldAnimate ? delay + 520 : 400, ref);
+  const life = useLife(architect, !reduceMotion, shouldAnimate ? delay + 520 : 400, ref, loop);
 
   useEffect(() => {
     if (!shouldAnimate) return;
@@ -116,12 +120,57 @@ export function ArchitectPortrait({
   );
 }
 
+/** How long each gesture takes, start to finish (ms). */
+const LASTS: Record<Gesture, number> = { blink: 280, twice: 570, smile: 1620, brows: 1070, left: 1420, right: 1420 };
+
+/** Plays one gesture; `done` is called once the face is back at rest. */
+function play(g: Gesture, life: Life, done: () => void) {
+  "worklet";
+  const { blink, smile, brow, look, puff } = life;
+  puff.set(withSequence(withTiming(1, { duration: 700 }), withTiming(0, { duration: 900 })));
+  if (g === "blink") {
+    blink.set(withSequence(withTiming(1, { duration: 80 }), withDelay(60, withTiming(0, { duration: 140 }, done))));
+  } else if (g === "twice") {
+    blink.set(
+      withSequence(
+        withTiming(1, { duration: 80 }),
+        withTiming(0, { duration: 120 }),
+        withDelay(100, withTiming(1, { duration: 80 })),
+        withDelay(50, withTiming(0, { duration: 140 }, done)),
+      ),
+    );
+  } else if (g === "smile") {
+    smile.set(withSequence(withTiming(1, { duration: 240 }), withDelay(1000, withTiming(0, { duration: 380 }, done))));
+  } else if (g === "brows") {
+    brow.set(withSequence(withTiming(1, { duration: 170 }), withDelay(600, withTiming(0, { duration: 300 }, done))));
+  } else {
+    look.set(
+      withSequence(
+        withTiming(g === "left" ? -1.2 : 1.2, { duration: 260 }),
+        withDelay(800, withTiming(0, { duration: 360 }, done)),
+      ),
+    );
+  }
+}
+
+function rest() {
+  "worklet";
+}
+
 /**
  * The gestures, driven by the page's scroll. Between gestures nothing moves,
  * and a portrait scrolled off the screen skips its turn — so a page of them
- * costs nothing while it's read, and little while it's scrolled.
+ * costs nothing while it's read, and little while it's scrolled. With
+ * `loop`, they're driven by the clock instead: the next gesture after a
+ * breath, round and round.
  */
-function useLife(architect: ArchitectKey, on: boolean, settle: number, ref: AnimatedRef<Animated.View>): Life {
+function useLife(
+  architect: ArchitectKey,
+  on: boolean,
+  settle: number,
+  ref: AnimatedRef<Animated.View>,
+  loopOn: boolean,
+): Life {
   const scroll = useScrollClock();
   const { height: screenH } = useWindowDimensions();
   const blink = useSharedValue(0);
@@ -133,18 +182,19 @@ function useLife(architect: ArchitectKey, on: boolean, settle: number, ref: Anim
   const beat = useSharedValue(0);
   const busy = useSharedValue(0);
   const { loop, every } = LIFE[architect];
+  const life = { look, blink, smile, brow, puff };
 
   // A first blink, once the portrait has settled on the page.
   useEffect(() => {
-    if (!on) return;
+    if (!on || loopOn) return;
     blink.set(withDelay(settle + 300, withSequence(withTiming(1, { duration: 80 }), withDelay(60, withTiming(0, { duration: 140 })))));
-  }, [on, settle, blink]);
+  }, [on, loopOn, settle, blink]);
 
   // Every so far down (or up) the page, the next gesture in their loop.
   useAnimatedReaction(
     () => (scroll ? scroll.get() : 0),
     (y, prev) => {
-      if (!on || prev === null) return;
+      if (!on || loopOn || prev === null) return;
       travel.set(travel.get() + Math.abs(y - prev));
       if (busy.get() || travel.get() < every) return;
       travel.set(0);
@@ -157,35 +207,28 @@ function useLife(architect: ArchitectKey, on: boolean, settle: number, ref: Anim
       };
       const g = loop[beat.get() % loop.length];
       beat.set(beat.get() + 1);
-      puff.set(withSequence(withTiming(1, { duration: 700 }), withTiming(0, { duration: 900 })));
-      if (g === "blink") {
-        blink.set(withSequence(withTiming(1, { duration: 80 }), withDelay(60, withTiming(0, { duration: 140 }, done))));
-      } else if (g === "twice") {
-        blink.set(
-          withSequence(
-            withTiming(1, { duration: 80 }),
-            withTiming(0, { duration: 120 }),
-            withDelay(100, withTiming(1, { duration: 80 })),
-            withDelay(50, withTiming(0, { duration: 140 }, done)),
-          ),
-        );
-      } else if (g === "smile") {
-        smile.set(withSequence(withTiming(1, { duration: 240 }), withDelay(1000, withTiming(0, { duration: 380 }, done))));
-      } else if (g === "brows") {
-        brow.set(withSequence(withTiming(1, { duration: 170 }), withDelay(600, withTiming(0, { duration: 300 }, done))));
-      } else {
-        look.set(
-          withSequence(
-            withTiming(g === "left" ? -1.2 : 1.2, { duration: 260 }),
-            withDelay(800, withTiming(0, { duration: 360 }, done)),
-          ),
-        );
-      }
+      play(g, { look, blink, smile, brow, puff }, done);
     },
-    [on, loop, every, screenH],
+    [on, loopOn, loop, every, screenH],
   );
 
-  return { look, blink, smile, brow, puff };
+  // On the clock: a gesture, then a breath (a little longer every third
+  // time, so the rhythm never ticks), and the next.
+  useEffect(() => {
+    if (!on || !loopOn) return;
+    let n = 0;
+    let timer: ReturnType<typeof setTimeout>;
+    const next = () => {
+      const g = loop[n % loop.length];
+      play(g, { look, blink, smile, brow, puff }, rest);
+      n += 1;
+      timer = setTimeout(next, LASTS[g] + (n % 3 === 0 ? 1700 : 950));
+    };
+    timer = setTimeout(next, settle + 300);
+    return () => clearTimeout(timer);
+  }, [on, loopOn, loop, settle, look, blink, smile, brow, puff]);
+
+  return life;
 }
 
 /** A moving part of a portrait: its sheet, slid, squashed or swapped. */

@@ -287,6 +287,16 @@ export default function LandmarkEntryScreen() {
                 <Text style={styles.link}>{worksBy(architect).length - 1} more in the registry</Text>
                 <Arrow length={18} />
               </Pressable>
+              <Pressable
+                onPress={() => router.push(`/architect/${architect}`)}
+                hitSlop={8}
+                style={({ pressed }) => [styles.linkRow, styles.bioLink, pressed && { opacity: 0.5 }]}
+                accessibilityRole="button"
+                accessibilityLabel={`Biography of ${ARCHITECTS[architect].name}`}
+              >
+                <Text style={styles.link}>Biography</Text>
+                <Arrow length={18} />
+              </Pressable>
             </View>
           </View>
         ) : null}
@@ -554,6 +564,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 10,
     marginTop: 12,
+  },
+  bioLink: {
+    marginTop: 10,
   },
   link: {
     fontFamily: FONT.medium,

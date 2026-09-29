@@ -42,10 +42,21 @@ Auto Indicator LLC — in the Appendix only, never on the cover.
 - **Ribbons** (`components/bookmark-ribbons.tsx`): flat, square-cut tapes
   (54pt wide) under a thin solid blue head-band, in book order: Tours,
   Landmarks, Appendix. The open section is solid blue and drawn out further;
-  the rest are blue tint. Eased motion, no bounce.
+  the rest are blue tint. Eased motion, no bounce. They lie over the open
+  page, so a turn clears them first: the tapped ribbon curls up off the page
+  like paper — rolling from its cut end toward the reader, the underside of
+  the roll showing — while the others fade out. It unrolls onto the new page
+  as the leaf lands (in solid blue if its section opened) and the others fade
+  back. The ribbon is cut into slices laid along the curve in one shared
+  perspective. The leaf starts `PAGE_TURN_DELAY_MS` behind the curl.
 - **Sections**: leaves bound at the left spine, ~650ms page turn
   (`components/book-pages.tsx`). Part One The Tours, Part Two The Registry,
-  Appendix.
+  Appendix. The book begins at the head-band: the strip above it (the status
+  bar) is not the book, and stays put in the open page's stock — paper, or
+  the board on the cover — while the leaves turn in a clipped frame below.
+  A leaf turns in perspective about its top edge, so that edge runs along
+  the band instead of rising past it, and the ribbons always hang over paper.
+  (The frame clips, so a lifted leaf can't be drawn over the ribbons.)
 - **Entries**: leaves laid over the book, hinged at the right
   (`lib/page-turn.ts`); swipe back from the left edge.
 - **Map** (`app/map.tsx`): the live canvas has no texture; its chrome is
@@ -57,7 +68,22 @@ Auto Indicator LLC — in the Appendix only, never on the cover.
   naming the walk, its length, the streets it follows and a locator; open,
   the route over the street plan (baked per walk from OpenStreetMap by
   `scripts/bake-walk-streets.ts`), with street names, numbered stops, start
-  and finish, a locator, scale and north point.
+  and finish, a locator, scale and north point. Where stops crowd together
+  (a street of one architect's houses) their numbers stand aside on short
+  leaders so each can be read.
+- **Walks** (`data/tours.ts`): each route is drawn along the ways a walker
+  takes — streets, campus walks, paths and steps from OpenStreetMap — by
+  `npx tsx scripts/route-walks.ts`, which stands each stop on the street it
+  faces (its address's street, or `FACES` for campus buildings) so the line
+  passes the front of the building instead of turning up its drive, and
+  writes the route, distance and time. `--plan` prints each walk's length and
+  how much of it doubles back beside the shortest order for its stops; stop
+  order is chosen from that and kept in `data/tours.ts`. Re-run
+  `scripts/bake-walk-streets.ts` after. Landmark positions are their
+  buildings' (OpenStreetMap footprints, checked against Nominatim);
+  `__tests__/walk-routes.test.ts` checks each walk passes its stops in order
+  and is as long as it says. Walk mode counts a stop reached at the building
+  or where the route passes it.
 
 ## Print primitives — `components/print.tsx`
 `InkPlane`, `Rule`, `DotRule`, `Bar`, `Arrow`, `Label`, `Annotation`.
@@ -101,6 +127,18 @@ Ranch shed roof). No photographs of the later six were to hand, so theirs
 are period caricatures rather than likenesses.
 Shown on their entries, the walks they lead, index headings and the
 Appendix; matching in `lib/architects.ts`.
+
+Each has a biography page (`app/architect/[key].tsx`), from the Appendix
+("Biography" under their entries), their entries and the walks they lead:
+the portrait held at the head of the page, going through its gestures on a
+clock (`loop`), the name beside it; the life below, scrolling, with notes to
+its sources; then their entries in the guide. The lives
+(`lib/architect-bios.ts`) are written from their Wikipedia articles and the
+sources those cite — for Hays, Plachek, Gutterson and Yelland, who have no
+article, from the Wikipedia articles that mention them and the archives
+they cite (UC Berkeley's Environmental Design Archives, PCAD). Notes are
+`[n]` in the text; `__tests__/architect-bios.test.ts` checks every note has
+a source and every source a note.
 
 ## Photographs
 An entry's lead photograph prints as its plate; when it has more — the

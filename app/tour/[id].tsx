@@ -95,6 +95,16 @@ export default function TourChapterScreen() {
               <Text style={styles.leadName}>{ARCHITECTS[lead].name}</Text>
               <Text style={[TYPE.label, styles.leadYears]}>{ARCHITECTS[lead].years}</Text>
               <Text style={styles.leadNote}>{ARCHITECTS[lead].note}</Text>
+              <Pressable
+                onPress={() => router.push(`/architect/${lead}`)}
+                hitSlop={8}
+                style={({ pressed }) => [styles.bioLink, pressed && { opacity: 0.5 }]}
+                accessibilityRole="button"
+                accessibilityLabel={`Biography of ${ARCHITECTS[lead].name}`}
+              >
+                <Text style={styles.bioLinkText}>Biography</Text>
+                <Arrow length={16} />
+              </Pressable>
             </View>
           </View>
         ) : null}
@@ -298,6 +308,20 @@ const styles = StyleSheet.create({
     lineHeight: 20,
     color: INK.charcoal,
     marginTop: 10,
+  },
+  bioLink: {
+    flexDirection: "row",
+    alignItems: "center",
+    alignSelf: "flex-start",
+    gap: 8,
+    marginTop: 12,
+  },
+  bioLinkText: {
+    fontFamily: FONT.medium,
+    fontSize: 11.5,
+    letterSpacing: 1.8,
+    textTransform: "uppercase",
+    color: INK.blue,
   },
   rule: {
     marginBottom: 18,

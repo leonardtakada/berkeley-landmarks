@@ -81,6 +81,12 @@ export const FONT_ASSETS = {
 /** One page turn, cover to colophon. */
 export const PAGE_TURN_MS = 650;
 
+/**
+ * Turning to a section, its ribbon starts to curl up off the page and the
+ * others fade; the leaf starts to turn PAGE_TURN_DELAY_MS in, a beat behind.
+ */
+export const PAGE_TURN_DELAY_MS = 50;
+
 export const TYPE = StyleSheet.create({
   /** Tracked capitals above a title: "CHAPTER 01 — THE REGISTRY". */
   kicker: {

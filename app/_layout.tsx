@@ -136,6 +136,7 @@ export default function RootLayout() {
             />
             <Stack.Screen name="landmark/[id]" />
             <Stack.Screen name="tour/[id]" />
+            <Stack.Screen name="architect/[key]" />
             <Stack.Screen
               name="map"
               options={{

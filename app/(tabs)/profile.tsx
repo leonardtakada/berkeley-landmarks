@@ -60,18 +60,35 @@ export default function AppendixScreen() {
           {GALLERY.map((k, i) => (
             <InkIn key={k} reveal={reveal} index={2 + i} step={0.1} style={styles.sitter}>
               <Pressable
-                onPress={() => router.navigate({ pathname: "/registry", params: { q: ARCHITECTS[k].surname } })}
+                onPress={() => router.push(`/architect/${k}`)}
                 style={({ pressed }) => [styles.sitterInner, pressed && { opacity: 0.6 }]}
                 accessibilityRole="button"
-                accessibilityLabel={`${ARCHITECTS[k].name}: ${worksBy(k).length} entries in the registry`}
+                accessibilityLabel={`${ARCHITECTS[k].name}, ${ARCHITECTS[k].years}`}
+                accessibilityHint="Opens their biography"
               >
                 <ArchitectPortrait architect={k} width={132} animated={false} />
                 <Text style={styles.sitterName}>{ARCHITECTS[k].name}</Text>
                 <Text style={styles.sitterYears}>{ARCHITECTS[k].years}</Text>
-                <View style={styles.worksRow}>
-                  <Text style={styles.link}>{worksBy(k).length} entries</Text>
-                  <Arrow length={16} />
-                </View>
+              </Pressable>
+              <Pressable
+                onPress={() => router.navigate({ pathname: "/registry", params: { q: ARCHITECTS[k].surname } })}
+                hitSlop={{ top: 4, bottom: 4 }}
+                style={({ pressed }) => [styles.worksRow, pressed && { opacity: 0.6 }]}
+                accessibilityRole="button"
+                accessibilityLabel={`${worksBy(k).length} entries in the registry`}
+              >
+                <Text style={styles.link}>{worksBy(k).length} entries</Text>
+                <Arrow length={16} />
+              </Pressable>
+              <Pressable
+                onPress={() => router.push(`/architect/${k}`)}
+                hitSlop={{ top: 4, bottom: 4 }}
+                style={({ pressed }) => [styles.bioRow, pressed && { opacity: 0.6 }]}
+                accessibilityRole="button"
+                accessibilityLabel={`Biography of ${ARCHITECTS[k].name}`}
+              >
+                <Text style={styles.link}>Biography</Text>
+                <Arrow length={16} />
               </Pressable>
             </InkIn>
           ))}
@@ -189,8 +206,16 @@ const styles = StyleSheet.create({
   worksRow: {
     flexDirection: "row",
     alignItems: "center",
+    alignSelf: "flex-start",
     gap: 8,
     marginTop: 8,
+  },
+  bioRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    alignSelf: "flex-start",
+    gap: 8,
+    marginTop: 7,
   },
   link: {
     fontFamily: FONT.medium,

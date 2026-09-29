@@ -72,3 +72,6 @@ expo-qr-code.png
 credentials.json
 .eas
 secrets/
+
+# fetched map data for scripts
+scripts/.cache/

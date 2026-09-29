@@ -139,7 +139,7 @@ export function FoldOutMap({
           <Animated.View pointerEvents="none" style={[styles.cover, { height: panelH }, coverStyle]}>
             <InkPlane color={INK.blue} texture={0.3} style={styles.coverPlane}>
               <View style={styles.coverText}>
-                <Text style={styles.coverKicker}>
+                <Text style={styles.coverKicker} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>
                   Walking map · {stops.length} stops · {distance}
                 </Text>
                 <Text style={styles.coverTitle} numberOfLines={1} adjustsFontSizeToFit>
@@ -184,6 +184,44 @@ export function FoldOutMap({
       </Animated.View>
     </View>
   );
+}
+
+const MARK_R = 10;
+
+/**
+ * The stops' numbered marks, nudged apart where stops crowd together (a
+ * street of houses by one architect) so that every number can be read; each
+ * keeps its true place in `at`, for a leader.
+ */
+function spread<T extends { x: number; y: number }>(marks: T[], width: number, height: number) {
+  const gap = MARK_R * 2 + 1.5;
+  const out = marks.map((m) => ({ ...m, at: { x: m.x, y: m.y } }));
+  for (let pass = 0; pass < 80; pass++) {
+    let crowded = false;
+    for (let i = 0; i < out.length; i++) {
+      for (let j = i + 1; j < out.length; j++) {
+        const [a, b] = [out[i], out[j]];
+        let dx = b.x - a.x;
+        let dy = b.y - a.y;
+        let d = Math.hypot(dx, dy);
+        if (d >= gap) continue;
+        crowded = true;
+        // (Two stops at one spot part along the walk's order.)
+        if (d < 0.01) [dx, dy, d] = [1, 0.4, Math.hypot(1, 0.4)];
+        const push = (gap - d) / 2 + 0.05;
+        a.x -= (dx / d) * push;
+        a.y -= (dy / d) * push;
+        b.x += (dx / d) * push;
+        b.y += (dy / d) * push;
+      }
+    }
+    for (const m of out) {
+      m.x = Math.min(width - 20, Math.max(20, m.x));
+      m.y = Math.min(height - 40, Math.max(20, m.y));
+    }
+    if (!crowded) break;
+  }
+  return out;
 }
 
 /** One panel of the sheet: a slice of the drawing, hinged at its top crease. */
@@ -337,7 +375,11 @@ function RouteDrawing({
 
   const line = (route.length >= 2 ? route : stops).map(geo.project);
   const routeD = line.map((p, i) => `${i ? "L" : "M"}${p.x.toFixed(1)} ${p.y.toFixed(1)}`).join(" ");
-  const marks = [...stops].sort((a, b) => a.order - b.order).map((s) => ({ ...geo.project(s), order: s.order }));
+  const marks = spread(
+    [...stops].sort((a, b) => a.order - b.order).map((s) => ({ ...geo.project(s), order: s.order })),
+    width,
+    height,
+  );
   const bar = Math.min(geo.quarterMile, width * 0.4);
 
   return (
@@ -393,9 +435,18 @@ function RouteDrawing({
           </SvgText>
         </G>
       ))}
+      {/* Where stops crowd together, their numbers stand aside on leaders. */}
+      {marks.map((m) =>
+        Math.hypot(m.x - m.at.x, m.y - m.at.y) > 3 ? (
+          <G key={`at${m.order}`}>
+            <Path d={`M${m.at.x.toFixed(1)} ${m.at.y.toFixed(1)} L${m.x.toFixed(1)} ${m.y.toFixed(1)}`} stroke={INK.blue} strokeWidth={1.2} />
+            <Circle cx={m.at.x} cy={m.at.y} r={3} fill={INK.blue} stroke={PAPER.slip} strokeWidth={1} />
+          </G>
+        ) : null,
+      )}
       {marks.map((m) => (
         <G key={m.order}>
-          <Circle cx={m.x} cy={m.y} r={10} fill={INK.blue} />
+          <Circle cx={m.x} cy={m.y} r={MARK_R} fill={INK.blue} stroke={PAPER.slip} strokeWidth={1.2} />
           <SvgText
             x={m.x}
             y={m.y + 3.8}

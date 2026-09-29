@@ -1,8 +1,9 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Platform } from "react-native";
 import * as Haptics from "expo-haptics";
 import type { Tour } from "@/data/tours";
 import { landmarks, type Landmark } from "@/data/landmarks";
+import { stopIndices } from "@/lib/route-legs";
 
 /** Distance (meters) at which a stop counts as "arrived". */
 export const ARRIVAL_RADIUS_M = 40;
@@ -13,7 +14,7 @@ export interface TourFollowState {
   /** 0-based index of the stop the walker is heading toward. */
   currentStopIndex: number;
   /** Ordered stops resolved to their landmarks (landmark-less stops dropped). */
-  stops: Array<{ stop: Tour["stops"][number]; landmark: Landmark }>;
+  stops: { stop: Tour["stops"][number]; landmark: Landmark }[];
   totalStops: number;
   /** Latest known user location, if any. */
   location: { latitude: number; longitude: number } | null;
@@ -54,7 +55,8 @@ function fireArrivalHaptic() {
 
 /**
  * Follow-along tour mode: watches the user's location along a tour route,
- * auto-advances when they come within ARRIVAL_RADIUS_M of the next stop,
+ * auto-advances when they come within ARRIVAL_RADIUS_M of the next stop (or
+ * of the point where the route passes it),
  * and fires haptic feedback on arrival. Falls back to manual step-through
  * when geolocation is unavailable or denied.
  */
@@ -64,38 +66,36 @@ export function useTourFollow(tour: Tour | null): TourFollowState {
   const [location, setLocation] = useState<{ latitude: number; longitude: number } | null>(null);
   const [locationUnavailable, setLocationUnavailable] = useState(false);
 
-  const stops = useRef(
-    (tour?.stops ?? [])
-      .slice()
-      .sort((a, b) => a.order - b.order)
-      .map((stop) => ({ stop, landmark: landmarks.find((l) => l.id === stop.landmarkId) }))
-      .filter((s): s is { stop: Tour["stops"][number]; landmark: Landmark } => !!s.landmark)
+  const stops = useMemo(
+    () =>
+      (tour?.stops ?? [])
+        .slice()
+        .sort((a, b) => a.order - b.order)
+        .map((stop) => ({ stop, landmark: landmarks.find((l) => l.id === stop.landmarkId) }))
+        .filter((s): s is { stop: Tour["stops"][number]; landmark: Landmark } => !!s.landmark),
+    [tour],
   );
-  stops.current =
-    (tour?.stops ?? [])
-      .slice()
-      .sort((a, b) => a.order - b.order)
-      .map((stop) => ({ stop, landmark: landmarks.find((l) => l.id === stop.landmarkId) }))
-      .filter((s): s is { stop: Tour["stops"][number]; landmark: Landmark } => !!s.landmark);
 
   // Reset progress when the tour changes.
-  useEffect(() => {
+  const [forTour, setForTour] = useState(tour?.id);
+  if (forTour !== tour?.id) {
+    setForTour(tour?.id);
     setActive(false);
     setCurrentStopIndex(0);
     setLocation(null);
     setLocationUnavailable(false);
-  }, [tour?.id]);
+  }
 
-  const totalStops = stops.current.length;
+  const totalStops = stops.length;
   const finished = currentStopIndex >= totalStops;
 
   const advance = useCallback(() => {
     setCurrentStopIndex((i) => {
-      const next = Math.min(i + 1, stops.current.length);
+      const next = Math.min(i + 1, totalStops);
       if (next > i) fireArrivalHaptic();
       return next;
     });
-  }, []);
+  }, [totalStops]);
 
   const rewind = useCallback(() => {
     setCurrentStopIndex((i) => Math.max(0, i - 1));
@@ -104,13 +104,21 @@ export function useTourFollow(tour: Tour | null): TourFollowState {
   const start = useCallback(() => setActive(true), []);
   const stop = useCallback(() => setActive(false), []);
 
-  const nextStop = !finished ? stops.current[currentStopIndex] : null;
+  const nextStop = !finished ? stops[currentStopIndex] : null;
+  // Where the walk passes each stop: a big building (the stadium, a school)
+  // can stand well back from the street the walker is on.
+  const route = tour?.routeCoordinates ?? [];
+  const passAt = route.length > 1 ? stopIndices(route, stops.map((s) => s.landmark)) : [];
+  const passing = nextStop && passAt[currentStopIndex] !== undefined ? route[passAt[currentStopIndex]] : null;
   const distanceToNextM =
     location && nextStop
-      ? distanceMeters(location, {
-          latitude: nextStop.landmark.latitude,
-          longitude: nextStop.landmark.longitude,
-        })
+      ? Math.min(
+          distanceMeters(location, {
+            latitude: nextStop.landmark.latitude,
+            longitude: nextStop.landmark.longitude,
+          }),
+          passing ? distanceMeters(location, passing) : Infinity,
+        )
       : null;
 
   // Location watch: expo-location on native, navigator.geolocation on web.
@@ -182,7 +190,7 @@ export function useTourFollow(tour: Tour | null): TourFollowState {
   return {
     active,
     currentStopIndex,
-    stops: stops.current,
+    stops,
     totalStops,
     location,
     distanceToNextM,
