@@ -72,7 +72,7 @@ export const tours: Tour[] = [
     name: 'South of Campus',
     neighborhood: 'Southside',
     description: 'A walk through the neighborhoods south of the UC Berkeley campus, featuring churches, clubs, and residential landmarks designed by Berkeley\'s most celebrated architects including Maybeck, Morgan, and Schweinfurth.',
-    author: 'Susan D. Cerny',
+    author: 'Berkeley Tours',
     stops: [
       { landmarkId: 'lm-32', order: 1, note: 'A shingled girls\' school (1892)' },
       { landmarkId: 'lm-1', order: 2, note: 'Maybeck\'s masterpiece' },
@@ -108,7 +108,7 @@ export const tours: Tour[] = [
     name: 'Northside & Hills',
     neighborhood: 'Northside',
     description: 'Discover the architectural treasures of Berkeley\'s Northside, from the whimsical Normandy Village to the hillside homes of renowned architects. This tour climbs into the Berkeley Hills for stunning views and remarkable residences.',
-    author: 'Daniella Thompson',
+    author: 'Berkeley Tours',
     stops: [
       { landmarkId: 'lm-20', order: 1, note: 'Fairy-tale village' },
       { landmarkId: 'lm-21', order: 2, note: 'John Galen Howard design' },
@@ -214,7 +214,7 @@ export const tours: Tour[] = [
     name: 'UC Berkeley Campus',
     neighborhood: 'UC Campus',
     description: 'Walk through the historic heart of the University of California, Berkeley, visiting the iconic buildings designed by John Galen Howard as part of the Phoebe Hearst Architectural Plan. From Sather Gate to the Campanile, experience one of America\'s great university campuses.',
-    author: 'Steven Finacom',
+    author: 'Berkeley Tours',
     stops: [
       { landmarkId: 'lm-40', order: 1, note: 'Iconic campus entrance' },
       { landmarkId: 'lm-63', order: 2, note: 'Classical lecture hall' },
@@ -351,7 +351,7 @@ export const tours: Tour[] = [
     name: 'West Berkeley Heritage',
     neighborhood: 'West Berkeley',
     description: 'Explore the oldest part of Berkeley, where the city\'s industrial and immigrant heritage comes alive. From Victorian cottages to Finnish halls, this walk reveals the working-class roots that shaped the community.',
-    author: 'Stephanie Manning & Daniella Thompson',
+    author: 'Berkeley Tours',
     stops: [
       { landmarkId: 'lm-13', order: 1, note: 'Spanish Colonial courtyard' },
       { landmarkId: 'lm-43', order: 2, note: 'Finnish immigrant heritage' },
@@ -481,7 +481,7 @@ export const tours: Tour[] = [
     id: 'tour-historic-landmarks',
     name: 'Historic Landmarks Walk',
     neighborhood: 'Various',
-    description: 'A curated walk through Berkeley\'s most significant designated landmarks, covering the key architectural highlights from the BAHA guidebook. This tour hits the must-see buildings that define Berkeley\'s architectural identity.',
+    description: 'A curated walk through Berkeley\'s most significant designated landmarks, covering the key architectural highlights of the city\'s designated landmarks. This tour hits the must-see buildings that define Berkeley\'s architectural identity.',
     author: 'Berkeley Tours',
     stops: [
       { landmarkId: 'lm-8', order: 1, note: 'Greene & Greene masterpiece' },
