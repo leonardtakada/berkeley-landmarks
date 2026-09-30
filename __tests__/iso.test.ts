@@ -71,3 +71,32 @@ describe("the walks' plates", () => {
     });
   }
 });
+
+describe("the city map's walkers", () => {
+  it("walk a network of the map's streets, hidden only within its stretches", async () => {
+    const { ISO_WALKS } = await import("../lib/iso-walks.generated");
+    const n = ISO_WALKS.nodes.length / 2;
+    expect(n, "run npx tsx scripts/iso/walks.ts").toBeGreaterThan(1000);
+    expect(ISO_WALKS.links.every((i) => Number.isInteger(i) && i >= 0 && i < n)).toBe(true);
+    const m = ISO_WALKS.links.length / 2;
+    for (const [k, runs] of Object.entries(ISO_WALKS.hidden)) {
+      expect(Number(k)).toBeLessThan(m);
+      expect(runs.length % 2).toBe(0);
+      for (let i = 0; i < runs.length; i++) {
+        expect(runs[i]).toBeGreaterThanOrEqual(i ? runs[i - 1] : 0);
+        expect(runs[i]).toBeLessThanOrEqual(1);
+      }
+    }
+  });
+
+  it("are the cover's architects, printed at every stride and facing either way", async () => {
+    const { WALKERS } = await import("../lib/walker-cast");
+    const src = fs.readFileSync(path.join(__dirname, "../components/walker-icons.generated.ts"), "utf8");
+    const icons = [...src.matchAll(/"([a-z]+-\d[rl])": require\("\.\.\/(assets\/walkers\/[^"]+)"\)/g)];
+    expect(icons.length, "run npx tsx scripts/iso/walker-icons.ts").toBe(WALKERS.length * 3 * 2);
+    for (const [, name, file] of icons) {
+      expect(WALKERS).toContain(name.split("-")[0]);
+      expect(fs.existsSync(path.join(__dirname, "..", file)), file).toBe(true);
+    }
+  });
+});

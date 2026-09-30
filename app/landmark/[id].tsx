@@ -30,10 +30,12 @@ import { FONT, INK, MARGIN, PAGE_TURN_MS, PAPER, TYPE } from "@/constants/book";
 import { CATEGORY_LABELS, landmarks, type Landmark } from "@/data/landmarks";
 import { useAuth } from "@/hooks/use-auth";
 import { ARCHITECTS, architectOf, worksBy } from "@/lib/architects";
+import { howFar, placeCheck } from "@/lib/arrival";
 import { photoCredit, photoSource } from "@/lib/photo-source";
 import { pickPhotos } from "@/lib/photo-prep";
 import { useReaderCopy } from "@/lib/reader-copy-context";
 import { trpc } from "@/lib/trpc";
+import { whereYouAre } from "@/lib/where-you-are";
 
 const EDITABLE_FIELDS: { key: keyof Landmark; label: string; multiline?: boolean }[] = [
   { key: "name", label: "Name" },
@@ -260,6 +262,7 @@ export default function LandmarkEntryScreen() {
             prompt="Mark as visited"
             onStamp={() => mark("visited", landmark.id, true)}
             onErase={() => mark("visited", landmark.id, false)}
+            check={() => visitCheck(landmark)}
             style={styles.visited}
           />
         </View>
@@ -713,3 +716,14 @@ const styles = StyleSheet.create({
     color: PAPER.cover,
   },
 });
+
+/** A visit is stamped on the spot: null if the reader is at the place, else a note saying why not. */
+async function visitCheck(landmark: Landmark): Promise<string | null> {
+  const fix = await whereYouAre();
+  if (fix === "denied") return "A visit is stamped on the spot, and the guide can’t see where you are: allow it Location in Settings.";
+  if (fix === "unavailable") return "The guide couldn’t find where you are just now. A visit is stamped on the spot.";
+  const { at, unsure, metres } = placeCheck(fix, landmark);
+  if (at) return null;
+  if (unsure) return "Your position is too rough to tell just now. Try again in a moment, in the open.";
+  return `You’re ${howFar(metres)} away. A visit is stamped on the spot.`;
+}

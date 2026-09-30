@@ -96,14 +96,17 @@ export default function TourChapterScreen() {
             </View>
           ))}
         </View>
-        <DateStamp
-          word="Walked"
-          day={walked}
-          prompt="Mark as walked"
-          onStamp={() => mark("walked", tour.id, true)}
-          onErase={() => mark("walked", tour.id, false)}
-          style={styles.walked}
-        />
+        {/* Stamped only by walking it: every stop's label, collected on the spot. */}
+        {walked ? (
+          <DateStamp
+            word="Walked"
+            day={walked}
+            prompt="Walked"
+            onStamp={() => {}}
+            onErase={() => mark("walked", tour.id, false)}
+            style={styles.walked}
+          />
+        ) : null}
 
         {/* The walk's own architect */}
         {lead ? (
@@ -229,8 +232,8 @@ export default function TourChapterScreen() {
           </ScrollView>
           {!collected ? (
             <Text style={styles.stampHint}>
-              Set out on foot with the guide: each stop you reach adds its label to this page, and the last stamps the
-              walk as walked.
+              Set out on foot with the guide: each stop adds its label to this page when you stand there, and with every
+              label the walk is stamped.
             </Text>
           ) : null}
         </View>

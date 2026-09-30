@@ -102,7 +102,8 @@ export default function StampsScreen() {
             </View>
             {walked === 0 ? (
               <Text style={styles.hint}>
-                Set out on a walk with the guide; stand at each of its stops and, at the last, its stamp is set here.
+                Set out on a walk with the guide and stand at each of its stops: with every label collected, its stamp is set
+                here.
               </Text>
             ) : null}
           </View>
@@ -118,7 +119,7 @@ export default function StampsScreen() {
             <Rule color={INK.charcoal} weight={1} />
             {visited === 0 ? (
               <Text style={styles.hint}>
-                Mark an entry as visited — or reach it on a walk — and it&apos;s listed here with the day.
+                Standing at a place, mark its entry visited — or reach it on a walk — and it&apos;s listed here with the day.
               </Text>
             ) : (
               [...days].map(([day, ids]) => (

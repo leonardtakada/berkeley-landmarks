@@ -54,9 +54,11 @@ Auto Indicator LLC — in the Appendix only, never on the cover.
   A leaf turns in perspective about its top edge, so that edge runs along
   the band instead of rising past it, and the ribbons always hang over paper.
   (The frame clips, so a lifted leaf can't be drawn over the ribbons.)
+  The leaf is flat paper all the way over: no shading as it tilts and no
+  shadow cast on the page beneath, which read as a blur.
 - **Entries**: leaves laid over the book, hinged at the right
   (`lib/page-turn.ts`); swipe back from the left edge. A tiny haptic tick
-  as a leaf turns over (the ribbons tick too).
+  as a leaf turns over (the ribbons tick too). No shade or edge shadow.
 - **The Registry's index** (`lib/registry-index.ts`): Find reads a query
   the way a reader puts it — "every Maybeck within walking distance",
   "Queen Anne in Elmwood", "1920s downtown" — into terms of the index
@@ -75,6 +77,18 @@ Auto Indicator LLC — in the Appendix only, never on the cover.
   (`lib/route-legs.ts`). Camera moves wait for the map to load. The flat
   vector map and the raster map are still there behind the dev toggle
   (`constants/map-engine.ts`).
+  The reader is drawn on the drawing (`components/maplibre-view.tsx`): a
+  vermilion ring and dot where they stand, gliding from fix to fix; the
+  fix's uncertainty as a disc lying on the ground; the way the phone faces
+  as a wedge on the ground before them. The reader's-mark button above the
+  north point finds them and follows them as they walk (filled while it
+  does) until the map is moved by hand; in walk mode following keeps the
+  camera on them instead of framing each leg. If they're off the map, or
+  location is off, a slip says so.
+  The guide's architects walk its streets from z15.6, as on the cover
+  (`components/iso-walkers.tsx`): a few in view, strolling, turning at
+  corners, stopping, hidden where a house, tree or rise stands in front of
+  them, appearing and going in along the way; still with Reduce Motion.
 - **Fold-out map** (`components/fold-out-map.tsx`): folded, a blue cover
   naming the walk, its length, the streets it follows and a locator; open,
   the walk's isometric plate (`components/iso-plate.tsx`): a block of the
@@ -125,6 +139,13 @@ groves. The pieces are laid back to front (`scripts/iso/scene.ts`).
   no anti-aliasing, so no edge of a face behind shows through); buildings
   and trees from z14, trees from z15, street names from z14 (main) and z15.5,
   districts out to z14.
+- **Walkers**: `npx tsx scripts/iso/walks.ts` writes
+  `lib/iso-walks.generated.ts` — the streets the map draws, as a network on
+  the terraces, with the stretches where a walker would be out of sight
+  (something nearer in the drawing covers their middle or head; a climb up
+  a terrace wall is always out of sight). `npx tsx scripts/iso/walker-icons.ts`
+  prints the architects (`lib/walker-cast.ts`, shared with the cover) at
+  three points of a stride, facing either way, to `assets/walkers/`.
 - `scripts/iso/preview.ts` and `city-proof.ts` proof the scene as a PNG.
 - `__tests__/iso.test.ts` checks the projection and that every walk has a
   plate with a model and flag for each stop.
@@ -212,21 +233,29 @@ Both maps carry the OpenStreetMap credit (ODbL).
 ## The reader's copy
 What the reader does with the guide is kept on the phone
 (`lib/reader-copy.ts`, kept by `lib/reader-copy-context.tsx`), with the day:
+Stamps are earned on the spot (`lib/arrival.ts`):
 - **Visited**: a vermilion date stamp under an entry's address — "Mark as
-  visited", pressed on with a heavy haptic; tap it to erase.
-- **Walk labels**: in walk mode, each stop reached (by location, or "On to
-  stop n" by hand) adds its travel label to the walk's page, dated, and
-  counts as a visit. The last one finishes the walk.
-- **Walked**: a finished walk (or one stamped "Mark as walked") gets a ring
-  stamp over its label on its page, a tick on the Tours contents, and its
-  stamp in the Appendix.
+  visited" finds the reader and presses it on (heavy haptic) only if they're
+  there: within 60 m of the building, 300 m of a historic district's middle,
+  on a fix good to 100 m. Otherwise a note says how far away they are, or
+  why the guide can't tell. Tap a stamp to erase it.
+- **Walk labels**: in walk mode (which follows the reader's location from
+  the start), standing within 40 m of a stop — or of where the route passes
+  it — on a fix good to 50 m collects its travel label, dated, and counts as
+  a visit; any of the walk's stops, in any order. Reaching the next stop
+  moves the walk on. "On to stop n" steps on by hand and collects nothing.
+  The card's ticks show the labels collected, the stop ahead in vermilion.
+- **Walked**: with every label collected, the walk gets a ring stamp over
+  its label on its page, a tick on the Tours contents, and its stamp in the
+  Appendix. There's no stamping it by hand.
 - **Turned-down pages**: the corner in an entry's running head.
 - **Stamps** (`app/stamps.tsx`, from the Appendix): the walks as a passport
   page — each walked walk's label with its ring stamp — then places visited,
   day by day, and pages turned down. The Registry marks visited entries
   with a tick and turned-down ones with a corner.
 Silence is a feature: no notifications, no badges, nothing asks the reader
-back. Location is asked for only on the map, a walk, or "near me".
+back. Location is asked for only on the map, a walk, "near me", or to stamp
+a visit.
 
 ## Colophon
 The Appendix's colophon credits the typefaces (Jost, Berkeley Post, Noto

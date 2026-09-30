@@ -26,6 +26,23 @@ export function isoPoint(p: LatLng, above = 1): [number, number] {
   return planeToLngLat(q.x, q.y);
 }
 
+/** A shape lying flat on the ground at a place: its outline as metres east and north of the place, on the place's terrace. */
+export function isoGroundShape(p: LatLng, outline: [number, number][]): [number, number][] {
+  const { u, v } = toLocal(p.latitude, p.longitude);
+  const z = Math.max(0, terraceZ(u, v)) + 0.5;
+  return outline.map(([du, dv]) => {
+    const q = iso(u + du, v + dv, z);
+    return planeToLngLat(q.x, q.y);
+  });
+}
+
+/** Whether a place lies within the drawing. */
+export function onDrawing(p: LatLng): boolean {
+  const t = ISO_TERRAIN;
+  const { u, v } = toLocal(p.latitude, p.longitude);
+  return u >= t.u0 && v >= t.v0 && u <= t.u0 + (t.cols - 1) * t.cell && v <= t.v0 + (t.rows - 1) * t.cell;
+}
+
 /** A line on the map, following the terraces up and down (points every few metres, so it steps with them). */
 export function isoLine(line: LatLng[], step = 8): [number, number][] {
   const out: [number, number][] = [];

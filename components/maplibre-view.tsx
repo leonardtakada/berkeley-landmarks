@@ -20,7 +20,7 @@
  * Uses the new @maplibre/maplibre-react-native v11 API (Map / Camera /
  * GeoJSONSource / Layer components — no default export).
  */
-import React, { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react";
+import React, { forwardRef, useCallback, useEffect, useEffectEvent, useImperativeHandle, useMemo, useRef, useState } from "react";
 import { Platform, StyleSheet, Text, View } from "react-native";
 import { useColorScheme } from "react-native";
 import {
@@ -31,10 +31,13 @@ import {
   UserLocation,
 } from "@maplibre/maplibre-react-native";
 import type { CameraRef, GeoJSONSourceRef } from "@maplibre/maplibre-react-native";
+import { useReducedMotion } from "react-native-reanimated";
 import { Asset } from "expo-asset";
 import { Directory, File, Paths } from "expo-file-system";
+import { IsoWalkers, type MapView } from "@/components/iso-walkers";
 import { useColors } from "@/hooks/use-colors";
-import { isoBounds, isoLine, isoPoint } from "@/lib/iso-map";
+import type { Fix } from "@/lib/arrival";
+import { isoBounds, isoGroundShape, isoLine, isoPoint, onDrawing } from "@/lib/iso-map";
 import { isoStyle } from "@/lib/iso-style";
 import { ISO_TILES_VERSION } from "@/lib/iso-terrain.generated";
 import { GLYPH_ASSETS } from "@/lib/map-glyphs.generated";
@@ -89,7 +92,15 @@ export interface CameraPadding {
 export interface MapCameraHandle {
   flyToCoord: (coord: Coordinate, zoom?: number, padding?: CameraPadding) => void;
   fitCoords: (coords: Coordinate[], padding?: CameraPadding) => void;
+  /**
+   * Finds the reader and keeps them in view as they walk, until the map is
+   * moved by hand. Resolves to how that went.
+   */
+  locate?: () => Promise<LocateResult>;
 }
+
+/** Finding the reader: shown and followed, off the map, location refused, or not found in time. */
+export type LocateResult = "shown" | "off-map" | "denied" | "unknown";
 
 interface ClusterMarker {
   id: string;
@@ -118,6 +129,8 @@ interface MapLibreViewProps {
    * turned or tilted, and the reader's position is drawn by the map.
    */
   iso?: boolean;
+  /** Hears when following the reader starts, and stops (the map moved by hand, or sent elsewhere). */
+  onFollowChange?: (following: boolean) => void;
   children?: React.ReactNode;
 }
 
@@ -202,33 +215,145 @@ function useOfflineAssets(kind: "flat" | "iso") {
   return { uris: uris?.kind === kind ? uris : null, error };
 }
 
-/** Where the reader is, watched while the isometric map is open (the native puck can't be placed on the drawing). */
-function useReaderPosition(enabled: boolean) {
-  const [at, setAt] = useState<Coordinate | null>(null);
+/**
+ * Where the reader is, and which way they face, watched while the map is
+ * open: every few metres, as closely as the phone can tell. (On the
+ * isometric map the native puck can't be placed on the drawing, so the
+ * reader is drawn by the map; either map can follow them.)
+ */
+function useReaderPosition(enabled: boolean, onFix: (fix: Fix) => void) {
+  const [fix, setFix] = useState<Fix | null>(null);
+  const [heading, setHeading] = useState<number | null>(null);
+  const [denied, setDenied] = useState(false);
+  const heard = useEffectEvent((f: Fix) => {
+    setFix(f);
+    onFix(f);
+  });
+  const refused = useEffectEvent(() => setDenied(true));
   useEffect(() => {
     if (!enabled || Platform.OS === "web") return;
-    let sub: { remove: () => void } | null = null;
+    const subs: { remove: () => void }[] = [];
     let cancelled = false;
     (async () => {
       try {
         const Location = await import("expo-location");
         const { status } = await Location.requestForegroundPermissionsAsync();
-        if (status !== "granted" || cancelled) return;
-        sub = await Location.watchPositionAsync(
-          { accuracy: Location.Accuracy.Balanced, distanceInterval: 5 },
-          (p) => setAt({ latitude: p.coords.latitude, longitude: p.coords.longitude }),
+        if (cancelled) return;
+        if (status !== "granted") {
+          refused();
+          return;
+        }
+        subs.push(
+          await Location.watchPositionAsync({ accuracy: Location.Accuracy.High, distanceInterval: 2 }, (p) =>
+            heard({ latitude: p.coords.latitude, longitude: p.coords.longitude, accuracy: p.coords.accuracy }),
+          ),
         );
-        if (cancelled) sub.remove();
+        try {
+          subs.push(
+            await Location.watchHeadingAsync((h) => {
+              const deg = h.trueHeading >= 0 ? h.trueHeading : h.magHeading;
+              if (deg < 0 || h.accuracy === 0) return;
+              // Only a real turn redraws it.
+              setHeading((was) => (was != null && Math.abs(((deg - was + 540) % 360) - 180) < 4 ? was : deg));
+            }),
+          );
+        } catch {
+          /* no compass: no facing */
+        }
+        if (cancelled) subs.forEach((s) => s.remove());
       } catch {
         /* no position: no mark */
       }
     })();
     return () => {
       cancelled = true;
-      sub?.remove();
+      subs.forEach((s) => s.remove());
     };
   }, [enabled]);
-  return at;
+  return { fix, heading, denied };
+}
+
+/** A point that glides to each new fix rather than jumping (straight there with Reduce Motion). */
+function useGlide(target: Coordinate | null, ms = 600): Coordinate | null {
+  const reduceMotion = useReducedMotion();
+  const [shown, setShown] = useState<Coordinate | null>(target);
+  const last = useRef<Coordinate | null>(target);
+  const lat = target?.latitude;
+  const lng = target?.longitude;
+  useEffect(() => {
+    if (lat == null || lng == null) return;
+    const from = last.current ?? { latitude: lat, longitude: lng };
+    const t0 = Date.now();
+    let raf = 0;
+    const step = () => {
+      const k = reduceMotion ? 1 : Math.min(1, (Date.now() - t0) / ms);
+      const e = 1 - (1 - k) ** 3;
+      const p = { latitude: from.latitude + (lat - from.latitude) * e, longitude: from.longitude + (lng - from.longitude) * e };
+      last.current = p;
+      setShown(p);
+      if (k < 1) raf = requestAnimationFrame(step);
+    };
+    raf = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(raf);
+  }, [lat, lng, ms, reduceMotion]);
+  return shown;
+}
+
+const NOTHING = { type: "FeatureCollection" as const, features: [] };
+/** How far the reader's facing reaches across the ground, metres, and how wide it opens. */
+const FACING_M = 26;
+const FACING_DEG = 32;
+
+/**
+ * The reader, on the drawing: the fix's uncertainty as a disc lying on the
+ * ground, the way they face as a wedge on the ground before them, and a
+ * vermilion ring and dot on paper where they stand. Always mounted (empty
+ * until there's a fix), so the other marks can be laid beneath it.
+ */
+function ReaderOnDrawing({ fix, heading }: { fix: Fix | null; heading: number | null }) {
+  const at = useGlide(fix);
+  const accuracy = fix?.accuracy ?? null;
+  const ground = useMemo(() => {
+    if (!at) return NOTHING;
+    const features = [];
+    if (accuracy != null && accuracy > 8) {
+      const r = Math.min(accuracy, 250);
+      const disc = Array.from({ length: 41 }, (_, i) => {
+        const a = ((i % 40) / 40) * Math.PI * 2;
+        return [Math.cos(a) * r, Math.sin(a) * r] as [number, number];
+      });
+      features.push({ type: "Feature" as const, properties: { k: "a" }, geometry: { type: "Polygon" as const, coordinates: [isoGroundShape(at, disc)] } });
+    }
+    if (heading != null) {
+      const arc = (radius: number) =>
+        Array.from({ length: 9 }, (_, i) => {
+          const a = ((heading - FACING_DEG + (i * FACING_DEG * 2) / 8) * Math.PI) / 180;
+          return [Math.sin(a) * radius, Math.cos(a) * radius] as [number, number];
+        });
+      const wedge = [...arc(4), ...arc(FACING_M).reverse()];
+      wedge.push(wedge[0]);
+      features.push({ type: "Feature" as const, properties: { k: "h" }, geometry: { type: "Polygon" as const, coordinates: [isoGroundShape(at, wedge)] } });
+    }
+    return { type: "FeatureCollection" as const, features };
+  }, [at, accuracy, heading]);
+  const point = at ? { type: "Feature" as const, properties: {}, geometry: { type: "Point" as const, coordinates: isoPoint(at) } } : NOTHING;
+  return (
+    <>
+      <GeoJSONSource id="reader-ground" data={ground}>
+        <Layer id="reader-accuracy" type="fill" filter={["==", ["get", "k"], "a"]} paint={{ "fill-color": INK_RED, "fill-opacity": 0.1 }} />
+        <Layer id="reader-facing" type="fill" filter={["==", ["get", "k"], "h"]} paint={{ "fill-color": INK_RED, "fill-opacity": 0.3 }} />
+      </GeoJSONSource>
+      <GeoJSONSource id="reader" data={point}>
+        <Layer id="reader-halo" type="circle" paint={{ "circle-radius": 11, "circle-color": CREAM, "circle-opacity": 0.9 }} />
+        <Layer
+          id="reader-ring"
+          type="circle"
+          paint={{ "circle-radius": 9, "circle-color": "transparent", "circle-stroke-width": 2.5, "circle-stroke-color": INK_RED }}
+        />
+        <Layer id="reader-dot" type="circle" paint={{ "circle-radius": 4, "circle-color": INK_RED }} />
+      </GeoJSONSource>
+    </>
+  );
 }
 
 /* ------------------------------------------------------------------ */
@@ -239,6 +364,8 @@ function useReaderPosition(enabled: boolean) {
 // wrapper's region clamps; maplibre-native enforces these natively).
 // LngLatBounds tuple order: [west, south, east, north].
 const MAX_BOUNDS: [number, number, number, number] = [-122.41, 37.785, -122.15, 37.965];
+const inBounds = (c: Coordinate) =>
+  c.longitude >= MAX_BOUNDS[0] && c.latitude >= MAX_BOUNDS[1] && c.longitude <= MAX_BOUNDS[2] && c.latitude <= MAX_BOUNDS[3];
 
 // Vermilion — the logo's second ink — marks the highlighted landmark.
 const INK_RED = "#E4592B";
@@ -261,6 +388,7 @@ const MapLibreMapView = forwardRef<MapCameraHandle | null, MapLibreViewProps>(
       clusterMaxZoom = 15,
       highlight,
       iso = false,
+      onFollowChange,
       children,
     },
     ref
@@ -273,7 +401,6 @@ const MapLibreMapView = forwardRef<MapCameraHandle | null, MapLibreViewProps>(
       (c: Coordinate, above?: number): [number, number] => (iso ? isoPoint(c, above) : [c.longitude, c.latitude]),
       [iso],
     );
-    const reader = useReaderPosition(iso && !!showsUserLocation);
     const cameraRef = useRef<CameraRef>(null);
     const shapeRef = useRef<GeoJSONSourceRef>(null);
 
@@ -294,22 +421,59 @@ const MapLibreMapView = forwardRef<MapCameraHandle | null, MapLibreViewProps>(
       if (move) requestAnimationFrame(move);
     }, []);
 
+    // Following the reader: the camera keeps them in view as they walk,
+    // until the map is moved by hand or sent somewhere else.
+    const following = useRef(false);
+    const follow = (on: boolean) => {
+      if (following.current === on) return;
+      following.current = on;
+      onFollowChange?.(on);
+    };
+    const zoom = useRef(15);
+    // What the map shows, for the walkers to keep to (read each frame, so no render).
+    const view = useRef<MapView>(null);
+    const locating = useRef<((r: LocateResult) => void) | null>(null);
+    const latest = useRef<Fix | null>(null);
+    /** Takes the camera to the reader, and follows them from there. */
+    const showReader = (fix: Fix): LocateResult => {
+      if (iso ? !onDrawing(fix) : !inBounds(fix)) return "off-map";
+      follow(true);
+      run(() => cameraRef.current?.flyTo({ center: place(fix), zoom: Math.max(zoom.current, 16.5), duration: 900 }));
+      return "shown";
+    };
+    const reader = useReaderPosition(!!showsUserLocation, (fix) => {
+      latest.current = fix;
+      if (locating.current) {
+        const done = locating.current;
+        locating.current = null;
+        done(showReader(fix));
+      } else if (following.current) {
+        run(() => cameraRef.current?.easeTo({ center: place(fix), duration: 800, easing: "linear" }));
+      }
+    });
+    const denied = reader.denied;
+    // On the drawing, everything laid on the map goes under the reader's mark.
+    const under = iso ? "reader-accuracy" : undefined;
+
     // The screen's camera API. (The native MapRef is kept private: forwarding
     // it through the same ref would replace this handle once the map mounts.)
     useImperativeHandle(
       ref,
       () => ({
-        flyToCoord: (coord, zoom = 16, padding) =>
+        flyToCoord: (coord, to = 16, padding) => {
+          follow(false);
           run(() =>
             cameraRef.current?.flyTo({
               center: place(coord, 6),
-              zoom,
+              zoom: to,
               ...(padding ? { padding } : null),
               duration: 900,
             }),
-          ),
+          );
+        },
         fitCoords: (coords, padding = DEFAULT_PADDING) => {
           if (coords.length === 0) return;
+          follow(false);
           const placed = coords.map((c) => place(c));
           const lats = placed.map((c) => c[1]);
           const lngs = placed.map((c) => c[0]);
@@ -320,8 +484,22 @@ const MapLibreMapView = forwardRef<MapCameraHandle | null, MapLibreViewProps>(
             ),
           );
         },
+        locate: () =>
+          new Promise<LocateResult>((resolve) => {
+            if (denied) return resolve("denied");
+            if (latest.current) return resolve(showReader(latest.current));
+            // Not found yet: the first fix answers, or the wait runs out.
+            locating.current?.("unknown");
+            locating.current = resolve;
+            setTimeout(() => {
+              if (locating.current !== resolve) return;
+              locating.current = null;
+              resolve("unknown");
+            }, 15_000);
+          }),
       }),
-      [run, place],
+      // eslint-disable-next-line react-hooks/exhaustive-deps -- follow/showReader read refs
+      [run, place, denied],
     );
 
     // onPress callbacks by landmark id (layer features can't hold functions).
@@ -438,6 +616,16 @@ const MapLibreMapView = forwardRef<MapCameraHandle | null, MapLibreViewProps>(
           touchPitch={!iso}
           onPress={onPress as any}
           onDidFinishLoadingMap={onMapLoaded}
+          onRegionWillChange={(e) => {
+            if (e.nativeEvent.userInteraction) follow(false);
+          }}
+          onRegionIsChanging={(e) => {
+            view.current = { bounds: e.nativeEvent.bounds, zoom: e.nativeEvent.zoom };
+          }}
+          onRegionDidChange={(e) => {
+            zoom.current = e.nativeEvent.zoom;
+            view.current = { bounds: e.nativeEvent.bounds, zoom: e.nativeEvent.zoom };
+          }}
         >
           <Camera
             ref={cameraRef}
@@ -447,22 +635,6 @@ const MapLibreMapView = forwardRef<MapCameraHandle | null, MapLibreViewProps>(
             maxBounds={iso ? isoBounds() : MAX_BOUNDS}
           />
           {showsUserLocation && !iso && <UserLocation accuracy heading />}
-          {/* The reader, on the drawing: a vermilion ring and dot on paper. */}
-          {iso && reader && (
-            <GeoJSONSource
-              id="reader"
-              data={{ type: "Feature" as const, properties: {}, geometry: { type: "Point" as const, coordinates: place(reader) } }}
-            >
-              <Layer id="reader-halo" type="circle" paint={{ "circle-radius": 11, "circle-color": CREAM, "circle-opacity": 0.9 }} />
-              <Layer
-                id="reader-ring"
-                type="circle"
-                paint={{ "circle-radius": 9, "circle-color": "transparent", "circle-stroke-width": 2.5, "circle-stroke-color": INK_RED }}
-              />
-              <Layer id="reader-dot" type="circle" paint={{ "circle-radius": 4, "circle-color": INK_RED }} />
-            </GeoJSONSource>
-          )}
-
           {/* Highlighted landmark — paper halo + red-ink crosshair ring so a
               deep-linked landmark is unmistakable after the camera flies in. */}
           {highlight && (
@@ -479,6 +651,7 @@ const MapLibreMapView = forwardRef<MapCameraHandle | null, MapLibreViewProps>(
             >
               <Layer
                 id="highlight-halo"
+                beforeId={under}
                 type="circle"
                 paint={{
                   "circle-radius": 18,
@@ -488,6 +661,7 @@ const MapLibreMapView = forwardRef<MapCameraHandle | null, MapLibreViewProps>(
               />
               <Layer
                 id="highlight-ring"
+                beforeId={under}
                 type="circle"
                 paint={{
                   "circle-radius": 14,
@@ -498,6 +672,7 @@ const MapLibreMapView = forwardRef<MapCameraHandle | null, MapLibreViewProps>(
               />
               <Layer
                 id="highlight-dot"
+                beforeId={under}
                 type="circle"
                 paint={{ "circle-radius": 4, "circle-color": INK_RED }}
               />
@@ -519,6 +694,7 @@ const MapLibreMapView = forwardRef<MapCameraHandle | null, MapLibreViewProps>(
             >
               <Layer
                 id={`polyline-line-${i}`}
+                beforeId={under}
                 type="line"
                 layout={{
                   "line-cap": "round",
@@ -546,6 +722,7 @@ const MapLibreMapView = forwardRef<MapCameraHandle | null, MapLibreViewProps>(
               {/* Individual landmark pins; numbered when they are tour stops. */}
               <Layer
                 id="landmark-pins"
+                beforeId={under}
                 type="circle"
                 filter={["!", ["has", "point_count"]]}
                 paint={{
@@ -559,6 +736,7 @@ const MapLibreMapView = forwardRef<MapCameraHandle | null, MapLibreViewProps>(
               {labelled ? (
                 <Layer
                   id="landmark-pin-labels"
+                beforeId={under}
                   type="symbol"
                   filter={["!", ["has", "point_count"]]}
                   layout={{
@@ -577,6 +755,7 @@ const MapLibreMapView = forwardRef<MapCameraHandle | null, MapLibreViewProps>(
               {/* Cluster bubble */}
               <Layer
                 id="landmark-clusters"
+                beforeId={under}
                 type="circle"
                 filter={["has", "point_count"]}
                 paint={{
@@ -600,6 +779,7 @@ const MapLibreMapView = forwardRef<MapCameraHandle | null, MapLibreViewProps>(
               {/* Cluster count */}
               <Layer
                 id="landmark-cluster-count"
+                beforeId={under}
                 type="symbol"
                 filter={["has", "point_count"]}
                 layout={{
@@ -619,6 +799,10 @@ const MapLibreMapView = forwardRef<MapCameraHandle | null, MapLibreViewProps>(
             </GeoJSONSource>
           )}
 
+          {/* The architects out walking, among the houses. */}
+          {iso && <IsoWalkers view={view} />}
+          {/* Last, so it's drawn over everything else laid on the map. */}
+          {iso && <ReaderOnDrawing fix={reader.fix} heading={reader.heading} />}
         </MLMap>
       </View>
     );

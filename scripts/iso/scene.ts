@@ -407,7 +407,12 @@ const STREET_WIDTH: Record<string, number> = {
   pedestrian: 6,
 };
 
-export async function buildScene(o: SceneOptions): Promise<{ pieces: Piece[]; zAt: (u: number, v: number) => number }> {
+/** A building or tree, and how far back it stands (u + v): the drawing order among them, far first. */
+export type Solid = { d: number; pieces: Piece[] };
+
+export async function buildScene(
+  o: SceneOptions,
+): Promise<{ pieces: Piece[]; zAt: (u: number, v: number) => number; solids: Solid[] }> {
   const t = await terrain();
   const { box } = o;
   const hs = o.heightScale ?? 1;
@@ -583,7 +588,7 @@ export async function buildScene(o: SceneOptions): Promise<{ pieces: Piece[]; zA
   }
 
   // Buildings and trees, back to front.
-  const solids: { d: number; pieces: Piece[] }[] = [];
+  const solids: Solid[] = [];
   for (const b of await buildings()) {
     if (b.c[0] < box.u0 || b.c[0] > box.u1 || b.c[1] < box.v0 || b.c[1] > box.v1) continue;
     if (b.ring.some(([u, v]) => u < box.u0 || u > box.u1 || v < box.v0 || v > box.v1)) continue;
@@ -602,5 +607,5 @@ export async function buildScene(o: SceneOptions): Promise<{ pieces: Piece[]; zA
   }
   solids.sort((a, b) => b.d - a.d);
   for (const s of solids) pieces.push(...s.pieces);
-  return { pieces, zAt };
+  return { pieces, zAt, solids };
 }

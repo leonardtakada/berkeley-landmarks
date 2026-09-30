@@ -45,7 +45,7 @@ export default function AboutScreen() {
     ],
     [
       "Your copy",
-      "The stamps, visits and turned-down pages you make are kept on this phone, and nowhere else. Nothing in the guide asks you to sign in — you'd sign in only to send photographs and corrections to the editors. No notifications, no badges, no tracking.",
+      "The stamps and visits are earned on the spot — the guide stamps them only where your phone finds you standing — and they, and the pages you turn down, are kept on this phone and nowhere else. Nothing in the guide asks you to sign in — you'd sign in only to send photographs and corrections to the editors. No notifications, no badges, no tracking.",
     ],
     [
       "Corrections",

@@ -10,13 +10,12 @@ import Animated, {
   withTiming,
   type SharedValue,
 } from "react-native-reanimated";
-import { LinearGradient } from "expo-linear-gradient";
 
 import { useBookHead } from "@/components/bookmark-ribbons";
 import { PaperSheet } from "@/components/paper-grain";
 import { InkPlane } from "@/components/print";
 import { PAGE_TURN_DELAY_MS, PAGE_TURN_MS, PAPER } from "@/constants/book";
-import { PERSPECTIVE, projectedFreeEdge } from "@/lib/page-turn";
+import { PERSPECTIVE } from "@/lib/page-turn";
 
 type Route = { key: string; name: string };
 type Descriptors = Record<string, { render: () => React.ReactNode }>;
@@ -35,9 +34,8 @@ const DISSOLVE_MS = 200;
  * Turning forward (cover → tours → registry → appendix) lifts the current
  * leaf off by its free edge and swings it over the spine, revealing the next
  * page underneath; turning back brings the previous leaf down over the
- * current one. Both pages are live during the ~650ms turn: the moving leaf
- * darkens as it tilts from the light, and casts a travelling shadow onto the
- * page beneath.
+ * current one. Both pages are live during the ~650ms turn. The leaf is flat
+ * paper throughout — no shading or cast shadow, which read as a blur.
  *
  * The book begins at the head-band. Above it (the status bar's strip) is
  * not the book: it stays put in the colour of the open page while the
@@ -212,7 +210,6 @@ function Leaf({
   children: React.ReactNode;
 }) {
   const moving = role === "moving";
-  const beneath = role === "beneath";
   const hidden = role === "hidden";
 
   /** How far the moving leaf is lifted: 0 flat on the book, 1 edge-on. */
@@ -240,33 +237,6 @@ function Leaf({
     };
   }, [hidden, moving, forward, width, dissolve]);
 
-  // The lifted leaf turns away from the light, darkest toward its free edge.
-  const tiltShade = useAnimatedStyle(() => {
-    if (!moving || dissolve) return { opacity: 0 };
-    const lift = liftOf(progress.value);
-    return { opacity: Math.sin((lift * Math.PI) / 2) * 0.55 };
-  }, [moving, forward, dissolve]);
-
-  // The page beneath sits in the leaf's shadow until the leaf clears it.
-  const underDim = useAnimatedStyle(() => {
-    if (!beneath || dissolve) return { opacity: 0 };
-    const lift = liftOf(progress.value);
-    return { opacity: 0.2 * (1 - lift) };
-  }, [beneath, forward, dissolve]);
-
-  // A soft shadow band cast just past the lifted leaf's free edge.
-  const castShadow = useAnimatedStyle(() => {
-    if (!beneath || dissolve) return { opacity: 0 };
-    const lift = liftOf(progress.value);
-    const deg = lift * 90;
-    const edge = projectedFreeEdge(width, deg);
-    const spread = 0.35 + Math.sin((lift * Math.PI) / 2) * 0.9;
-    return {
-      opacity: Math.sin(lift * Math.PI) * 0.85,
-      transform: [{ translateX: edge }, { scaleX: spread }],
-    };
-  }, [beneath, forward, width, dissolve]);
-
   // Always the same element type, so hiding a page never remounts it (its
   // scroll position and state survive being turned past). The leaf is laid
   // out full-screen, as the screens expect, with the strip above the band
@@ -283,33 +253,9 @@ function Leaf({
       ]}
     >
       {children}
-      {/* Always mounted, so each shows its own opacity from the first frame
-          of a turn: a shade mounted mid-turn would show, until the page
-          moved, whatever its style first worked out. */}
-      <Animated.View pointerEvents="none" style={[StyleSheet.absoluteFill, styles.dim, underDim]} />
-      <Animated.View pointerEvents="none" style={[styles.cast, castShadow]}>
-        <LinearGradient
-          colors={["rgba(28,20,12,0.42)", "rgba(28,20,12,0.14)", "rgba(28,20,12,0)"]}
-          locations={[0, 0.35, 1]}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 0 }}
-          style={StyleSheet.absoluteFill}
-        />
-      </Animated.View>
-      <Animated.View pointerEvents="none" style={[StyleSheet.absoluteFill, tiltShade]}>
-        <LinearGradient
-          colors={["rgba(40,30,18,0.05)", "rgba(40,30,18,0.2)", "rgba(40,30,18,0.5)"]}
-          locations={[0, 0.6, 1]}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 0 }}
-          style={StyleSheet.absoluteFill}
-        />
-      </Animated.View>
     </Animated.View>
   );
 }
-
-const CAST_W = 110;
 
 const styles = StyleSheet.create({
   strip: {
@@ -333,16 +279,5 @@ const styles = StyleSheet.create({
   },
   hidden: {
     display: "none",
-  },
-  dim: {
-    backgroundColor: "#1C140C",
-  },
-  cast: {
-    position: "absolute",
-    top: 0,
-    bottom: 0,
-    left: 0,
-    width: CAST_W,
-    transformOrigin: "0% 50%",
   },
 });

@@ -48,15 +48,20 @@ export function TourFollowCard({ tour, follow, walking, onBegin, onLayout }: Tou
     );
   }
 
+  const labels = copy.labels[tour.id] ?? {};
+  const collected = follow.stops.filter((s) => labels[s.landmark.id]).length;
+
   if (follow.finished) {
+    const walked = copy.walked[tour.id];
     return (
       <View style={[styles.card, bottom]} onLayout={onLayout}>
         <PaperGrain />
-        <Text style={TYPE.kicker}>Walk {no} · Complete</Text>
+        <Text style={TYPE.kicker}>Walk {no} · {walked ? "Complete" : "The end of the walk"}</Text>
         <Text style={styles.title}>{tour.name}</Text>
         <Text style={styles.note}>
-          All {follow.totalStops} stops visited.
-          {copy.walked[tour.id] ? ` Its stamp is in the Appendix, dated ${formatDay(copy.walked[tour.id])}.` : ""}
+          {walked
+            ? `All ${follow.totalStops} labels collected. Its stamp is in the Appendix, dated ${formatDay(walked)}.`
+            : `${collected} of ${follow.totalStops} labels collected. Each is collected standing at its stop; with all of them, the walk is stamped.`}
         </Text>
         <View style={styles.controls}>
           <Pressable onPress={follow.rewind} hitSlop={8} style={styles.linkRow}>
@@ -99,7 +104,10 @@ export function TourFollowCard({ tour, follow, walking, onBegin, onLayout }: Tou
       {/* Progress: one segment per stop. */}
       <View style={styles.progress}>
         {follow.stops.map((s, k) => (
-          <View key={s.landmark.id} style={[styles.tick, k <= i && styles.tickOn]} />
+          <View
+            key={s.landmark.id}
+            style={[styles.tick, labels[s.landmark.id] ? styles.tickOn : null, k === i && styles.tickHere]}
+          />
         ))}
       </View>
 
@@ -122,7 +130,11 @@ export function TourFollowCard({ tour, follow, walking, onBegin, onLayout }: Tou
       </Pressable>
 
       {follow.locationUnavailable ? (
-        <Text style={styles.note}>Location unavailable — step through by hand.</Text>
+        <Text style={styles.note}>Location is off, so the stops can&apos;t know you&apos;re there: step through by hand. Labels are collected only on the spot.</Text>
+      ) : !follow.active ? (
+        <Text style={styles.note}>Not following you: the stops you pass won&apos;t collect their labels.</Text>
+      ) : labels[next.landmark.id] ? (
+        <Text style={styles.note}>Its label is already collected.</Text>
       ) : null}
 
       <View style={styles.controls}>
@@ -196,6 +208,9 @@ const styles = StyleSheet.create({
   },
   tickOn: {
     backgroundColor: INK.blue,
+  },
+  tickHere: {
+    backgroundColor: INK.vermilion,
   },
   nextRow: {
     flexDirection: "row",

@@ -7,13 +7,14 @@ import {
   ScrollView,
 } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
-import Svg, { Path, Text as SvgText } from "react-native-svg";
+import Svg, { Circle, Path, Text as SvgText } from "react-native-svg";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/hooks/use-colors";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import MapViewWrapper, { MapPolyline, MapPolygon } from "@/components/map-view-wrapper";
 import MapLibreMapView, {
   MapPolyline as VectorMapPolyline,
+  type LocateResult,
   type MapCameraHandle,
 } from "@/components/maplibre-view";
 import { useMapEngine } from "@/constants/map-engine";
@@ -142,7 +143,36 @@ export default function MapScreen() {
     },
     [activeTour, collect],
   );
-  const tourFollow = useTourFollow(activeTour ?? null, onReach);
+  const tourFollow = useTourFollow(activeTour ?? null, { walking, onReach });
+
+  // "Where am I": the map finds the reader and follows them until it's
+  // moved by hand. A note says why, when it can't.
+  const [followingReader, setFollowingReader] = useState(false);
+  const [finding, setFinding] = useState(false);
+  const [locateNote, setLocateNote] = useState<string | null>(null);
+  const noteTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const locate = useCallback(async () => {
+    if (!mapRef.current?.locate || finding) return;
+    setLocateNote(null);
+    setFinding(true);
+    const result = await mapRef.current.locate();
+    setFinding(false);
+    const note: Record<LocateResult, string | null> = {
+      shown: null,
+      "off-map": "You’re off the map: it covers Berkeley.",
+      denied: "The guide can’t see where you are: allow it Location in Settings.",
+      unknown: "The guide couldn’t find where you are just now.",
+    };
+    if (noteTimer.current) clearTimeout(noteTimer.current);
+    setLocateNote(note[result]);
+    if (note[result]) noteTimer.current = setTimeout(() => setLocateNote(null), 4000);
+  }, [finding]);
+  useEffect(
+    () => () => {
+      if (noteTimer.current) clearTimeout(noteTimer.current);
+    },
+    [],
+  );
 
   // Frame the walk: the whole route until the reader sets out; then the
   // first stop; then, at each step, the leg of the route between the stop
@@ -157,6 +187,8 @@ export default function MapScreen() {
     if (!stops.length) return;
     const route = activeTour.routeCoordinates;
     const pad = padFor(cardHeight);
+    // While the map follows the reader, it stays on them.
+    if (walking && !tourFollow.finished && followingReader) return;
     if (!walking || tourFollow.finished) {
       mapRef.current?.fitCoords(route.length > 1 ? [...route, ...stops] : stops, pad);
     } else if (stepIndex === 0) {
@@ -230,6 +262,7 @@ export default function MapScreen() {
         maxZoomLevel={17}
         onPress={handleMapPress}
         showsUserLocation
+        onFollowChange={setFollowingReader}
         highlight={
           selectedLandmark
             ? {
@@ -438,6 +471,38 @@ export default function MapScreen() {
         </View>
       )}
 
+      {/* Where am I: the reader's own mark, filled while the map follows them. */}
+      {isMapLibre && !selectedLandmark ? (
+        <View
+          pointerEvents="box-none"
+          style={[
+            styles.locateRow,
+            { bottom: (activeTour ? cardHeight : Math.max(insets.bottom, 12)) + (isIso ? 52 : 12) },
+          ]}
+        >
+          {locateNote ? (
+            <View style={styles.locateNote} accessibilityLiveRegion="polite">
+              <PaperGrain opacity={0.7} />
+              <Text style={styles.locateNoteText}>{locateNote}</Text>
+            </View>
+          ) : null}
+          <Pressable
+            onPress={locate}
+            accessibilityRole="button"
+            accessibilityLabel={followingReader ? "Following you on the map" : "Show where I am"}
+            accessibilityState={{ busy: finding, selected: followingReader }}
+            hitSlop={6}
+            style={({ pressed }) => [styles.locateButton, (pressed || finding) && { opacity: 0.55 }]}
+          >
+            <PaperGrain opacity={0.7} />
+            <Svg width={24} height={24} viewBox="0 0 24 24">
+              <Circle cx={12} cy={12} r={9} fill={followingReader ? INK_RED : "none"} stroke={INK_RED} strokeWidth={2.2} />
+              <Circle cx={12} cy={12} r={3.6} fill={followingReader ? PAPER.cover : INK_RED} />
+            </Svg>
+          </Pressable>
+        </View>
+      ) : null}
+
       {/* On the isometric city north isn't up: a north point says where it is. */}
       {isIso && !selectedLandmark ? (
         <View
@@ -636,6 +701,41 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.22,
     shadowRadius: 4,
     shadowOffset: { width: 1, height: 2 },
+  },
+  locateRow: {
+    position: "absolute" as const,
+    right: 10,
+    left: 10,
+    zIndex: 6,
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    alignItems: "center",
+    gap: 8,
+  },
+  locateButton: {
+    width: 42,
+    height: 42,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: PAPER.slip,
+    overflow: "hidden",
+    shadowColor: "#2A2016",
+    shadowOpacity: 0.22,
+    shadowRadius: 4,
+    shadowOffset: { width: 1, height: 2 },
+  },
+  locateNote: {
+    flexShrink: 1,
+    paddingHorizontal: 12,
+    paddingVertical: 9,
+    backgroundColor: PAPER.slip,
+    overflow: "hidden",
+  },
+  locateNoteText: {
+    fontFamily: FONT.regular,
+    fontSize: 13,
+    lineHeight: 18,
+    color: INK.charcoal,
   },
   north: {
     position: "absolute" as const,

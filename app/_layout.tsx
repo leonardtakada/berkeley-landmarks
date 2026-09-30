@@ -81,8 +81,8 @@ export default function RootLayout() {
     : {
         cardStyleInterpolator: forPageTurn,
         transitionSpec: pageTurnSpec,
-        cardOverlayEnabled: true,
-        cardShadowEnabled: true,
+        cardOverlayEnabled: false,
+        cardShadowEnabled: false,
       };
   const [trpcClient] = useState(() => createTRPCClient());
 

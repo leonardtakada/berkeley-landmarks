@@ -51,13 +51,15 @@ export function CheckStamp({ size = 22, style }: { size?: number; style?: StyleP
 /**
  * The reader's date stamp: "Visited" or "Walked" and the day, beside a
  * tick. Unstamped, a dotted ring and the word to press it with. Pressing it
- * stamps today; pressing a stamp offers to erase it.
+ * stamps today — once `check`, if given, allows it (a visit is stamped only
+ * on the spot); pressing a stamp offers to erase it.
  */
 export function DateStamp({
   word,
   day,
   onStamp,
   onErase,
+  check,
   prompt,
   style,
 }: {
@@ -65,6 +67,8 @@ export function DateStamp({
   day: Day | undefined;
   onStamp: () => void;
   onErase: () => void;
+  /** Before stamping: resolves to null to stamp, or to a note saying why not. */
+  check?: () => Promise<string | null>;
   /** What the unstamped mark says, e.g. "Mark as visited". */
   prompt: string;
   style?: StyleProp<ViewStyle>;
@@ -72,24 +76,46 @@ export function DateStamp({
   // Only a stamp pressed here, now, is pressed onto the page.
   const [fresh, setFresh] = useState(false);
   if (!day && fresh) setFresh(false);
+  const [checking, setChecking] = useState(false);
+  const [why, setWhy] = useState<string | null>(null);
 
   if (!day) {
+    const press = async () => {
+      if (checking) return;
+      if (check) {
+        setChecking(true);
+        setWhy(null);
+        const no = await check();
+        setChecking(false);
+        if (no) {
+          setWhy(no);
+          return;
+        }
+      }
+      setFresh(true);
+      onStamp();
+    };
     return (
-      <Pressable
-        onPress={() => {
-          setFresh(true);
-          onStamp();
-        }}
-        hitSlop={10}
-        style={({ pressed }) => [styles.row, style, pressed && { opacity: 0.5 }]}
-        accessibilityRole="button"
-        accessibilityLabel={prompt}
-      >
-        <Svg width={22} height={22} viewBox="0 0 24 24">
-          <Circle cx={12} cy={12} r={11} stroke={INK.faded} strokeWidth={1.2} strokeDasharray="3 3" fill="none" />
-        </Svg>
-        <Text style={styles.prompt}>{prompt}</Text>
-      </Pressable>
+      <View style={style}>
+        <Pressable
+          onPress={press}
+          hitSlop={10}
+          style={({ pressed }) => [styles.row, pressed && { opacity: 0.5 }]}
+          accessibilityRole="button"
+          accessibilityLabel={prompt}
+          accessibilityState={{ busy: checking }}
+        >
+          <Svg width={22} height={22} viewBox="0 0 24 24">
+            <Circle cx={12} cy={12} r={11} stroke={INK.faded} strokeWidth={1.2} strokeDasharray="3 3" fill="none" />
+          </Svg>
+          <Text style={[styles.prompt, checking && { color: INK.faded }]}>{checking ? "Finding where you are…" : prompt}</Text>
+        </Pressable>
+        {why ? (
+          <Text style={styles.why} accessibilityLiveRegion="polite">
+            {why}
+          </Text>
+        ) : null}
+      </View>
     );
   }
   return (
@@ -236,6 +262,14 @@ const styles = StyleSheet.create({
     alignItems: "center",
     alignSelf: "flex-start",
     gap: 10,
+  },
+  why: {
+    fontFamily: FONT.regular,
+    fontSize: 13.5,
+    lineHeight: 19,
+    color: INK.sepia,
+    marginTop: 8,
+    maxWidth: 320,
   },
   prompt: {
     fontFamily: FONT.medium,

@@ -8,10 +8,10 @@ import Animated, {
   useSharedValue,
   type SharedValue,
 } from "react-native-reanimated";
-import Svg, { Circle, Ellipse, Path, Rect } from "react-native-svg";
+import Svg, { Path } from "react-native-svg";
 
 import { LOGO_STREETS } from "@/components/logo-streets.generated";
-import type { ArchitectKey } from "@/lib/architects";
+import { BODY, CAST, FIG_H, FIG_W, HEAD, HEAD_INK, LEGS, WALKERS, type Figure } from "@/lib/walker-cast";
 
 const LOGO = require("@/assets/images/logo-on-blue.png");
 const TOWER = require("@/assets/images/logo-tower.png");
@@ -39,117 +39,10 @@ function behindTower(x: number, y: number) {
 }
 
 // ── The walkers ───────────────────────────────────────────────────────────
-// Each is drawn in a 14 × 34 box, feet at the bottom middle, printed a
-// little larger than the image's own pixels so they read at a glance.
-const FIG_W = 14;
-const FIG_H = 34;
+// Each is drawn in a 14 × 34 box, feet at the bottom middle (lib/walker-cast),
+// printed a little larger than the image's own pixels so they read at a glance.
 const GROW = 1.35;
 const MOST_AT_ONCE = 5;
-const C = "#2E2A27";
-const P = "#FDFAF2";
-const BT = "#C9D0E4";
-const VT = "#F4CDB9";
-const GREY = "#D9D2C4";
-
-type Figure = { coat: string; skirt?: boolean; head?: string; top: React.ReactNode };
-
-/** Each architect at a few pixels high: a coat, and the hat, hair or beard they're known by. */
-const CAST: Record<ArchitectKey, Figure> = {
-  maybeck: {
-    coat: C,
-    top: (
-      <>
-        <Path d="M4 8.6 Q7 17 10 8.6 Z" fill={P} />
-        <Ellipse cx={7.6} cy={4.6} rx={4.6} ry={1.7} fill={C} />
-        <Circle cx={8} cy={2.9} r={1} fill={C} />
-      </>
-    ),
-  },
-  morgan: {
-    coat: BT,
-    skirt: true,
-    top: (
-      <>
-        <Path d="M3.4 8 Q3.6 3.6 7 3.6 Q10.4 3.6 10.6 8 Q9.6 5.8 7 5.8 Q4.4 5.8 3.4 8 Z" fill={C} />
-        <Circle cx={10.4} cy={5.8} r={1.9} fill={C} />
-      </>
-    ),
-  },
-  howard: {
-    coat: C,
-    top: (
-      <>
-        <Rect x={4.4} y={0.2} width={5.2} height={4.4} fill={C} />
-        <Rect x={3} y={4.2} width={8} height={1.1} fill={C} />
-      </>
-    ),
-  },
-  ratcliff: {
-    coat: BT,
-    top: (
-      <>
-        <Path d="M3.4 7.4 Q3.6 3.8 7 3.8 Q10.4 3.8 10.6 7.4 Q9 5.8 7 5.8 Q5 5.8 3.4 7.4 Z" fill={C} />
-        <Rect x={4.2} y={7.4} width={5.6} height={1} fill={C} />
-      </>
-    ),
-  },
-  hays: {
-    coat: P,
-    top: (
-      <>
-        <Path d="M3.4 8 Q3.4 3.8 7 3.8 Q10.6 3.8 10.6 8 Q9.4 6 7 6 Q4.6 6 3.4 8 Z" fill={GREY} />
-        <Rect x={4.2} y={7.6} width={5.6} height={0.8} fill={C} />
-      </>
-    ),
-  },
-  coxhead: {
-    coat: C,
-    top: (
-      <>
-        <Path d="M3.4 9 Q3.2 6.4 4.2 5.8 L4.8 8.4 Z M10.6 9 Q10.8 6.4 9.8 5.8 L9.2 8.4 Z" fill={GREY} />
-        <Path d="M5 10 Q7 14.6 9 10 Z" fill={GREY} />
-      </>
-    ),
-  },
-  thomas: {
-    coat: P,
-    top: <Path d="M3.2 8 Q3.2 3.6 7 3.6 Q10.8 3.6 10.8 8 Q9.4 5.4 7 6.2 Q4.6 5.4 3.2 8 Z" fill={C} />,
-  },
-  plachek: {
-    coat: C,
-    top: (
-      <>
-        <Path d="M3.4 7.6 Q3.4 3.4 7 3.4 Q10.6 3.4 10.6 7.6 Q9.6 5.4 7 6.6 Q4.4 5.4 3.4 7.6 Z" fill={C} />
-        <Path d="M5.6 12.4 L7 16 L8.4 12.4 Z" fill={P} />
-      </>
-    ),
-  },
-  gutterson: {
-    coat: VT,
-    top: (
-      <>
-        <Path d="M3.4 9 Q3.2 6.6 4 6 L4.8 8.6 Z M10.6 9 Q10.8 6.6 10 6 L9.2 8.6 Z" fill={C} />
-        <Path d="M8.4 9.8 H11.4 V11.4 H10.4 Z" fill={C} />
-      </>
-    ),
-  },
-  yelland: {
-    coat: BT,
-    head: P,
-    top: <Path d="M3 6.2 Q3.4 3 7 3 Q10.6 3 11 5.2 L12.6 6.4 Z" fill={C} />,
-  },
-  esherick: {
-    coat: P,
-    top: (
-      <>
-        <Path d="M3.4 7 Q3.4 3.8 7 3.8 Q10.6 3.8 10.6 7 Q9.4 5.6 7 5.6 Q4.6 5.6 3.4 7 Z" fill={GREY} />
-        <Rect x={4} y={7.2} width={6} height={1.3} fill={C} />
-        <Rect x={4.6} y={11.2} width={4.8} height={2.2} fill={C} />
-      </>
-    ),
-  },
-};
-const WALKERS = Object.keys(CAST) as ArchitectKey[];
 
 /** Where one walker is: on a street (from → to, `t` of the way), or off the slab. */
 interface Walker {
@@ -376,24 +269,32 @@ function WalkerFigure({
   });
   const legA = useAnimatedStyle(() => {
     const it = walkers.value[index];
-    const swing = it && it.pause <= 0 && !it.leaving ? Math.sin(it.step) * 26 : 0;
+    const swing = it && it.pause <= 0 && !it.leaving ? Math.sin(it.step) * LEGS.swing : 0;
     return { transform: [{ rotate: `${swing}deg` }] };
   });
   const legB = useAnimatedStyle(() => {
     const it = walkers.value[index];
-    const swing = it && it.pause <= 0 && !it.leaving ? Math.sin(it.step) * 26 : 0;
+    const swing = it && it.pause <= 0 && !it.leaving ? Math.sin(it.step) * LEGS.swing : 0;
     return { transform: [{ rotate: `${-swing}deg` }] };
   });
 
-  const leg = { top: 22 * s, width: 2.2 * s, height: 12 * s, backgroundColor: C, transformOrigin: "top" as const };
+  const leg = {
+    top: LEGS.top * s,
+    width: LEGS.width * s,
+    height: LEGS.height * s,
+    backgroundColor: LEGS.ink,
+    transformOrigin: "top" as const,
+  };
   return (
     <Animated.View pointerEvents="none" style={[styles.walker, { width: w, height: h }, place]}>
-      <Animated.View style={[styles.leg, leg, { left: 4.8 * s }, legA]} />
-      <Animated.View style={[styles.leg, leg, { left: 7 * s }, legB]} />
+      <Animated.View style={[styles.leg, leg, { left: LEGS.left[0] * s }, legA]} />
+      <Animated.View style={[styles.leg, leg, { left: LEGS.left[1] * s }, legB]} />
       <Svg width={w} height={h} viewBox={`0 0 ${FIG_W} ${FIG_H}`} style={StyleSheet.absoluteFill}>
-        <Path d={figure.skirt ? "M4.2 11.4 H9.8 L12.4 26 H1.6 Z" : "M4 11.4 H10 L11.2 24.4 H2.8 Z"} fill={figure.coat} />
-        <Circle cx={7} cy={7.6} r={3.6} fill={figure.head ?? VT} />
-        {figure.top}
+        <Path d={figure.skirt ? BODY.skirt : BODY.coat} fill={figure.coat} />
+        <Path d={HEAD} fill={figure.head ?? HEAD_INK} />
+        {figure.marks.map((m, i) => (
+          <Path key={i} d={m.d} fill={m.fill} />
+        ))}
       </Svg>
     </Animated.View>
   );
