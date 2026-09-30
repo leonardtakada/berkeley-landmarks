@@ -190,6 +190,7 @@ export function IsoWalkers({ view }: { view: React.RefObject<MapView> }) {
     let last = Date.now();
     let placedFor = "";
     let wasEmpty = true;
+    let wasSig = "";
     const frame = () => {
       const now = Date.now();
       const dt = Math.min(0.1, (now - last) / 1000);
@@ -217,6 +218,7 @@ export function IsoWalkers({ view }: { view: React.RefObject<MapView> }) {
         crowd.push(w);
       }
       const features = [];
+      const sig: string[] = [];
       for (const w of crowd) {
         if (!reduceMotion) stroll(w, dt);
         const p = where(w);
@@ -227,14 +229,21 @@ export function IsoWalkers({ view }: { view: React.RefObject<MapView> }) {
         }
         const o = w.fade * w.seen;
         if (o < 0.02) continue;
+        const at = planeToLngLat(p.x, p.y);
+        const ic = icon(w, reduceMotion);
+        sig.push(`${ic}${at[0].toFixed(6)},${at[1].toFixed(6)},${(o * 10) | 0}`);
         features.push({
           type: "Feature" as const,
-          properties: { icon: icon(w, reduceMotion), o: Math.round(o * 100) / 100 },
-          geometry: { type: "Point" as const, coordinates: planeToLngLat(p.x, p.y) },
+          properties: { icon: ic, o: Math.round(o * 100) / 100 },
+          geometry: { type: "Point" as const, coordinates: at },
         });
       }
-      wasEmpty = false;
-      setData({ type: "FeatureCollection", features });
+      // Nothing the map would draw differently: don't touch the source.
+      const joined = sig.join("|");
+      if (joined === wasSig) return;
+      wasSig = joined;
+      wasEmpty = features.length === 0;
+      setData(wasEmpty ? EMPTY : { type: "FeatureCollection", features });
     };
     const id = setInterval(frame, FRAME_MS);
     return () => clearInterval(id);
