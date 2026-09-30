@@ -82,8 +82,8 @@ export const FONT_ASSETS = {
 export const PAGE_TURN_MS = 650;
 
 /**
- * Turning to a section, its ribbon starts to curl up off the page and the
- * others fade; the leaf starts to turn PAGE_TURN_DELAY_MS in, a beat behind.
+ * Turning to a section, the ribbons start to fade away; the leaf starts to
+ * turn PAGE_TURN_DELAY_MS in, a beat behind.
  */
 export const PAGE_TURN_DELAY_MS = 50;
 

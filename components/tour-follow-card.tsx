@@ -7,6 +7,8 @@ import { Arrow } from "@/components/print";
 import { FONT, INK, PAPER, TYPE, chapterNo } from "@/constants/book";
 import { tours, type Tour } from "@/data/tours";
 import type { TourFollowState } from "@/hooks/use-tour-follow";
+import { formatDay } from "@/lib/reader-copy";
+import { useReaderCopy } from "@/lib/reader-copy-context";
 
 interface TourFollowCardProps {
   tour: Tour;
@@ -25,6 +27,7 @@ interface TourFollowCardProps {
 export function TourFollowCard({ tour, follow, walking, onBegin, onLayout }: TourFollowCardProps) {
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const { copy } = useReaderCopy();
   const no = chapterNo(tours.indexOf(tour) + 1);
   const bottom = { paddingBottom: Math.max(insets.bottom, 14) + 12 };
 
@@ -51,11 +54,20 @@ export function TourFollowCard({ tour, follow, walking, onBegin, onLayout }: Tou
         <PaperGrain />
         <Text style={TYPE.kicker}>Walk {no} · Complete</Text>
         <Text style={styles.title}>{tour.name}</Text>
-        <Text style={styles.note}>All {follow.totalStops} stops visited.</Text>
-        <Pressable onPress={follow.rewind} hitSlop={8} style={styles.linkRow}>
-          <Arrow direction="left" length={18} />
-          <Text style={styles.link}>Back to the last stop</Text>
-        </Pressable>
+        <Text style={styles.note}>
+          All {follow.totalStops} stops visited.
+          {copy.walked[tour.id] ? ` Its stamp is in the Appendix, dated ${formatDay(copy.walked[tour.id])}.` : ""}
+        </Text>
+        <View style={styles.controls}>
+          <Pressable onPress={follow.rewind} hitSlop={8} style={styles.linkRow}>
+            <Arrow direction="left" length={18} />
+            <Text style={styles.link}>Last stop</Text>
+          </Pressable>
+          <Pressable onPress={() => router.push("/stamps")} hitSlop={8} style={styles.linkRow}>
+            <Text style={styles.link}>Your stamps</Text>
+            <Arrow length={18} />
+          </Pressable>
+        </View>
       </View>
     );
   }

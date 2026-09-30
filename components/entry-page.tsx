@@ -1,10 +1,12 @@
-import React from "react";
-import { Animated, Pressable, StyleSheet, Text, View } from "react-native";
+import React, { useEffect } from "react";
+import { Animated, Platform, Pressable, StyleSheet, Text, View } from "react-native";
+import * as Haptics from "expo-haptics";
 import { useRouter } from "expo-router";
 import { useCardAnimation } from "expo-router/js-stack";
 import { LinearGradient } from "expo-linear-gradient";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { CornerFold } from "@/components/copy-marks";
 import { PaperGrain } from "@/components/paper-grain";
 import { Arrow } from "@/components/print";
 import { INK, MARGIN, PAPER, TYPE } from "@/constants/book";
@@ -15,6 +17,10 @@ import { INK, MARGIN, PAPER, TYPE } from "@/constants/book";
  * it is lifted mid-turn.
  */
 export function EntryPage({ children }: { children: React.ReactNode }) {
+  // A tiny tick as the leaf turns over, like the section pages' ribbons.
+  useEffect(() => {
+    if (Platform.OS !== "web") Haptics.selectionAsync().catch(() => {});
+  }, []);
   return (
     <View style={styles.page}>
       <PaperGrain />
@@ -45,8 +51,19 @@ function LiftShade() {
   );
 }
 
-/** Running head of an entry: the way back on the left, the folio on the right. */
-export function RunningHead({ back, folio }: { back: string; folio?: string }) {
+/**
+ * Running head of an entry: the way back on the left, the folio on the
+ * right — and, on a page the reader can keep, its corner to turn down.
+ */
+export function RunningHead({
+  back,
+  folio,
+  corner,
+}: {
+  back: string;
+  folio?: string;
+  corner?: { on: boolean; onToggle: () => void };
+}) {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   return (
@@ -61,7 +78,10 @@ export function RunningHead({ back, folio }: { back: string; folio?: string }) {
         <Arrow direction="left" length={18} />
         <Text style={[TYPE.kicker, styles.backText]}>{back}</Text>
       </Pressable>
-      {folio ? <Text style={TYPE.label}>{folio}</Text> : null}
+      <View style={styles.right}>
+        {folio ? <Text style={TYPE.label}>{folio}</Text> : null}
+        {corner ? <CornerFold on={corner.on} onToggle={corner.onToggle} /> : null}
+      </View>
     </View>
   );
 }
@@ -82,6 +102,10 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 10,
+  },
+  right: {
+    flexDirection: "row",
+    alignItems: "center",
   },
   backText: {
     color: INK.blue,

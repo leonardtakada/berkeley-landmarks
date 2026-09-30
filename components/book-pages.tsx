@@ -115,7 +115,7 @@ export function BookPages({
       return;
     }
     const id = turn.id;
-    // (A beat behind the ribbon curling up out of its way.)
+    // (A beat behind the ribbons fading out of its way.)
     progress.value = withDelay(
       reduceMotion ? 0 : PAGE_TURN_DELAY_MS,
       withTiming(1, { duration: reduceMotion ? DISSOLVE_MS : PAGE_TURN_MS, easing: EASE }, (finished) => {

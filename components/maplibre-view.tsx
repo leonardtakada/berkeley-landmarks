@@ -32,8 +32,11 @@ import {
 } from "@maplibre/maplibre-react-native";
 import type { CameraRef, GeoJSONSourceRef } from "@maplibre/maplibre-react-native";
 import { Asset } from "expo-asset";
-import type * as LegacyFS from "expo-file-system/legacy";
+import { Directory, File, Paths } from "expo-file-system";
 import { useColors } from "@/hooks/use-colors";
+import { isoBounds, isoLine, isoPoint } from "@/lib/iso-map";
+import { isoStyle } from "@/lib/iso-style";
+import { ISO_TILES_VERSION } from "@/lib/iso-terrain.generated";
 import { GLYPH_ASSETS } from "@/lib/map-glyphs.generated";
 
 /* ------------------------------------------------------------------ */
@@ -109,6 +112,12 @@ interface MapLibreViewProps {
   clusterMaxZoom?: number;
   /** Emphasized landmark (deep-link / selection): ink crosshair ring */
   highlight?: Coordinate | null;
+  /**
+   * The guide's isometric city (scripts/iso/city.ts) instead of the flat
+   * map: every coordinate is placed on the drawing, the view can't be
+   * turned or tilted, and the reader's position is drawn by the map.
+   */
+  iso?: boolean;
   children?: React.ReactNode;
 }
 
@@ -130,62 +139,96 @@ export function MapPolygon(_props: PolygonProps) {
 /* Offline asset staging (pmtiles + glyph PBFs → cache dir)            */
 /* ------------------------------------------------------------------ */
 
-let fsPromise: Promise<typeof LegacyFS> | null = null;
-function fs(): Promise<typeof LegacyFS> {
-  fsPromise ??= import("expo-file-system/legacy") as Promise<typeof LegacyFS>;
-  return fsPromise;
+const stagedPromise: Partial<Record<"flat" | "iso", Promise<{ pmtilesUri: string; glyphsUrl: string }>>> = {};
+
+/** The tile file each map draws from, and the name its copy goes by (a new build gets a new name). */
+const TILES = {
+  flat: { name: "berkeley.pmtiles", module: () => require("../assets/map/berkeley.pmtiles") },
+  iso: { name: `iso-${ISO_TILES_VERSION}.pmtiles`, module: () => require("../assets/map/iso.pmtiles") },
+};
+
+/** A bundled asset copied to `dest`: from the dev server in development (the asset loader stalls on large binaries), else from the app. */
+async function stage(mod: number, dest: File) {
+  if (dest.exists) return;
+  const asset = Asset.fromModule(mod);
+  if (asset.uri.startsWith("http")) {
+    await File.downloadFileAsync(asset.uri, dest, { idempotent: true });
+  } else {
+    await asset.downloadAsync();
+    new File(asset.localUri ?? asset.uri).copy(dest);
+  }
 }
 
-let stagedPromise: Promise<{ pmtilesUri: string; glyphsUrl: string }> | null = null;
-
 /** Copy bundled map assets into real files so maplibre-native can mmap them. */
-async function stageOfflineAssets(): Promise<{ pmtilesUri: string; glyphsUrl: string }> {
-  const F = await fs();
-  const cache = F.cacheDirectory ?? F.documentDirectory;
-  if (!cache) throw new Error("no cache directory");
-
-  // --- PMTiles -------------------------------------------------------
-  const pmDest = `${cache}berkeley.pmtiles`;
-  if (!(await F.getInfoAsync(pmDest)).exists) {
-    const [asset] = await Asset.loadAsync(require("../assets/map/berkeley.pmtiles"));
-    await F.copyAsync({ from: asset.localUri ?? asset.uri, to: pmDest });
+async function stageOfflineAssets(kind: "flat" | "iso"): Promise<{ pmtilesUri: string; glyphsUrl: string }> {
+  const tiles = new File(Paths.cache, TILES[kind].name);
+  await stage(TILES[kind].module(), tiles);
+  // Earlier builds' copies of the isometric tiles go.
+  for (const f of Paths.cache.list()) {
+    if (f instanceof File && /^iso-.*\.pmtiles$/.test(f.name) && f.name !== TILES.iso.name) f.delete();
   }
 
-  // --- Glyph PBFs (fontstack/range.pbf structure) ---------------------
-  const glyphsRoot = `${cache}map-glyphs`;
+  // Glyph PBFs, in their fontstack/range.pbf folders.
+  const glyphs = new Directory(Paths.cache, "map-glyphs");
   await Promise.all(
     Object.entries(GLYPH_ASSETS).map(async ([key, mod]) => {
       const [stack, range] = key.split("/");
-      const dir = `${glyphsRoot}/${stack}`;
-      const dest = `${dir}/${range}.pbf`;
-      if ((await F.getInfoAsync(dest)).exists) return;
-      await F.makeDirectoryAsync(dir, { intermediates: true });
-      const [asset] = await Asset.loadAsync(mod);
-      await F.copyAsync({ from: asset.localUri ?? asset.uri, to: dest });
-    })
+      const dir = new Directory(glyphs, stack);
+      dir.create({ intermediates: true, idempotent: true });
+      await stage(mod as number, new File(dir, `${range}.pbf`));
+    }),
   );
 
   return {
-    pmtilesUri: `pmtiles://${pmDest}`,
-    glyphsUrl: `${glyphsRoot}/{fontstack}/{range}.pbf`,
+    pmtilesUri: `pmtiles://${tiles.uri}`,
+    glyphsUrl: `${glyphs.uri.replace(/\/$/, "")}/{fontstack}/{range}.pbf`,
   };
 }
 
-function useOfflineAssets() {
-  const [uris, setUris] = useState<{ pmtilesUri: string; glyphsUrl: string } | null>(null);
+function useOfflineAssets(kind: "flat" | "iso") {
+  const [uris, setUris] = useState<{ kind: string; pmtilesUri: string; glyphsUrl: string } | null>(null);
   const [error, setError] = useState<string | null>(null);
   useEffect(() => {
     if (Platform.OS === "web") return;
-    stagedPromise ??= stageOfflineAssets();
+    const staged = (stagedPromise[kind] ??= stageOfflineAssets(kind));
     let cancelled = false;
-    stagedPromise
-      .then((u) => !cancelled && setUris(u))
+    staged
+      .then((u) => !cancelled && setUris({ ...u, kind }))
       .catch((e) => !cancelled && setError(String(e)));
     return () => {
       cancelled = true;
     };
-  }, []);
-  return { uris, error };
+  }, [kind]);
+  return { uris: uris?.kind === kind ? uris : null, error };
+}
+
+/** Where the reader is, watched while the isometric map is open (the native puck can't be placed on the drawing). */
+function useReaderPosition(enabled: boolean) {
+  const [at, setAt] = useState<Coordinate | null>(null);
+  useEffect(() => {
+    if (!enabled || Platform.OS === "web") return;
+    let sub: { remove: () => void } | null = null;
+    let cancelled = false;
+    (async () => {
+      try {
+        const Location = await import("expo-location");
+        const { status } = await Location.requestForegroundPermissionsAsync();
+        if (status !== "granted" || cancelled) return;
+        sub = await Location.watchPositionAsync(
+          { accuracy: Location.Accuracy.Balanced, distanceInterval: 5 },
+          (p) => setAt({ latitude: p.coords.latitude, longitude: p.coords.longitude }),
+        );
+        if (cancelled) sub.remove();
+      } catch {
+        /* no position: no mark */
+      }
+    })();
+    return () => {
+      cancelled = true;
+      sub?.remove();
+    };
+  }, [enabled]);
+  return at;
 }
 
 /* ------------------------------------------------------------------ */
@@ -217,13 +260,20 @@ const MapLibreMapView = forwardRef<MapCameraHandle | null, MapLibreViewProps>(
       clusterRadius = 50,
       clusterMaxZoom = 15,
       highlight,
+      iso = false,
       children,
     },
     ref
   ) => {
     const scheme = useColorScheme();
     const colors = useColors();
-    const { uris, error } = useOfflineAssets();
+    const { uris, error } = useOfflineAssets(iso ? "iso" : "flat");
+    // Where a coordinate goes on this map: straight on, or onto the drawing.
+    const place = useCallback(
+      (c: Coordinate, above?: number): [number, number] => (iso ? isoPoint(c, above) : [c.longitude, c.latitude]),
+      [iso],
+    );
+    const reader = useReaderPosition(iso && !!showsUserLocation);
     const cameraRef = useRef<CameraRef>(null);
     const shapeRef = useRef<GeoJSONSourceRef>(null);
 
@@ -252,7 +302,7 @@ const MapLibreMapView = forwardRef<MapCameraHandle | null, MapLibreViewProps>(
         flyToCoord: (coord, zoom = 16, padding) =>
           run(() =>
             cameraRef.current?.flyTo({
-              center: [coord.longitude, coord.latitude],
+              center: place(coord, 6),
               zoom,
               ...(padding ? { padding } : null),
               duration: 900,
@@ -260,8 +310,9 @@ const MapLibreMapView = forwardRef<MapCameraHandle | null, MapLibreViewProps>(
           ),
         fitCoords: (coords, padding = DEFAULT_PADDING) => {
           if (coords.length === 0) return;
-          const lats = coords.map((c) => c.latitude);
-          const lngs = coords.map((c) => c.longitude);
+          const placed = coords.map((c) => place(c));
+          const lats = placed.map((c) => c[1]);
+          const lngs = placed.map((c) => c[0]);
           run(() =>
             cameraRef.current?.fitBounds(
               [Math.min(...lngs), Math.min(...lats), Math.max(...lngs), Math.max(...lats)],
@@ -270,7 +321,7 @@ const MapLibreMapView = forwardRef<MapCameraHandle | null, MapLibreViewProps>(
           );
         },
       }),
-      [run],
+      [run, place],
     );
 
     // onPress callbacks by landmark id (layer features can't hold functions).
@@ -289,11 +340,12 @@ const MapLibreMapView = forwardRef<MapCameraHandle | null, MapLibreViewProps>(
           properties: { id: m.id, pinColor: m.pinColor ?? PIN_BLUE, label: m.label ?? "" },
           geometry: {
             type: "Point" as const,
-            coordinates: [m.coordinate.longitude, m.coordinate.latitude],
+            // On the drawing, a pin stands over its building.
+            coordinates: place(m.coordinate, 14),
           },
         })),
       };
-    }, [clusterMarkers]);
+    }, [clusterMarkers, place]);
     const labelled = useMemo(() => !!clusterMarkers?.some((m) => m.label), [clusterMarkers]);
 
     // Polyline descriptor children (tour route etc.). Polygon children
@@ -314,6 +366,7 @@ const MapLibreMapView = forwardRef<MapCameraHandle | null, MapLibreViewProps>(
 
     const styleJSON = useMemo(() => {
       if (!uris) return null;
+      if (iso) return isoStyle(uris) as any;
       const base =
         scheme === "dark"
           ? require("../assets/map/paper-dark.json")
@@ -325,7 +378,7 @@ const MapLibreMapView = forwardRef<MapCameraHandle | null, MapLibreViewProps>(
           berkeley: { type: "vector", url: uris.pmtilesUri },
         },
       } as any;
-    }, [scheme, uris]);
+    }, [scheme, uris, iso]);
 
     const handleShapePress = useCallback(
       async (event: any) => {
@@ -368,12 +421,11 @@ const MapLibreMapView = forwardRef<MapCameraHandle | null, MapLibreViewProps>(
       );
     }
 
-    const center: [number, number] = initialRegion
-      ? [initialRegion.longitude, initialRegion.latitude]
-      : [-122.2727, 37.8716];
-    const initialZoom = initialRegion
-      ? Math.log2(360 / Math.max(initialRegion.latitudeDelta, 0.0001))
-      : 15;
+    const center: [number, number] = place(
+      initialRegion ? initialRegion : { latitude: 37.8716, longitude: -122.2727 },
+    );
+    const initialZoom =
+      (initialRegion ? Math.log2(360 / Math.max(initialRegion.latitudeDelta, 0.0001)) : 15) - (iso ? 0.6 : 0);
 
     return (
       <View style={[styles.container, style]}>
@@ -382,17 +434,34 @@ const MapLibreMapView = forwardRef<MapCameraHandle | null, MapLibreViewProps>(
           mapStyle={styleJSON}
           attribution={false}
           logo={false}
+          touchRotate={!iso}
+          touchPitch={!iso}
           onPress={onPress as any}
           onDidFinishLoadingMap={onMapLoaded}
         >
           <Camera
             ref={cameraRef}
             initialViewState={{ center, zoom: initialZoom }}
-            minZoom={minZoomLevel}
-            maxZoom={maxZoomLevel}
-            maxBounds={MAX_BOUNDS}
+            minZoom={iso ? 11.5 : minZoomLevel}
+            maxZoom={iso ? 18.5 : maxZoomLevel}
+            maxBounds={iso ? isoBounds() : MAX_BOUNDS}
           />
-          {showsUserLocation && <UserLocation accuracy heading />}
+          {showsUserLocation && !iso && <UserLocation accuracy heading />}
+          {/* The reader, on the drawing: a vermilion ring and dot on paper. */}
+          {iso && reader && (
+            <GeoJSONSource
+              id="reader"
+              data={{ type: "Feature" as const, properties: {}, geometry: { type: "Point" as const, coordinates: place(reader) } }}
+            >
+              <Layer id="reader-halo" type="circle" paint={{ "circle-radius": 11, "circle-color": CREAM, "circle-opacity": 0.9 }} />
+              <Layer
+                id="reader-ring"
+                type="circle"
+                paint={{ "circle-radius": 9, "circle-color": "transparent", "circle-stroke-width": 2.5, "circle-stroke-color": INK_RED }}
+              />
+              <Layer id="reader-dot" type="circle" paint={{ "circle-radius": 4, "circle-color": INK_RED }} />
+            </GeoJSONSource>
+          )}
 
           {/* Highlighted landmark — paper halo + red-ink crosshair ring so a
               deep-linked landmark is unmistakable after the camera flies in. */}
@@ -404,7 +473,7 @@ const MapLibreMapView = forwardRef<MapCameraHandle | null, MapLibreViewProps>(
                 properties: {},
                 geometry: {
                   type: "Point" as const,
-                  coordinates: [highlight.longitude, highlight.latitude],
+                  coordinates: place(highlight, 14),
                 },
               }}
             >
@@ -444,7 +513,7 @@ const MapLibreMapView = forwardRef<MapCameraHandle | null, MapLibreViewProps>(
                 properties: {},
                 geometry: {
                   type: "LineString" as const,
-                  coordinates: p.coordinates.map((c) => [c.longitude, c.latitude]),
+                  coordinates: iso ? isoLine(p.coordinates) : p.coordinates.map((c) => [c.longitude, c.latitude]),
                 },
               }}
             >
@@ -470,7 +539,7 @@ const MapLibreMapView = forwardRef<MapCameraHandle | null, MapLibreViewProps>(
               id="landmarks"
               data={markerGeoJSON}
               cluster={!labelled}
-              clusterRadius={clusterRadius}
+              clusterRadius={iso ? Math.min(clusterRadius, 36) : clusterRadius}
               clusterMaxZoom={clusterMaxZoom}
               onPress={handleShapePress}
             >
@@ -480,7 +549,8 @@ const MapLibreMapView = forwardRef<MapCameraHandle | null, MapLibreViewProps>(
                 type="circle"
                 filter={["!", ["has", "point_count"]]}
                 paint={{
-                  "circle-radius": labelled ? 12 : 6,
+                  // Numbered stops shrink as the map draws out, so a walk's pins don't pile up.
+                  "circle-radius": labelled ? (["interpolate", ["linear"], ["zoom"], 11.5, 5, 13, 8, 14.5, 12] as any) : 6,
                   "circle-color": ["get", "pinColor"] as any,
                   "circle-stroke-width": 2,
                   "circle-stroke-color": CREAM,
@@ -494,14 +564,14 @@ const MapLibreMapView = forwardRef<MapCameraHandle | null, MapLibreViewProps>(
                   layout={{
                     "text-field": ["get", "label"] as any,
                     "text-font": ["Noto Sans Bold"],
-                    "text-size": 12,
+                    "text-size": ["interpolate", ["linear"], ["zoom"], 13, 9, 14.5, 12] as any,
                     "text-anchor": "center",
                     "text-allow-overlap": true,
                     "text-ignore-placement": true,
                     // The baked glyphs sit high; same correction as the cluster counts.
                     "text-offset": [0.05, 1.1],
                   }}
-                  paint={{ "text-color": CREAM }}
+                  paint={{ "text-color": CREAM, "text-opacity": ["step", ["zoom"], 0, 12.8, 1] as any }}
                 />
               ) : null}
               {/* Cluster bubble */}
@@ -510,19 +580,10 @@ const MapLibreMapView = forwardRef<MapCameraHandle | null, MapLibreViewProps>(
                 type="circle"
                 filter={["has", "point_count"]}
                 paint={{
-                  "circle-radius": [
-                    "step",
-                    ["get", "point_count"],
-                    15,
-                    5,
-                    19,
-                    15,
-                    24,
-                    40,
-                    30,
-                    100,
-                    37,
-                  ] as any,
+                  // Smaller on the drawing, which they'd otherwise cover.
+                  "circle-radius": (iso
+                    ? ["step", ["get", "point_count"], 11, 5, 13, 15, 16, 40, 19, 100, 22]
+                    : ["step", ["get", "point_count"], 15, 5, 19, 15, 24, 40, 30, 100, 37]) as any,
                   "circle-color": [
                     "step",
                     ["get", "point_count"],
@@ -532,7 +593,7 @@ const MapLibreMapView = forwardRef<MapCameraHandle | null, MapLibreViewProps>(
                     50,
                     "#F7F3EA",
                   ] as any,
-                  "circle-stroke-width": ["step", ["get", "point_count"], 2.5, 15, 3, 40, 3.5, 100, 4] as any,
+                  "circle-stroke-width": (iso ? 2 : ["step", ["get", "point_count"], 2.5, 15, 3, 40, 3.5, 100, 4]) as any,
                   "circle-stroke-color": "#0B2E8C",
                 }}
               />
@@ -544,7 +605,7 @@ const MapLibreMapView = forwardRef<MapCameraHandle | null, MapLibreViewProps>(
                 layout={{
                   "text-field": ["get", "point_count_abbreviated"] as any,
                   "text-font": ["Noto Sans Bold"],
-                  "text-size": 13,
+                  "text-size": iso ? 11 : 13,
                   "text-anchor": "center",
                   "text-justify": "center",
                   "text-pitch-alignment": "viewport",

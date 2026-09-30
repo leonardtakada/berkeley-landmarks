@@ -7,6 +7,7 @@ import {
   ScrollView,
 } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
+import Svg, { Path, Text as SvgText } from "react-native-svg";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/hooks/use-colors";
 import { IconSymbol } from "@/components/ui/icon-symbol";
@@ -27,8 +28,10 @@ import { BERKELEY_BOUNDARY } from "@/data/berkeley-boundary";
 import { tours } from "@/data/tours";
 import { useTourFollow } from "@/hooks/use-tour-follow";
 import { TourFollowCard } from "@/components/tour-follow-card";
-import { useStamps } from "@/lib/stamps";
 import { StampCollectOverlay } from "@/components/travel-stamp";
+import { WalkStampOverlay } from "@/components/copy-marks";
+import { today } from "@/lib/reader-copy";
+import { useReaderCopy } from "@/lib/reader-copy-context";
 import { MapUnfold } from "@/components/map-unfold";
 import { ArchitectPortrait } from "@/components/architect-portrait";
 import { Arrow, Rule } from "@/components/print";
@@ -64,7 +67,7 @@ export default function MapScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const mapRef = useRef<MapCameraHandle | null>(null);
-  const { isMapLibre, toggleEngine, ready: engineReady } = useMapEngine();
+  const { engine, isMapLibre, isIso, toggleEngine, ready: engineReady } = useMapEngine();
 
   const [selectedLandmark, setSelectedLandmark] = useState<Landmark | null>(null);
   const [activeCategories, setActiveCategories] = useState<Set<LandmarkCategory>>(
@@ -117,15 +120,29 @@ export default function MapScreen() {
     () => (activeTourId ? tours.find((t) => t.id === activeTourId) : null),
     [activeTourId]
   );
-  const tourFollow = useTourFollow(activeTour ?? null);
-
-  // Tour-progress stamps: tapping a stop while its tour is active collects
-  // a travel label.
-  const stampState = useStamps(activeTour?.id ?? null);
+  // A walk's labels: each stop the walker reaches adds its label to the
+  // walk's page; the last presses the walk's stamp into the Appendix.
+  const { collect } = useReaderCopy();
   const [collectedFlash, setCollectedFlash] = useState<{
     landmarkName: string;
     tourName: string;
   } | null>(null);
+  const [walkStamp, setWalkStamp] = useState<{ tourId: string; title: string; walk: number; day: string } | null>(null);
+  const onReach = useCallback(
+    (landmarkId: string) => {
+      if (!activeTour) return;
+      const { added, finished } = collect(activeTour.id, landmarkId);
+      if (finished) {
+        setCollectedFlash(null);
+        setWalkStamp({ tourId: activeTour.id, title: activeTour.name, walk: tours.indexOf(activeTour) + 1, day: today() });
+      } else if (added) {
+        const landmark = landmarks.find((l) => l.id === landmarkId);
+        if (landmark) setCollectedFlash({ landmarkName: landmark.name, tourName: activeTour.name });
+      }
+    },
+    [activeTour, collect],
+  );
+  const tourFollow = useTourFollow(activeTour ?? null, onReach);
 
   // Frame the walk: the whole route until the reader sets out; then the
   // first stop; then, at each step, the leg of the route between the stop
@@ -178,23 +195,9 @@ export default function MapScreen() {
     });
   }, []);
 
-  const handleMarkerPress = useCallback(
-    (landmark: Landmark) => {
-      setSelectedLandmark(landmark);
-      // Stamp collection: marker tap on a stop during its active tour.
-      if (activeTour && tourStopIds.has(landmark.id)) {
-        stampState.collect(landmark.id).then((added) => {
-          if (added) {
-            setCollectedFlash({
-              landmarkName: landmark.name,
-              tourName: activeTour.name,
-            });
-          }
-        });
-      }
-    },
-    [activeTour, tourStopIds, stampState]
-  );
+  const handleMarkerPress = useCallback((landmark: Landmark) => {
+    setSelectedLandmark(landmark);
+  }, []);
 
   const handleMapPress = useCallback(() => {
     setSelectedLandmark(null);
@@ -218,6 +221,8 @@ export default function MapScreen() {
       <MapUnfold animated>
       {isMapLibre ? (
         <MapLibreMapView
+        key={isIso ? "iso" : "flat"}
+        iso={isIso}
         ref={mapRef}
         style={styles.map}
         initialRegion={BERKELEY_CENTER}
@@ -347,7 +352,7 @@ export default function MapScreen() {
       {__DEV__ && engineReady && (
         <Pressable
           accessibilityLabel={
-            isMapLibre ? "Switch to raster map" : "Switch to vector map"
+            `Map: ${engine}. Switch to the next.`
           }
           onPress={toggleEngine}
           style={[
@@ -365,7 +370,7 @@ export default function MapScreen() {
             color={colors.text}
           />
           <Text style={{ color: INK.blue, fontSize: 11, fontFamily: FONT.medium, letterSpacing: 1.4, textTransform: "uppercase" }}>
-            {isMapLibre ? "vector" : "raster"}
+            {engine}
           </Text>
         </Pressable>
       )}
@@ -432,6 +437,37 @@ export default function MapScreen() {
           </Pressable>
         </View>
       )}
+
+      {/* On the isometric city north isn't up: a north point says where it is. */}
+      {isIso && !selectedLandmark ? (
+        <View
+          pointerEvents="none"
+          style={[
+            styles.north,
+            { bottom: (activeTour && !selectedLandmark ? cardHeight : Math.max(insets.bottom, 12)) + 6 },
+          ]}
+          accessible
+          accessibilityLabel="North is up and to the left"
+        >
+          <Svg width={40} height={30} viewBox="0 0 40 30">
+            <Path d="M14 10 L36 15.8 L27.3 17.7 L30 26.2 Z" fill={INK.charcoal} />
+            <SvgText x={2} y={12} fontSize={11} fontFamily={FONT.medium} fill={INK.charcoal}>
+              N
+            </SvgText>
+          </Svg>
+        </View>
+      ) : null}
+
+      {/* The map's imprint: its streets are OpenStreetMap's, and say so. */}
+      <Text
+        style={[
+          styles.imprint,
+          { bottom: (activeTour && !selectedLandmark ? cardHeight : Math.max(insets.bottom, 12)) + 6 },
+        ]}
+        accessibilityRole="text"
+      >
+        © OpenStreetMap contributors
+      </Text>
 
       {/* Follow-along tour card */}
       {activeTour && !selectedLandmark && (
@@ -518,6 +554,15 @@ export default function MapScreen() {
           onDismiss={() => setCollectedFlash(null)}
         />
       )}
+      {walkStamp && (
+        <WalkStampOverlay
+          tourId={walkStamp.tourId}
+          title={walkStamp.title}
+          walk={walkStamp.walk}
+          day={walkStamp.day}
+          onDismiss={() => setWalkStamp(null)}
+        />
+      )}
     </View>
   );
 }
@@ -591,6 +636,24 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.22,
     shadowRadius: 4,
     shadowOffset: { width: 1, height: 2 },
+  },
+  north: {
+    position: "absolute" as const,
+    right: 10,
+    zIndex: 5,
+    padding: 4,
+    backgroundColor: "rgba(250,246,236,0.8)",
+  },
+  imprint: {
+    position: "absolute" as const,
+    left: 10,
+    zIndex: 5,
+    paddingHorizontal: 5,
+    paddingVertical: 2,
+    backgroundColor: "rgba(250,246,236,0.8)",
+    fontFamily: FONT.regular,
+    fontSize: 10,
+    color: INK.sepia,
   },
   closeButtonText: {
     fontFamily: FONT.medium,

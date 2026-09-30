@@ -6,12 +6,15 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { ArchitectPortrait } from "@/components/architect-portrait";
 import { ChapterOpener, Folio, InkIn, SectionPage, useFirstReveal } from "@/components/book-page";
+import { CheckStamp } from "@/components/copy-marks";
 import { Rule } from "@/components/print";
 import { ScrollClock, useScrollClockHandler } from "@/components/scroll-clock";
 import { WalkLabel } from "@/components/walk-label";
 import { FONT, INK, MARGIN, TYPE, chapterNo } from "@/constants/book";
 import { tours, type Tour } from "@/data/tours";
 import { ARCHITECTS, architectsOnTour } from "@/lib/architects";
+import { formatDay } from "@/lib/reader-copy";
+import { useReaderCopy } from "@/lib/reader-copy-context";
 
 /**
  * Part One — the Tours, set as a table of contents: each walk a numbered
@@ -24,12 +27,14 @@ export default function ToursScreen() {
   const insets = useSafeAreaInsets();
   const reveal = useFirstReveal();
   const clock = useScrollClockHandler();
+  const { copy } = useReaderCopy();
 
   return (
     <SectionPage>
       <ScrollClock value={clock.offset}>
       <Animated.FlatList
         data={tours}
+        extraData={copy.walked}
         onScroll={clock.onScroll}
         scrollEventThrottle={16}
         keyExtractor={(t) => t.id}
@@ -49,6 +54,7 @@ export default function ToursScreen() {
               tour={item}
               number={index + 1}
               last={index === tours.length - 1}
+              walked={copy.walked[item.id]}
               onPress={() => router.push(`/tour/${item.id}`)}
             />
           </InkIn>
@@ -64,11 +70,14 @@ function ContentsEntry({
   tour,
   number,
   last,
+  walked,
   onPress,
 }: {
   tour: Tour;
   number: number;
   last: boolean;
+  /** The day the reader walked it, if they have. */
+  walked?: string;
   onPress: () => void;
 }) {
   const { lead, cast } = architectsOnTour(tour);
@@ -91,7 +100,7 @@ function ContentsEntry({
       onPress={onPress}
       style={({ pressed }) => [styles.entry, pressed && styles.pressed]}
       accessibilityRole="button"
-      accessibilityLabel={`Walk ${number}: ${tour.name}, ${tour.distance}`}
+      accessibilityLabel={`Walk ${number}: ${tour.name}, ${tour.distance}${walked ? `. Walked ${formatDay(walked)}` : ""}`}
     >
       <View style={[styles.row, flip && styles.rowFlip]}>
         <View style={styles.labelBox}>
@@ -104,6 +113,7 @@ function ContentsEntry({
               style={[styles.cameo, flip ? styles.cameoLeft : styles.cameoRight]}
             />
           ) : null}
+          {walked ? <CheckStamp size={28} style={[styles.check, flip ? styles.checkRight : styles.checkLeft]} /> : null}
         </View>
         <View style={styles.head}>
           <Text style={styles.numeral}>{chapterNo(number)}</Text>
@@ -112,6 +122,7 @@ function ContentsEntry({
           <Text style={styles.meta}>
             {tour.stops.length} stops  ·  {tour.distance}  ·  {tour.duration}
           </Text>
+          {walked ? <Text style={styles.walked}>Walked {formatDay(walked)}</Text> : null}
         </View>
       </View>
       <Text style={styles.desc} numberOfLines={3}>
@@ -158,6 +169,23 @@ const styles = StyleSheet.create({
   },
   cameoLeft: {
     left: -16,
+  },
+  check: {
+    position: "absolute",
+    top: -8,
+  },
+  checkLeft: {
+    left: -10,
+  },
+  checkRight: {
+    right: -10,
+  },
+  walked: {
+    ...TYPE.label,
+    fontSize: 9.5,
+    letterSpacing: 1.6,
+    color: INK.vermilion,
+    marginTop: 6,
   },
   head: {
     flex: 1,

@@ -18,6 +18,7 @@ import Animated from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { ArchitectPortrait } from "@/components/architect-portrait";
+import { DateStamp } from "@/components/copy-marks";
 import { EntryPage, RunningHead } from "@/components/entry-page";
 import { PaperGrain } from "@/components/paper-grain";
 import { PhotoGallery, PhotoViewer, type GalleryPhoto } from "@/components/photo-gallery";
@@ -29,8 +30,9 @@ import { FONT, INK, MARGIN, PAGE_TURN_MS, PAPER, TYPE } from "@/constants/book";
 import { CATEGORY_LABELS, landmarks, type Landmark } from "@/data/landmarks";
 import { useAuth } from "@/hooks/use-auth";
 import { ARCHITECTS, architectOf, worksBy } from "@/lib/architects";
-import { photoSource } from "@/lib/photo-source";
+import { photoCredit, photoSource } from "@/lib/photo-source";
 import { pickPhotos } from "@/lib/photo-prep";
+import { useReaderCopy } from "@/lib/reader-copy-context";
 import { trpc } from "@/lib/trpc";
 
 const EDITABLE_FIELDS: { key: keyof Landmark; label: string; multiline?: boolean }[] = [
@@ -78,6 +80,7 @@ export default function LandmarkEntryScreen() {
   const submitPhoto = trpc.photos.submit.useMutation();
   const submitEdit = trpc.submissions.submit.useMutation();
   const { user } = useAuth({ autoFetch: true });
+  const { copy, mark } = useReaderCopy();
 
   const [uploading, setUploading] = useState(false);
   const [uploaded, setUploaded] = useState(0);
@@ -94,8 +97,10 @@ export default function LandmarkEntryScreen() {
   const gallery = useMemo<GalleryPhoto[]>(() => {
     if (!landmark) return [];
     const list: GalleryPhoto[] = [];
-    if (landmark.photoUrl) list.push({ uri: photoUri(landmark.photoUrl) });
-    for (const p of landmark.photos ?? []) list.push({ uri: photoUri(p.url), caption: p.caption, credit: p.credit });
+    if (landmark.photoUrl) list.push({ uri: photoUri(landmark.photoUrl), credit: photoCredit(landmark.photoUrl) });
+    for (const p of landmark.photos ?? []) {
+      list.push({ uri: photoUri(p.url), caption: p.caption, credit: photoCredit(p.url) ?? p.credit });
+    }
     for (const p of approvedPhotos ?? []) {
       list.push({ uri: photoUri(p.photoUrl), caption: p.caption ?? "From a reader", credit: "Sent in by a reader" });
     }
@@ -211,7 +216,11 @@ export default function LandmarkEntryScreen() {
 
   return (
     <EntryPage>
-      <RunningHead back="The Registry" folio={number ? `No. ${number}` : undefined} />
+      <RunningHead
+        back="The Registry"
+        folio={number ? `No. ${number}` : undefined}
+        corner={{ on: !!copy.corners[landmark.id], onToggle: () => mark("corners", landmark.id, !copy.corners[landmark.id]) }}
+      />
       <ScrollClock value={clock.offset}>
       <Animated.ScrollView
         onScroll={clock.onScroll}
@@ -226,6 +235,7 @@ export default function LandmarkEntryScreen() {
               source={photoSource(photoUri(landmark.photoUrl))}
               index={1}
               caption={landmark.name}
+              credit={photoCredit(landmark.photoUrl)}
               width={plateW}
               height={plateH}
               onPress={() => setViewerAt(0)}
@@ -244,6 +254,14 @@ export default function LandmarkEntryScreen() {
           </Text>
           <Text style={styles.title}>{landmark.name}</Text>
           <Text style={styles.address}>{landmark.address}, Berkeley</Text>
+          <DateStamp
+            word="Visited"
+            day={copy.visited[landmark.id]}
+            prompt="Mark as visited"
+            onStamp={() => mark("visited", landmark.id, true)}
+            onErase={() => mark("visited", landmark.id, false)}
+            style={styles.visited}
+          />
         </View>
 
         {/* Particulars */}
@@ -499,6 +517,9 @@ const styles = StyleSheet.create({
     letterSpacing: -0.3,
     color: INK.charcoal,
     marginTop: 6,
+  },
+  visited: {
+    marginTop: 16,
   },
   address: {
     fontFamily: FONT.regular,

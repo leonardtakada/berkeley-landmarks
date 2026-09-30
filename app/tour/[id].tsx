@@ -5,6 +5,7 @@ import Animated from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { ArchitectPortrait } from "@/components/architect-portrait";
+import { DateStamp, RingStamp } from "@/components/copy-marks";
 import { EntryPage, RunningHead } from "@/components/entry-page";
 import { FoldOutMap } from "@/components/fold-out-map";
 import { Annotation, Arrow, Bar, Rule } from "@/components/print";
@@ -15,7 +16,8 @@ import { FONT, INK, MARGIN, PAGE_TURN_MS, PAPER, TYPE, chapterNo } from "@/const
 import { landmarks } from "@/data/landmarks";
 import { tours } from "@/data/tours";
 import { ARCHITECTS, architectOf, architectsOnTour } from "@/lib/architects";
-import { useStamps } from "@/lib/stamps";
+import { formatDay } from "@/lib/reader-copy";
+import { useReaderCopy } from "@/lib/reader-copy-context";
 
 /**
  * A walk, printed as a chapter: its label, number, title and particulars; the
@@ -28,7 +30,7 @@ export default function TourChapterScreen() {
   const insets = useSafeAreaInsets();
   const index = tours.findIndex((t) => t.id === id);
   const tour = tours[index];
-  const stampState = useStamps(tour?.id ?? null);
+  const { copy, mark } = useReaderCopy();
   const clock = useScrollClockHandler();
 
   if (!tour) {
@@ -50,7 +52,9 @@ export default function TourChapterScreen() {
     .filter((s): s is typeof s & { landmark: NonNullable<typeof s.landmark> } => !!s.landmark);
   const { lead, cast } = architectsOnTour(tour);
   const others = cast.filter((k) => k !== lead);
-  const collected = stops.filter((s) => stampState.stamps.has(s.landmarkId)).length;
+  const labels = copy.labels[tour.id] ?? {};
+  const collected = stops.filter((s) => labels[s.landmarkId]).length;
+  const walked = copy.walked[tour.id];
   const words = tour.description.split(" ");
 
   return (
@@ -65,7 +69,14 @@ export default function TourChapterScreen() {
       >
         {/* Chapter opener */}
         <View style={styles.opener}>
-          <WalkLabel tourId={tour.id} title={tour.name} width={140} delay={PAGE_TURN_MS * 0.6} />
+          <View style={styles.labelBox}>
+            <WalkLabel tourId={tour.id} title={tour.name} width={140} delay={PAGE_TURN_MS * 0.6} />
+            {walked ? (
+              <View style={styles.ring} accessible accessibilityLabel={`Stamped: walked ${formatDay(walked)}`}>
+                <RingStamp walk={index + 1} day={walked} size={84} />
+              </View>
+            ) : null}
+          </View>
           <View style={styles.openerText}>
             <Text style={styles.numeral}>{no}</Text>
             <Bar />
@@ -85,6 +96,14 @@ export default function TourChapterScreen() {
             </View>
           ))}
         </View>
+        <DateStamp
+          word="Walked"
+          day={walked}
+          prompt="Mark as walked"
+          onStamp={() => mark("walked", tour.id, true)}
+          onErase={() => mark("walked", tour.id, false)}
+          style={styles.walked}
+        />
 
         {/* The walk's own architect */}
         {lead ? (
@@ -191,19 +210,28 @@ export default function TourChapterScreen() {
           </View>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.stamps}>
             {stops.map((s, i) => {
-              const got = stampState.stamps.has(s.landmarkId);
+              const got = labels[s.landmarkId];
               return (
-                <View key={s.landmarkId} style={styles.stampSlot}>
-                  <TravelStamp landmarkName={s.landmark.name} tourName={tour.name} collected={got} size={80} variant={i} />
-                  <Text style={[styles.stampName, got && { color: INK.charcoal }]} numberOfLines={2}>
+                <View
+                  key={s.landmarkId}
+                  style={styles.stampSlot}
+                  accessible
+                  accessibilityLabel={`${s.landmark.name}: ${got ? `label collected ${formatDay(got)}` : "not yet collected"}`}
+                >
+                  <TravelStamp landmarkName={s.landmark.name} tourName={tour.name} collected={!!got} size={80} variant={i} />
+                  <Text style={[styles.stampName, !!got && { color: INK.charcoal }]} numberOfLines={2}>
                     {s.landmark.name}
                   </Text>
+                  {got ? <Text style={styles.stampDay}>{formatDay(got, "stamp")}</Text> : null}
                 </View>
               );
             })}
           </ScrollView>
           {!collected ? (
-            <Text style={styles.stampHint}>Stand at a stop and its label is added to this page.</Text>
+            <Text style={styles.stampHint}>
+              Set out on foot with the guide: each stop you reach adds its label to this page, and the last stamps the
+              walk as walked.
+            </Text>
           ) : null}
         </View>
 
@@ -437,6 +465,26 @@ const styles = StyleSheet.create({
     lineHeight: 14,
     color: INK.faded,
     textAlign: "center",
+  },
+  stampDay: {
+    fontFamily: FONT.medium,
+    fontSize: 9.5,
+    letterSpacing: 1.2,
+    color: INK.vermilion,
+    marginTop: 3,
+  },
+  labelBox: {
+    // The stamp struck across the label's corner lies over the title beside it.
+    zIndex: 1,
+  },
+  ring: {
+    position: "absolute",
+    right: -24,
+    bottom: -18,
+  },
+  walked: {
+    marginHorizontal: MARGIN.outer,
+    marginTop: 18,
   },
   stampHint: {
     fontFamily: FONT.regular,

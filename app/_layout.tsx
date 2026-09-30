@@ -8,7 +8,7 @@ import { useReducedMotion } from "react-native-reanimated";
 import { Platform } from "react-native";
 import "@/lib/_core/nativewind-pressable";
 import { ThemeProvider } from "@/lib/theme-provider";
-import { FavoritesProvider } from "@/lib/favorites-context";
+import { ReaderCopyProvider } from "@/lib/reader-copy-context";
 import { trpc, createTRPCClient } from "@/lib/trpc";
 import {
   SourceSerif4_400Regular,
@@ -33,7 +33,6 @@ import {
 import type { EdgeInsets, Metrics, Rect } from "react-native-safe-area-context";
 
 import { initManusRuntime, subscribeSafeAreaInsets } from "@/lib/_core/manus-runtime";
-import { startProximityNotifications, stopProximityNotifications } from "@/lib/landmark-notifications";
 
 const DEFAULT_WEB_INSETS: EdgeInsets = { top: 0, right: 0, bottom: 0, left: 0 };
 const DEFAULT_WEB_FRAME: Rect = { x: 0, y: 0, width: 0, height: 0 };
@@ -52,17 +51,6 @@ export default function RootLayout() {
   // Initialize Manus runtime for cookie injection from parent container
   useEffect(() => {
     initManusRuntime();
-  }, []);
-
-  // Proximity landmark notifications (native only, best effort in Expo Go)
-  useEffect(() => {
-    if (Platform.OS === "web") return;
-    let stopped = false;
-    startProximityNotifications().catch(() => {});
-    return () => {
-      stopped = true;
-      stopProximityNotifications();
-    };
   }, []);
 
   const handleSafeAreaUpdate = useCallback((metrics: Metrics) => {
@@ -113,7 +101,7 @@ export default function RootLayout() {
 
   const content = (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <FavoritesProvider>
+      <ReaderCopyProvider>
         <QueryClientProvider client={queryClient}>
           <trpc.Provider client={trpcClient} queryClient={queryClient}>
           <Stack
@@ -137,6 +125,8 @@ export default function RootLayout() {
             <Stack.Screen name="landmark/[id]" />
             <Stack.Screen name="tour/[id]" />
             <Stack.Screen name="architect/[key]" />
+            <Stack.Screen name="stamps" />
+            <Stack.Screen name="about" />
             <Stack.Screen
               name="map"
               options={{
@@ -148,7 +138,7 @@ export default function RootLayout() {
           </Stack>
           </trpc.Provider>
         </QueryClientProvider>
-      </FavoritesProvider>
+      </ReaderCopyProvider>
     </GestureHandlerRootView>
   );
 

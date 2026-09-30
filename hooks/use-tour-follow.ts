@@ -26,7 +26,7 @@ export interface TourFollowState {
   finished: boolean;
   start: () => void;
   stop: () => void;
-  /** Manually advance to the next stop (skips arrival check). */
+  /** Done at this stop: on to the next (by hand, or on arrival there). */
   advance: () => void;
   /** Step back to the previous stop. */
   rewind: () => void;
@@ -58,9 +58,10 @@ function fireArrivalHaptic() {
  * auto-advances when they come within ARRIVAL_RADIUS_M of the next stop (or
  * of the point where the route passes it),
  * and fires haptic feedback on arrival. Falls back to manual step-through
- * when geolocation is unavailable or denied.
+ * when geolocation is unavailable or denied. `onReach` hears of each stop
+ * the walker reaches, either way.
  */
-export function useTourFollow(tour: Tour | null): TourFollowState {
+export function useTourFollow(tour: Tour | null, onReach?: (landmarkId: string) => void): TourFollowState {
   const [active, setActive] = useState(false);
   const [currentStopIndex, setCurrentStopIndex] = useState(0);
   const [location, setLocation] = useState<{ latitude: number; longitude: number } | null>(null);
@@ -90,12 +91,11 @@ export function useTourFollow(tour: Tour | null): TourFollowState {
   const finished = currentStopIndex >= totalStops;
 
   const advance = useCallback(() => {
-    setCurrentStopIndex((i) => {
-      const next = Math.min(i + 1, totalStops);
-      if (next > i) fireArrivalHaptic();
-      return next;
-    });
-  }, [totalStops]);
+    if (currentStopIndex >= totalStops) return;
+    fireArrivalHaptic();
+    onReach?.(stops[currentStopIndex].landmark.id);
+    setCurrentStopIndex(currentStopIndex + 1);
+  }, [currentStopIndex, totalStops, stops, onReach]);
 
   const rewind = useCallback(() => {
     setCurrentStopIndex((i) => Math.max(0, i - 1));

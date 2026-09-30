@@ -1,6 +1,7 @@
 /**
- * Map engine feature flag: choose between the new offline MapLibre vector
- * map ("maplibre") and the legacy raster tile map ("raster").
+ * Map engine feature flag: the guide's isometric city ("iso", drawn by
+ * MapLibre from scripts/iso/city.ts), the flat offline MapLibre vector map
+ * ("maplibre"), or the legacy raster tile map ("raster").
  *
  * - `MAPLIBRE_ENABLED` is the compile-time default.
  * - A runtime override is persisted in AsyncStorage so the engine can be
@@ -13,7 +14,8 @@ import { useCallback, useEffect, useState } from "react";
 import { Platform } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-export type MapEngine = "maplibre" | "raster";
+export type MapEngine = "iso" | "maplibre" | "raster";
+const ENGINES: MapEngine[] = ["iso", "maplibre", "raster"];
 
 export const MAPLIBRE_ENABLED = true;
 
@@ -23,14 +25,14 @@ let cachedOverride: MapEngine | null = null;
 
 export function defaultMapEngine(): MapEngine {
   if (Platform.OS === "web") return "raster";
-  return MAPLIBRE_ENABLED ? "maplibre" : "raster";
+  return MAPLIBRE_ENABLED ? "iso" : "raster";
 }
 
 export async function getStoredMapEngine(): Promise<MapEngine | null> {
   if (cachedOverride) return cachedOverride;
   try {
     const v = await AsyncStorage.getItem(OVERRIDE_KEY);
-    if (v === "maplibre" || v === "raster") {
+    if (v === "iso" || v === "maplibre" || v === "raster") {
       cachedOverride = v;
       return v;
     }
@@ -49,6 +51,7 @@ export async function setStoredMapEngine(engine: MapEngine): Promise<void> {
 export function useMapEngine(): {
   engine: MapEngine;
   isMapLibre: boolean;
+  isIso: boolean;
   toggleEngine: () => void;
   ready: boolean;
 } {
@@ -69,12 +72,11 @@ export function useMapEngine(): {
   }, []);
 
   const toggleEngine = useCallback(() => {
-    const next: MapEngine =
-      (override ?? defaultMapEngine()) === "maplibre" ? "raster" : "maplibre";
+    const next = ENGINES[(ENGINES.indexOf(override ?? defaultMapEngine()) + 1) % ENGINES.length];
     setOverride(next);
     setStoredMapEngine(next);
   }, [override]);
 
   const engine = override ?? defaultMapEngine();
-  return { engine, isMapLibre: engine === "maplibre", toggleEngine, ready };
+  return { engine, isMapLibre: engine !== "raster", isIso: engine === "iso", toggleEngine, ready };
 }

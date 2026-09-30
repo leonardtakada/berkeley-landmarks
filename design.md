@@ -43,12 +43,9 @@ Auto Indicator LLC — in the Appendix only, never on the cover.
   (54pt wide) under a thin solid blue head-band, in book order: Tours,
   Landmarks, Appendix. The open section is solid blue and drawn out further;
   the rest are blue tint. Eased motion, no bounce. They lie over the open
-  page, so a turn clears them first: the tapped ribbon curls up off the page
-  like paper — rolling from its cut end toward the reader, the underside of
-  the roll showing — while the others fade out. It unrolls onto the new page
-  as the leaf lands (in solid blue if its section opened) and the others fade
-  back. The ribbon is cut into slices laid along the curve in one shared
-  perspective. The leaf starts `PAGE_TURN_DELAY_MS` behind the curl.
+  page, so a turn clears them first: all of them fade out quickly, change
+  while they're away, and fade back as the leaf lands — nothing moves but the
+  leaf, which starts `PAGE_TURN_DELAY_MS` behind the fade.
 - **Sections**: leaves bound at the left spine, ~650ms page turn
   (`components/book-pages.tsx`). Part One The Tours, Part Two The Registry,
   Appendix. The book begins at the head-band: the strip above it (the status
@@ -58,19 +55,34 @@ Auto Indicator LLC — in the Appendix only, never on the cover.
   the band instead of rising past it, and the ribbons always hang over paper.
   (The frame clips, so a lifted leaf can't be drawn over the ribbons.)
 - **Entries**: leaves laid over the book, hinged at the right
-  (`lib/page-turn.ts`); swipe back from the left edge.
-- **Map** (`app/map.tsx`): the live canvas has no texture; its chrome is
-  flat slips. The camera follows the reader: a landmark flies in above its
-  sheet; "the large map" frames the whole walk; "set out on foot" starts at
-  stop 1, and each step frames the leg of the route between two stops
-  (`lib/route-legs.ts`). Camera moves wait for the map to load.
+  (`lib/page-turn.ts`); swipe back from the left edge. A tiny haptic tick
+  as a leaf turns over (the ribbons tick too).
+- **The Registry's index** (`lib/registry-index.ts`): Find reads a query
+  the way a reader puts it — "every Maybeck within walking distance",
+  "Queen Anne in Elmwood", "1920s downtown" — into terms of the index
+  (architect, style, district, era), shown as slips that can be taken out;
+  terms of one kind widen, of different kinds narrow; other words are looked
+  for anywhere in an entry. If nothing answers the terms, the query is read
+  as plain words. "Near me" (Where, or said in the query) keeps what's
+  within a quarter hour's walk, nearest first, in bands of five minutes.
+  Order by name, year, architect, style or district; tapping a heading
+  narrows the index to it. `__tests__/registry-index.test.ts`.
+- **Map** (`app/map.tsx`): the isometric city (below), drawn by MapLibre;
+  its chrome is flat slips, with a north point (north is up and to the
+  left). The camera follows the reader: a landmark flies in above its sheet;
+  "the large map" frames the whole walk; "set out on foot" starts at stop 1,
+  and each step frames the leg of the route between two stops
+  (`lib/route-legs.ts`). Camera moves wait for the map to load. The flat
+  vector map and the raster map are still there behind the dev toggle
+  (`constants/map-engine.ts`).
 - **Fold-out map** (`components/fold-out-map.tsx`): folded, a blue cover
   naming the walk, its length, the streets it follows and a locator; open,
-  the route over the street plan (baked per walk from OpenStreetMap by
-  `scripts/bake-walk-streets.ts`), with street names, numbered stops, start
-  and finish, a locator, scale and north point. Where stops crowd together
-  (a street of one architect's houses) their numbers stand aside on short
-  leaders so each can be read.
+  the walk's isometric plate (`components/iso-plate.tsx`): a block of the
+  city cut out as a paper diorama, the route a vermilion ribbon laid among
+  the buildings by depth (its dotted centre line over everything), the
+  stops' buildings as enlarged models with numbered flags — rising out of
+  the page one after another, in the walk's order, once the sheet lies flat
+  — the streets it follows named flat on the ground, a north point.
 - **Walks** (`data/tours.ts`): each route is drawn along the ways a walker
   takes — streets, campus walks, paths and steps from OpenStreetMap — by
   `npx tsx scripts/route-walks.ts`, which stands each stop on the street it
@@ -90,6 +102,32 @@ Auto Indicator LLC — in the Appendix only, never on the cover.
 Photographs print as one-ink duotones with a vermilion block set out of
 register (`components/tipped-in-plate.tsx`). Travel stamps are geometric
 labels — circle, square, arch, triangle.
+
+## The isometric city — `scripts/iso/`
+Berkeley as the cover device draws it: seen from the south-west, east up to
+the right, north up to the left (`lib/iso.ts`). The land is stacked paper,
+one sheet per 25 m terrace (USGS 3DEP elevation via the AWS terrain tiles,
+`scripts/iso/terrain.ts`), its risers a deeper tint; the Bay flat blue with
+ruled waves; streets paper on a pale blue ground; every OpenStreetMap
+building raised from its outline (houses under gables, heights from tags or
+guessed from kind and size), flat-shaded in two tones lit from the west;
+the registry's landmarks in vermilion; lollipop trees in the parks and
+groves. The pieces are laid back to front (`scripts/iso/scene.ts`).
+- **Walk plates**: `npx tsx scripts/iso/plates.ts [walk…]` bakes each walk's
+  block to `assets/plates/<walk>.png` and writes
+  `components/walk-plates.generated.ts` (route, models, flags, labels);
+  `scripts/iso/proof.ts` proofs one as the app draws it.
+- **The city map**: `npx tsx scripts/iso/city.ts` writes
+  `assets/map/iso.pmtiles` — the scene laid out on MapLibre's globe as if its
+  metres were at 0°, 0° — and `lib/iso-terrain.generated.ts`, the terraces
+  the app lifts pins, routes and the reader onto (`lib/iso-map.ts`). Style:
+  `lib/iso-style.ts`, one fill layer in the drawing's order (fill sort key,
+  no anti-aliasing, so no edge of a face behind shows through); buildings
+  and trees from z14, trees from z15, street names from z14 (main) and z15.5,
+  districts out to z14.
+- `scripts/iso/preview.ts` and `city-proof.ts` proof the scene as a PNG.
+- `__tests__/iso.test.ts` checks the projection and that every walk has a
+  plate with a model and flag for each stop.
 
 ## Illustration
 Flat cut-paper prints after the Showa travel labels: a handful of shapes in
@@ -158,6 +196,44 @@ Landmark photos are Wikimedia Commons thumbnails at a width Commons serves
 (landmarks without one get a drawn plate, above);
 `node scripts/fix-photo-urls.mjs` re-resolves them through the Commons API
 and checks every link (`--check` to only check).
+
+**Offline.** The guide works with no signal. Every photograph in it is
+printed into the app: `node scripts/bundle-photos.mjs` fetches each one
+(lead plates and galleries), prints it 960px wide through mozjpeg into
+`assets/photos/`, asks Commons who took it and on what licence, and writes
+`lib/photos.generated.ts`; `photoSource()` serves the bundled print wherever
+the URL appears, and `photoCredit()` its credit, set small under the plate.
+Re-run it after adding photographs. The large map is bundled PMTiles and
+glyphs; the fold-out maps are baked. Only readers' photographs, sign-in and
+sending things to the editors need the network.
+`__tests__/offline.test.ts` fails if a photograph isn't bundled.
+Both maps carry the OpenStreetMap credit (ODbL).
+
+## The reader's copy
+What the reader does with the guide is kept on the phone
+(`lib/reader-copy.ts`, kept by `lib/reader-copy-context.tsx`), with the day:
+- **Visited**: a vermilion date stamp under an entry's address — "Mark as
+  visited", pressed on with a heavy haptic; tap it to erase.
+- **Walk labels**: in walk mode, each stop reached (by location, or "On to
+  stop n" by hand) adds its travel label to the walk's page, dated, and
+  counts as a visit. The last one finishes the walk.
+- **Walked**: a finished walk (or one stamped "Mark as walked") gets a ring
+  stamp over its label on its page, a tick on the Tours contents, and its
+  stamp in the Appendix.
+- **Turned-down pages**: the corner in an entry's running head.
+- **Stamps** (`app/stamps.tsx`, from the Appendix): the walks as a passport
+  page — each walked walk's label with its ring stamp — then places visited,
+  day by day, and pages turned down. The Registry marks visited entries
+  with a tick and turned-down ones with a corner.
+Silence is a feature: no notifications, no badges, nothing asks the reader
+back. Location is asked for only on the map, a walk, or "near me".
+
+## Colophon
+The Appendix's colophon credits the typefaces (Jost, Berkeley Post, Noto
+Sans on the maps), the inks and stock, the sources of the registry, the maps
+(OpenStreetMap) and the lives, and every Commons photographer by name
+(`lib/credits.ts`, from the bundled credits). "About this guide"
+(`app/about.tsx`) says how each part was gathered.
 
 ## Motion
 Page turns, entry leaves, ribbons drawn out, cover printing, printed matter

@@ -11,7 +11,13 @@ import { Arrow, InkPlane, Rule } from "@/components/print";
 import { ScrollClock, useScrollClockHandler } from "@/components/scroll-clock";
 import { FONT, INK, MARGIN, PAPER, TYPE } from "@/constants/book";
 import { useAuth } from "@/hooks/use-auth";
+import { tours } from "@/data/tours";
 import { ARCHITECTS, worksBy, type ArchitectKey } from "@/lib/architects";
+import { commonsPhotographers, otherPhotoSources } from "@/lib/credits";
+import { useReaderCopy } from "@/lib/reader-copy-context";
+
+const PHOTOGRAPHERS = commonsPhotographers();
+const OTHER_SOURCES = otherPhotoSources();
 
 const GALLERY: ArchitectKey[] = [
   "maybeck",
@@ -29,7 +35,7 @@ const GALLERY: ArchitectKey[] = [
 
 /**
  * The Appendix: the guide's architects as a sheet of labels, the owner's
- * plate, the colophon and the credits.
+ * plate and their stamps, the colophon and the credits.
  */
 export default function AppendixScreen() {
   const router = useRouter();
@@ -37,6 +43,10 @@ export default function AppendixScreen() {
   const reveal = useFirstReveal();
   const clock = useScrollClockHandler();
   const { user, logout } = useAuth({ autoFetch: true });
+  const { copy } = useReaderCopy();
+  const walked = tours.filter((t) => copy.walked[t.id]).length;
+  const visited = Object.keys(copy.visited).length;
+  const corners = Object.keys(copy.corners).length;
   const version = Constants.expoConfig?.version ?? "1.0.0";
 
   return (
@@ -123,8 +133,34 @@ export default function AppendixScreen() {
           )}
         </InkIn>
 
-        {/* Proposals */}
+        {/* The reader's stamps */}
         <InkIn reveal={reveal} index={8} style={styles.propose}>
+          <Rule color={INK.charcoal} weight={1} />
+          <Text style={[TYPE.kicker, styles.colophonHead]}>Stamps</Text>
+          <Text style={styles.colophonBody}>
+            {walked || visited || corners
+              ? [
+                  `${walked} of ${tours.length} walks walked`,
+                  `${visited} ${visited === 1 ? "place" : "places"} visited`,
+                  corners ? `${corners} ${corners === 1 ? "page" : "pages"} turned down` : null,
+                ]
+                  .filter(Boolean)
+                  .join(" · ") + "."
+              : "A stamp for every walk you finish, and a note of every place you've been — kept here, like a passport."}
+          </Text>
+          <Pressable
+            onPress={() => router.push("/stamps")}
+            hitSlop={8}
+            style={({ pressed }) => [styles.plateAction, pressed && { opacity: 0.6 }]}
+            accessibilityRole="button"
+          >
+            <Text style={styles.link}>Your stamps</Text>
+            <Arrow length={16} />
+          </Pressable>
+        </InkIn>
+
+        {/* Proposals */}
+        <InkIn reveal={reveal} index={9} style={styles.propose}>
           <Rule color={INK.charcoal} weight={1} />
           <Text style={[TYPE.kicker, styles.colophonHead]}>A place for the guide</Text>
           <Text style={styles.colophonBody}>
@@ -150,19 +186,41 @@ export default function AppendixScreen() {
         </InkIn>
 
         {/* Colophon */}
-        <InkIn reveal={reveal} index={9} style={styles.colophon}>
+        <InkIn reveal={reveal} index={10} style={styles.colophon}>
           <Rule color={INK.charcoal} weight={1} />
           <Text style={[TYPE.kicker, styles.colophonHead]}>Colophon</Text>
           <Text style={styles.colophonBody}>
-            Berkeley Tours, a guide to the city&apos;s landmarks and walks. Set in Jost, a revival of Paul Renner&apos;s Futura,
-            with titles in Berkeley Post, cut for this guide. Printed in two inks — the blue and vermilion of the
-            Campanile device — on cream stock.
+            Berkeley Tours, a guide to the city&apos;s landmarks and walks. Set in Jost, Owen Earl&apos;s revival of Paul
+            Renner&apos;s Futura, with titles in Berkeley Post, cut for this guide by Leonard Takada; the maps are lettered
+            in Noto Sans.
           </Text>
           <Text style={styles.colophonBody}>
-            Registry particulars after the Berkeley Architectural Heritage Association and the City of
-            Berkeley Landmarks Preservation Commission. Photographs from Wikimedia Commons and the readers
-            of this guide.
+            Printed in two inks — the blue and vermilion of the Campanile device, each with a screened tint — on a cream
+            stock with a quiet tooth; the leaves are a warmer cream, loose slips a paler one. Flat planes of ink carry
+            the faint laydown of lithographed colour. The illustrations are cut paper: a handful of shapes in the two
+            inks, their tints and charcoal, every edge cut with a slight wobble.
           </Text>
+          <Text style={styles.colophonBody}>
+            Registry particulars after the Berkeley Architectural Heritage Association and the City of Berkeley
+            Landmarks Preservation Commission. Maps and walks drawn from OpenStreetMap, © OpenStreetMap contributors,
+            under the Open Database License; the lie of the land from the U.S. Geological Survey&apos;s 3D Elevation
+            Program. The architects&apos; lives from their Wikipedia articles and the sources
+            they cite, with UC Berkeley&apos;s Environmental Design Archives and the Pacific Coast Architecture Database.
+          </Text>
+          <Text style={styles.colophonBody}>
+            Photographs from Wikimedia Commons, each credited on its plate, by {PHOTOGRAPHERS.join(", ")}
+            {OTHER_SOURCES.length ? `; from ${OTHER_SOURCES.join(" and ")}` : ""}; and from the readers of this
+            guide.
+          </Text>
+          <Pressable
+            onPress={() => router.push("/about")}
+            hitSlop={8}
+            style={({ pressed }) => [styles.plateAction, pressed && { opacity: 0.6 }]}
+            accessibilityRole="button"
+          >
+            <Text style={styles.link}>About this guide</Text>
+            <Arrow length={16} />
+          </Pressable>
           <View style={styles.credit}>
             <Text style={TYPE.label}>Created by</Text>
             <Text style={styles.creditName}>Leonard Takada</Text>

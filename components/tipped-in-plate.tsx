@@ -26,6 +26,7 @@ export function TippedInPlate({
   source,
   index,
   caption,
+  credit,
   width,
   height,
   offset = 10,
@@ -36,6 +37,8 @@ export function TippedInPlate({
   /** Figure number (1-based). */
   index: number;
   caption?: string;
+  /** Who took the photograph, and on what licence, set small under the caption. */
+  credit?: string;
   width: number;
   height: number;
   /** How far the vermilion block sits out of register; 0 for none. */
@@ -61,6 +64,11 @@ export function TippedInPlate({
         <Text style={styles.fig}>Fig. {chapterNo(index)}</Text>
         {caption ? `  ${caption}` : ""}
       </Text>
+      {credit ? (
+        <Text style={styles.credit} numberOfLines={1}>
+          Photograph: {credit}
+        </Text>
+      ) : null}
     </View>
   );
   return onPress ? (
@@ -146,6 +154,12 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: INK.blue,
     overflow: "hidden",
+  },
+  credit: {
+    fontFamily: FONT.regular,
+    fontSize: 11,
+    color: INK.faded,
+    marginTop: 3,
   },
   drawnNote: {
     fontFamily: FONT.regular,

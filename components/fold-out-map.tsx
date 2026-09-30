@@ -3,6 +3,7 @@ import { Pressable, StyleSheet, Text, View, useWindowDimensions } from "react-na
 import Animated, {
   Easing,
   interpolate,
+  useAnimatedReaction,
   useAnimatedStyle,
   useReducedMotion,
   useSharedValue,
@@ -13,7 +14,9 @@ import Animated, {
 import Svg, { Circle, G, Path, Rect, Text as SvgText } from "react-native-svg";
 import * as Haptics from "expo-haptics";
 
+import { IsoPlate } from "@/components/iso-plate";
 import { Arrow, InkPlane } from "@/components/print";
+import { PLATES } from "@/components/walk-plates.generated";
 import { FONT, INK, MARGIN, PAPER, TYPE } from "@/constants/book";
 import { BERKELEY_BOUNDARY } from "@/data/berkeley-boundary";
 import { landmarks } from "@/data/landmarks";
@@ -51,10 +54,12 @@ function flapTop(open: number, i: number, panelH: number) {
  * shadowed while it hangs away from the light — and again to fold it back.
  *
  * Folded, its front panel is the map's cover: the walk, its length, the
- * streets it follows and where in the city it lies. Open, it is drawn from
- * the walk's own route over the street plan, with the streets it follows
- * named, its stops numbered, a locator, a scale of a quarter mile and a
- * north point.
+ * streets it follows and where in the city it lies. Open, it is the walk's
+ * isometric plate (components/iso-plate.tsx): a block of the city as a
+ * paper diorama, the route laid over it, and the stops' buildings rising
+ * out of the page once the sheet lies flat. (A walk without a plate gets
+ * the flat street plan below: the route over the streets, its stops
+ * numbered, a locator, a scale of a quarter mile and a north point.)
  */
 export function FoldOutMap({
   tourId,
@@ -73,10 +78,22 @@ export function FoldOutMap({
 }) {
   const { width: screenW } = useWindowDimensions();
   const reduceMotion = useReducedMotion();
+  const plate = PLATES[tourId];
   const W = screenW - MARGIN.outer * 2;
-  const H = Math.round(W * MAP_ASPECT);
+  const H = Math.round(plate ? (W * plate.height) / plate.width : W * MAP_ASPECT);
   const panelH = H / PANELS;
   const open = useSharedValue(0);
+  // The stops' buildings rise once the sheet lies flat, and sink as it folds.
+  const rise = useSharedValue(reduceMotion ? 1 : 0);
+  useAnimatedReaction(
+    () => open.value > 0.94,
+    (flat, was) => {
+      if (reduceMotion || flat === was) return;
+      rise.value = flat
+        ? withTiming(1, { duration: 1500, easing: Easing.linear })
+        : withTiming(0, { duration: 160, easing: Easing.in(Easing.quad) });
+    },
+  );
 
   const toggle = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
@@ -104,8 +121,13 @@ export function FoldOutMap({
   const streets = useMemo(() => decodeStreets(tourId), [tourId]);
   const via = streets.follows.slice(0, 3).map(shortName);
   const drawing = useMemo(
-    () => <RouteDrawing stops={stops} route={route} streets={streets} width={W} height={H} />,
-    [stops, route, streets, W, H],
+    () =>
+      plate ? (
+        <IsoPlate plate={plate} width={W} rise={rise} />
+      ) : (
+        <RouteDrawing stops={stops} route={route} streets={streets} width={W} height={H} />
+      ),
+    [plate, rise, stops, route, streets, W, H],
   );
   const coverStyle = useAnimatedStyle(() => ({ opacity: interpolate(open.value, [0, 0.18], [1, 0], "clamp") }));
   const first = [...stops].sort((a, b) => a.order - b.order)[0];
@@ -174,8 +196,8 @@ export function FoldOutMap({
       ) : null}
       <Animated.View style={[styles.foot, footStyle]}>
         <View style={styles.legend}>
-          <View style={styles.legendSwatch} />
-          <Text style={TYPE.label}>Other registry buildings</Text>
+          <View style={[styles.legendSwatch, plate && { backgroundColor: INK.vermilionTint }]} />
+          <Text style={TYPE.label}>{plate ? "Registry landmarks" : "Other registry buildings"}</Text>
         </View>
         <Pressable onPress={onOpenFullMap} hitSlop={10} style={styles.fullLink}>
           <Text style={styles.link}>The large map</Text>
@@ -482,6 +504,18 @@ function RouteDrawing({
           N
         </SvgText>
       </G>
+      {/* The imprint: the street plan is OpenStreetMap's. */}
+      <SvgText
+        x={width - 14}
+        y={height - 13}
+        fontSize={7}
+        fontFamily={FONT.medium}
+        fill={INK.sepia}
+        textAnchor="end"
+        letterSpacing={0.6}
+      >
+        STREETS © OPENSTREETMAP CONTRIBUTORS
+      </SvgText>
     </Svg>
   );
 }
