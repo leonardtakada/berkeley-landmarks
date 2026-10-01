@@ -1,0 +1,920 @@
+Received: from 127.0.0.1
+ by atlas-production.v2-mail-prod1-bf1.omega.yahoo.com pod-id atlas--production-bf1-ddf7c88b8-w8nx8.bf1.yahoo.com with HTTP; Wed, 5 Aug 2026 16:57:22 +0000
+Return-Path: <bounce-mc.us2_3292730.9715114-f5e22bbbe8@mail41.sea172.mcdlv.net>
+X-Originating-Ip: [148.105.10.41]
+Received-SPF: pass (domain of mail41.sea172.mcdlv.net designates 148.105.10.41 as permitted sender)
+Authentication-Results: mta.yahoo.com;
+ dkim=pass header.i=@fbl.mcsv.net header.s=k1 arc_overridden_status=NOT_OVERRIDDEN;
+ dkim=pass header.i=@berkeleyheritage.com header.s=k3 arc_overridden_status=NOT_OVERRIDDEN;
+ spf=pass smtp.mailfrom=mail41.sea172.mcdlv.net arc_overridden_status=NOT_OVERRIDDEN;
+ dmarc=pass(p=NONE) header.from=berkeleyheritage.com arc_overridden_status=NOT_OVERRIDDEN;
+X-Apparently-To: leonardtakada@yahoo.com; Wed, 5 Aug 2026 16:57:23 +0000
+X-YMailISG: 1S8etWQWLDu.B1Quwj.dn725v4lZSW8sbfA99cvsRi5xD3._
+ 2rBDL7zw5fKa8iEV8JFoM7jNh4CRJNiJ2M7nUU_VMJhzdUdFn5qaYX4SX1UV
+ lz8Q5pthYAAK.CCGjf6.Cwpu9WnYWq7roZg4fQ.e4YicxJTLf4suVqg_EzpT
+ ETBCZPPoPIn._td8EHE4ROuKSSIyohs29yaPY9xIBYtjyzMa1uKUg31qMewW
+ vcMYhQk0hQ9fklwbMXkftGz5IFvM3T1x9HQlGB_yEtaingFFELBt5COK9WSY
+ WNUY9uVRhvfKMY8r5Yx9xzDJS2JwRHvPNkAqWL4v6jkDt0Oe9jp5qZL4sO70
+ PYzsCn.r2oSOPtsGqw.HHyZ_JKqlpirBOE0qaNUg1qxIR6QssnqaS6TmH7z7
+ HFF1ADP.oKaz3uc573lMajXbNiGMPSLo9xjGZzEpTqIiE33L1E.sBa6aQEb_
+ uyWXkbiynD7TanWDQKSFCXABATsXrYfbl0N1DFUv__elE4A0jE3Pw7NLk4n8
+ dSuY9FL7BuKwYj0ID5q7yewN.thMhNM5CxPVPQR5HYkAi6j5gBTTc7lhzKy8
+ QG49.NMTK9dgNNEqkSnrDMI6xNoJBFRt3LFh.HViXsuguSUC0_2KRWk99qP.
+ FDs9_NQkMZAi6gA6rP7hYAAe0DfG8Mq2Ewqj.R2REd96Vrr2r71CgGqTXiLl
+ Hjij_9zKbYCj4YPVHltl27rUax49cSKT40NH3gfUhltOke2wT3vTFx1lxMvN
+ QZJwPM57SA_LoLr7uVwlh4SJXlz1I1KtIkitp8Qobq46JuTqkq6YfIq4Iv0M
+ kKutdR4WDQrvgPR1Eikr2DKaKDaK9jymSCrCounYjG6Gq_7TAWuz.HfqFNVi
+ _aq6h3OplONSzJ3UMmjg0AM4X4rPmcg_Qb_nEErEogXS0WXLFf9YZ3naNTga
+ rxNQn2.xXLwgvlQJnH5PT.5mo.XwLwh6rQlimMtc3hhbCRs4kwgKef6OVgn.
+ xB3rpRW3i3OUFvpdvMX_ya4DDnHjoLzt5hSaOfp70KPKTemS9Cj7zmi4atyf
+ 8MSOnMa_AQeWfBqshISfB1Zi.Plt80RczVog4wn0gjD_VFYrQ8oJzh3e91Rl
+ gnO8KGOa1cYuPMLn3zHYVVq4V1qQ3MKq22ylgvhdM_XRoFZ03FzfVT_k.tKI
+ 88b9rHtASxUfIhz2VMX7UdJWOh7sIHm9F.Bo3xL0GiJ.KoFdDe2hSIXvoJyu
+ zp6KdiedNMsO56wPzP1V6m0DNi7HotD._008JrBKW53s
+Received: from 148.105.10.41 (EHLO mail41.sea172.mcdlv.net)
+ by 10.197.40.105 with SMTPs
+ (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256);
+ Wed, 05 Aug 2026 16:57:22 +0000
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=fbl.mcsv.net; s=k1;
+	t=1785949039; x=1786035439;
+	bh=s70hAh18OunSmAwQsQK7HqM7AQflLhMjRTUbzT29VTs=;
+	h=Subject:From:Reply-To:To:Date:Message-ID:X-MC-User:Feedback-ID:
+	 List-ID:List-Unsubscribe:List-Unsubscribe-Post:Content-Type:
+	 MIME-Version:CC:Date:Subject:From;
+	b=aiy6YH18ip8diE6eOZajwuvs1VorZdWhVCpBZ1z5//jdvGL8wPQV3UZgGx7ttcxmU
+	 Empoul62LFIV4nll8Dx0lzHQtMoKoyED6yr9bHjAFiGghB7u+dLWyrHX8wWdW06OMj
+	 8PkfORZ7z6YPBqXBn54pme5b12S027Uo5o5fAOsUcjLTRxv049BmTqvokovDg0ucFh
+	 w8Pg56qBficYrJC/5GggoVEgb0q1N9Rit8pF3HJ1c/lf1Lg9EyxjzU9sdztJ65SRJl
+	 G1YIKW6IWM4SUdpXfKSu+PJDyHqUEJzZqP6kew2Zo51EUcmLZ2ZPl9cz9HUbAevV9U
+	 mbg3zkw0LHSQg==
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+	d=berkeleyheritage.com; s=k3; t=1785949039; x=1786219039;
+	i=baha@berkeleyheritage.com;
+	bh=s70hAh18OunSmAwQsQK7HqM7AQflLhMjRTUbzT29VTs=;
+	h=Subject:From:Reply-To:To:Date:Message-ID:X-MC-User:Feedback-ID:
+	 List-ID:List-Unsubscribe:List-Unsubscribe-Post:Content-Type:
+	 MIME-Version:CC:Date:Subject:From;
+	b=FZSFJZiwpX5Vv3+uTrBwHMcVdS64rDgmQL/G5MUst/QBQ2ohpeDYlNgM3MCzKJaP+
+	 fcu43dBDPe2noSFlw+we5HzDn3WhDw0wWR6pkrHmIeBQN42EwTnwFFSAXVV96eCAQP
+	 Dr3Wx+IUQ0dg01cs/4CaFiUehf4bDASqgvGyFBqe81qSVfQaZ6LC2Zj4QbmcfUCAUf
+	 +X+67IGuFBWWTMzDtIn9J5Qhuvun61K4bd7vGzcPfb1D0ggwehMswqVsl2Gk1u7jw3
+	 C/0guNYzPQvqYgievlowMpQw6gqHzbSFpTcdh2bOTjsAJz26MXhuwejhoQ6ySspS42
+	 MksIuqQ400Yuw==
+Received: from localhost (localhost [127.0.0.1])
+	by mail41.sea172.mcdlv.net (Mailchimp) with ESMTP id 4hFc5q5wvszDRT12f
+	for <leonardtakada@yahoo.com>; Wed,  5 Aug 2026 16:57:19 +0000 (UTC)
+Subject: =?utf-8?Q?Part=202=20of=20the=20Story=20of=20a=20Maybeck=20House=20=28August=2015=20&=2016=20Estate=20Sale=29?=
+From: BAHA <baha@berkeleyheritage.com>
+Reply-To: =?utf-8?Q?BAHA?= <baha@berkeleyheritage.com>
+To: <leonardtakada@yahoo.com>
+Date: Wed,  5 Aug 2026 16:57:14 +0000
+Message-ID: <cf07d73ef679275ea4445c763.f5e22bbbe8.20260805165703.4b7edff93d.2acb3270@mail41.sea172.mcdlv.net>
+X-Mailer: Mailchimp Mailer - **CID4b7edff93df5e22bbbe8**
+X-Campaign: mailchimpcf07d73ef679275ea4445c763.4b7edff93d
+X-campaignid: mailchimpcf07d73ef679275ea4445c763.4b7edff93d
+X-Report-Abuse: Please report abuse for this campaign here: https://mailchimp.com/contact/abuse/?u=cf07d73ef679275ea4445c763&id=4b7edff93d&e=f5e22bbbe8
+X-MC-User: cf07d73ef679275ea4445c763
+Feedback-ID: 3292730:3292730.9715114:us2:mc
+List-ID: cf07d73ef679275ea4445c763mc list <cf07d73ef679275ea4445c763.532077.list-id.mcsv.net>
+X-Accounttype: pd
+List-Unsubscribe: <https://berkeleyheritage.us2.list-manage.com/unsubscribe?u=cf07d73ef679275ea4445c763&id=c7350fddaa&t=h&e=f5e22bbbe8&c=4b7edff93d>, <mailto:unsubscribe-mc.us2_cf07d73ef679275ea4445c763.4b7edff93d-f5e22bbbe8@unsubscribe.mailchimpapp.net?subject=unsubscribe>
+List-Unsubscribe-Post: List-Unsubscribe=One-Click
+Content-Type: multipart/alternative; boundary="_----------=_MCPart_1616880020"
+MIME-Version: 1.0
+Content-Length: 40695
+
+This is a multi-part message in MIME format
+
+--_----------=_MCPart_1616880020
+Content-Type: text/plain; charset="utf-8"; format="fixed"
+Content-Transfer-Encoding: quoted-printable
+
+News from BAHA
+------------------------------------------------------------
+https://mailchi.mp/3c3353a06d83/victory-for-berkeley-preservation-in-court=
+-of-appeal-9715114?e=3Df5e22bbbe8
+
+The Story Behind the
+Estate Sale House =E2=80=94 in four parts
+
+Part Two
+
+"Mrs. Cole"
+
+That the Maybeck Studio has survived so beautifully to this day=2C we have=
+ the second owner to thank. There have been three owners of the Maybeck St=
+udio at 2711 Buena Vista Way during its 102 years of existence; all owners=
+ have either themselves been Maybecks or have been close friends of the Ma=
+ybeck family. Frances van Barneveld Cole (1898=E2=80=931989) was the secon=
+d owner.
+
+Frances van Barneveld Cole. Water Brockmann=2C 1950
+
+Her connection to the Maybecks went back to 1915 when her father was appoi=
+nted Chief of the Department of Mining and Metallurgy (to be housed in the=
+ Palace of the same name) at the Panama-Pacific International Exposition.=
+ Also teaching courses at the University=2C Prof. Van Barneveld moved his=
+ family to Berkeley where they landed in the neighborhood of Annie and Ber=
+nard Maybeck=2C with the two families becoming friends. The four van Barne=
+veld children=E2=80=94all teenagers=E2=80=94were close in age to Kerna and=
+ Wallen Maybeck. Frances van Barneveld remembered planting redwood seedlin=
+gs on the bare hillsides with Kerna and Wallen. The van Barnevelds stayed=
+ in Berkeley long enough for the children to attend the University. Daught=
+er Frances then spent most of her adult life in St Louis=2C married to Bar=
+zillai Linneas Cole=2C the founder of the Cole Chemical Company=2C a pharm=
+aceutical firm.
+
+Frances Cole kept in touch with the Maybecks. In fact=2C the Maybecks stay=
+ed with the Coles when Maybeck was asked to design a campus for Principia=
+ College across the river at Elsah=2C Illinois. Mrs. Cole noticed that Ben=
+ came down for breakfast each morning wearing a long velvet bathrobe of a=
+ distinctive dark red color. That image stayed in her mind=2C and years la=
+ter she utilized her memory of Maybeck=E2=80=99s sartorial preference when=
+ she had dark red linen velvet draperies made for the Studio. On one of Ma=
+ybeck=E2=80=99s many visits to St. Louis=2C the Coles commissioned him to=
+ design a new building for Cole Chemical Company. The plans and rendering=
+ still exist=2C but a local architect was ultimately chosen for practicali=
+ty.
+
+Maga and her parents in Palm Beach=2C c. 1936. Siegfried Brockmann papers
+
+The Coles had one child: Margaret (1927=E2=80=931984)=2C whom her parents=
+ were devoted to=2C and who was forever known by her childhood nickname=2C=
+ =E2=80=9CMaga.=E2=80=9D In 1958=2C Maga decided to continue her study of=
+ architecture in Berkeley. Her mother suggested she call on the Maybecks.=
+ Wallen and his wife Jacomena were pleased to meet the next Cole generatio=
+n (their own twins were the same age as Maga)=2C and they immediately rent=
+ed their Maybeck Twin Drive cottage=2C Arillaga=2C to Maga. Mr. Cole died=
+ unexpectedly in 1963. Mrs. Cole sold the company=2C as well as their St.=
+ Louis estate=2C and headed west to be near Maga.
+
+Maga at the time she left for Berkeley. Siegfried Brockmann=2C 1958
+
+Arriving at the end of 1963=2C Mrs. Cole bought Kerna Maybeck=E2=80=99s ow=
+n house at 2701 Buena Vista and lived there before buying the Studio (also=
+ from Kerna) in 1972. Maga had meanwhile put both her architecture degree=
+ and her interest in Maybeck=E2=80=99s building philosophy to good use by=
+ designing and building her own =E2=80=9CBerkeley=E2=80=9D house on proper=
+ty purchased from the Maybecks. The house was completed in 1968 and stands=
+ next door to the Studio on the uphill side. Around the same time=2C Maga=
+ became actively involved in an architectural history group that later eme=
+rged as the Berkeley Architectural Heritage Association.
+
+As the new owner of the Studio=2C Mrs. Cole devoted her time to its needed=
+ restoration. Jacomena wrote=2C =E2=80=9Cshe went through it with money an=
+d loving care.=E2=80=9D The house had been a rental for many years after t=
+he Maybeck family dispersed to other nearby homes. The original=2C fragile=
+ Bubblestone roof leaked. Mrs. Cole had a metal roof put on. She made util=
+itarian but costly upgrades such as new electrical and plumbing. Whatever=
+ she did aesthetically to the house or the garden=2C she asked herself=2C=
+ =E2=80=9CWhat would Maybeck do?=E2=80=9D Both the metal tread on the gard=
+en steps and the garden lights are Mrs. Cole=E2=80=99s touches. (See if yo=
+u can find all three of the Maybeck-inspired garden lights when you are at=
+ the Sale.)
+
+One of the garden lights designed by Mrs. Cole. Anthony Bruce=2C 2026
+
+Part of the restoration that Mrs. Cole undertook in 1974=E2=80=9376 was to=
+ repair and protect the distinctive Bubblestone sack wall covering. In Jun=
+e of 1980=2C Richard Rice=2C son of Bubblestone inventor John Rice=2C went=
+ on a pilgrimage to determine how Maybeck=E2=80=99s early experiments with=
+ the material had held up. At the Studio he met Mrs. Cole and Maga and rec=
+orded what had been done: =E2=80=9CIn Berkeley I found the Bubblestone sac=
+ks on both the Studio and Cottage=2C as expected=2C much weakened by rotti=
+ng of the jute. Mrs. Frances Cole=2C a friend of the Maybecks and now owne=
+r of the Studio=2C had worked diligently to strengthen and preserve the sa=
+cks. She had found and used a commercial product that had the desired effe=
+ct when carefully applied in a thin coating.=E2=80=9D Her contractor had t=
+hen recommended painting the sacks for durability. Mrs. Cole chose a color=
+ to simulate the original tinted concrete and keyed it to the rosy hue of=
+ the fallen eucalyptus leaves that lay all about on the property. The hous=
+e will have been
+repainted for the first time by the date of the Sale. Creating one paint c=
+olor to match the various shades of =E2=80=9CMaybeck Pink=E2=80=9D that co=
+-exist on the house is a challenge!
+
+This is how Richard Rice found the Studio after Mrs. Cole's restorative wo=
+rk on the sacks. Richard Rice=2C 1980=2C Siegfried Brockmann papers
+
+After the renovations were completed=2C Mrs. Cole sold her house next door=
+ and moved into the Studio. She had turned it again into a beautiful and c=
+omfortable place too live=2C and=2C throughout=2C the linen-velvet draperi=
+es of rich=2C dark red=E2=80=94inspired by Maybeck=E2=80=94hung on the win=
+dows and sliding doors.
+
+Mrs. Cole=E2=80=99s daughter Maga died at an early age in 1984. Mrs. Cole=
+ was left alone=2C without a nearby family member. She did however=2C have=
+ another close person who visited her several times a year from St. Louis.=
+ His name was Siegfried; he and the Coles had met at a New Year=E2=80=99s=
+ Day party in 1950. Siegfried soon became the son that they had never had.=
+ Mrs. Cole had always intended the Studio to go to Siegfried=2C and upon h=
+er death in the summer of 1989=2C Siegfried found himself the owner of a B=
+erkeley treasure.
+
+Mrs. Cole's linen velvet draperies and a few of the sale items.
+
+You will find a number of items for sale in the house that once belonged t=
+o Frances Cole=2C such as two Victorian side chairs covered in dark red li=
+nen velvet. Mr. Cole will be represented by pristine bottles of a Cole Che=
+mical Company product=2C =E2=80=9CBrom.=E2=80=9D You might even discover a=
+ relief map of North America made by Maga Cole when she was ten years old.
+
+=E2=80=94Anthony Bruce=2C 2026
+
+Mrs. Cole and Maga in Washington=2C D.C. Walter Brockmann=2C 1950
+
+
+VOLUNTEERS WANTED
+
+Volunteers are needed to help in different capacities during  the two days=
+ of the Sale. Most of Saturday is covered; there are still quite a few shi=
+fts open for Sunday
+
+Volunteers receive free admission to the event.
+
+To volunteer=2C
+e-mail BAHA at
+baha@berkeleyheritage.com
+or call 510-847-1379
+
+to buy admission tickets=2C please go to
+Eventbrite (https://www.eventbrite.com/e/estate-sale-at-the-maybeck-studio=
+-tickets-1996466486003?aff=3Doddtdtcreator)
+
+Through the generosity of the Siegfried E. Brockmann Trust=2C BAHA will re=
+ceive 100% of the proceeds from this summertime fundraising event.
+
+
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
+** unsubscribe (https://berkeleyheritage.us2.list-manage.com/unsubscribe?u=
+=3Dcf07d73ef679275ea4445c763&id=3Dc7350fddaa&t=3Db&e=3Df5e22bbbe8&c=3D4b7edf=
+f93d)
+| ** update subscription (https://berkeleyheritage.us2.list-manage.com/pro=
+file?u=3Dcf07d73ef679275ea4445c763&id=3Dc7350fddaa&e=3Df5e22bbbe8&c=3D4b7edf=
+f93d)
+ | ** view e-mail in browser (https://mailchi.mp/3c3353a06d83/victory-for-=
+berkeley-preservation-in-court-of-appeal-9715114?e=3Df5e22bbbe8)
+--_----------=_MCPart_1616880020
+Content-Type: text/html; charset="utf-8"
+Content-Transfer-Encoding: quoted-printable
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www=
+=2Ew3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+    <head>
+        <meta http-equiv=3D"Content-Type" content=3D"text/html; charset=3D=
+UTF-8">
+
+        <!-- Facebook sharing information tags -->
+        <meta property=3D"og:title" content=3D"Part 2 of the Story of a Ma=
+ybeck House (August 15 & 16 Estate Sale)">
+
+        <title>Part 2 of the Story of a Maybeck House (August 15 & 16 Esta=
+te Sale)</title>
+=09=09
+=09<style type=3D"text/css">
+=09=09#outlook a{
+=09=09=09padding:0;
+=09=09}
+=09=09body{
+=09=09=09width:100% !important;
+=09=09}
+=09=09.ReadMsgBody{
+=09=09=09width:100%;
+=09=09}
+=09=09.ExternalClass{
+=09=09=09width:100%;
+=09=09}
+=09=09body{
+=09=09=09-webkit-text-size-adjust:none;
+=09=09}
+=09=09body{
+=09=09=09margin:0;
+=09=09=09padding:0;
+=09=09}
+=09=09img{
+=09=09=09height:auto;
+=09=09=09line-height:100%;
+=09=09=09outline:none;
+=09=09=09text-decoration:none;
+=09=09}
+=09=09#backgroundTable{
+=09=09=09height:100% !important;
+=09=09=09margin:0;
+=09=09=09padding:0;
+=09=09=09width:100% !important;
+=09=09}
+=09=09body=2C#backgroundTable{
+=09=09=09background-color:#CCCC99;
+=09=09}
+=09=09h1=2C.h1{
+=09=09=09color:#505050;
+=09=09=09display:block;
+=09=09=09font-family:Arial;
+=09=09=09font-size:28px;
+=09=09=09font-weight:bold;
+=09=09=09line-height:100%;
+=09=09=09margin-top:0;
+=09=09=09margin-right:0;
+=09=09=09margin-bottom:10px;
+=09=09=09margin-left:0;
+=09=09=09text-align:left;
+=09=09}
+=09=09h2=2C.h2{
+=09=09=09color:#606060;
+=09=09=09display:block;
+=09=09=09font-family:Arial;
+=09=09=09font-size:26px;
+=09=09=09font-weight:bold;
+=09=09=09line-height:100%;
+=09=09=09margin-top:0;
+=09=09=09margin-right:0;
+=09=09=09margin-bottom:10px;
+=09=09=09margin-left:0;
+=09=09=09text-align:left;
+=09=09}
+=09=09h3=2C.h3{
+=09=09=09color:#707070;
+=09=09=09display:block;
+=09=09=09font-family:Arial;
+=09=09=09font-size:24px;
+=09=09=09font-weight:bold;
+=09=09=09line-height:100%;
+=09=09=09margin-top:0;
+=09=09=09margin-right:0;
+=09=09=09margin-bottom:10px;
+=09=09=09margin-left:0;
+=09=09=09text-align:left;
+=09=09}
+=09=09h4=2C.h4{
+=09=09=09color:#808080;
+=09=09=09display:block;
+=09=09=09font-family:Arial;
+=09=09=09font-size:22px;
+=09=09=09font-weight:bold;
+=09=09=09line-height:100%;
+=09=09=09margin-top:0;
+=09=09=09margin-right:0;
+=09=09=09margin-bottom:10px;
+=09=09=09margin-left:0;
+=09=09=09text-align:left;
+=09=09}
+=09=09#templatePreheader{
+=09=09=09background-color:#E0E4EF;
+=09=09}
+=09=09.preheaderContent div{
+=09=09=09color:#627EAF;
+=09=09=09font-family:Arial;
+=09=09=09font-size:10px;
+=09=09=09line-height:100%;
+=09=09=09text-align:left;
+=09=09}
+=09=09.preheaderContent div a:link=2C.preheaderContent div a:visited{
+=09=09=09color:#3B5998;
+=09=09=09font-weight:normal;
+=09=09=09text-decoration:underline;
+=09=09}
+=09=09#templateHeader{
+=09=09=09background-color:#3B5998;
+=09=09=09border-bottom:5px solid #3B5998;
+=09=09}
+=09=09.headerContent{
+=09=09=09color:#96A6C5;
+=09=09=09font-family:Arial;
+=09=09=09font-size:24px;
+=09=09=09font-weight:bold;
+=09=09=09line-height:100%;
+=09=09=09padding:0;
+=09=09=09text-align:center;
+=09=09=09vertical-align:middle;
+=09=09}
+=09=09.headerContent a:link=2C.headerContent a:visited{
+=09=09=09color:#336699;
+=09=09=09font-weight:normal;
+=09=09=09text-decoration:underline;
+=09=09}
+=09=09#headerImage{
+=09=09=09height:auto;
+=09=09=09max-width:500px !important;
+=09=09}
+=09=09#templateContainer=2C.bodyContent{
+=09=09=09background-color:#FFFFFF;
+=09=09}
+=09=09.bodyContent div{
+=09=09=09color:#505050;
+=09=09=09font-family:Arial;
+=09=09=09font-size:14px;
+=09=09=09line-height:150%;
+=09=09=09text-align:left;
+=09=09}
+=09=09.bodyContent div a:link=2C.bodyContent div a:visited=2C.bodyContent=
+ div a .yshortcuts {
+=09=09=09color:#3B5998;
+=09=09=09font-weight:normal;
+=09=09=09text-decoration:underline;
+=09=09}
+=09=09.bodyContent div img{
+=09=09=09display:inline;
+=09=09=09height:auto;
+=09=09=09max-width:460px;
+=09=09}
+=09=09#templateFooter{
+=09=09=09background-color:#E0E4EF;
+=09=09=09border-top:5px solid #3B5998;
+=09=09}
+=09=09.footerContent div{
+=09=09=09color:#627EAF;
+=09=09=09font-family:Arial;
+=09=09=09font-size:11px;
+=09=09=09line-height:125%;
+=09=09=09text-align:left;
+=09=09}
+=09=09.footerContent div a:link=2C.footerContent div a:visited=2C.footerCo=
+ntent div a .yshortcuts {
+=09=09=09color:#3B5998;
+=09=09=09font-weight:normal;
+=09=09=09text-decoration:underline;
+=09=09}
+=09=09.footerContent img{
+=09=09=09display:inline;
+=09=09}
+=09=09#utility{
+=09=09=09background-color:#E0E4EF;
+=09=09=09border:0;
+=09=09}
+=09=09#utility div{
+=09=09=09text-align:center;
+=09=09}
+=09=09#monkeyRewards img{
+=09=09=09max-width:190px;
+=09=09}
+</style></head>
+    <body leftmargin=3D"0" marginwidth=3D"0" topmargin=3D"0" marginheight=
+=3D"0" offset=3D"0" style=3D"-webkit-text-size-adjust: none;margin: 0;padd=
+ing: 0;background-color: #CCCC99;width: 100% !important;">
+    =09<center>
+        =09<table border=3D"0" cellpadding=3D"0" cellspacing=3D"0" height=
+=3D"100%" width=3D"100%" id=3D"backgroundTable" style=3D"margin: 0;padding=
+: 0;background-color: #CCCC99;height: 100% !important;width: 100% !importa=
+nt;">
+            =09<tr>
+                =09<td align=3D"center" valign=3D"top">
+                        <!-- // Begin Template Preheader \\ -->
+                        <table border=3D"0" cellpadding=3D"10" cellspacing=
+=3D"0" width=3D"500" id=3D"templatePreheader" style=3D"background-color: #=
+E0E4EF;">
+                            <tr>
+                                <td valign=3D"top" class=3D"preheaderConte=
+nt">
+
+                                =09<!-- // Begin Module: Standard Preheade=
+r \ -->
+                                    <table border=3D"0" cellpadding=3D"10"=
+ cellspacing=3D"0" width=3D"100%">
+                                    =09<tr>
+                                        =09<td valign=3D"top">
+                                            =09<div style=3D"color: #627EA=
+F;font-family: Arial;font-size: 10px;line-height: 100%;text-align: left;">=
+<span style=3D"font-size:12px;"><span style=3D"color:#4b0082;"><span style=
+=3D"font-family:georgia=2Cserif;">News from BAHA</span></span></span></div=
+>
+                                            </td>
+                                            <!--
+ -->
+=09=09=09=09=09=09=09=09=09=09=09<td valign=3D"top" width=3D"190">
+                                            =09<div style=3D"color: #627EA=
+F;font-family: Arial;font-size: 10px;line-height: 100%;text-align: left;">=
+Is this email not displaying correctly?<br>
+<a href=3D"https://mailchi.mp/3c3353a06d83/victory-for-berkeley-preservati=
+on-in-court-of-appeal-9715114?e=3Df5e22bbbe8" target=3D"_blank" style=3D"col=
+or: #3B5998;font-weight: normal;text-decoration: underline;">View it in yo=
+ur browser</a>.</div>
+                                            </td>
+=09=09=09=09=09=09=09=09=09=09=09<!--
+ -->
+                                        </tr>
+                                    </table>
+                                =09<!-- // End Module: Standard Preheader=
+ \ -->
+
+                                </td>
+                            </tr>
+                        </table>
+                        <!-- // End Template Preheader \\ -->
+                    =09<table border=3D"0" cellpadding=3D"0" cellspacing=
+=3D"0" width=3D"500" id=3D"templateContainer" style=3D"background-color: #=
+FFFFFF;">
+                        =09<tr>
+                            =09<td align=3D"center" valign=3D"top">
+                                    <!-- // Begin Template Header \\ -->
+                                =09<table border=3D"0" cellpadding=3D"0" c=
+ellspacing=3D"0" width=3D"500" id=3D"templateHeader" style=3D"background-c=
+olor: #3B5998;border-bottom: 5px solid #3B5998;">
+                                        <tr>
+                                            <td class=3D"headerContent" st=
+yle=3D"color: #96A6C5;font-family: Arial;font-size: 24px;font-weight: bold=
+;line-height: 100%;padding: 0;text-align: center;vertical-align: middle;">
+
+                                            =09<!-- // Begin Module: Stand=
+ard Header Image \\ -->
+                                            =09<div style=3D"text-align: c=
+enter;"><img src=3D"http://gallery.mailchimp.com/cf07d73ef679275ea4445c763=
+/images/12683722085_tz6ZW.jpg" alt=3D"" border=3D"0" style=3D"height: 50px=
+;width: 468px;margin: 0;padding: 0;max-width: 500px;line-height: 100%;outl=
+ine: none;text-decoration: none;" width=3D"468" height=3D"50" id=3D"header=
+Image campaign-icon"></div>
+                                            =09<!-- // End Module: Standar=
+d Header Image \\ -->
+
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                        =09<td id=3D"">
+                                            </td>
+                                        </tr>
+                                    </table>
+                                    <!-- // End Template Header \\ -->
+                                </td>
+                            </tr>
+                        =09<tr>
+                            =09<td align=3D"center" valign=3D"top">
+                                    <!-- // Begin Template Body \\ -->
+                                =09<table border=3D"0" cellpadding=3D"0" c=
+ellspacing=3D"0" width=3D"500" id=3D"templateBody">
+                                    =09<tr>
+                                            <td valign=3D"top" class=3D"bo=
+dyContent" style=3D"background-color: #FFFFFF;">
+
+                                                <!-- // Begin Module: Stan=
+dard Content \\ -->
+                                                <table border=3D"0" cellpa=
+dding=3D"20" cellspacing=3D"0" width=3D"100%">
+                                                    <tr>
+                                                        <td valign=3D"top"=
+>
+                                                            <div style=3D"=
+color: #505050;font-family: Arial;font-size: 14px;line-height: 150%;text-a=
+lign: left;"><div style=3D"text-align: center;color: #505050;font-family:=
+ Arial;font-size: 14px;line-height: 150%;">
+<p style=3D"text-align: center;"><span style=3D"color:#6666ff"><span style=
+=3D"font-size:30px"><strong><em><span style=3D"font-family:comic sans ms=
+=2C marker felt-thin=2C arial=2C sans-serif"><img data-file-id=3D"6724843"=
+ height=3D"117" src=3D"https://mcusercontent.com/cf07d73ef679275ea4445c763=
+/images/a6730316-80f4-1886-94c6-9f6af06d598c.gif" style=3D"border: 0px;wid=
+th: 432px;height: 117px;margin: 0px;line-height: 100%;outline: none;text-d=
+ecoration: none;display: inline;max-width: 460px;" width=3D"432"></span></=
+em></strong></span><br>
+<br>
+<span style=3D"font-size:24px"><strong><em><span style=3D"font-family:comi=
+c sans ms=2C marker felt-thin=2C arial=2C sans-serif">The Story Behind&nbs=
+p;the<br>
+Estate Sale House &mdash; in four parts</span></em></strong></span></span>=
+<br>
+<br>
+<span style=3D"color:#ff0066"><span style=3D"font-size:24px"><font face=3D=
+"georgia=2C times=2C times new roman=2C serif"><span style=3D"caret-color:=
+rgb(75=2C 0=2C 130)"><strong>Part Two</strong></span></font></span><br>
+<br>
+<span style=3D"font-size:30px"><font face=3D"georgia=2C times=2C times new=
+ roman=2C serif"><span style=3D"caret-color:rgb(75=2C 0=2C 130)"><strong>&=
+quot;Mrs. Cole&quot;</strong></span></font></span></span></p>
+
+<div style=3D"text-align: left;color: #505050;font-family: Arial;font-size=
+: 14px;line-height: 150%;">
+<p><font color=3D"#000000" face=3D"georgia=2C times=2C times new roman=2C=
+ serif" size=3D"3">That the Maybeck Studio has survived so&nbsp;<span styl=
+e=3D"caret-color:rgb(0=2C 0=2C 0)">beautifully</span>&nbsp;to this day=2C=
+ we have the second owner to thank. There have been three owners of the Ma=
+ybeck Studio at 2711 Buena Vista Way during its 102 years of existence; al=
+l owners have either themselv</font><span style=3D"color:#000000"><span st=
+yle=3D"font-size:16px"><span style=3D"font-family:georgia=2C times=2C time=
+s new roman=2C serif">es been Maybecks or have been close friends of the M=
+aybeck family. Frances van Barneveld Cole (1898&ndash;1989) was the second=
+ owner.</span></span></span></p>
+
+<p style=3D"text-align: center;"><br>
+<img data-file-id=3D"6724991" height=3D"369" src=3D"https://mcusercontent.=
+com/cf07d73ef679275ea4445c763/images/5043f50e-df60-4ca7-b495-b63c8bf1b4b9.=
+gif" style=3D"border: 0px;width: 375px;height: 369px;margin: 0px;line-heig=
+ht: 100%;outline: none;text-decoration: none;display: inline;max-width: 46=
+0px;" width=3D"375"><br>
+Frances van Barneveld Cole. Water Brockmann=2C 1950</p>
+
+<p><br>
+<span style=3D"color:#000000"><span style=3D"font-size:16px"><span style=
+=3D"font-family:georgia=2C times=2C times new roman=2C serif">Her connecti=
+on to the Maybecks went back to 1915 when her father was appointed Chief o=
+f the Department of Mining and Metallu</span></span></span><span style=3D"=
+color:#000000"><span style=3D"font-size:16px"><span style=3D"font-family:g=
+eorgia=2C times=2C times new roman=2C serif">rgy (to be housed in the Pala=
+ce of the same name) at the Panama-Pacific International Exposition. Also=
+ teaching courses at the University=2C Prof. Van Barneveld moved his famil=
+y to Berkeley where they landed in the neighborhood of Annie and Bernard M=
+aybeck=2C with the two families becoming friends. The four van Barneveld c=
+hildren&mdash;all teenagers&mdash;were close in age to Kerna and Wallen Ma=
+ybeck. Frances van Barneveld remembered planting redwood seedlings on the=
+ bare hillsides with Kerna and Wallen. The van Barnevelds stayed in Berkel=
+ey long enough for the children to attend the University. Daughter Frances=
+ then spent most of her adult life in St Louis=2C married to Barzillai Lin=
+neas Cole=2C the founder&nbsp;of the Cole Chemical Company=2C a pharmaceut=
+ical firm.&nbsp;</span></span></span></p>
+
+<p><span style=3D"color:#000000"><span style=3D"font-size:16px"><span styl=
+e=3D"font-family:georgia=2C times=2C times new roman=2C serif">Frances Col=
+e kept in touch with the Maybecks. In fact=2C the Maybecks stayed with the=
+ Coles when Maybeck was asked to design a campus for Principia College acr=
+oss the river at Elsah=2C Illinois. Mrs. Cole noticed that Ben came down f=
+or breakfast each morning wearing a long velvet bathrobe of a distinctive=
+ dark red color. That image stayed in her mind=2C and years later she util=
+ized her memory of Maybeck&rsquo;s sartorial preference when she had dark=
+ red linen velvet draperies made for the Studio. On one of Maybeck&rsquo;s=
+ many visits to St. Louis=2C the Coles commissioned him to design a new bu=
+ilding for Cole Chemical Company. The plans and rendering still exist=2C b=
+ut a local architect was ultimately chosen for practicality.</span></span>=
+</span><br>
+&nbsp;</p>
+
+<p style=3D"text-align: center;"><span style=3D"color:#000000"><span style=
+=3D"font-size:16px"><span style=3D"font-family:georgia=2C times=2C times n=
+ew roman=2C serif"><img data-file-id=3D"6724992" height=3D"290" src=3D"htt=
+ps://mcusercontent.com/cf07d73ef679275ea4445c763/images/58f0be39-82b7-69b5=
+-e477-1d61ab05c45e.gif" style=3D"border: 0px;width: 432px;height: 290px;ma=
+rgin: 0px;line-height: 100%;outline: none;text-decoration: none;display: i=
+nline;max-width: 460px;" width=3D"432"></span></span></span><br>
+Maga and her parents in Palm Beach=2C c. 1936. Siegfried Brockmann papers<=
+/p>
+
+<p><span style=3D"color:#000000"><span style=3D"font-size:16px"><span styl=
+e=3D"font-family:georgia=2C times=2C times new roman=2C serif">The Coles h=
+ad one child: Margaret (1927&ndash;1984)=2C whom her parents were devoted=
+ to=2C and who was forever known by her childhood nickname=2C &ldquo;Maga.=
+&rdquo; In 1958=2C Maga decided to continue her study of architecture in B=
+erkeley. Her mother suggested she call on the Maybecks. Wallen and his wif=
+e Jacomena were pleased to meet the next Cole generation (their own twins=
+ were the same age as Maga)=2C and they immediately rented their Maybeck T=
+win Drive cottage=2C Arillaga=2C to Maga. Mr. Cole died unexpectedly in 19=
+63. Mrs. Cole sold the company=2C as well as their St. Louis estate=2C and=
+ headed west to be near Maga.</span></span></span></p>
+
+<p style=3D"text-align: center;"><img data-file-id=3D"6725042" height=3D"3=
+63" src=3D"https://mcusercontent.com/cf07d73ef679275ea4445c763/images/da41=
+0dc1-4e8e-e932-884c-ccd73ea7173d.gif" style=3D"border: 0px;width: 432px;he=
+ight: 363px;margin: 0px;line-height: 100%;outline: none;text-decoration: n=
+one;display: inline;max-width: 460px;" width=3D"432"><br>
+Maga at the time she left for Berkeley. Siegfried Brockmann=2C 1958</p>
+
+<p><span style=3D"color:#000000"><span style=3D"font-size:16px"><span styl=
+e=3D"font-family:georgia=2C times=2C times new roman=2C serif">Arriving at=
+ the end of 1963=2C Mrs. Cole bought Kerna Maybeck&rsquo;s own house at 27=
+01 Buena Vista and lived there before buying the Studio (also from Kerna)=
+ in 1972. Maga had meanwhile put both her architecture degree and her inte=
+rest in Maybeck&rsquo;s building philosophy to good use by designing and b=
+uilding her own &ldquo;Berkeley&rdquo; house on property purchased from th=
+e Maybecks. The house was completed in 1968 and stands next door to the St=
+udio on the uphill side. Around the same time=2C Maga became actively invo=
+lved in an architectural history group that later emerged as the Berkeley=
+ Architectural Heritage Association.&nbsp;</span></span></span></p>
+
+<p><font color=3D"#000000" face=3D"georgia=2C times=2C times new roman=2C=
+ serif" size=3D"3">As the new owner of the Studio=2C Mrs. Cole devoted her=
+ time to its needed restoration. Jacomena wrote=2C &ldquo;she went through=
+ it with money and loving care.&rdquo; The house had been a rental for man=
+y years after the Maybeck family dispersed to other nearby homes. The orig=
+inal=2C fragile Bubblestone roof leaked. Mrs. Cole had a metal roof put on=
+=2E She made&nbsp;utilitarian but&nbsp;costly upgrades such as new&nbsp;elec=
+trical and plumbing.&nbsp;Whatever she did aesthetically to the house or t=
+he garden=2C she asked herself=2C &ldquo;What would Maybeck do?&rdquo; Bot=
+h the metal tread on the garden steps and the garden lights are Mrs. Cole&=
+rsquo;s touches. (See if you can find all three of the Maybeck-inspired ga=
+rden lights when you are at the Sale.)&nbsp;</font></p>
+
+<p style=3D"text-align: center;"><img data-file-id=3D"6725043" height=3D"3=
+68" src=3D"https://mcusercontent.com/cf07d73ef679275ea4445c763/images/e76a=
+6039-16d6-60b7-9771-bb598c321f90.gif" style=3D"border: 0px;width: 432px;he=
+ight: 368px;margin: 0px;line-height: 100%;outline: none;text-decoration: n=
+one;display: inline;max-width: 460px;" width=3D"432"><br>
+One of the garden lights designed by Mrs. Cole. Anthony Bruce=2C 2026</p>
+
+<p><span style=3D"color:#000000"><span style=3D"font-size:16px"><span styl=
+e=3D"font-family:georgia=2C times=2C times new roman=2C serif">Part of the=
+ restoration that Mrs. Cole undertook in 1974&ndash;76 was to repair and p=
+rotect the distinctive Bubblestone sack wall covering. In June of 1980=2C=
+ Richard Rice=2C son of Bubblestone inventor John Rice=2C went on a pilgri=
+mage to determine how Maybeck&rsquo;s early experiments with the material=
+ had held up. At the Studio he met Mrs. Cole and Maga and recorded what ha=
+d been done: &ldquo;In Berkeley I found the Bubblestone sacks on both the=
+ Studio and Cottage=2C as expected=2C much weakened by rotting of the jute=
+=2E Mrs. Frances Cole=2C a friend of the Maybecks and now owner of the Studi=
+o=2C had worked diligently to strengthen and preserve the sacks. She had f=
+ound and used a commercial product that had the desired effect when carefu=
+lly applied in a thin coating.&rdquo; Her contractor had then recommended=
+ painting the sacks for durability. Mrs. Cole chose a color to simulate th=
+e original tinted concrete and keyed it to the rosy hue of the fallen euca=
+lyptus leaves that lay all about on the property. The house will have been=
+ repainted for the first time by the date of the Sale. Creating one paint=
+ color to match the various shades of &ldquo;Maybeck Pink&rdquo; that co-e=
+xist on the house is a challenge!</span></span></span></p>
+
+<p style=3D"text-align: center;"><img data-file-id=3D"6725044" height=3D"3=
+08" src=3D"https://mcusercontent.com/cf07d73ef679275ea4445c763/images/0170=
+3111-0de5-5210-468b-29360b1458ce.gif" style=3D"border: 0px;width: 432px;he=
+ight: 308px;margin: 0px;line-height: 100%;outline: none;text-decoration: n=
+one;display: inline;max-width: 460px;" width=3D"432"><br>
+This is how Richard Rice found the Studio after Mrs. Cole&#39;s restorativ=
+e work on the sacks. Richard Rice=2C 1980=2C Siegfried Brockmann papers</p=
+>
+
+<p><font color=3D"#000000" face=3D"georgia=2C times=2C times new roman=2C=
+ serif" size=3D"3">After the renovations were completed=2C Mrs. Cole sold=
+ her house next door and moved into the Studio. She had turned it again in=
+to a beautiful and comfortable place&nbsp;<span style=3D"caret-color:rgb(0=
+=2C 0=2C 0)">too</span>&nbsp;live=2C and=2C throughout=2C the linen-velvet=
+ draperies of rich=2C dark red&mdash;</font><em style=3D"color:rgb(0=2C 0=
+=2C 0); font-family:georgia=2C times=2C &quot;times new roman=2C serif; fo=
+nt-size:16px">inspired by Maybeck</em><font color=3D"#000000" face=3D"geor=
+gia=2C times=2C times new roman=2C serif" size=3D"3">&mdash;hung on the wi=
+ndows and sliding doors.&nbsp;</font></p>
+
+<p><span style=3D"color:#000000"><span style=3D"font-size:16px"><span styl=
+e=3D"font-family:georgia=2C times=2C times new roman=2C serif">Mrs. Cole&r=
+squo;s daughter Maga died at an early age in 1984. Mrs. Cole was left alon=
+e=2C without a nearby family member. She did however=2C have another close=
+ person who visited her several times a year from St. Louis. His name was=
+ Siegfried; he and the Coles had met at a New Year&rsquo;s Day party&nbsp;=
+in 1950.</span></span> </span><span style=3D"color:#000000"><span style=3D=
+"font-size:16px"><span style=3D"font-family:georgia=2C times=2C times new=
+ roman=2C serif">Siegfried soon became the son that they had</span></span>=
+</span> <span style=3D"color:#000000"><span style=3D"font-size:16px"><span=
+ style=3D"font-family:georgia=2C times=2C times new roman=2C serif">never=
+ had. Mrs. Cole had always intended the Studio to go to Siegfried=2C and u=
+pon her death in the summer of 1989=2C Siegfried found himself the owner o=
+f a Berkeley treasure.</span></span></span></p>
+
+<p style=3D"text-align: center;"><img data-file-id=3D"6725045" height=3D"2=
+45" src=3D"https://mcusercontent.com/cf07d73ef679275ea4445c763/images/1b99=
+d063-2b28-3864-2698-ff0d689e69bc.gif" style=3D"border: 0px;width: 432px;he=
+ight: 245px;margin: 0px;line-height: 100%;outline: none;text-decoration: n=
+one;display: inline;max-width: 460px;" width=3D"432"><br>
+Mrs. Cole&#39;s linen velvet draperies and a few of the sale items.</p>
+
+<p><span style=3D"color:#000000"><span style=3D"font-size:16px"><span styl=
+e=3D"font-family:georgia=2C times=2C times new roman=2C serif">You will fi=
+nd a number of items for sale in the house that once belonged to Frances C=
+ole=2C such as two Victorian side chairs covered in dark red linen velvet.=
+ Mr. Cole will be represented by pristine bottles of a Cole Chemical Compa=
+ny product=2C &ldquo;Brom.&rdquo; You might even discover a relief map of=
+ North America made by Maga Cole when she was ten years old.</span></span>=
+</span></p>
+
+<p><span style=3D"color:#000000"><span style=3D"font-size:16px"><span styl=
+e=3D"font-family:georgia=2C times=2C times new roman=2C serif">&mdash;Anth=
+ony Bruce=2C 2026</span></span></span></p>
+
+<p style=3D"text-align: center;"><img data-file-id=3D"6725046" height=3D"3=
+45" src=3D"https://mcusercontent.com/cf07d73ef679275ea4445c763/images/acd3=
+20d0-1be2-59a4-159d-616597c0c9aa.gif" style=3D"border: 0px;width: 432px;he=
+ight: 345px;margin: 0px;line-height: 100%;outline: none;text-decoration: n=
+one;display: inline;max-width: 460px;" width=3D"432"><br>
+Mrs. Cole and Maga in Washington=2C D.C. Walter Brockmann=2C 1950</p>
+</div>
+
+<p style=3D"text-align: center;">&nbsp;</p>
+
+<p style=3D"text-align: center;"><strong><span style=3D"font-size:18px"><s=
+pan style=3D"color:#6666ff"><span style=3D"font-family:georgia=2C times=2C=
+ times new roman=2C serif">VOLUNTEERS WANTED</span></span></span></strong>=
+</p>
+
+<p style=3D"text-align: left;"><strong><font color=3D"#000000" face=3D"geo=
+rgia=2C times=2C times new roman=2C serif" size=3D"3">Volunteers are neede=
+d to help in different&nbsp;<span style=3D"caret-color:rgb(0=2C 0=2C 0)">c=
+apacities during&nbsp;</span>&nbsp;the two days&nbsp;of the Sale. </font><=
+font color=3D"#000000" face=3D"georgia=2C times=2C times new roman=2C seri=
+f" size=3D"3">Most of Saturday is covered; there are still quite a few shi=
+fts open for Sunday</font></strong></p>
+
+<p style=3D"text-align: center;"><br>
+<span style=3D"color:#000000"><em><span style=3D"font-size:16px"><span sty=
+le=3D"font-family:georgia=2C times=2C times new roman=2C serif"><strong>Vo=
+lunteers receive free&nbsp;</strong></span></span></em><strong><em><font f=
+ace=3D"georgia=2C times=2C times new roman=2C serif" size=3D"3">admission=
+ to the event.</font></em><br>
+<br>
+<span style=3D"font-size:16px"><span style=3D"font-family:georgia=2C times=
+=2C times new roman=2C serif">To volunteer=2C<br>
+e-mail BAHA at </span></span></strong></span><span style=3D"color:#6699ff"=
+><strong><span style=3D"font-size:16px"><span style=3D"font-family:georgia=
+=2C times=2C times new roman=2C serif">baha@berkeleyheritage.com</span></s=
+pan></strong></span><span style=3D"color:#000000"><strong><span style=3D"f=
+ont-size:16px"><span style=3D"font-family:georgia=2C times=2C times new ro=
+man=2C serif"> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<br>
+or call 510-847-1379</span></span></strong></span><br>
+<br>
+<span style=3D"color:#ff3366"><span style=3D"font-size:24px"><span style=
+=3D"font-family:comic sans ms=2C marker felt-thin=2C arial=2C sans-serif">=
+to buy admission tickets=2C&nbsp;please go to</span></span></span><br>
+<a href=3D"https://berkeleyheritage.us2.list-manage.com/track/click?u=3Dcf=
+07d73ef679275ea4445c763&id=3Da800d72502&e=3Df5e22bbbe8" target=3D"_blank"=
+ style=3D"color: #3B5998;font-weight: normal;text-decoration: underline;">=
+<span style=3D"color:#0000FF"><span style=3D"font-size:24px"><span style=
+=3D"font-family:georgia=2C times=2C times new roman=2C serif">Eventbrite</=
+span></span></span></a><br>
+&nbsp;</p>
+
+<p style=3D"text-align: left;"><font color=3D"#000000" face=3D"georgia=2C=
+ times=2C times new roman=2C serif" size=3D"3"><span style=3D"caret-color:=
+rgb(0=2C 0=2C 0)">Through the&nbsp;generosity of the&nbsp;Siegfried&nbsp;E=
+=2E Brockmann Trust=2C BAHA will receive 100% of the proceeds from this&nbsp=
+;summertime fundraising event.</span></font></p>
+
+<p style=3D"text-align: center;"><img data-file-id=3D"6724251" height=3D"1=
+18" src=3D"https://mcusercontent.com/cf07d73ef679275ea4445c763/images/06dd=
+298b-18be-3e8b-d3e4-10991ff10c92.gif" style=3D"border: 0px;width: 432px;he=
+ight: 118px;margin: 0px;line-height: 100%;outline: none;text-decoration: n=
+one;display: inline;max-width: 460px;" width=3D"432"></p>
+
+<p style=3D"text-align: center;">&nbsp;</p>
+</div>
+</div>
+=09=09=09=09=09=09=09=09=09=09=09=09=09=09</td>
+                                                    </tr>
+                                                </table>
+                                                <!-- // End Module: Standa=
+rd Content \\ -->
+
+                                            </td>
+                                        </tr>
+                                    </table>
+                                    <!-- // End Template Body \\ -->
+                                </td>
+                            </tr>
+                        =09<tr>
+                            =09<td align=3D"center" valign=3D"top">
+                                    <!-- // Begin Template Footer \\ -->
+                                =09<table border=3D"0" cellpadding=3D"10"=
+ cellspacing=3D"0" width=3D"500" id=3D"templateFooter" style=3D"background=
+-color: #E0E4EF;border-top: 5px solid #3B5998;">
+                                    =09<tr>
+                                        =09<td valign=3D"top" class=3D"foo=
+terContent">
+
+                                                <!-- // Begin Module: Stan=
+dard Footer \\ -->
+                                                <table border=3D"0" cellpa=
+dding=3D"10" cellspacing=3D"0" width=3D"100%">
+                                                    <tr>
+                                                        <td valign=3D"top"=
+ width=3D"250">
+                                                            <div style=3D"=
+color: #627EAF;font-family: Arial;font-size: 11px;line-height: 125%;text-a=
+lign: left;"></div>
+                                                        </td>
+                                                        <td valign=3D"top"=
+ width=3D"190" id=3D"monkeyRewards">
+                                                            <div style=3D"=
+color: #627EAF;font-family: Arial;font-size: 11px;line-height: 125%;text-a=
+lign: left;"></div>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td colspan=3D"2"=
+ valign=3D"middle" id=3D"utility" style=3D"background-color: #E0E4EF;borde=
+r: 0;">
+                                                            <div style=3D"=
+color: #627EAF;font-family: Arial;font-size: 11px;line-height: 125%;text-a=
+lign: center;">&nbsp;<a href=3D"https://berkeleyheritage.us2.list-manage.c=
+om/unsubscribe?u=3Dcf07d73ef679275ea4445c763&id=3Dc7350fddaa&t=3Db&e=3Df5e22bbbe8&c=3D4b7edff93d" style=3D"color: #3B5998;font-weight: normal;text-dec=
+oration: underline;">unsubscribe</a>&nbsp;| <a href=3D"https://berkeleyher=
+itage.us2.list-manage.com/profile?u=3Dcf07d73ef679275ea4445c763&id=3Dc7350=
+fddaa&e=3Df5e22bbbe8&c=3D4b7edff93d" style=3D"color: #3B5998;font-weight: no=
+rmal;text-decoration: underline;">update subscription</a>
+ | <a href=3D"https://mailchi.mp/3c3353a06d83/victory-for-berkeley-preserv=
+ation-in-court-of-appeal-9715114?e=3Df5e22bbbe8" style=3D"color: #3B5998;fon=
+t-weight: normal;text-decoration: underline;">view e-mail in browser</a>
+&nbsp;</div>
+                                                        </td>
+                                                    </tr>
+                                                </table>
+                                                <!-- // End Module: Standa=
+rd Footer \\ -->
+
+                                            </td>
+                                        </tr>
+                                    </table>
+                                    <!-- // End Template Footer \\ -->
+                                </td>
+                            </tr>
+                        </table>
+                        <br>
+                    </td>
+                </tr>
+            </table>
+        </center>
+    <div style=3D"display:none;"><img src=3D"https://berkeleyheritage.us2.=
+list-manage.com/track/open.php?u=3Dcf07d73ef679275ea4445c763&id=3D4b7edff9=
+3d&e=3Df5e22bbbe8" height=3D"1" width=3D"1" style=3D"display:none;" alt=
+=3D""></div></body>
+</html>
+--_----------=_MCPart_1616880020--

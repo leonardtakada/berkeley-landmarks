@@ -224,6 +224,8 @@ async function main() {
       `export const ISO_LEVELS = ${JSON.stringify(levels)};\n` +
       `/** Changes whenever the tiles do, so the app copies the new ones. */\n` +
       `export const ISO_TILES_VERSION = ${JSON.stringify(crypto.createHash("sha1").update(fs.readFileSync(OUT)).digest("hex").slice(0, 10))};\n` +
+      `/** The tiles' size in bytes, so a copy cut short is known for one. */\n` +
+      `export const ISO_TILES_BYTES = ${fs.statSync(OUT).size};\n` +
       `/** The drawing's extent on the engine's globe: west, south, east, north. */\n` +
       `export const ISO_BOUNDS: [number, number, number, number] = ${JSON.stringify([w0, s0, e0, n0])};\n`,
   );

@@ -1,0 +1,40 @@
+---
+title: "Berkeley Landmarks :: Standing up for our LPO"
+authors: ["BAHA"]
+source: "BAHA (Berkeley Architectural Heritage Association)"
+source_url: "https://old.berkeleyheritage.com/berkeley_landmarks/lpo_ref.html"
+published_date: ""
+photo_credits: ["Daniella Thompson, 2004"]
+scraped_at: "2026-09-30"
+license_note: "Copyrighted source material - used for research/app content with attribution; verify rights before publication."
+---
+Berkeley Landmarks :: Standing up for our LPO
+
+Standing up for our LPO
+This November, the most important preservation challenge we’ve ever faced.
+
+Delaware Street Historic District (photo: Daniella Thompson, 2004)
+Summer 2008
+Identifying, celebrating, and protecting our architectural heritage is the cornerstone of what our organization has been doing for 34 years. Along the way, we have learned to be sensitive to our community’s cultural, historical, landscape, archeological, and green resources as well.
+BAHA was at the forefront in working to develop a strong Landmarks Preservation Ordinance (LPO) years before other communities in the state and in the country. Through the LPO, the City of Berkeley has provided a Landmarks Commission and a secretary from the Planning Department to carry out the official designations and record-keeping. It is truly exciting that so many communities, both in the state and around the country, have followed our early lead, embracing and celebrating the identification of their historic resources.
+However, the City of Berkeley has never provided money or staff for the identification of resources in good faith, except in some very specific narrow circumstances when required to by federal law when federal money was used on a project. It is thanks to decades of volunteer labors of love (primarily the excellent work of BAHA members) that we have identified individual sites, structures, and districts. We thank the tireless preservation volunteers for all they have done on the city’s behalf.
+The struggles began in West Berkeley so many decades ago now, as pro-development forces had banded together to flatten West Berkeley’s residential community and build an industrial park instead. BAHA members rallied to identify and save from the wrecker’s ball those remnants of our beginnings as a city. It has been a joy to watch those houses be restored and lived in again, and the communities restored.
+We have learned that sustainable reuse of existing buildings is smart—not only because older buildings often are well-constructed, liveable reminders of the past that can be adapted to 21st-century needs, but also because it is the green thing to do. New construction has a huge carbon footprint that includes building materials, transportation, and other construction needs. Add to that a demolition with accompanying landfill, and the project adds decades to the time it takes to recover the energy lost—in most circumstances, longer than the building will exist. For more information on this topic, see Sustainable Stewardship: Historic Preservation's Essential Role in Fighting Climate Change by Richard Moe, president of the National Trust for Historic Preservation. But the struggle continues. For the last few years, development forces have once again attempted to take the reins, and this time the citizens of Berkeley are in real danger of losing control over the designation and protection of historic resources. We lament that the City of Berkeley has often been a roadblock to historic preservation. We understand the reasons, because we know that the City is under enormous pressure to build ever-larger buildings. But we don’t understand why the determination exists to sidestep good community process, or why the City is not interested in being on the cutting edge of green building principles and tools.
+A Berkeley citizen-driven referendum, presented to voters in November, will address the most important preservation challenge we have ever faced. You will read about it here, and hear a lot more about it in the coming months.
+The following is language from the statement of purpose in our current Landmarks Preservation Ordinance:
+The protection, enhancement, perpetuation and use of structures, sites and areas that are reminders of past eras, events and persons important to local, state or national history, or which provide significant examples of architectural styles of the past, or are landmarks in the history of architecture, or which are unique and irreplaceable assets to the City and its neighborhoods, or which provide for this generation and future generations examples of the physical surroundings in which past generations lived; The enrichment of human life in its educational and cultural dimensions in order to serve spiritual as well as material needs by fostering knowledge of the living heritage of the past.
+We have an LPO that has served us well since 1974. It has been updated over the years, and could use some polishing, but that is not what the City has done. They have tossed out the old, and installed the new. If the referendum passes, the new LPO will go into effect almost immediately. The “Mayor’s LPO,” as the new ordinance has come to be known, is not considered to be preservation-friendly because it provides a mechanism for pending development sites to have a guaranteed fast, paid consultant– driven process. This will happen outside any conventional public process, and no new information will be allowed once a decision is made. There is not another city in the state that has this “backroom” escalated process.
+Here are some specifics:
+The current LPO. There has been a process in place for 34 years: the Landmarks Commission examines the evidence, hears testimony, and makes a determination, but it is only the elected City Council that makes the final determination of what is a landmark and what is not. This means a demolition can be approved and carried out—it just goes through a public process first. And if new information comes to light after that determination, there is a process to bring the site back for re-evaluation after two years if the building has not yet been demolished. The new LPO will remove that provision. But no one can argue right now with our current LPO that there was not ample time for public process.
+
+The Mayor’s new LPO. It revolves around a backroom process, unknown by the public until a determination is at hand; a “third rail” process designed by senior management of the Planning Department and the City Attorney to accommodate the timelines of property developers and the city government. When a development permit is pending, the City of Berkeley will arrange for and pay the developer’s consultants to do the historic analysis, and those consultants will make a determination of whether the structure is worthy, in their opinion, of preservation.
+
+The City says they will charge developers for this service (there are not yet details of what or when that will happen). But serious property developers will gladly pay to get a green light. This information, complete with a determination and tied with a ribbon, will then be presented to the Landmarks Commission, and, as before, the City Council will have the final say. The very real concern of the preservation community and neighborhoods all over the city is that this backroom process will happen so quickly that most neighborhoods will not realize what is happening before it is all over and the demolition permit has been granted.
+
+The speedy timeline means that even if what is happening is miraculously discovered as soon as it’s made public, there will not be enough time to carry out additional research (not a small matter when it can take 20 to 40 hours or even longer to research a single property). Once the City Council accepts the consultant’s determination, nothing can stop the wrecking ball.
+
+A NO vote on the referendum, which is a NO vote on the Mayor’s LPO, is a good thing for the ongoing program to identify and preserve our historic resources.
+
+More information at savethelpo.org
+
+Copyright © 2008–2019 BAHA. All rights reserved.

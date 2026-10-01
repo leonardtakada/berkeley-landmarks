@@ -1,0 +1,116 @@
+---
+title: "BAHA :: Flowers Plucked From Berkeley: A Japanese American Nursery During the 1940s :: Annie Ren"
+authors: ["Annie Ren"]
+source: "BAHA (Berkeley Architectural Heritage Association)"
+source_url: "https://old.berkeleyheritage.com/essays/a_japanese_american_nursery_during_the_1940s.html"
+published_date: "15 July 1944"
+photo_credits: []
+scraped_at: "2026-09-30"
+license_note: "Copyrighted source material - used for research/app content with attribution; verify rights before publication."
+---
+BAHA :: Flowers Plucked From Berkeley: A Japanese American Nursery During the 1940s :: Annie Ren
+
+Flowers Plucked From Berkeley: A Japanese American Nursery During the 1940s
+Annie Ren
+This article was edited for factual accuracy
+
+1534 Oregon Street
+February 2022
+West Berkeley on an overcast day is spectacularly ordinary. Here, the utility poles stand erect over low apartment roofs and bungalows. Their overhead power lines carve up the sky. Vehicles decelerate at the intersection of Oregon and California streets, where there lies a miscellany of plants and signs that read “yield to traffic in circle.” Passersby are unlikely to spare a lingering glance or a curious thought at the taupe housing complexes that blend into the dour landscape. But something endures in that space, hinting at a tumultuous past as unique as the history of this neighborhood. It is an invisible legacy demanding to be visible again.
+House number 1534 sits on the northeastern corner of the West Berkeley block delineated by Oregon, Russell, California, and Sacramento streets. The four digits are hammered onto a clapboard-clad triplex that was built in the first decade of the 20th century and stands today. In 1909, it was rented by T. Kishibe, a nurseryman who apparently stayed only one year or so. The next renter was Buichi Mayama, a 38-year-old Japanese florist who immigrated to the United States in 1890. The U.S. Census collected in 1910 reports that he lived with his wife Niobe, his daughter Schizue, and his fellow workmen, including Tito Saito, Kumataro Watanabe, and Hedatoro Kimuchi.1
+Mayama, and Kishibe before him, leased an existing nursery that was established in 1899 by Swiss-born market gardener Frederick Aebi and that had grown to comprise nine greenhouses and two water towers spanning many lots of land on the eastern side of the block. Records show that the land supporting two-story undistinguished apartment complexes at 1550 and 1590 Oregon Street, as well as at 1527 and 1529 Russell Street, once supported sunlit buildings made with wood, reinforced with steel, topped with glass, and full of flowers.2 These greenhouses were once occupied by diverse species of flora imported from Japan, thriving and benefiting from Berkeley’s Mediterranean climate. It is hard to believe that a century later, a lonely sum of three trees are the only growing things on that corner of Oregon Street.
+
+The Aebi nursery in the 1903 Sanborn Map
+
+The Mayama Nursery in the 1911 Sanborn Map
+
+The former Mayama nursery site today (Google maps)
+Even though Buichi moved to Los Angeles following his divorce from Niobe in the 1910s, they had already established a culture and precedent for the Japanese American community in the San Pablo Park neighborhood. On the same block, other Japanese residents also worked in the flower or garden business, like Ryusuke Yusa of 1541 Russell Street, Noboru Morita of 1500 Oregon Street, and Tadao Ikeda of 1528 (now 1526) Oregon Street.3 These immigrants carried the knowledge of plants and a desire for prosperity across the Pacific Ocean. They decided to establish roots in this community and subsequently beautify this foreign land. So as the Japanese American population in Berkeley surged in later years, people sought out the social and religious organizations readily existing on this very block, including the Higashi Honganji Buddhist Temple at 1524 Oregon Street.4
+When the Roaring Twenties and the Great Depression swept through the Bay Area, many businesses changed hands or went bankrupt. This nursery was no exception. It was briefly held by a Japanese nurseryman named Yamato Shemawaka, who immigrated from Japan in 1905. Similar to his predecessor, Yamato employed his lodgers: Naoya Kawamura, who immigrated in 1907; Sadao Yoshihara, who immigrated in 1918; Tsuneo Kawaragi, who immigrated in 1918; and Toshio Nagata, who immigrated in 1919.5 By 1924, Yamato had sold the nursery business to the Fujii family. The Fujii brothers, Kakichi and Maruo, were its last Japanese proprietors before the fate of Japanese Americans was permanently altered. Kakichi and Maruo were both in their thirties and had many children. Kakichi and his wife Tomoye had a daughter, Sumiko, and sons Yosheitoshi, Kakuo, and Takuma. Maruo and his younger wife, Satsuki, had sons Jiro and Tokumaru, and daughters Tomoko, Teruko, Kaoru, and Noriko.6
+
+Noriko, Kakichi, Tomoko, Jiro, Satsuki & Maruo Fujii, 1940 California Flower Market collection, MS 6000; California Historical Society
+
+Maruo, Noriko & Kakichi Fujii, 1940 California Flower Market collection, MS 6000; California Historical Society
+By the early 1930s, the Fujii family business had built momentum and was full steam ahead. In a “garden book” they published in 1932, the Fujii Nursery Co. lists a broad offering of a hundred varieties of field-grown plants, flowers, trees, seeds, fertilizers, gardening tools.7 The descriptions demonstrate a thorough understanding of horticulture and local climatology. Business aside, the Fujii family members no doubt found a sense of belonging in this Berkeley neighborhood. They were active in the Higashi Honganji Temple down the street and became close friends with the Morita family.8 According to Karen Fujii, the granddaughter of Maruo Fujii, Kakichi and Maruo kept true to their Japanese heritage and never bothered to become fluent in English. However, they each adopted plain, single-syllable names, Fred and John, as they communicated with their non-Japanese-speaking neighbors. And evidently, their notable adjustment to American society was well-received by the neighborhood. In May 1937, when Kakichi Fujii offered a donation of a thousand flowering cherry trees to beautify the city of Berkeley, the mayor of Berkeley at the time, Edward N. Ament, declared that Fujii’s name “will long be remembered for this generous, friendly gesture. It has been said that he who plants a tree plants love”.9 So why was Fujii’s name not carved onto a plaque or plastered on a street sign in commemoration? Why instead was his name on the register of the Gila River internment camp just six years later?
+
+Fujii Nursery Garden Book, 1932
+
+Fujii’s donation acknowledged by mayor (Berkeley Gazette, May 1937)
+For those questions to be answered, the experience of the Fujii nursery must first be contextualized by the business of Japanese American nurseries and the events of World War II. The Japanese American nursery business followed the expansion of the economy and the development of the Bay Area in the latter half of the nineteenth century. The Domoto brothers were the first of many successful nurserymen who saw opportunity as wealth flushed into California, and they brought a diverse collection of Japanese plants to Oakland. Following suit, many Japanese American nurseries emerged around San Francisco, in the East Bay, and on the San Francisco Peninsula, where properties were less expensive for constructing greenhouses and reliable transportation was available for shipping equipment and orders. Unaltered by the 1906 fire, the 1918 influenza, and World War I, the flower industry suffered its first major blow with the rest of the country in the Great Depression and was dealt a crippling loss by the events following Pearl Harbor.10
+President Franklin Roosevelt signed into action Executive Order 9066 on February 19, 1942. This order assigned military authority over the West Coast and inhabitants in that area, resulting in the forced evacuation of hundreds of thousands of people of Japanese heritage. At the time, Berkeley had a Japanese population of 1,319, of whom 859 were American-born. They were given a week and up to 10 days to pack their belongings and take what they could carry. Many Japanese American nursery owners, just like most Japanese American business owners, had to arrange flash sales and find buyers or caretakers for their nurseries, for a period of unknown duration. Greenhouses, equipment, and land were sold at staggeringly low prices. Those who found caretakers were troubled by bad contracts, low accountability, and a nursery in disarray post-internment.11 Since evacuation was right before Mother’s Day, the day which “accounted for one-fifth of annual flower sales,” many grown stocks were unable to see harvest nor profits.12 This particular business and industry are emblematic of how property and value were appropriated and destroyed by those who, whether purposefully or incidentally, capitalized on the flight of their neighbors during afflicted and desperate times.
+The day was August 8, 1942. On the records of the Wartime Relocation Authority (WRA) of the Gila Rivers internment camp in Arizona, the names Maruo and Kakichi appeared alongside those of their children.13 The WRA form is similar to a regular census in that it records parental birthplace, occupation, marital status, ethnicity, and languages spoken. However, additional information on years of Japanese schooling, religion, and citizenship was also collected and scrutinized by the government in an effort to identify “enemy aliens.” Further surveys asked internees to renounce allegiance to imperial Japan while swearing allegiance to the United States and to serve in the U.S. Army during the war. Those who responded negatively to both questions were put on a watch list, and many “watched persons” were eventually transferred to Tule Lake Segregation Center.14 Interestingly, by September of 1943, the names of Maruo, Kakichi, and their children appeared on the registry of Tule Lake, where they spent the rest of internment.15
+The Fujii family mostly stayed intact through the physically and mentally grueling journey from racetrack assembly centers to the internment camps in peripheral Arizona and California. Testimonies, memoirs, and records later revealed that the conditions at the camps were inhumane and un-American, violating constitutional rights and basic human rights. But even under such mistreatment, their spirit remained unbroken. In an effort to lead normal lives under abnormal circumstances, many camp members practiced their trades and attempted to recreate a pre-war lifestyle. Kakichi was at one point pictured working on his crops at the camp by WRA photographer Francis Stewart.16 However, the conditions of southwest Arizona, characterized by sub-zero weather and snow-blankets in winter, so unlike coastal California, made agriculture a limited, seasonal activity.17 During internment, Tomoko Fujii met and married Nobuo Matsumoto, and Raymond was born to Maruo and Satsuki Fujii.
+
+Kakichi Fujii at Gila River 1942–43
+
+Tule Lake Registry front page, Sept. 1943–July 1944
+
+Entries in Tule Lake Registry, Sept. 1943–July 1944
+As people of Japanese ancestry were being rapidly evacuated out of the West Coast, the WRA was well aware of the economic losses incurred. According to its Quarterly Report, issued on June 30, 1942, the WRA stated that “in a movement of this kind ... it was probably inevitable that some mistakes would be made and some people would suffer.”18 Before the WRA was established in late March of 1942, an office of Alien Property Custodian was signed into action by executive order, and its authority was delegated to the Treasury and the Federal Reserve Bank. The former froze all bank assets of aliens, including Kakichi Fujii’s $3,342.97 in cash.19 The latter institution established the Evacuee Property Division in San Francisco, responsible for safeguarding property during the period of internment. “Wartime handling of evacuee property is a sorry part of the war record,” concluded the WRA in its Final Report. The responsibility of handling evacuee property bounced from agency to agency while people were already being evacuated.20 And to this day, the specific figure of how much value was appropriated, vandalized, or destroyed during internment is still heavily contested. Some say $400 million, but others claim that figure to be a gross underestimation of the actual billions incurred. The facts are elusive due to a lack of bank records and the destruction of tax records. Today, the $400 million figure has been disavowed by the Federal Reserve and scrutinized by the bipartisan Commission of Wartime Relocation and Internment of Civilians (CWRIC), which began investigating that figure in 1981.21
+The land on which the Fujii nursery stood, as well as the house that the Fujii family called home, continued to belong to Frederick Aebi and his family until the latter 1940s, and the nursery was leased to new operators. In the 1948 Sanborn maps created after the war, the nursery is once again renamed. No longer the “B. Mayama Nursery” or “Yamato Nursery” and “Fujii Nursery,” it has become “Victory Nursery.”22 Victory gardens were a part of an active war effort to simultaneously increase agricultural production and express patriotism. But seeing this change must have felt like a betrayal for the Fujii family, as well as for the rest of the Japanese population in Berkeley who returned to the streets where they had raised families, built businesses, and made contributions to the community.
+
+“B. Mayama Nursery” in the 1911 Sanborn Map
+
+“Fujii Bros. Nursery” in the 1929 Sanborn Map
+
+“Fujii Nursery” in the 1939 Sanborn Map
+
+“Victory Nursery” in the 1948 Sanborn Map
+
+“Melrose Nursery” in the 1950 Sanborn Map
+Instead of returning to Berkeley, the Fujii brothers split up. Kakichi, as the older son, went back to Japan to take care of the family estate. Maruo Fujii’s family relocated to Richmond, California to continue their nursery business with the help of friends and fellow nurserymen.23
+When the 1948 Evacuation Claims Act was set up to redress economic losses incurred by Japanese Americans, only $37 million was distributed to some of the 60,000 survivors of internment camps.24 This underserving process reflected the Justice Department’s attitude that “balanced protecting the interest of the United States with trying to give claimants such liberty.”25 With however much money they had left, Maruo and Jiro set up their greenhouses on Davilla Road, between Kawai Nursery and Fukushima Nursery, and began growing roses.26 By 1953, records reflect that they had $57,000 in assets and more in liabilities.27 Business began to wilt in the 1990s with the passing of the Andean Trade Preference Act, as South American flower exporters gradually priced out domestic flower growers.28 Today, although the business is non-operational, the parcel of land in Richmond still belongs to the Fujii family.
+
+Fujii property in East Richmond, then (El Cerrito Historical Society)
+
+Fujii property in East Richmond, now (Google Maps)
+The original Fujii nursery was never again managed by the Fujii family, and their West Berkeley neighborhood had changed beyond recognition, both physically and demographically. But the story of that original property continues. By the mid-1950s, the nursery land had been acquired by real-estate developers Gerson Bakar and Morris Wallock. In August of 1954, Mason-McDuffie Co. the real-estate company that developed the San Pablo Park area and most of the Northbrae neighborhood in Berkeley, negotiated an agreement with Bakar and Wallock for the purchase of this land, which comprised the nursery lots. By February of the following year, Mason-McDuffie had already taken the initiative to demolish the greenhouses that had been there for the last 55 years.29
+Three months later, $10,000 of promised $69,000 was transferred from one party to the other in exchange for the specified rear 25 feet of Lot 10, and all of lots 11, 12, 13, the northwestern 155 feet of lots 14 and 15, all of lots 20, 21, 22, 23, 24, 25 in Block 29 as described in the “Smith’s Subdivision Part of Mathews Tract,” filed in 1887.30
+Another three months later, $500 of a promised $36,000 was transferred to Jordan & Reed Construction Co. for the building of apartments on that land.31 That’s how the apartments of today came to be.
+
+Mason-McDuffie Co. letter to banker American Trust Co.
+Of the many Japanese American businesses and families affected by internment, the Fujii Bros. Nursery on the corner of California Street and Oregon Street was a loss that was never fully recovered nor commemorated. Karen Fujii said that her grandparents didn’t talk much about the camps, and this story has mostly been lost to their family. So it is about time that this story, which includes the passionate history of the nursery business, the traumatic repercussions of war, and the road to redress, is recovered and commemorated. Regardless of what history chooses to record or ignore, the Fujii family’s entrepreneurial spirit, strong sense of community-building, generosity towards their neighbors, hard work, and resiliency in the face of calamity are characteristic of the immigrants who built West Berkeley.
+
+Apartments built on the former Fujii Nursery site, 1590 Oregon Street at California Street
+
+Apartments built on the former Fujii Nursery site, 1525–1527 Russell Street
+
+The former Fujii nursery site today (Google maps)
+~~~~~
+This article was researched and written in a seminar at UC Berkeley, “Berkeley’s Built Environment: Two Residential Neighborhoods,” Fall 2021, sponsored by The Art of Writing Program, as part of a larger project to engage undergraduate students in original research and in Public Art History. I would like to express my deepest appreciation to Professor M. M. Lovell and GSI Elizabeth Fair for their substantive and inspirational teaching in the classroom and mentorship outside the classroom. I am also grateful for members of the Fujii family who responded to my cold e-mails and calls about their family history. It has been an adventure and a pleasure conducting this research.
+Footnotes
+United States Census Bureau, U.S. Federal Census of 1910, Enumeration District 63, accessed October 25, 2021.
+Sanborn Fire Insurance Map from Berkeley, Alameda County, California, 1911, Vol. 2, Sanborn Map Company, Library of Congress, accessed December 12, 2021, page 171.
+United States Census Bureau, U.S. Federal Census of 1930 & 1940, Enumeration Districts 280 & 96, October 25, 2021.
+History, Berkeley Higashi Honganji Buddhist Temple, accessed October 25, 2021.
+United States Census Bureau, U.S. Federal Census of 1920, Enumeration District 170, accessed October 25, 2021.
+United States Census Bureau, U.S. Federal Census of 1930, Enumeration District 280, accessed October 25, 2021.
+Fujii Nursery Co. Perennial Annual Rose Bush Garden Book, 1932, from Henry G. Gilbert Nursery Seed Trade Catalog Collection, U.S. Department of Agriculture, National Agricultural Library, accessed December 10, 2021.
+Karen Fujii, phone conversation, December 12, 2021.
+“1000 Japanese Cherry Trees Given to City.” Berkeley Gazette, May 1937. Bancroft Library, University of California, Berkeley.
+Dana Ogo Shew. “The Japanese Nursery Industry in the Bay Area.” In Growing a Community: Pioneers of the Japanese American Floral Industry, Anthropological Studies Center, accessed December 10, 2021.
+Ibid.
+Kashima, Tetsuden. “Economic Loss.” In Personal Justice Denied: Report of the Commission on Wartime Relocation and Internment of Civilians, 117–34. University of Washington Press, 1997.
+Wartime Relocation Authority, family no. 40160, from Densho Digital Repository, accessed December 12, 2021.
+Gila River: A History of Relocation at the Gila River Relocation Center, Japanese American Relocation Digital Archive, UC Berkeley, Bancroft Library, Online Archive of California, accessed December 12, 2021.
+“Persons of Japanese Ancestry Registered at Tule Lake Segregation Center (September 1943 through 15 July 1944),” U.S. Army’s Western Defense Command (WDC), 1944, National Archives by National Park Services, 12, December 2021.
+Original Caption: “Fred K. Fujii, former owner and operator of the Fujii Nursery Co., of Berkeley, California, where he has had 20 years of experience in the nursery business. Fred is pictured with Stocks, which are ready to be harvested for their seed. These plants were grown for experimental purposes.” April 24, 1943. Gila River Relocation Center. Rivers, Arizona. Photo by Francis Stewart. WRA call no. B-462. Collection of War Relocation Authority Photographs of Japanese-American Evacuation and Resettlement. Courtesy of UC Berkeley, Bancroft Library.
+Gila River: A History of Relocation at the Gila River Relocation Center.
+First Quarterly Report, March 18 to June 30, 1942, War Relocation Authority, Washington, D.C., as cited in Taylor, Sandra C. See footnote 19.
+“In re: Debt owing to Kakichi Fujii,” document 48-8582, filed September 22, 1948, in Federal Register, volume 13, part 9, The National Archives of the United States; July-September 1948, accessed December 12, 2021.
+United States Department of the Interior, The Wartime Handling of Evacuee Property (Washington, D.C.: Government Printing Office, 1946), 3-4, as cited in Taylor, Sandra C. See footnote 19.
+Taylor, Sandra C. “Evacuation and Economic Loss: Questions and Perspectives.” in Daniels, Roger, Sandra C. Taylor, and Harry H. L. Kitano, eds. Japanese Americans: From Relocation to Redress, 163-67. Salt Lake City: University of Utah Press, 1986. Revised edition. Seattle: University of Washington Press, 1991, accessed December 12, 2021.
+Sanborn Fire Insurance Map from Berkeley, Alameda County, California, 1948, Vol. 2, Sanborn Map Company, Library of Congress, accessed December 12, 2021, page 171.
+Karen Fujii, December 12, 2021.
+Taylor, Sandra C. “Evacuation and Economic Loss: Questions and Perspectives.” 163-67.
+Kashima, Tetsuden. “Economic Loss.” 117–34.
+Northwest El Cerrito and East Richmond Nurseries, in Remembering Our Local Japanese Heritage: The El Cerrito and Flower Growers, by El Cerrito Historical Society, accessed December 12, 2021.
+Hearing of Subcommittee on the Trading With the Enemy Act, of the committee of the Judiciary, U.S. Senate, Volume 1, February 27, 1953, accessed December 12, 2021.
+Dana Ogo Shew. “The Japanese Nursery Industry in the Bay Area.”
+Letter to American Trust Company from Mason-McDuffie, February 1, 1955, Mason-McDuffie Co. Records 1904–1983, Ctn. 22, folder 40, Bancroft Library, University of California, Berkeley.
+Purchase Agreement between Mason-McDuffie Co. and Gerson Bakar & Morris Wallock, May 11, 1955, Mason-McDuffie Co. Records 1904–1983, Ctn. 22, folder 40, Bancroft Library, University of California, Berkeley.
+Purchase Agreement between Mason-McDuffie Co. and Jordan & Reed Construction Co., August 10, 1954, Mason-McDuffie Co. Records 1904–1983, Ctn. 22, folder 40, Bancroft Library, University of California, Berkeley.
+
+Essays & Stories
+
+Copyright © 2022 Annie Ren. All rights reserved.

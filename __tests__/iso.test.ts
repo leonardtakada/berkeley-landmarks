@@ -89,14 +89,46 @@ describe("the city map's walkers", () => {
     }
   });
 
-  it("are the cover's architects, printed at every stride and facing either way", async () => {
+  it("are the cover's architects, drawn as closed shapes in their box", async () => {
     const { WALKERS } = await import("../lib/walker-cast");
-    const src = fs.readFileSync(path.join(__dirname, "../components/walker-icons.generated.ts"), "utf8");
-    const icons = [...src.matchAll(/"([a-z]+-\d[rl])": require\("\.\.\/(assets\/walkers\/[^"]+)"\)/g)];
-    expect(icons.length, "run npx tsx scripts/iso/walker-icons.ts").toBe(WALKERS.length * 3 * 2);
-    for (const [, name, file] of icons) {
-      expect(WALKERS).toContain(name.split("-")[0]);
-      expect(fs.existsSync(path.join(__dirname, "..", file)), file).toBe(true);
+    const { WALKER_SHAPES } = await import("../lib/walker-shapes");
+    expect(WALKER_SHAPES.length).toBe(WALKERS.length);
+    for (const parts of WALKER_SHAPES) {
+      expect(parts.length).toBeGreaterThanOrEqual(3); // keyline, coat, head…
+      for (const { ink, rings } of parts) {
+        expect(ink).toMatch(/^#[0-9A-F]{6}$/i);
+        for (const r of rings) {
+          expect(r.length % 2).toBe(0);
+          expect(r.length).toBeGreaterThanOrEqual(8);
+          expect([r[0], r[1]]).toEqual([r[r.length - 2], r[r.length - 1]]);
+          for (let i = 0; i < r.length; i += 2) {
+            expect(r[i]).toBeGreaterThan(-1.5);
+            expect(r[i]).toBeLessThan(15.5);
+            expect(r[i + 1]).toBeGreaterThan(-1.5);
+            expect(r[i + 1]).toBeLessThan(35);
+          }
+        }
+      }
     }
+  });
+
+  it("flatten paths and grow keylines outward", async () => {
+    const { flatten, grow } = await import("../lib/walker-shapes");
+    const area = (r: number[]) => {
+      let a = 0;
+      for (let i = 0; i < r.length - 2; i += 2) a += r[i] * r[i + 3] - r[i + 2] * r[i + 1];
+      return Math.abs(a / 2);
+    };
+    // A circle of radius 2, by two half-ellipse arcs: close to π·4.
+    const [disc] = flatten("M3 5 a2 2 0 1 0 4 0 a2 2 0 1 0 -4 0 Z");
+    expect(area(disc)).toBeGreaterThan(Math.PI * 4 * 0.95);
+    expect(area(disc)).toBeLessThan(Math.PI * 4);
+    // A 2 × 3 rectangle, relative moves; grown by ½ it's 3 × 4, either way round.
+    const [box] = flatten("M1 1 h2 v3 h-2 Z");
+    expect(area(box)).toBeCloseTo(6);
+    expect(area(grow(box, 0.5))).toBeCloseTo(12);
+    expect(area(grow([...box].reverse().flatMap((_, i, a) => (i % 2 ? [] : [a[i + 1], a[i]])), 0.5))).toBeCloseTo(12);
+    // Two shapes in one path are two rings.
+    expect(flatten("M0 0 L1 0 L1 1 Z M3 3 L4 3 L4 4 Z")).toHaveLength(2);
   });
 });

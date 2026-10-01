@@ -19,6 +19,14 @@ const ENGINES: MapEngine[] = ["iso", "maplibre", "raster"];
 
 export const MAPLIBRE_ENABLED = true;
 
+/**
+ * A release build on a phone draws only the isometric city: the other two
+ * are development fallbacks, and their tiles are left out of the build
+ * (lib/tile-cache.ts, components/maplibre-view.tsx). A choice saved by a
+ * development build on the same phone is ignored.
+ */
+export const ISO_ONLY = !__DEV__ && Platform.OS !== "web";
+
 const OVERRIDE_KEY = "map.engine.override";
 
 let cachedOverride: MapEngine | null = null;
@@ -59,6 +67,7 @@ export function useMapEngine(): {
   const [ready, setReady] = useState(cachedOverride !== null || false);
 
   useEffect(() => {
+    if (ISO_ONLY) return;
     let cancelled = false;
     getStoredMapEngine().then((v) => {
       if (!cancelled) {
@@ -77,6 +86,6 @@ export function useMapEngine(): {
     setStoredMapEngine(next);
   }, [override]);
 
-  const engine = override ?? defaultMapEngine();
-  return { engine, isMapLibre: engine !== "raster", isIso: engine === "iso", toggleEngine, ready };
+  const engine = ISO_ONLY ? "iso" : (override ?? defaultMapEngine());
+  return { engine, isMapLibre: engine !== "raster", isIso: engine === "iso", toggleEngine, ready: ready || ISO_ONLY };
 }

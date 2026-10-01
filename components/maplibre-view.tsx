@@ -31,7 +31,7 @@ import {
   UserLocation,
 } from "@maplibre/maplibre-react-native";
 import type { CameraRef, GeoJSONSourceRef } from "@maplibre/maplibre-react-native";
-import { useReducedMotion } from "react-native-reanimated";
+import { useReducedMotion, useSharedValue } from "react-native-reanimated";
 import { Asset } from "expo-asset";
 import { Directory, File, Paths } from "expo-file-system";
 import { IsoWalkers, type MapView } from "@/components/iso-walkers";
@@ -39,7 +39,7 @@ import { useColors } from "@/hooks/use-colors";
 import type { Fix } from "@/lib/arrival";
 import { isoBounds, isoGroundShape, isoLine, isoPoint, onDrawing } from "@/lib/iso-map";
 import { isoStyle } from "@/lib/iso-style";
-import { ISO_TILES_VERSION } from "@/lib/iso-terrain.generated";
+import { ISO_TILES_BYTES, ISO_TILES_VERSION } from "@/lib/iso-terrain.generated";
 import { GLYPH_ASSETS } from "@/lib/map-glyphs.generated";
 
 /* ------------------------------------------------------------------ */
@@ -154,28 +154,43 @@ export function MapPolygon(_props: PolygonProps) {
 
 const stagedPromise: Partial<Record<"flat" | "iso", Promise<{ pmtilesUri: string; glyphsUrl: string }>>> = {};
 
-/** The tile file each map draws from, and the name its copy goes by (a new build gets a new name). */
+/** The tile file each map draws from, the name its copy goes by (a new build gets a new name), and its size when known. */
 const TILES = {
-  flat: { name: "berkeley.pmtiles", module: () => require("../assets/map/berkeley.pmtiles") },
-  iso: { name: `iso-${ISO_TILES_VERSION}.pmtiles`, module: () => require("../assets/map/iso.pmtiles") },
+  // (The flat map is a development fallback: a release build leaves its tiles out — constants/map-engine.)
+  flat: { name: "berkeley.pmtiles", module: () => (__DEV__ ? require("../assets/map/berkeley.pmtiles") : 0), bytes: undefined },
+  iso: { name: `iso-${ISO_TILES_VERSION}.pmtiles`, module: () => require("../assets/map/iso.pmtiles"), bytes: ISO_TILES_BYTES },
 };
 
-/** A bundled asset copied to `dest`: from the dev server in development (the asset loader stalls on large binaries), else from the app. */
-async function stage(mod: number, dest: File) {
-  if (dest.exists) return;
+/**
+ * A bundled asset copied to `dest`, whole: from the dev server in development
+ * (the asset loader stalls on large binaries), else from the app. It's written
+ * beside `dest` and moved into place once complete, so a copy cut short (the
+ * app closed part way) is never taken for the real thing, and a copy already
+ * there of the wrong size is made again.
+ */
+async function stage(mod: number, dest: File, bytes?: number) {
   const asset = Asset.fromModule(mod);
-  if (asset.uri.startsWith("http")) {
-    await File.downloadFileAsync(asset.uri, dest, { idempotent: true });
-  } else {
-    await asset.downloadAsync();
-    new File(asset.localUri ?? asset.uri).copy(dest);
+  const remote = asset.uri.startsWith("http");
+  if (!remote) await asset.downloadAsync();
+  const source = remote ? null : new File(asset.localUri ?? asset.uri);
+  const size = bytes ?? source?.size;
+  if (dest.exists && (!size || dest.size === size)) return;
+  const part = new File(dest.parentDirectory, `${dest.name}.part`);
+  if (part.exists) part.delete();
+  if (source) await source.copy(part);
+  else await File.downloadFileAsync(asset.uri, part, { idempotent: true });
+  if (size && part.size !== size) {
+    part.delete();
+    throw new Error(`${dest.name}: copied ${part.size} of ${size} bytes`);
   }
+  if (dest.exists) dest.delete();
+  await part.move(dest);
 }
 
 /** Copy bundled map assets into real files so maplibre-native can mmap them. */
 async function stageOfflineAssets(kind: "flat" | "iso"): Promise<{ pmtilesUri: string; glyphsUrl: string }> {
   const tiles = new File(Paths.cache, TILES[kind].name);
-  await stage(TILES[kind].module(), tiles);
+  await stage(TILES[kind].module(), tiles, TILES[kind].bytes);
   // Earlier builds' copies of the isometric tiles go.
   for (const f of Paths.cache.list()) {
     if (f instanceof File && /^iso-.*\.pmtiles$/.test(f.name) && f.name !== TILES.iso.name) f.delete();
@@ -203,7 +218,11 @@ function useOfflineAssets(kind: "flat" | "iso") {
   const [error, setError] = useState<string | null>(null);
   useEffect(() => {
     if (Platform.OS === "web") return;
-    const staged = (stagedPromise[kind] ??= stageOfflineAssets(kind));
+    // (A copy that failed is tried again the next time the map opens.)
+    const staged = (stagedPromise[kind] ??= stageOfflineAssets(kind).catch((e) => {
+      delete stagedPromise[kind];
+      throw e;
+    }));
     let cancelled = false;
     staged
       .then((u) => !cancelled && setUris({ ...u, kind }))
@@ -430,8 +449,8 @@ const MapLibreMapView = forwardRef<MapCameraHandle | null, MapLibreViewProps>(
       onFollowChange?.(on);
     };
     const zoom = useRef(15);
-    // What the map shows, for the walkers to keep to (read each frame, so no render).
-    const view = useRef<MapView>(null);
+    // What the map shows, for the walkers to keep to (read each frame on the UI thread, so no render).
+    const view = useSharedValue<MapView>(null);
     const locating = useRef<((r: LocateResult) => void) | null>(null);
     const latest = useRef<Fix | null>(null);
     /** Takes the camera to the reader, and follows them from there. */
@@ -452,8 +471,10 @@ const MapLibreMapView = forwardRef<MapCameraHandle | null, MapLibreViewProps>(
       }
     });
     const denied = reader.denied;
-    // On the drawing, everything laid on the map goes under the reader's mark.
+    // On the drawing, everything laid on the map goes under the reader's mark;
+    // a walk's route goes under the walkers too, who walk along it.
     const under = iso ? "reader-accuracy" : undefined;
+    const underWalkers = iso ? "walkers" : undefined;
 
     // The screen's camera API. (The native MapRef is kept private: forwarding
     // it through the same ref would replace this handle once the map mounts.)
@@ -585,7 +606,11 @@ const MapLibreMapView = forwardRef<MapCameraHandle | null, MapLibreViewProps>(
       return (
         <View style={[styles.container, style]}>
           <Text style={styles.note}>
-            {error ? `MapLibre failed: ${error}` : "MapLibre view is native-only."}
+            {error
+              ? __DEV__
+                ? `MapLibre failed: ${error}`
+                : "The map couldn't be laid out just now. Fold it away and open it again."
+              : "MapLibre view is native-only."}
           </Text>
         </View>
       );
@@ -620,11 +645,11 @@ const MapLibreMapView = forwardRef<MapCameraHandle | null, MapLibreViewProps>(
             if (e.nativeEvent.userInteraction) follow(false);
           }}
           onRegionIsChanging={(e) => {
-            view.current = { bounds: e.nativeEvent.bounds, zoom: e.nativeEvent.zoom };
+            view.set({ bounds: e.nativeEvent.bounds, zoom: e.nativeEvent.zoom });
           }}
           onRegionDidChange={(e) => {
             zoom.current = e.nativeEvent.zoom;
-            view.current = { bounds: e.nativeEvent.bounds, zoom: e.nativeEvent.zoom };
+            view.set({ bounds: e.nativeEvent.bounds, zoom: e.nativeEvent.zoom });
           }}
         >
           <Camera
@@ -694,7 +719,7 @@ const MapLibreMapView = forwardRef<MapCameraHandle | null, MapLibreViewProps>(
             >
               <Layer
                 id={`polyline-line-${i}`}
-                beforeId={under}
+                beforeId={underWalkers}
                 type="line"
                 layout={{
                   "line-cap": "round",

@@ -192,7 +192,7 @@ function tick(ws: Walker[], dt: number) {
  * the grid — turning at the crossings at random, stopping now and then — pass
  * behind the tower, and step off again at the rim.
  */
-export function StreetsLogo({ width, height }: { width: number; height: number }) {
+export function StreetsLogo({ width, height, onLoad }: { width: number; height: number; onLoad?: () => void }) {
   const reduceMotion = useReducedMotion();
   const walkers = useSharedValue<Walker[]>(opening());
   const shuffled = useSharedValue(false);
@@ -227,7 +227,7 @@ export function StreetsLogo({ width, height }: { width: number; height: number }
 
   return (
     <View style={{ width, height }}>
-      <Image source={LOGO} style={styles.fill} />
+      <Image source={LOGO} style={styles.fill} onLoad={onLoad} />
       {layer(false)}
       <Image source={TOWER} style={styles.fill} />
       {layer(true)}

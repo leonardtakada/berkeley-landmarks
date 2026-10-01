@@ -23,6 +23,27 @@ const WALKABLE = new Set(["primary", "secondary", "tertiary", "residential", "un
 const SMALLEST = 12;
 const SAMPLE = 2;
 const CELL = 20;
+/** Out of sight for less than this, metres of street, a walker stays in view… */
+const SHORTEST_HIDDEN = 6;
+/** …and back in view for less than this, they stay hidden. */
+const SHORTEST_SEEN = 8;
+
+/** Hidden runs (from–to fractions of a stretch `len` metres long) without the blinks. */
+function steady(runs: number[], len: number): number[] {
+  const merged: number[] = [];
+  for (let k = 0; k < runs.length; k += 2) {
+    const n = merged.length;
+    if (n && (runs[k] - merged[n - 1]) * len < SHORTEST_SEEN) merged[n - 1] = runs[k + 1];
+    else merged.push(runs[k], runs[k + 1]);
+  }
+  const out: number[] = [];
+  for (let k = 0; k < merged.length; k += 2) {
+    // (A run that reaches either end may carry on along the next stretch.)
+    const atEnd = merged[k] === 0 || merged[k + 1] === 1;
+    if (atEnd || (merged[k + 1] - merged[k]) * len >= SHORTEST_HIDDEN) out.push(merged[k], merged[k + 1]);
+  }
+  return out;
+}
 
 type OsmWay = { id: number; nodes?: number[]; tags?: Record<string, string>; geometry?: { lat: number; lon: number }[] };
 type P3 = [number, number, number];
@@ -194,9 +215,11 @@ async function main() {
     }
     return false;
   };
+  // Out of sight when body and head are both covered: a nearer thing that
+  // hides only the feet, or only the hat, leaves the walker in view.
   const hiddenAt = (u: number, v: number, z: number) => {
     const [x, y] = flat([u, v, z]);
-    return [0.55, 0.9].some((f) => covered([x, y + WALKER_HEIGHT * f], u + v) || underHill(u, v, z, WALKER_HEIGHT * f));
+    return [0.55, 0.9].every((f) => covered([x, y + WALKER_HEIGHT * f], u + v) || underHill(u, v, z, WALKER_HEIGHT * f));
   };
 
   // ── Where along each stretch a walker is out of sight ───────────────────
@@ -225,7 +248,10 @@ async function main() {
         start = -1;
       }
     }
-    if (runs.length) hidden[i] = runs;
+    // A glimpse between two houses isn't worth showing, nor a moment behind
+    // a lamp-post's worth of something: either would only blink.
+    const tidy = steady(runs, len);
+    if (tidy.length) hidden[i] = tidy;
   });
   console.log(`hidden: ${((out / total) * 100).toFixed(0)}% of ${total} samples, ${((Date.now() - t0) / 1000).toFixed(1)}s`);
 

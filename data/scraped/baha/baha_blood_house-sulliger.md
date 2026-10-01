@@ -1,0 +1,43 @@
+---
+title: "Berkeley Landmarks :: The Ellen Blood House #2"
+authors: ["The Fictional Neighborhood"]
+source: "BAHA (Berkeley Architectural Heritage Association)"
+source_url: "https://old.berkeleyheritage.com/berkeley_landmarks/blood_house-sulliger.html"
+published_date: "15 October 2003"
+photo_credits: []
+scraped_at: "2026-09-30"
+license_note: "Copyrighted source material - used for research/app content with attribution; verify rights before publication."
+---
+Berkeley Landmarks :: The Ellen Blood House #2
+
+Yes, the Blood house is a rare survivor in its neighborhood
+Letter to the ZAB
+Update: The Blood House was moved to 2508 Regent Street in August 2014 and restored.
+15 October 2003
+The Fictional Neighborhood
+This is to rebut some of the arguments and documentation provided by Michael R. Corbett in his analysis of the neighborhood around the Blood house, dated 12 August 2003, and revised on 29 August 2003. This writer does not believe that the landmark status of the Ellen Blood house should be questioned, since it was designated by the Landmarks Preservation Commission, and that designation was upheld unanimously by the City Council. Mr. Corbett’s analysis, however, does appear to be an end-run around the City Council’s approval, by now arguing that there are plenty of other pre-1903 structures in the neighborhood and that the Blood house, therefore, would not be missed.
+Mr. Corbett’s analysis is interesting but contains some factual and conceptual errors that give rise to erroneous conclusions. Specifically, Mr. Corbett asserts that the University of California created a “respectable college town” by laying out and developing the College Homestead Tract. In reality, the University of California had nothing to do with the tract. Yet from this assumption, Mr. Corbett creates a fictional neighborhood where none existed, and therefore is able to include the western portion of the tract and argue that there are many more Victorian structures than there actually are in the Blood house’s neighborhood.
+Purpose of the College Homestead Tract
+
+Exhibit A: College Homestead Association PlanAs Mr. Corbett points out, the College Homestead Tract was recorded on 15 May 1866 (Exhibit A). You should note that this was a plan, not reality: the four blocks west of Guyot Street (now Shattuck Avenue), for instance, were never purchased and never became a part of the tract. In its Articles of Association, the College Homestead Association, on 1 September 1864, laid out thirteen articles to govern the Association, and not one of the articles specifies building a college town. Rather the purpose was simply to sell lots, raise money, and keep the College of California afloat. It did not work, and Secretary Samuel H. Willey would later lament that only half the lots sold in six months and by December 1866, 81 had been sold, of which only 77 had been fully paid for.
+This failure to raise capital caused the demise of the College of California, which in 1869 transferred its property and interests to the University of California, and was absorbed as the College of Letters and Sciences. Since there was no campus in Berkeley, the university decided to remain in Oakland while developing the Berkeley site. In order to provide more space for operations, the university obtained the buildings of the College School in Oakland in trade with the widow Mary Brayton (who inherited the Oakland property from her husband Isaac Brayton) for all of the unsold College Homestead and Berkeley Property Tracts in Berkeley. Mary Brayton thereafter sold lots to the public. At no time did the University of California have anything to do with the College Homestead Tract, and thus no attempt was made to create a college town.
+Settlement of the College Homestead Tract
+The settlement of the College Homestead Tract involved the development of transportation systems in Berkeley. In 1901, John E. Boyd, an expressman, raconteur, and poet, remembered that in 1878 when Berkeley was chartered, “there was an unbroken field from Telegraph to Shattuck Avenues, and from Dwight Way to University Avenue.” He later described how the farmer, who had plowed up the field between Telegraph and Shattuck, and Dwight and Bancroft, left them a small strip on the north, which became Bancroft Way.
+What gave rise to two different neighborhoods on the College Homestead Tract was the coming of a street car and a branch of the railroad: the bobtail car (later a small steam dummy engine) along Telegraph Avenue between the university and Oakland, and the Berkeley Branch of the Central Pacific that ran up Adeline to Shattuck—stopping at the Dwight Way Station—to the Berkeley Station at University and Shattuck Avenues.
+The Western Neighborhood
+
+Exhibit B: Steele Tract & Dwight Way StationExhibit B is the subdivision map for the Steele Tract that shows the Dwight Way train station as it existed in the 19th Century. The train station gave rise to a surrounding community, especially to the East, up Dwight Way and then along Fulton Street (the empty field described by John Boyd). Along Dwight Way and Shattuck Avenue in this area were located many stores offering goods and services to the community. This area thrived well into the 20th Century, until the business community was concentrated downtown. Today, the Williamson, Williams, and Davis-Byrne Buildings (2122–2140 Dwight Way) remind us of this early commercial center.
+The Eastern Neighborhood
+
+Exhibit C: Villa Lots & campus trolley terminusExhibit C is the map for the Villa Lots south of the university campus, which shows clearly the terminus for the trolley from Oakland, via Telegraph Avenue (called Choate Street north of Dwight Way), to the campus. This trolley was used by faculty, students, and neighbors to the east of Dana Street, who formed the campus community to the south and east of campus. The Berkeley Property Tract, mentioned above, was plotted by the College of California in May 1868. In contrast with the College Homestead Tract, which was simply for income, the Berkeley Property Tract was a residential neighborhood created by Frederick Law Olmsted. This tract was situated east of the College Homestead Tract (Exhibit D). By the end of the 19th Century, this tract was fully developed and drew residential development for the users of the campus to the east and south, clear down past Dwight Way along the foothills. This is the neighborhood of the Ellen Blood house.
+
+Exhibit D: Berkeley Property TractWhy differentiate between the Neighborhoods?
+So why does it matter that there are two different neighborhoods in the College Homestead Tract? The reason is that by including all of those remaining structures from the Dwight Way Station neighborhood, Mr. Corbett believes he demonstrates that there are still plenty of Victorians left in the tract. But these Victorian structures on the western edge of the tract survived precisely because they were far enough away from campus to escape the university’s expansion and the commercial development of Telegraph Avenue. Whereas the eastern part of the tract—the real college town—has seen its Victorian structures virtually eliminated by expansion and development.
+Exaggerated and Inflated Results
+
+Exhibit E: Surviving pre-1903 structuresExhibit E shows the breakdown of pre-1903 structures (excepting churches and schools) as they existed in the two neighborhoods. In the eastern/campus part of the tract, only 6% of the 138 structures from 1903 remain. In the western/Dwight Way Station neighborhood, the remaining structures represent 22% of the 172 structures that were there in 1903. By combining these two neighborhoods, Mr. Corbett thereby inflates the real number of survivors in the Blood house’s neighborhood. If you take Mr. Corbett’s own diagram (Exhibit F), and draw a line down Dana Street, you will see very clearly that most the of the survivors from 1903 are west of Ellsworth Street.
+
+Exhibit F: Locations of surviving pre-1903 structuresThis argument does not even consider architectural styles. Of the eight remaining pre-1903 structures in the Blood house’s neighborhood, only three are Victorian in style: 2526 Durant (Blood house), 2421 Durant, and 2437 Dwight. In style, four of the remaining eight are Colonial Revival, and the last a shingle-style house on Bowditch. The conclusion then is that the Ellen Blood house is one of only three houses of the same period and architectural style that remain in the neighborhood that grew up south of campus between Telegraph Avenue and the residential foothills to the East.
+Jerry A. Sulliger
+
+Copyright © 2003–2019 BAHA. All rights reserved.

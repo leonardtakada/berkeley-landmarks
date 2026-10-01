@@ -1,0 +1,72 @@
+---
+title: "Berkeley Landmarks :: American Photo Player Co. Buildings"
+authors: ["Daniella Thompson"]
+source: "BAHA (Berkeley Architectural Heritage Association)"
+source_url: "https://old.berkeleyheritage.com/eastbay_then-now/photoplayer.html"
+published_date: "3 March 2010"
+photo_credits: ["Daniella Thompson, 2010"]
+scraped_at: "2026-09-30"
+license_note: "Copyrighted source material - used for research/app content with attribution; verify rights before publication."
+---
+Berkeley Landmarks :: American Photo Player Co. Buildings
+
+Bread and music were staples of West Berkeley block
+Daniella Thompson
+
+American Photo Player Co. buildings, Strawberry Creek Park (photo: Daniella Thompson, 2010)
+3 March 2010
+Berkeley prides itself on being at the forefront of national trends. This was already the case a hundred years ago, when newfangled inventions like the automobile and the movies found receptive local entrepreneurs ready to help them along.
+Movies being silent in those days, they required musical accompaniment to help convey emotions. “Comparatively few houses can pay for large orchestras composed of highly paid musicians. Mechanical substitutes are indispensable,” wrote Harvey Brougham in the Overland Monthly in August 1920, continuing:
+Modifications of the great and costly organs that require a large theatre to house them, and an artist of first-class ability to operate them, are beyond the reach of large numbers of picture places. But American ingenuity has been equal to that emergency. Mechanical instruments that synchronize the expression of the music with the different degrees of action on the screen have been developed with such efficiency that the picture exhibitor is poor indeed who cannot furnish his patrons with a good substitute for a satisfactory orchestra. It is gratifying to mention that in this line of enterprise California is leading, just as our favored State is ahead in the production of screen attractions. The American Photo Player Company of San Francisco, New York and Chicago has made a wonderful business and artistic success in the manufacture and installation of musical merchandise, suitable to the motion picture industry.
+
+Ad reproduced in “Silent Film Sound”�by Rick Altman
+Although it maintained offices and showrooms in San Francisco, New York, and Chicago, the American Photo Player Company’s manufacturing facility was located in Berkeley, on the southeast corner of Addison and Bonar streets.
+
+Overland Monthly, August 1920
+In his book Memoirs of a San Francisco Organ Builder (1977), Louis J. Schoenstein described the company’s product, trademarked the Fotoplayer:
+About this time [1912] we began hearing of the American Photo Player Company and their factory in Berkeley, California, conducted by the Van Valkenburg Brothers, specializing in the so-called Pit Organ. These organs were placed in the orchestra pit and consisted of a piano in the center and two sections of the organ on either side. Two automatic player mechanisms were provided in the piano to give continuous music. Some of these pit organs also had harmonium reeds, and for the purpose of tuning these, my father and I made frequent visits to the factory in West Berkeley. These Photo Player organs were also equipped with every imaginable percussion device (or so-called traps), bass drums, snare drums, bells, gongs, whistles, castanets, etc. A series of pull knobs controlling these devices hung within easy reach of the performer. Further, there were the knee swells affecting both organ chambers. I recall hearing and seeing Hal Van Valkenburg give a demonstration on one of the organs at the factory. Being the builder of the organ he may have been exceptionally expert at manipulating it, but I do not recall hearing anyone since who could match him in agility, or in following the music roll and interpreting the music so perfectly.
+
+Joe Rinaudo plays his Fotoplayer, manufactured in 1926 at the Van Nuys plant. The American Photo Player Company established its factory in 1912, locating it next to the Atchison, Topeka and Santa Fe railroad tracks, which ran on a north-south line through the eastern half of the same block. The factory was located in a former flour warehouse, built in 1906 by the Sperry Flour Company. A building permit was taken out on 23 October 1912 to construct a second building to the north, with a warehouse below and office above, at a cost of $3,872. This wood-sided building still stands at 2101 Bonar Street. The designer was F.M. Madsen; the builder, Christ Texdahl of Harper Street.
+Sperry Flour Co. wasn’t the first occupant of this block, known in the assessor’s books as Block A of the Bryant Tract. As early as 1893, there were at least two residences at the southwestern end of this block. One of them, at 2141 Bonar Street, was owned and most likely built as a speculative venture by A.H. Broad, Berkeley’s popular contractor, public official, and amateur painter. The second, at 2125 Bonar, was the home of John T. Lamb, an Iowan whose working life included stints as shepherd, hotel keeper in a mining town, mine engineer, and gold amalgamator. On Bonar Street, he was listed first as laborer, then as attorney. Lamb and his wife, Annie, decamped for Madera County in 1899 but continued to own their house and three lots on Bonar Street.
+
+The Sperry Flour Company’s warehouse was built in 1906 and burned in December 1912. The Lamb house is shown at bottom left. (Sanborn fire insurance map, 1911)
+By 1894, A.H. Broad had built a second house on the block, this one at 1257 Allston Way. It was occupied and eventually acquired by a working-class couple who frequently changed jobs in their efforts to bring home the bacon. Gustav Sonntag worked as longshoreman, dairyman, driver, janitor at the University of California, seaman, and expressman. His wife, Eline, tried her hand at running a grocery and working as a knitter at the J.J. Pfister Knitting Co. on Eighth and Parker.
+For a dozen years, the Lamb house and the two Broad-built houses were the only taxable properties on the block. It was the San Francisco earthquake and fire that finally spurred further development. About the same time that the Sperry flour warehouse was going up, Elijah J. Berryman built his hay and grain warehouse a few lots to the south. This warehouse was located directly on top of Strawberry Creek. With the help of a partner, Berryman acquired the Lambs’ triple lot that adjoined his property and settled into the former Lamb home. With another partner, he built a coal shed next to the railroad’s spur track and established a fuel business.
+
+At the southern end of the block were the Fisher Brothers’ Vienna Bakery, their flats, and the Sonntag property. (Sanborn fire insurance map, 1911)
+A year later, a baker by the name of Christopher C. Fisher purchased five lots on the northeast corner of Bonar and Allston Way. He built a bakery, soon to be known as Fisher’s Vienna Bakery, and a pair of flats at 1251–1253 Allston Way, where he and his younger brother, Fred, settled down.
+By the time the American Photo Player Company took possession of the old Sperry warehouse in late 1912, Block A of the Bryant Tract was almost fully built. The Journal of a City’s Progress, published by the Berkeley Chamber of Commerce, reported that the factory was giving employment to 100 men and women.
+American Photo Player and its product, the Fotoplayer, were the brainchild of Harold A. Van Valkenburg and his younger brother, Burt. Born in Minnesota, the two had migrated to Seattle with their parents before coming to Oakland. Harold set up as an independent electrical mechanic, and his inventions paved the way to the Fotoplayer. His and Burt’s patents included a piano-playing mechanism; pneumatically operated pianos and orchestrions; a sound-producing device; an automatic record rewind and play mechanism; a damping device for snare drums; and a note-accenting device, among others.
+
+Drawing for one of Hal Van Valkenburg’s patents
+In early December 1912, a pile of sawdust in the rear of the factory combusted, leading to the destruction of the old Sperry building and a loss estimated at $60,000. The Oakland Tribune reported on 9 December that the factory, established only a short time earlier, was largely insured. “Owing to shortage of water and the distance of the nearest fire company, the saving of the structures was found impossible,” informed the newspaper. “Organ pipes and reeds comprised the chief portion of the stock that was destroyed. The freight cars burned contained new stock just arrived. The plant employed 180 men.”
+On 15 December, the Tribune followed up:
+B. R. Van Valkenburg announced this week that the American Photoplayer company, of which he is manager, intends reconstruction at once of its plant at Addison and Bonar streets which was destroyed a week ago by fire. The new building will cost about $25,000 and will occupy the site. It is expected the factory will be ready for occupation in 90 days. It will be of brick, three stories in height and occupy a ground space of 85 by 100 feet.
+
+American Photo Player Co. buildings on Bonar Street. The wooden building was constructed in 1912, the brick building in 1913. (photo: Daniella Thompson, 2010)
+The building permit issued on 31 January 1913 specified a one- and two-story brick factory with a basement, to be constructed on the east side of Bonar Street, 100 feet south of Addison, at a cost of $17,300. The architect this time was 24-year-old Walter W. Crapo of San Francisco, collaborating with Coates and Traver, who the previous year had taken second prize in the design competition for San Francisco City Hall. The contractor was Benjamin Pearson of Berkeley.
+
+The one-story wing of the American Photo Player Co. complex faces Strawberry Creek Park. (photo: Daniella Thompson, 2010)
+
+The pipe factory at 2117 Bonar St. was built in 1916. (photo: Daniella Thompson, 2010)
+During the 1910s, American Photo Player Co. was a leader in its field. In 1917, under the leadership of chief executive Harold J. Werner, the company entered the pipe organ business through its newly acquired subsidiary, the Robert Morton Organ Company, with a factory in Van Nuys. Harvey Brougham’s article in the Overland Monthly touted it:
+For houses of larger resources, the Robert-Morton symphonic organ has been evolved. Played by one performer, this organ rivals a symphonic orchestra. Its emotional range is only limited by the musical sympathies of the performer at the console. This instrument, without any adjustment, may be played by an organist as an organ, producing both orchestral and cathedral effects, as desired. Moreover, it can be played with music rolls, or be utilized to augment the musical effect of an orchestra of four or five instrumental soloists, and reach impressive symphonic proportions.
+Despite its commercial success, the company ran into financial trouble through excessive indebtedness. In September 1923, American Photo Player and its Robert Morton subsidiary were taken over in the interest of creditors, and a new company, Photoplayer Co., formed to operate the manufacturing plants. Stockholders of American Photo Player Co. sued in April 1924 for liabilities of over $530,000, of which $110,000 was demanded of Harold J. Werner.
+
+Presto, 3 May 1924
+Under the new management, the Berkeley plant was closed down. The Robert Morton Co. continued in Van Nuys. It was the second largest producer of theater organs in America until the talkies and the Great Depression put an end to its business in the early 1930s.
+The Berkeley factory buildings had been owned from the start by Thomas W. Corder, wholesale wool merchant of Oakland. In 1926, he leased the brick building at 2109 Bonar Street to the Northwest Chair Company of Tacoma, Washington. It was used as its California distributing warehouse. The company supplied “bedroom, children’s, dining room, kitchen, library and store chairs made of ash, birch, mahogany, oak and Walnut,” according to an Oakland Tribune article dated 21 March 1926.
+
+The complex in 1929 (Sanborn fire insurance map)
+The tenant at 2101 Bonar Street was the Oliver Organ Company, which in 1927 built the organ for the Chapel of the Chimes, then being constructed to a design by Julia Morgan. But Oliver Organ also fell victim to the Depression. Beginning in 1931, its owner, Oliver Lowe, became a building contractor.
+Based in Los Angeles during the 1920s, and also affected by the talkie revolution, Harold Van Valkenburg turned his attention to other inventions. His Van Nuys–based Van Valkenburg Laboratory manufactured “Sylvatone door chimes and vacuum trumpets, Choo-Choo and Cuckoo Auto Horns, novelty tuned bells, Chicken water heaters, Model A Ford timing gear oiler and silencer, and stoplight switches.” On 25 December 1932, the Oakland Tribune announced that the Van Valkenburg Laboratory had recently moved to 1,000-square-foot plant at 4147 Broadway in Oakland and was employing two workers. Harold Van Valkenburg died on 28 August 1935.
+The future use of the organ factory was eventually determined by Charles F. Cooper, who moved his cabinet-making business into part of it about 1939. Gradually, Cooper expanded into the entire space and bought it outright in the mid-1940s. Cooper Woodworking still owned the complex in 1986, when it was designated a City of Berkeley Landmark. In 1987, Huck Rorick and Phil Lovett renovated the complex and adapted it for reuse as the Strawberry Creek Design Center.
+
+Continental Baking took over the entire southern part of the block. (Sanborn fire insurance map, 1929)
+The southern part of the block changed more dramatically. In 1924, the Fisher brothers sold their bakery business to a national concern, Ward Baking Company, which within a year was renamed Continental Baking. Ward constructed a large plant on the former Fisher and Sonntag properties. While the fate of the Fisher flats is not known, the two Sonntag houses at 1255 and 1257 Allston Way were moved to 2223 and 2219 Acton Street, respectively.
+In 1929, a fire insurance map still showed the fuel and feed yard to the north of the bakery, but by 1950, the makers of Wonder Bread had swallowed up those parcels as well. The former bakery building at 1255 Allston Way is now the home of Berkeley Youth Alternatives.
+
+Oakland Tribune, 6 Feb. 1925
+This article was published in the Berkeley Daily Planet on 11 March 2010.
+
+Copyright © 2010–2022 Daniella Thompson. All rights reserved.

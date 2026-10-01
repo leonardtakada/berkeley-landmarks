@@ -86,9 +86,16 @@ Auto Indicator LLC — in the Appendix only, never on the cover.
   camera on them instead of framing each leg. If they're off the map, or
   location is off, a slip says so.
   The guide's architects walk its streets from z15.6, as on the cover
-  (`components/iso-walkers.tsx`): a few in view, strolling, turning at
-  corners, stopping, hidden where a house, tree or rise stands in front of
-  them, appearing and going in along the way; still with Reduce Motion.
+  (`components/iso-walkers.tsx`): a few in view, strolling on the right of
+  the street, turning at corners, stopping, hidden where a house or rise
+  stands in front of them. New ones arrive only out of view or from behind
+  something, and leave the same way — nobody pops up or vanishes in plain
+  sight. Each is drawn as flat shapes on the drawing (`lib/walker-shapes.ts`:
+  keyline, coat, head, hat), the legs swinging and the body sinking as
+  they part, with the stride matched to the pace so the feet don't slide.
+  The stroll runs on the UI thread and hands the map GeoJSON 30 times a
+  second (shapes, not icons: icons are re-placed on each update and
+  blink); the walk's route lies under them. Still with Reduce Motion.
 - **Fold-out map** (`components/fold-out-map.tsx`): folded, a blue cover
   naming the walk, its length, the streets it follows and a locator; open,
   the walk's isometric plate (`components/iso-plate.tsx`): a block of the
@@ -142,10 +149,10 @@ groves. The pieces are laid back to front (`scripts/iso/scene.ts`).
 - **Walkers**: `npx tsx scripts/iso/walks.ts` writes
   `lib/iso-walks.generated.ts` — the streets the map draws, as a network on
   the terraces, with the stretches where a walker would be out of sight
-  (something nearer in the drawing covers their middle or head; a climb up
-  a terrace wall is always out of sight). `npx tsx scripts/iso/walker-icons.ts`
-  prints the architects (`lib/walker-cast.ts`, shared with the cover) at
-  three points of a stride, facing either way, to `assets/walkers/`.
+  (something nearer in the drawing covers both their middle and head; a climb up
+  a terrace wall is always out of sight); glimpses under 8 m and cover under
+  6 m are smoothed away so no one blinks. The figures are the cover's
+  (`lib/walker-cast.ts`), turned into polygons by `lib/walker-shapes.ts`.
 - `scripts/iso/preview.ts` and `city-proof.ts` proof the scene as a PNG.
 - `__tests__/iso.test.ts` checks the projection and that every walk has a
   plate with a model and flag for each stop.

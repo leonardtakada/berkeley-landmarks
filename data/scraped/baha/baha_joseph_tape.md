@@ -1,0 +1,46 @@
+---
+title: "BAHA :: Joseph Tape and the S.S. Mongolia"
+authors: ["Daniella Thompson"]
+source: "BAHA (Berkeley Architectural Heritage Association)"
+source_url: "https://old.berkeleyheritage.com/essays/joseph_tape.html"
+published_date: "2 July 2004"
+photo_credits: []
+scraped_at: "2026-09-30"
+license_note: "Copyrighted source material - used for research/app content with attribution; verify rights before publication."
+---
+BAHA :: Joseph Tape and the S.S. Mongolia
+
+The Tapes of Russell Street
+Part 4. Joseph Tape and the S.S. Mongolia
+Daniella Thompson
+Herbert Chan (r) at the mail dock, San Francisco (photo courtesy of Jack Kim)
+2 July 2004
+In his introduction to Asian Immigration and Exclusion, 1906–1913 (Records of the Immigration and Naturalization Service), Alan M. Kraut writes:
+Economic dislocation brought thousands of Chinese to the United States in the nineteenth century, over 70,000 in the decade of the 1870s alone. By 1880, over a hundred thousand Chinese were present in the United States. Pressure from racial nativists and those who feared competition from foreign workers, especially low-paid unskilled laborers, resulted in the Chinese Exclusion Law of 1882 that halted the legal immigration of Chinese until after the Second World War.
+[...] Feeling especially vulnerable to Chinese influence in their economy and society, Californians led the way in anti-Chinese nativism. Numerous state and local laws were passed to limit Chinese economic activity. Dennis Kearney organized his Workingmen’s party to make anti-Chinese sentiment a partisan political issue. The Workingmen succeeded in including numerous anti-Chinese articles into a revision of the California State Constitution in 1878. However, the Chinese were not passive. The Chinese Benevolent Association hired attorneys. Some anti-Chinese ordinances were struck down under the Civil Rights Act of 1870, others under the Fourteenth Amendment, and still others under the 1868 Burlingame treaty.
+[...] The Chinese Exclusion Act of 1882 got strong bipartisan support in Congress. In final form, it prohibited the arrival of Chinese laborers, skilled and unskilled, for ten years; made mandatory the registration and the carrying of valid passports by all Chinese; made all Chinese ineligible for citizenship; and forbade wives of laborers already in the United States from joining their spouses. Although teachers, students, merchants, tourists, and diplomatic personnel were “exempt classes” under the law, U.S. immigration authorities were given broad discretionary powers to hinder, if not block, entry of those they thought unfit for admission. The law was renewed in 1891 and 1902, and in 1904 exclusion was made permanent.
+Exclusion, then, was a mature, carefully administered policy by the turn of the century. The INS Subject Correspondence files offer scholars case files of Chinese seeking to smuggle themselves into the United States and the deportation of those caught engaging in illegal activities to elude immigration restriction during the first two decades of the twentieth century. [...]
+
+S.S. Mongolia (image courtesy of Bj�rn Larsson)
+One of the most notorious immigration smuggling cases involved the Pacific Mail Steamship Company’s S.S. Mongolia. In October 1915, concluding her final Pacific run, the ship arrived in San Francisco from Hong Kong. Following a tipoff, U.S. Customs agents discovered 86 Chinese stowaways on board. The San Francisco press seized upon the case and feasted on it for weeks. A well-publicized investigation into corruption and immigration smuggling was conducted by John B. Densmore of the Labor Department. One of the suspects was Joseph Tape, in his capacity as bonding agent. Robert Barde recounts the story in detail in the chapter “The Scandalous ShipMongolia” from his book-in-progress Island of Angels:
+A ship like the Mongolia, which could carry 1,500 passengers, would also carry a very large crew. On average, about 270 men. For this voyage, over 220 Chinese crewmen from the Mongolia were ready to ship back to Hong Kong on the S.S. China; perhaps a few others had chosen to remain in San Francisco. A new crew was ready to take her to New York. Perhaps smugglers had a plan to use the commotion of switching two rather large crews—one of which was nearly all Chinese—to land the 86 stowaways.
+As it was Watchman Graham who usually attended to landing the members of the crew under bond, suspicion naturally fell on him. But the process of bonding crew members so that they could go ashore was sufficiently complex that suspicion could also fall on any number of persons. One such was Joe Tape, a resident Chinese who worked as an agent for the Southern Pacific Railroad and for a number of the steamship companies. His specialty was the bonding process by which a crewman who was normally not entitled to enter the U.S.—in practice, a Chinese crew member—could enter for thirty days. The bond—somewhat like a bail bond, but issued by a customs broker—was redeemable when the crewman sailed on an outbound ship. This bond was what guaranteed that he did not remain in the United States.
+Joseph Tape at his Hayward ranch
+(photo courtesy of Jack Kim)
+Joe Tape would board a ship the day she entered San Francisco. He would be given the names and photographs of all the crewmen whom the officers would allow to go ashore. The normal procedure was for Tape to take the photographs to Wm. H. Thornley, a customs house broker, who would attach an individual’s photograph to that individual’s bond. Tape would then take the bonds to Angel Island for approval by the Commissioner. The approval came in the form of a letter, signed by the Commissioner, to the master of the ship, advising him which crewmen would be permitted to go ashore and at what time an Immigration officer would be at the ship to land the men. Tape would then take the bonds to the Immigration office in the City and give them to the Immigration officer on duty—in this case, Watchman Graham. At 5:00, Graham and Tape would walk over to the ship and give the vessel’s officer a list of all those who had been bonded. The officer gave passes to the crew going ashore, who then passed down the gangway. The Immigration watchman would identify each one by his name and photograph on the bond; each pass was collected.
+The weakness in the system was that no one checked the crewmen back on to the ship. To redeem the bond, a crewman had only to appear at muster the morning the ship was to sail. An immigration officer would compare his face and description with that on the bond and, if they matched, presumed that the crewman had returned to the ship.
+On October 27th, Joe Tape did some unusual things. Normally, he would wait until the next day to arrange for the crew’s bonds. But on October 27th he immediately boarded the Mongolia, got a list of names, then showed up at Angel Island with 42 bonds for members of the crew. This surprised Inspector Hays, for the day before he had been informed by Pacific Mail that no crewmen from the Mongolia would be allowed ashore. Hays thought to call the Pacific Mail office for verification, but was told that, indeed, no crewmen from the Mongolia would be allowed ashore. Hays informed Joe Tape that the bonds would not be approved. Tape then destroyed the bonds, after first cutting out the photographs and returning them to their owners.
+
+Joseph and Mary Tape, c. 1917 (photo courtesy of Jack Kim)
+The DA suspected Tape of trying to land at least 42 of the stowaways as crewmen. Hadn’t Tape tried to get bonds for crew members even though Pacific Mail had clearly stated that none would be allowed ashore? Had he not tried hard to convince Pacific Mail to allow crew shore leave “for one night only,” showing “unusual interest and activity in their behalf”? Hadn’t he gone to the ship the very day of arrival, when it was his normal practice to wait until the second or even the third day? Hadn’t he tried to destroy the “evidence,” the bonds themselves? It all seemed highly suspicious.
+But Tape countered that haste was necessary if the crew—scheduled to leave for Hong Kong in three days—were to have any shore leave at all. Tape also suggested that investigators check the photographs that had been returned to the crew. Those photographs were found to be not those of stowaways, but of the crewmembers, as claimed.
+Densmore found that the suspicions of Tape didn’t hold up and, further, that Tape’s complicity would have been unnecessary. A corrupt Immigration man could simply pass the stowaways off the boat as crewmen, “as he is the only officer who sees the photographs, compares them with the crewmen as they leave the boat, and passes them off if satisfied that they are the ones represented in the bond; and no check being made of the return of the crewmen to the vessel [...] the landing of the stowaways would not be detected, as the entire crew would be accounted for on muster by the watchman on sailing day.”32
+32. Densmore, Report to Secretary of Labor Wilson, January 11, 1916, p. 16; INS microfilms, Supplement Reel 4.
+Our thanks to Bob Barde for his permission to quote the above passages from Island of Angels.
+
+Continue to Part Five
+The Tapes of Russell Sreet
+
+Essays & Stories
+
+Copyright © 2004–2019 Daniella Thompson. All rights reserved.

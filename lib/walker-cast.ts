@@ -4,7 +4,7 @@ import type { ArchitectKey } from "./architects";
  * The guide's architects as tiny cut-paper walkers: a coat, and the hat,
  * hair or beard each is known by. Drawn in a 14 × 34 box, feet at the
  * bottom middle — out walking the cover's streets (components/logo-walkers)
- * and the city map's (scripts/iso/walker-icons.ts prints them for it).
+ * and the city map's (lib/walker-shapes.ts turns them into polygons for it).
  */
 export const FIG_W = 14;
 export const FIG_H = 34;

@@ -1,13 +1,12 @@
 import { StyleSheet } from "react-native";
-import {
-  Jost_200ExtraLight,
-  Jost_300Light,
-  Jost_300Light_Italic,
-  Jost_400Regular,
-  Jost_400Regular_Italic,
-  Jost_500Medium,
-  Jost_600SemiBold,
-} from "@expo-google-fonts/jost";
+// One weight at a time, so the bundle carries only the faces the guide sets.
+import { Jost_200ExtraLight } from "@expo-google-fonts/jost/200ExtraLight";
+import { Jost_300Light } from "@expo-google-fonts/jost/300Light";
+import { Jost_300Light_Italic } from "@expo-google-fonts/jost/300Light_Italic";
+import { Jost_400Regular } from "@expo-google-fonts/jost/400Regular";
+import { Jost_400Regular_Italic } from "@expo-google-fonts/jost/400Regular_Italic";
+import { Jost_500Medium } from "@expo-google-fonts/jost/500Medium";
+import { Jost_600SemiBold } from "@expo-google-fonts/jost/600SemiBold";
 
 /**
  * The press sheet, after Showa Modern (1920s–30s Japanese commercial print):

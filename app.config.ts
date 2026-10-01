@@ -85,7 +85,14 @@ const config: ExpoConfig = {
     [
       "expo-location",
       {
-        locationWhenInUsePermission: "Allow $(PRODUCT_NAME) to show your location on the map.",
+        locationWhenInUsePermission:
+          "The guide uses your location to show where you are on the map, to collect each stop of a walk as you reach it, and to stamp the places you visit.",
+      },
+    ],
+    [
+      "expo-image-picker",
+      {
+        photosPermission: "The guide lets you choose photographs of a place to send to its editors.",
       },
     ],
     [

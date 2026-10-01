@@ -1,3 +1,5 @@
+import "@/lib/quiet-logs";
+import { liftLaunchScreen } from "@/lib/launch-screen";
 import "@/global.css";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import Stack from "expo-router/js-stack";
@@ -10,11 +12,9 @@ import "@/lib/_core/nativewind-pressable";
 import { ThemeProvider } from "@/lib/theme-provider";
 import { ReaderCopyProvider } from "@/lib/reader-copy-context";
 import { trpc, createTRPCClient } from "@/lib/trpc";
-import {
-  SourceSerif4_400Regular,
-  SourceSerif4_500Medium,
-  SourceSerif4_600SemiBold,
-} from "@expo-google-fonts/source-serif-4";
+import { SourceSerif4_400Regular } from "@expo-google-fonts/source-serif-4/400Regular";
+import { SourceSerif4_500Medium } from "@expo-google-fonts/source-serif-4/500Medium";
+import { SourceSerif4_600SemiBold } from "@expo-google-fonts/source-serif-4/600SemiBold";
 import { useFonts } from "expo-font";
 import { FONT_ASSETS, PAPER } from "@/constants/book";
 import {
@@ -73,6 +73,13 @@ export default function RootLayout() {
     ...FONT_ASSETS,
   });
   const reduceMotion = useReducedMotion();
+  // The cover lifts the launch screen once its drawing is in; anywhere else
+  // (or if that's slow), a moment after the type is ready.
+  useEffect(() => {
+    if (!fontsLoaded) return;
+    const id = setTimeout(liftLaunchScreen, 800);
+    return () => clearTimeout(id);
+  }, [fontsLoaded]);
 
   // Entry pages are leaves laid over the book: they turn in on a hinge and
   // swipe back by the free edge. Reduce Motion swaps the turn for a dissolve.

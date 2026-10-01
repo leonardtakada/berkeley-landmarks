@@ -22,10 +22,14 @@ const MID_RECT_MAX_LON = MID_RECT.maxLon;
 import type * as LegacyFS from "expo-file-system/legacy";
 import { Asset } from "expo-asset";
 import * as ImageManipulator from "expo-image-manipulator";
+// The raster map is a development fallback on a phone (constants/map-engine):
+// a release build leaves its 10 MB of tiles out (`__DEV__` is false there, so
+// these requires are dropped before the bundler gathers assets).
+const NO_TILES: TileIndex = { version: 0, byteLength: 0, tiles: {} };
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const lightIndex = require("../assets/tiles-index.json") as TileIndex;
+const lightIndex = (__DEV__ ? require("../assets/tiles-index.json") : NO_TILES) as TileIndex;
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const darkIndex = require("../assets/tiles-dark-index.json") as TileIndex;
+const darkIndex = (__DEV__ ? require("../assets/tiles-dark-index.json") : NO_TILES) as TileIndex;
 
 type TileIndex = {
   version: number;
@@ -36,10 +40,9 @@ type TileIndex = {
 export type TileScheme = "light" | "dark";
 
 const INDICES: Record<TileScheme, TileIndex> = { light: lightIndex, dark: darkIndex };
-const ASSETS: Record<TileScheme, any> = {
-  light: require("../assets/tiles.bin"),
-  dark: require("../assets/tiles-dark.bin"),
-};
+const ASSETS: Record<TileScheme, any> = __DEV__
+  ? { light: require("../assets/tiles.bin"), dark: require("../assets/tiles-dark.bin") }
+  : { light: null, dark: null };
 
 export const CACHE_TEMPLATE = "file:///__tilecache__/{z}-{x}-{y}.png";
 

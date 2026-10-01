@@ -1,0 +1,1029 @@
+Received: from 127.0.0.1
+ by atlas-production.v2-mail-prod1-gq1.omega.yahoo.com pod-id atlas--production-gq1-79547c674d-t95ld.gq1.yahoo.com with HTTP; Tue, 11 Aug 2026 17:36:29 +0000
+Return-Path: <bounce-mc.us2_3292730.9715215-f5e22bbbe8@mail41.sea172.mcdlv.net>
+X-Originating-Ip: [148.105.10.41]
+Received-SPF: pass (domain of mail41.sea172.mcdlv.net designates 148.105.10.41 as permitted sender)
+Authentication-Results: mta.yahoo.com;
+ dkim=pass header.i=@fbl.mcsv.net header.s=k1 arc_overridden_status=NOT_OVERRIDDEN;
+ dkim=pass header.i=@berkeleyheritage.com header.s=k3 arc_overridden_status=NOT_OVERRIDDEN;
+ spf=pass smtp.mailfrom=mail41.sea172.mcdlv.net arc_overridden_status=NOT_OVERRIDDEN;
+ dmarc=pass(p=NONE) header.from=berkeleyheritage.com arc_overridden_status=NOT_OVERRIDDEN;
+X-Apparently-To: leonardtakada@yahoo.com; Tue, 11 Aug 2026 17:36:29 +0000
+X-YMailISG: jrixtB0WLDupnuDeR8CwpblALdSl5yn1s.vbWZz8fLGyVBvV
+ a9xZmDoZc8nB2ZZ6P133NOuP8UH.Ft8AGUTA8Yg91LwR2mqZPx98DL3jnD6V
+ Wep0UPIONeGOyTBAdcy.pn.y0z_s.C9Eiai1b93CkFatBI_0Re94bxhXs5Jq
+ MB9rVMc6iDYyYEzhWJyJmBCP2VcwLtSssztFuaRZjGHdsV5eSrWflQ.Ttz5q
+ 57JI41kBpbV8HQFHaCdaNAD2dqVPS.7zA3l3unX3VyIF4pK7HXbQbKbWTAcO
+ zVQgtcXVz3sZpEAxBjf9FYvJSUE78YSBCQ8TnQc9YA_.QQmwYWKQ7LtWNiCX
+ yEBGKdq07j104Z8zoAWlhyS.JoYTnqDIZpLRUo8oCmtvqWvb6kQW4HmQ5Zl0
+ ugaRt8Zc9aGXBgRj9ImdCxSwdtQJt_g0a42D0OjmsMZ0UpV.ww.WYr0AXlsy
+ tUZavWTfmMmUsodkgxjxCeRtG1YOO6ktLqvYBR6fU.rpuYIYr.viCfVHH7lB
+ NolfurLi4p_t6MrHxEU.CdTjIpzFxU1MjyBMzSXS2UXAIIRUmlU2PCADBe5h
+ BsFjRKk4BhzVaGau7ETaz5wgoEdp0UhoZ5u9vDBgEcktTwpOamACbKfU0z1W
+ OWpcdDuUh1IFlFPBO1SUXG5LV11K8.g1OQdQJjp1Q0yUMzt_8RGBz3ZUOT_J
+ Qu3h7xesNa7HXSXTKIC47I2IkSYpaB7h0tTkOLRc5rY4uOFu9h2vcHhZisnH
+ xUakv_ria9AfiBd62UnwkNuE5af8u71cKr23xKecoAM13J2xlA24IBtXzOrk
+ b3rzJs2JNQ9vSLZh4WDd6u89lTpjZPUeX7L_KbK3DPpjWoXucHbIsY5zA4PK
+ l2cF4Q1j3xydv4PRBfM1.QNy8eznItKcwS7.0l5.GZPahip9pVfcUpAFY0Ei
+ D6VC7ql1Mt7lULBkySf5P300L7l5QiUq5SlA9VHJf1XBTdq7DRLy4H6p6yx7
+ 3zpyn9ZTMr.8NGeWnkblrLfmj2M8.VAaqVUzpEOVMtRLD8fel.rz0FsqfPsg
+ Bh_sG2lYV0Iz5OD5NVd.9W0IuBw7lpsgz8w4062nspCqcgkoUjCCKb5WJayi
+ _uY3WXdVYUicP_Jg2_0oh4rmjVWTNrLPlpItmCHKLmXpqK2QRAJsyKZgQChy
+ IgiXmG7keXb9HTF54mL3ZXOYB0KkJKDWvsOkwJBiuFhvpghFqNoWgJeraSo9
+ E6JfsGhmQlp3YDF3Ts41Bl0IOF7AsXoojw1oVfXCLaUyCw--
+Received: from 148.105.10.41 (EHLO mail41.sea172.mcdlv.net)
+ by 10.253.31.88 with SMTPs
+ (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256);
+ Tue, 11 Aug 2026 17:36:29 +0000
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=fbl.mcsv.net; s=k1;
+	t=1786469789; x=1786556189;
+	bh=jyA/SlsPWvk2GaplTgyVlQQPiKENO8kFN3KMxZQDvFc=;
+	h=Subject:From:Reply-To:To:Date:Message-ID:X-MC-User:Feedback-ID:
+	 List-ID:List-Unsubscribe:List-Unsubscribe-Post:Content-Type:
+	 MIME-Version:CC:Date:Subject:From;
+	b=FmbR69uEbWQOs713OQAUU+qLJ+MqHconCgrSQ0uZs+B07HZNn2eoDnqV7C68BON+L
+	 NRIMSLyhhi4Sb4F/U0I3yechGV/F4W/g2VLW/Z7xbIFDvMg8zY/zgL+QNX8R4BNAym
+	 CYO90PvShxj8TNGtmoPL9oYmleuHnHyfDbaXEPe6EhsAHDvpVkdnCV+TLeL4jjPyRm
+	 ObqL60n+3D6jYPzLKv+SIi4dlBdCXhIOQamSze8au+shJe8G+sa37UV47IEMZ9uLl2
+	 Ts7tBtJramstC8zFAYZyX+en8zNTAv0XGXeEM8bE/s3nJja1PdstuXu0eQTUm0uzsj
+	 4iUXN0d1r0wyw==
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+	d=berkeleyheritage.com; s=k3; t=1786469789; x=1786739789;
+	i=baha@berkeleyheritage.com;
+	bh=jyA/SlsPWvk2GaplTgyVlQQPiKENO8kFN3KMxZQDvFc=;
+	h=Subject:From:Reply-To:To:Date:Message-ID:X-MC-User:Feedback-ID:
+	 List-ID:List-Unsubscribe:List-Unsubscribe-Post:Content-Type:
+	 MIME-Version:CC:Date:Subject:From;
+	b=k9RHfbsw59u4aGARZYESZdyBitAIMxc48HO8hvFdSICHSqn8y2GL8MFxMFqTOgYSG
+	 hUyU6w41SDeDIvok8D5UoIQZYRnzDOg698I28dpaNnNlSNYoonfJhIQE0pBcT42Ekt
+	 Wiv9jPD4kd9ltBZ33nmHqPIyGSxXbaKkmm4XSHl/RRNlgXmxE15qgDVpTzpa+5g8np
+	 0V3C+bJZOdpDM0tbMY+d41hDL0lVdRV77/yruEcnnKuhkPw5NWFLC+2w41xNMqB6j8
+	 1gTLLwerFVccYaAA15z5T4BeUlHb7Ywyxgxyq2PN3CQ2Oa/u7i1xLOdlpcCDWV2pf/
+	 0WDrrjkgIaf4A==
+Received: from localhost (localhost [127.0.0.1])
+	by mail41.sea172.mcdlv.net (Mailchimp) with ESMTP id 4hKJhF0WJjzDRSvlP
+	for <leonardtakada@yahoo.com>; Tue, 11 Aug 2026 17:36:29 +0000 (UTC)
+Subject: =?utf-8?Q?Par3=20of=20the=20Story=20of=20a=20Maybeck=20House=20=28August=2015=20&=2016=20Estate=20Sale=29?=
+From: BAHA <baha@berkeleyheritage.com>
+Reply-To: =?utf-8?Q?BAHA?= <baha@berkeleyheritage.com>
+To: <leonardtakada@yahoo.com>
+Date: Tue, 11 Aug 2026 17:36:23 +0000
+Message-ID: <cf07d73ef679275ea4445c763.f5e22bbbe8.20260811173611.889d53a973.eabda359@mail41.sea172.mcdlv.net>
+X-Mailer: Mailchimp Mailer - **CID889d53a973f5e22bbbe8**
+X-Campaign: mailchimpcf07d73ef679275ea4445c763.889d53a973
+X-campaignid: mailchimpcf07d73ef679275ea4445c763.889d53a973
+X-Report-Abuse: Please report abuse for this campaign here: https://mailchimp.com/contact/abuse/?u=cf07d73ef679275ea4445c763&id=889d53a973&e=f5e22bbbe8
+X-MC-User: cf07d73ef679275ea4445c763
+Feedback-ID: 3292730:3292730.9715215:us2:mc
+List-ID: cf07d73ef679275ea4445c763mc list <cf07d73ef679275ea4445c763.532077.list-id.mcsv.net>
+X-Accounttype: pd
+List-Unsubscribe: <https://berkeleyheritage.us2.list-manage.com/unsubscribe?u=cf07d73ef679275ea4445c763&id=c7350fddaa&t=h&e=f5e22bbbe8&c=889d53a973>, <mailto:unsubscribe-mc.us2_cf07d73ef679275ea4445c763.889d53a973-f5e22bbbe8@unsubscribe.mailchimpapp.net?subject=unsubscribe>
+List-Unsubscribe-Post: List-Unsubscribe=One-Click
+Content-Type: multipart/alternative; boundary="_----------=_MCPart_505319481"
+MIME-Version: 1.0
+Content-Length: 47453
+
+This is a multi-part message in MIME format
+
+--_----------=_MCPart_505319481
+Content-Type: text/plain; charset="utf-8"; format="fixed"
+Content-Transfer-Encoding: quoted-printable
+
+News from BAHA
+------------------------------------------------------------
+https://mailchi.mp/92d494aa4ba6/victory-for-berkeley-preservation-in-court=
+-of-appeal-9715215?e=3Df5e22bbbe8
+
+The Story Behind the
+Estate Sale House =E2=80=94 in four parts
+
+Part Three
+
+"Siegfried"
+
+In July 1989=2C Siegfried E. Brockmann (1928=E2=80=932025) was called into=
+ the office of Mrs. Cole=E2=80=99s lawyer. He learned that he had been beq=
+ueathed Mrs. Cole=E2=80=99s house=2C the Maybeck Studio at 2711 Buena Vist=
+a Way. The gift was not entirely unexpected=2C but Siegfried was overcome=
+ by Mrs. Cole=E2=80=99s generosity and realized that it would change the c=
+ourse of his life.
+
+Siegfried had been born in D=C3=B6beln=2C a small city in Saxony near Dres=
+den. His idyllic childhood=2C surrounded by family and friends=2C changed=
+ in the early 1930s when a new government regime came into being which bro=
+ught with it a pall that hung over everyday existence. When Siegfried=2C a=
+t age 15=2C was in high school=2C he=2C along with his fellow students=2C=
+ was  sent to the front to serve as a Luftwaffenhelfer (the wartime job mo=
+st of the youngsters were given). In the spring of 1945=2C when the end se=
+emed near=2C the officer for Siegfried=E2=80=99s unit told all the schoolb=
+oys to head for home. He did not want them to be taken prisoner by the Rus=
+sians.
+
+Siegfried with his two older sisters and mother in D=C3=B6beln about 1935.
+
+At War=E2=80=99s end=2C Siegfried=2C and all the others at home=2C hoped a=
+nd prayed that the Americans would take control. Instead=2C their quadrant=
+ of Germany was turned over to Russia. Life was even worse under this fore=
+ign regime=2C but Siegfried learned that a pharmaceutical company was abou=
+t to open and he and two school friends applied as interns. After two year=
+s=2C he received his certificate and decided that the time to escape was n=
+ow! A friend gave him detailed instructions on how to reach the border and=
+ how to cross the border; he even gave Siegfried contacts in both Goslar a=
+nd Munich.
+
+Siegfried=2C on the left=2C in D=C3=B6blen with two school friends=2C Irmg=
+ard and Werner=2C shortly before his escape in 1948.
+
+In the West=2C Siegfried discovered that the chemistry certificate meant n=
+othing with out a residence permit. After about a week of seeking employme=
+nt=2C he was resigned to having to return to the Russian Zone. But before=
+ he left Munich=2C Siegfried received assistance through a chance encounte=
+r and was directed to a Press Control Officer working for the U.S. Militar=
+y Government. This was Walter Brockmann=2C who told Siegfried to come back=
+ the next day and he might have an answer. Walter was told by the other go=
+vernment officials that the only way to keep someone from having to return=
+ to the East was if an American=E2=80=94Walter Brockmann in this case=E2=
+=80=94were to adopt him. Walter was intrigued=2C and started the proceedin=
+gs with help from influential friends living on nearby Lake Starnberg who=
+ wrote letters of recommendation and also contacted Siegfried=E2=80=99s mo=
+ther. After the adoption took place=2C the Starnberg friends became Siegfr=
+ied=E2=80=99s honorary godparents.
+
+The sought-after Identification Card.
+
+Walter felt ready to retire from the military=2C and off they went to New=
+ York City on the USNS General Alexander M. Patch where Siegfried had his=
+ first Thanksgiving dinner on board. Upon arrival=2C Walter sold his colle=
+ction of D=C3=BCrer engravings so that Siegfried could finish high school=
+=2C and sent him to Suffield Academy in Connecticut. The instructors were=
+ impressed with Siegfried=E2=80=99s knowledge of chemistry and recommend h=
+e apply to American University=2C which he did.
+
+In December 1949=2C after the fall semester had ended=2C Siegfried ran int=
+o a classmate in downtown Washington=2C D.C. who told him that a friend wa=
+s giving him a farewell party and that he could bring a guest. On New Year=
+=E2=80=99s Day 1950=2C Siegfried took the long streetcar ride to Chevy Cha=
+se. At the gathering he met the girl who was giving the party=2C Maga van=
+ Barneveld Cole=2C and her grandmother=2C her parents=2C and her uncle=2C=
+ James Cole=2C a chemistry professor at the University of Virginia. Other=
+ visits at the house on Quesada Street in Chevy Chase followed. The fun-lo=
+ving Maga and Siegfried soon became close friends=2C and Siegfried became=
+ the son that the Coles never had=2C and they=2C in turn=2C were Siegfried=
+=E2=80=99s American family.
+
+Maga Cole and Siegfried in Maga's Ford. Water Brockmann=2C 1951
+
+Prof. Cole arranged for Siegfried to attend the University of Virginia whi=
+le helping him with research. While there=2C Siegfried often spent weekend=
+s in Washington with Walter and the Coles. And sometimes the Coles would p=
+ick up Siegfried on a Friday and take him to Palm Beach. Mrs. van Barnevel=
+d wrote of such an impromptu trip=2C =E2=80=9CMaga and Siegfried run so be=
+autifully to the water=E2=80=99s edge. Siegfried=E2=80=99s first touch of=
+ ocean.=E2=80=9D
+
+Siegfried reading over the University of Virginia catalog with Mrs. Cole.=
+ Walter Brockmann=2C 1950
+
+After graduation in 1954=2C Siegfried received a teaching fellowship at Ha=
+rvard. Eventually he realized that the academic life was not for him. When=
+ Cole Chemical Company in St. Louis offered him a position=2C he gladly ac=
+cepted. Siegfried had worked summers at the company=2C staying with the Co=
+les. Now he was a permanent part of the company=2C and a permanent St. Lou=
+is resident. Mrs. Cole found an apartment for Siegfried which she furnishe=
+d. The sofa for sale this weekend was custom-made by Mrs. Cole for the apa=
+rtment. Siegfried tried his hand at furniture design: two angular marble-t=
+opped tables constructed by the Cole Company workshop.
+
+A few years later=2C Siegfried was able to buy a house in the Central West=
+ End. From a weed patch in the back of his new house=2C Siegfried created=
+ one of the world's most charming gardens. He discovered that he had moved=
+ into a neighborhood of interesting people. Two doors way lived Marie Tayl=
+or=2C an artist whose work will be at the Sale. Next door were members of=
+ one of St. Louis's earliest families. Through them=2C he was introduced t=
+o many who became lifelong friends=2C as well as to a type of social life=
+ he had never before known.
+
+Siegfried and his St. Louis garden.
+
+Maga Cole left for Berkeley in 1958 to continue her study of architecture.=
+ She rented the cottage=2C Arrilaga=2C from the Maybecks=2C where Siegfrie=
+d stayed on his many trips to Berkeley. On the first visit=2C in 1959=2C M=
+aga introduced him to the Maybeck children: Kerna and Wallen. As a guest a=
+t Wallen and Jacomena=E2=80=99s house=2C Siegfried was served his first Ma=
+nhattan.
+
+During the next thirty years=2C especially after Mrs. Cole had also moved=
+ to Berkeley=2C Siegfried and Walter made a semi-annual pilgrimage to =E2=
+=80=9CMaybeck Country=2C=E2=80=9D often staying at the French Hotel. It wa=
+s on such a visit in July 1989 (five years after Mrs. Cole had lost her da=
+ughter Maga)=2C that Siegfried=2C arriving at Mrs. Cole=E2=80=99s home at=
+ the appointed time the next morning=2C was met at the front door by her l=
+awyer and executor.
+
+With the gift of Mrs. Cole=E2=80=99s very special Maybeck house=2C which w=
+as filled with happy memories=2C Siegfried made the decision to retire ear=
+ly from the pharmaceutical company and move to Berkeley. Walter was elderl=
+y and needed his care=2C which was a main factor in the decision to retire=
+=2E The moving van (carrying belongings from Siegfried=E2=80=99s three-story=
+ St. Louis house) arrived at 2711 Buena Vista Way on October 31=2C 1990. T=
+he date happened to be Mrs. Cole=E2=80=99s birthday.
+
+Under the friendly wing of Jacomena Maybeck=2C Siegfried quickly acclimati=
+zed to his new surroundings=2C making friends with all the neighbors=2C an=
+d going to Edy=E2=80=99s every day for lunch (a favorite spot that Walter=
+ and Siegfried had discovered on earlier visits). When Jacomena and I appr=
+oached them about including the Studio on the upcoming 1992 BAHA house tou=
+r=2C they were most agreeable. During the tour preparations I made several=
+ visits to the Studio=2C and we soon became friends. Walter died later tha=
+t year. Siegfried continued in the house that was now almost a living memo=
+rial to two of the most important people in his life. Siegfried said there=
+ was not one day that he did not sit in the living room and think of Walte=
+r and Mrs. Cole.
+
+Siegfried and Walter at the 1992 BAHA house tour.
+
+Siegfried was proud to be the steward of a Maybeck house. He was eager to=
+ share it with others. A request from an out-of-state visitor to see a May=
+beck house (usually made through the BAHA office!)=2C or a group of archit=
+ects from Japan or Holland who wanted to see the =E2=80=9CSack House=E2=80=
+=9D=E2=80=94 all were welcomed. Siegfried opened his home for many BAHA ev=
+ents over the years; the last time being the afternoon that Maybeck=E2=80=
+=99s Packard made an appearance on Buena Vista Way one summer afternoon in=
+ 2016.
+
+Siegfried=2C on the left=2C with guests at the BAHA "Maybeck Country" tour=
+=2E Daniella Thompson=2C 2009
+
+As did Mrs. Cole before him=2C Siegfried made improvements to the property=
+=2E He created a terrace in front of the house=2C using the same type of agg=
+regate paving that the Maybecks had used elsewhere in the garden. He added=
+ counters and cupboards to the bare walls of the tiny kitchen=2C and put i=
+n central heating=2C which=2C along with Mrs. Cole=E2=80=99s heavy =E2=80=
+=9CMaybeck=E2=80=9D draperies=2C assured that the Studio was warm and welc=
+oming in winter. Siegfried enjoyed working in the garden and relaxing on t=
+he terrace as the sun set over the bay in the distance.
+
+Siegfried died on December 27=2C 2025=2C his 97th birthday. The Siegfried=
+ E. Brockmann Trust is pleased that BAHA members will  enjoy the Maybeck S=
+tudio this weekend. Soon=2C  a new chapter in the history of the house wil=
+l begin.
+
+=E2=80=94Anthony Bruce 2026
+
+VOLUNTEERS WANTED
+
+Volunteers are needed to help in different capacities during  the two days=
+ of the Sale. Most of Saturday is covered; there are still quite a few shi=
+fts open for Sunday
+
+Volunteers receive free admission to the event.
+
+To volunteer=2C
+e-mail BAHA at
+baha@berkeleyheritage.com
+or call 510-847-1379
+
+to buy admission tickets=2C please go to
+Eventbrite (https://www.eventbrite.com/e/estate-sale-at-the-maybeck-studio=
+-tickets-1996466486003?aff=3Doddtdtcreator)
+
+Through the generosity of the Siegfried E. Brockmann Trust=2C BAHA will re=
+ceive 100% of the proceeds from this summertime fundraising event.
+
+
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
+** unsubscribe (https://berkeleyheritage.us2.list-manage.com/unsubscribe?u=
+=3Dcf07d73ef679275ea4445c763&id=3Dc7350fddaa&t=3Db&e=3Df5e22bbbe8&c=3D889d53=
+a973)
+| ** update subscription (https://berkeleyheritage.us2.list-manage.com/pro=
+file?u=3Dcf07d73ef679275ea4445c763&id=3Dc7350fddaa&e=3Df5e22bbbe8&c=3D889d53=
+a973)
+ | ** view e-mail in browser (https://mailchi.mp/92d494aa4ba6/victory-for-=
+berkeley-preservation-in-court-of-appeal-9715215?e=3Df5e22bbbe8)
+--_----------=_MCPart_505319481
+Content-Type: text/html; charset="utf-8"
+Content-Transfer-Encoding: quoted-printable
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www=
+=2Ew3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+    <head>
+        <meta http-equiv=3D"Content-Type" content=3D"text/html; charset=3D=
+UTF-8">
+
+        <!-- Facebook sharing information tags -->
+        <meta property=3D"og:title" content=3D"Par3 of the Story of a Mayb=
+eck House (August 15 & 16 Estate Sale)">
+
+        <title>Par3 of the Story of a Maybeck House (August 15 & 16 Estate=
+ Sale)</title>
+=09=09
+=09<style type=3D"text/css">
+=09=09#outlook a{
+=09=09=09padding:0;
+=09=09}
+=09=09body{
+=09=09=09width:100% !important;
+=09=09}
+=09=09.ReadMsgBody{
+=09=09=09width:100%;
+=09=09}
+=09=09.ExternalClass{
+=09=09=09width:100%;
+=09=09}
+=09=09body{
+=09=09=09-webkit-text-size-adjust:none;
+=09=09}
+=09=09body{
+=09=09=09margin:0;
+=09=09=09padding:0;
+=09=09}
+=09=09img{
+=09=09=09height:auto;
+=09=09=09line-height:100%;
+=09=09=09outline:none;
+=09=09=09text-decoration:none;
+=09=09}
+=09=09#backgroundTable{
+=09=09=09height:100% !important;
+=09=09=09margin:0;
+=09=09=09padding:0;
+=09=09=09width:100% !important;
+=09=09}
+=09=09body=2C#backgroundTable{
+=09=09=09background-color:#CCCC99;
+=09=09}
+=09=09h1=2C.h1{
+=09=09=09color:#505050;
+=09=09=09display:block;
+=09=09=09font-family:Arial;
+=09=09=09font-size:28px;
+=09=09=09font-weight:bold;
+=09=09=09line-height:100%;
+=09=09=09margin-top:0;
+=09=09=09margin-right:0;
+=09=09=09margin-bottom:10px;
+=09=09=09margin-left:0;
+=09=09=09text-align:left;
+=09=09}
+=09=09h2=2C.h2{
+=09=09=09color:#606060;
+=09=09=09display:block;
+=09=09=09font-family:Arial;
+=09=09=09font-size:26px;
+=09=09=09font-weight:bold;
+=09=09=09line-height:100%;
+=09=09=09margin-top:0;
+=09=09=09margin-right:0;
+=09=09=09margin-bottom:10px;
+=09=09=09margin-left:0;
+=09=09=09text-align:left;
+=09=09}
+=09=09h3=2C.h3{
+=09=09=09color:#707070;
+=09=09=09display:block;
+=09=09=09font-family:Arial;
+=09=09=09font-size:24px;
+=09=09=09font-weight:bold;
+=09=09=09line-height:100%;
+=09=09=09margin-top:0;
+=09=09=09margin-right:0;
+=09=09=09margin-bottom:10px;
+=09=09=09margin-left:0;
+=09=09=09text-align:left;
+=09=09}
+=09=09h4=2C.h4{
+=09=09=09color:#808080;
+=09=09=09display:block;
+=09=09=09font-family:Arial;
+=09=09=09font-size:22px;
+=09=09=09font-weight:bold;
+=09=09=09line-height:100%;
+=09=09=09margin-top:0;
+=09=09=09margin-right:0;
+=09=09=09margin-bottom:10px;
+=09=09=09margin-left:0;
+=09=09=09text-align:left;
+=09=09}
+=09=09#templatePreheader{
+=09=09=09background-color:#E0E4EF;
+=09=09}
+=09=09.preheaderContent div{
+=09=09=09color:#627EAF;
+=09=09=09font-family:Arial;
+=09=09=09font-size:10px;
+=09=09=09line-height:100%;
+=09=09=09text-align:left;
+=09=09}
+=09=09.preheaderContent div a:link=2C.preheaderContent div a:visited{
+=09=09=09color:#3B5998;
+=09=09=09font-weight:normal;
+=09=09=09text-decoration:underline;
+=09=09}
+=09=09#templateHeader{
+=09=09=09background-color:#3B5998;
+=09=09=09border-bottom:5px solid #3B5998;
+=09=09}
+=09=09.headerContent{
+=09=09=09color:#96A6C5;
+=09=09=09font-family:Arial;
+=09=09=09font-size:24px;
+=09=09=09font-weight:bold;
+=09=09=09line-height:100%;
+=09=09=09padding:0;
+=09=09=09text-align:center;
+=09=09=09vertical-align:middle;
+=09=09}
+=09=09.headerContent a:link=2C.headerContent a:visited{
+=09=09=09color:#336699;
+=09=09=09font-weight:normal;
+=09=09=09text-decoration:underline;
+=09=09}
+=09=09#headerImage{
+=09=09=09height:auto;
+=09=09=09max-width:500px !important;
+=09=09}
+=09=09#templateContainer=2C.bodyContent{
+=09=09=09background-color:#FFFFFF;
+=09=09}
+=09=09.bodyContent div{
+=09=09=09color:#505050;
+=09=09=09font-family:Arial;
+=09=09=09font-size:14px;
+=09=09=09line-height:150%;
+=09=09=09text-align:left;
+=09=09}
+=09=09.bodyContent div a:link=2C.bodyContent div a:visited=2C.bodyContent=
+ div a .yshortcuts {
+=09=09=09color:#3B5998;
+=09=09=09font-weight:normal;
+=09=09=09text-decoration:underline;
+=09=09}
+=09=09.bodyContent div img{
+=09=09=09display:inline;
+=09=09=09height:auto;
+=09=09=09max-width:460px;
+=09=09}
+=09=09#templateFooter{
+=09=09=09background-color:#E0E4EF;
+=09=09=09border-top:5px solid #3B5998;
+=09=09}
+=09=09.footerContent div{
+=09=09=09color:#627EAF;
+=09=09=09font-family:Arial;
+=09=09=09font-size:11px;
+=09=09=09line-height:125%;
+=09=09=09text-align:left;
+=09=09}
+=09=09.footerContent div a:link=2C.footerContent div a:visited=2C.footerCo=
+ntent div a .yshortcuts {
+=09=09=09color:#3B5998;
+=09=09=09font-weight:normal;
+=09=09=09text-decoration:underline;
+=09=09}
+=09=09.footerContent img{
+=09=09=09display:inline;
+=09=09}
+=09=09#utility{
+=09=09=09background-color:#E0E4EF;
+=09=09=09border:0;
+=09=09}
+=09=09#utility div{
+=09=09=09text-align:center;
+=09=09}
+=09=09#monkeyRewards img{
+=09=09=09max-width:190px;
+=09=09}
+</style></head>
+    <body leftmargin=3D"0" marginwidth=3D"0" topmargin=3D"0" marginheight=
+=3D"0" offset=3D"0" style=3D"-webkit-text-size-adjust: none;margin: 0;padd=
+ing: 0;background-color: #CCCC99;width: 100% !important;">
+    =09<center>
+        =09<table border=3D"0" cellpadding=3D"0" cellspacing=3D"0" height=
+=3D"100%" width=3D"100%" id=3D"backgroundTable" style=3D"margin: 0;padding=
+: 0;background-color: #CCCC99;height: 100% !important;width: 100% !importa=
+nt;">
+            =09<tr>
+                =09<td align=3D"center" valign=3D"top">
+                        <!-- // Begin Template Preheader \\ -->
+                        <table border=3D"0" cellpadding=3D"10" cellspacing=
+=3D"0" width=3D"500" id=3D"templatePreheader" style=3D"background-color: #=
+E0E4EF;">
+                            <tr>
+                                <td valign=3D"top" class=3D"preheaderConte=
+nt">
+
+                                =09<!-- // Begin Module: Standard Preheade=
+r \ -->
+                                    <table border=3D"0" cellpadding=3D"10"=
+ cellspacing=3D"0" width=3D"100%">
+                                    =09<tr>
+                                        =09<td valign=3D"top">
+                                            =09<div style=3D"color: #627EA=
+F;font-family: Arial;font-size: 10px;line-height: 100%;text-align: left;">=
+<span style=3D"font-size:12px;"><span style=3D"color:#4b0082;"><span style=
+=3D"font-family:georgia=2Cserif;">News from BAHA</span></span></span></div=
+>
+                                            </td>
+                                            <!--
+ -->
+=09=09=09=09=09=09=09=09=09=09=09<td valign=3D"top" width=3D"190">
+                                            =09<div style=3D"color: #627EA=
+F;font-family: Arial;font-size: 10px;line-height: 100%;text-align: left;">=
+Is this email not displaying correctly?<br>
+<a href=3D"https://mailchi.mp/92d494aa4ba6/victory-for-berkeley-preservati=
+on-in-court-of-appeal-9715215?e=3Df5e22bbbe8" target=3D"_blank" style=3D"col=
+or: #3B5998;font-weight: normal;text-decoration: underline;">View it in yo=
+ur browser</a>.</div>
+                                            </td>
+=09=09=09=09=09=09=09=09=09=09=09<!--
+ -->
+                                        </tr>
+                                    </table>
+                                =09<!-- // End Module: Standard Preheader=
+ \ -->
+
+                                </td>
+                            </tr>
+                        </table>
+                        <!-- // End Template Preheader \\ -->
+                    =09<table border=3D"0" cellpadding=3D"0" cellspacing=
+=3D"0" width=3D"500" id=3D"templateContainer" style=3D"background-color: #=
+FFFFFF;">
+                        =09<tr>
+                            =09<td align=3D"center" valign=3D"top">
+                                    <!-- // Begin Template Header \\ -->
+                                =09<table border=3D"0" cellpadding=3D"0" c=
+ellspacing=3D"0" width=3D"500" id=3D"templateHeader" style=3D"background-c=
+olor: #3B5998;border-bottom: 5px solid #3B5998;">
+                                        <tr>
+                                            <td class=3D"headerContent" st=
+yle=3D"color: #96A6C5;font-family: Arial;font-size: 24px;font-weight: bold=
+;line-height: 100%;padding: 0;text-align: center;vertical-align: middle;">
+
+                                            =09<!-- // Begin Module: Stand=
+ard Header Image \\ -->
+                                            =09<div style=3D"text-align: c=
+enter;"><img src=3D"http://gallery.mailchimp.com/cf07d73ef679275ea4445c763=
+/images/12683722085_tz6ZW.jpg" alt=3D"" border=3D"0" style=3D"height: 50px=
+;width: 468px;margin: 0;padding: 0;max-width: 500px;line-height: 100%;outl=
+ine: none;text-decoration: none;" width=3D"468" height=3D"50" id=3D"header=
+Image campaign-icon"></div>
+                                            =09<!-- // End Module: Standar=
+d Header Image \\ -->
+
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                        =09<td id=3D"">
+                                            </td>
+                                        </tr>
+                                    </table>
+                                    <!-- // End Template Header \\ -->
+                                </td>
+                            </tr>
+                        =09<tr>
+                            =09<td align=3D"center" valign=3D"top">
+                                    <!-- // Begin Template Body \\ -->
+                                =09<table border=3D"0" cellpadding=3D"0" c=
+ellspacing=3D"0" width=3D"500" id=3D"templateBody">
+                                    =09<tr>
+                                            <td valign=3D"top" class=3D"bo=
+dyContent" style=3D"background-color: #FFFFFF;">
+
+                                                <!-- // Begin Module: Stan=
+dard Content \\ -->
+                                                <table border=3D"0" cellpa=
+dding=3D"20" cellspacing=3D"0" width=3D"100%">
+                                                    <tr>
+                                                        <td valign=3D"top"=
+>
+                                                            <div style=3D"=
+color: #505050;font-family: Arial;font-size: 14px;line-height: 150%;text-a=
+lign: left;"><div style=3D"text-align: center;color: #505050;font-family:=
+ Arial;font-size: 14px;line-height: 150%;">
+<p style=3D"text-align: center;"><span style=3D"color:#6666ff"><span style=
+=3D"font-size:30px"><strong><em><span style=3D"font-family:comic sans ms=
+=2C marker felt-thin=2C arial=2C sans-serif"><img data-file-id=3D"6724843"=
+ height=3D"117" src=3D"https://mcusercontent.com/cf07d73ef679275ea4445c763=
+/images/a6730316-80f4-1886-94c6-9f6af06d598c.gif" style=3D"border: 0px;wid=
+th: 432px;height: 117px;margin: 0px;line-height: 100%;outline: none;text-d=
+ecoration: none;display: inline;max-width: 460px;" width=3D"432"></span></=
+em></strong></span><br>
+<br>
+<span style=3D"font-size:24px"><strong><em><span style=3D"font-family:comi=
+c sans ms=2C marker felt-thin=2C arial=2C sans-serif">The Story Behind&nbs=
+p;the<br>
+Estate Sale House &mdash; in four parts</span></em></strong></span></span>=
+<br>
+<br>
+<span style=3D"color:#ff0066"><span style=3D"font-size:24px"><font face=3D=
+"georgia=2C times=2C times new roman=2C serif"><span style=3D"caret-color:=
+rgb(75=2C 0=2C 130)"><strong>Part Three</strong></span></font></span><br>
+<br>
+<span style=3D"font-size:30px"><font face=3D"georgia=2C times=2C times new=
+ roman=2C serif"><span style=3D"caret-color:rgb(75=2C 0=2C 130)"><strong>&=
+quot;Siegfried&quot;</strong></span></font></span></span></p>
+
+<div style=3D"text-align: left;color: #505050;font-family: Arial;font-size=
+: 14px;line-height: 150%;">
+<p><span style=3D"color:#000000"><span style=3D"font-size:16px"><span styl=
+e=3D"font-family:georgia=2C times=2C times new roman=2C serif">In July 198=
+9=2C Siegfried E. Brockmann (1928&ndash;2025) was called into the office o=
+f Mrs. Cole&rsquo;s lawyer. He learned that he had been bequeathed Mrs. Co=
+le&rsquo;s house=2C the Maybeck Studio at 2711 Buena Vista Way. The gift w=
+as not entirely unexpected=2C but Siegfried was overcome by Mrs. Cole&rsqu=
+o;s generosity and realized that it would change the course of his life.</=
+span></span></span></p>
+
+<p><font color=3D"#000000" face=3D"georgia=2C times=2C times new roman=2C=
+ serif" size=3D"3">Siegfried had been born in D&ouml;beln=2C a small city=
+ in Saxony near Dresden. His idyllic childhood=2C surrounded by family and=
+ friends=2C changed in the early 1930s when a new government regime came i=
+nto being which brought with it a pall that hung over everyday existence.=
+ When Siegfried=2C at age 15=2C was in high school=2C he=2C along with his=
+ fellow students=2C was&nbsp;&nbsp;sent to the front to serve as a </font>=
+<em style=3D"color:rgb(0=2C 0=2C 0); font-family:georgia=2C times=2C &quot=
+;times new roman=2C serif; font-size:16px">Luftwaffenhelfer&nbsp;</em><spa=
+n style=3D"color:#000000"><span style=3D"font-size:16px"><span style=3D"fo=
+nt-family:georgia=2C times=2C times new roman=2C serif">(the wartime job m=
+ost of the youngsters were given)</span></span></span><font color=3D"#0000=
+00" face=3D"georgia=2C times=2C times new roman=2C serif" size=3D"3">. In=
+ the spring of 1945=2C when the end seemed near=2C the officer for Siegfri=
+ed&rsquo;s unit&nbsp;told all the schoolboys to head for home. He did not=
+ want them to be taken&nbsp;<span style=3D"caret-color:rgb(0=2C 0=2C 0)">p=
+risoner</span>&nbsp;by the Russians.</font></p>
+
+<p style=3D"text-align: center;"><img data-file-id=3D"6725205" height=3D"1=
+70" src=3D"https://mcusercontent.com/cf07d73ef679275ea4445c763/images/7d48=
+e92a-6984-9840-91d1-b759da7e22ef.gif" style=3D"border: 0px;width: 432px;he=
+ight: 170px;margin: 0px;line-height: 100%;outline: none;text-decoration: n=
+one;display: inline;max-width: 460px;" width=3D"432"><br>
+Siegfried with his two older sisters and mother in D&ouml;beln about 1935.=
+</p>
+
+<p><span style=3D"color:#000000"><span style=3D"font-size:16px"><span styl=
+e=3D"font-family:georgia=2C times=2C times new roman=2C serif">At War&rsqu=
+o;s end=2C Siegfried=2C and all the others at home=2C hoped and prayed tha=
+t the Americans would take control. Instead=2C their quadrant of Germany w=
+as turned over to Russia. Life was even worse under this foreign regime=2C=
+ but Siegfried learned that a pharmaceutical company was about to open and=
+ he and two school friends applied as interns. After two years=2C he recei=
+ved his certificate and decided that the time to escape was now! A friend=
+ gave him detailed instructions on how to reach the border and&nbsp;how to=
+ cross the border; he even gave Siegfried contacts in both Goslar and Muni=
+ch.</span></span></span></p>
+
+<p style=3D"text-align: center;"><img data-file-id=3D"6725206" height=3D"2=
+36" src=3D"https://mcusercontent.com/cf07d73ef679275ea4445c763/images/a942=
+ec3c-6ce7-5afb-482c-bd31119fc41d.gif" style=3D"border: 0px;width: 432px;he=
+ight: 236px;margin: 0px;line-height: 100%;outline: none;text-decoration: n=
+one;display: inline;max-width: 460px;" width=3D"432"><br>
+Siegfried=2C on the left=2C in D&ouml;blen with two school friends=2C Irmg=
+ard and Werner=2C shortly before his escape in 1948.</p>
+
+<p><font color=3D"#000000" face=3D"georgia=2C times=2C times new roman=2C=
+ serif" size=3D"3">In the West=2C Siegfried discovered that the chemistry=
+ certificate meant nothing with out a residence permit. After about a week=
+ of seeking employment=2C he was resigned to having to return to the Russi=
+an Zone. But before he left Munich=2C Siegfried received assistance throug=
+h a chance encounter and was directed to a Press Control Officer working f=
+or the U.S. Military Government. This was Walter Brockmann=2C who told Sie=
+gfried to come back the next day and he might have an answer. Walter was t=
+old by the other government officials that the only way to keep someone fr=
+om having to return to the East&nbsp;was if an American&mdash;Walter Brock=
+mann in this case&mdash;were to adopt him. Walter was intrigued=2C and sta=
+rted the proceedings with help from influential friends living on&nbsp;<sp=
+an style=3D"caret-color:rgb(0=2C 0=2C 0)">nearby</span>&nbsp;Lake Starnber=
+g who wrote letters of recommendation and also contacted Siegfried&rsquo;s=
+ mother. After the adoption took place=2C the Starnberg friends became Sie=
+gfried&rsquo;s honorary godparents.&nbsp;</font></p>
+
+<p style=3D"text-align: center;"><img data-file-id=3D"6725207" height=3D"2=
+73" src=3D"https://mcusercontent.com/cf07d73ef679275ea4445c763/images/1a2c=
+77c7-2c64-2f70-478a-d3b86cf9421d.gif" style=3D"border: 0px;width: 432px;he=
+ight: 273px;margin: 0px;line-height: 100%;outline: none;text-decoration: n=
+one;display: inline;max-width: 460px;" width=3D"432"><br>
+The sought-after Identification Card.</p>
+
+<p><span style=3D"font-size:16px"><span style=3D"font-family:georgia=2C ti=
+mes=2C times new roman=2C serif"><span style=3D"color:#000000">Walter felt=
+ ready to retire from the military=2C and off they went to New York City o=
+n</span><span style=3D"color:#000000"> the USNS General Alexander M. Patch=
+ </span><span style=3D"color:#000000">where Siegfried had his first Thanks=
+giving dinner on board. Upon arrival=2C </span></span></span><span style=
+=3D"font-size:16px"><span style=3D"font-family:georgia=2C times=2C times n=
+ew roman=2C serif"><span style=3D"color:#000000">Walter sold his collectio=
+n of D&uuml;rer engravings s</span></span></span><span style=3D"font-size:=
+16px"><span style=3D"font-family:georgia=2C times=2C times new roman=2C se=
+rif"><span style=3D"color:#000000">o that Siegfried could finish high scho=
+ol=2C and sent him to Suffield Academy in Connecticut. The instructors wer=
+e impressed with Siegfried&rsquo;s knowledge of chemistry and recommend he=
+ apply to American University=2C which he did.</span></span></span></p>
+
+<p><span style=3D"color:#000000"><span style=3D"font-size:16px"><span styl=
+e=3D"font-family:georgia=2C times=2C times new roman=2C serif">In December=
+ 1949=2C after the fall semester had ended=2C Siegfried ran into a classma=
+te in downtown Washington=2C D.C. who told him that a friend was giving hi=
+m a farewell party and that he could bring a guest. On New Year&rsquo;s Da=
+y 1950=2C Siegfried took the long streetcar ride to Chevy Chase. At the ga=
+thering he met the girl who was giving the party=2C Maga van Barneveld Col=
+e=2C and her grandmother=2C her parents=2C and her uncle=2C James Cole=2C=
+ a chemistry professor at the University of Virginia. Other visits at the=
+ house on Quesada Street in Chevy Chase followed. The fun-loving Maga and=
+ Siegfried soon became close friends=2C and Siegfried became the son that=
+ the Coles never had=2C and they=2C in turn=2C were Siegfried&rsquo;s Amer=
+ican family.</span></span></span></p>
+
+<p style=3D"text-align: center;"><img data-file-id=3D"6725204" height=3D"2=
+42" src=3D"https://mcusercontent.com/cf07d73ef679275ea4445c763/images/8b9c=
+c66d-bd3a-dd09-3a74-f8b7ca876047.gif" style=3D"border: 0px;width: 432px;he=
+ight: 242px;margin: 0px;line-height: 100%;outline: none;text-decoration: n=
+one;display: inline;max-width: 460px;" width=3D"432"></p>
+
+<p style=3D"text-align: center;">Maga Cole and Siegfried in Maga&#39;s For=
+d. Water Brockmann=2C 1951</p>
+
+<p style=3D"text-align: left;"><span style=3D"color:#000000"><span style=
+=3D"font-size:16px"><span style=3D"font-family:georgia=2C times=2C times n=
+ew roman=2C serif">Prof. Cole arranged for Siegfried to attend the Univers=
+ity of Virginia while helping him with research. While there=2C Siegfried=
+ often spent weekends in Washington with Walter and the Coles. And sometim=
+es the Coles would pick up Siegfried on a&nbsp;Friday and take him to Palm=
+ Beach. Mrs. van Barneveld wrote of such an impromptu trip=2C &ldquo;Maga=
+ and Siegfried run so beautifully to the water&rsquo;s edge. Siegfried&rsq=
+uo;s first touch of ocean.&rdquo;</span></span></span></p>
+
+<p style=3D"text-align: center;"><br>
+<img data-file-id=3D"6725228" height=3D"300" src=3D"https://mcusercontent.=
+com/cf07d73ef679275ea4445c763/images/4e5d4507-d5d3-221a-a2cb-221246249221.=
+gif" style=3D"border: 0px;width: 432px;height: 300px;margin: 0px;line-heig=
+ht: 100%;outline: none;text-decoration: none;display: inline;max-width: 46=
+0px;" width=3D"432"><br>
+Siegfried reading over the University of Virginia catalog with Mrs. Cole.=
+ Walter Brockmann=2C 1950</p>
+
+<p><span style=3D"color:#000000"><span style=3D"font-size:16px"><span styl=
+e=3D"font-family:georgia=2C times=2C times new roman=2C serif">After gradu=
+ation in 1954=2C Siegfried received a teaching fellowship at Harvard. Even=
+tually he realized that the academic life was not for him. When Cole Chemi=
+cal Company in St. Louis offered him a position=2C he gladly accepted. Sie=
+gfried had worked summers at the company=2C staying with the Coles. Now he=
+ was a permanent part of the company=2C and a permanent St. Louis resident=
+=2E Mrs. Cole found an apartment for Siegfried which she furnished. The sofa=
+ for sale this weekend was custom-made by Mrs. Cole for the apartment. Sie=
+gfried tried his hand at furniture design: two angular marble-topped table=
+s constructed by the Cole Company workshop.</span></span></span><br>
+<br>
+<font color=3D"#000000" face=3D"georgia=2C times=2C times new roman=2C ser=
+if" size=3D"3">A few years later=2C Siegfried was able to buy a house in t=
+he Central West End. From a weed patch in the back of his new house=2C Sie=
+gfried created one of the world&#39;s most charming gardens. He discovered=
+ that he had moved into a neighborhood of interesting people. Two doors wa=
+y lived Marie Taylor=2C an artist whose work will be at the Sale. Next doo=
+r were members of one&nbsp;<span style=3D"caret-color:rgb(0=2C 0=2C 0)">of=
+</span>&nbsp;St. Louis&#39;s earliest families. Through them=2C he was&nbs=
+p;<span style=3D"caret-color:rgb(0=2C 0=2C 0)">introduced to many who beca=
+me lifelong friends=2C as well as to a type of social life he had never be=
+fore known.&nbsp;</span></font></p>
+
+<p style=3D"text-align: center;"><img data-file-id=3D"6725226" height=3D"3=
+50" src=3D"https://mcusercontent.com/cf07d73ef679275ea4445c763/images/1348=
+9dc3-4d5f-f688-6e51-71f3f5871e74.gif" style=3D"border: 0px;width: 432px;he=
+ight: 350px;margin: 0px;line-height: 100%;outline: none;text-decoration: n=
+one;display: inline;max-width: 460px;" width=3D"432"><br>
+Siegfried and his St. Louis garden.</p>
+
+<p><span style=3D"color:#000000"><span style=3D"font-size:16px"><span styl=
+e=3D"font-family:georgia=2C times=2C times new roman=2C serif">Maga Cole l=
+eft for Berkeley in 1958 to continue her study of architecture. She rented=
+ the cottage=2C Arrilaga=2C from the Maybecks=2C where Siegfried stayed on=
+ his many trips to Berkeley. On the first visit=2C in 1959=2C Maga introdu=
+ced him to the Maybeck children: Kerna and Wallen. As a guest at Wallen an=
+d Jacomena&rsquo;s house=2C Siegfried was served his first Manhattan. &nbs=
+p;</span></span></span></p>
+
+<p><span style=3D"color:#000000"><span style=3D"font-size:16px"><span styl=
+e=3D"font-family:georgia=2C times=2C times new roman=2C serif">During the=
+ next thirty years=2C especially after Mrs. Cole had also moved to Berkele=
+y=2C Siegfried and Walter made a semi-annual pilgrimage to &ldquo;Maybeck=
+ Country=2C&rdquo; often staying at the French Hotel. It was on such a vis=
+it in July 1989 (five years after Mrs. Cole had lost her daughter Maga)=2C=
+ that Siegfried=2C arriving at Mrs. Cole&rsquo;s home at the appointed tim=
+e the next morning=2C was met at the front door by her lawyer and executor=
+=2E</span></span></span></p>
+
+<p><span style=3D"color:#000000"><span style=3D"font-size:16px"><span styl=
+e=3D"font-family:georgia=2C times=2C times new roman=2C serif">With the gi=
+ft of Mrs. Cole&rsquo;s very special Maybeck house=2C which was filled wit=
+h happy memories=2C Siegfried made the decision to retire early from the p=
+harmaceutical company and move to Berkeley. Walter was elderly and needed=
+ his care=2C which was a main factor in the decision to retire. The moving=
+ van (carrying belongings from Siegfried&rsquo;s three-story St. Louis hou=
+se) arrived at 2711 Buena Vista Way on October 31=2C 1990. The date happen=
+ed to be Mrs. Cole&rsquo;s birthday.</span></span></span></p>
+
+<p><span style=3D"color:#000000"><span style=3D"font-size:16px"><span styl=
+e=3D"font-family:georgia=2C times=2C times new roman=2C serif">Under the f=
+riendly wing of Jacomena Maybeck=2C Siegfried quickly acclimatized to his=
+ new surroundings=2C making friends with all the neighbors=2C and going to=
+ Edy&rsquo;s every day for lunch (a favorite spot that Walter and Siegfrie=
+d had discovered on earlier visits). When Jacomena and I approached them a=
+bout including the Studio on the upcoming 1992 BAHA house tour=2C they wer=
+e most agreeable. During the tour preparations I made several visits to th=
+e Studio=2C and we soon became friends. Walter died later that year. Siegf=
+ried continued in the house that was now almost a living memorial to two o=
+f the most important people in his life. Siegfried said there was not one=
+ day that he did not sit in the living room and think of Walter and Mrs. C=
+ole.</span></span></span></p>
+
+<p style=3D"text-align: center;"><img data-file-id=3D"6725227" height=3D"3=
+09" src=3D"https://mcusercontent.com/cf07d73ef679275ea4445c763/images/49e6=
+83fe-1398-8dde-ddcf-2227c9a2479b.gif" style=3D"border: 0px;width: 432px;he=
+ight: 309px;margin: 0px;line-height: 100%;outline: none;text-decoration: n=
+one;display: inline;max-width: 460px;" width=3D"432"><br>
+Siegfried and Walter at the 1992 BAHA house tour.</p>
+
+<p><span style=3D"color:#000000"><span style=3D"font-size:16px"><span styl=
+e=3D"font-family:georgia=2C times=2C times new roman=2C serif">Siegfried w=
+as proud to be the steward of a Maybeck house. He was eager to share it wi=
+th others. A request from an out-of-state visitor to see a Maybeck house (=
+usually made through the BAHA office!)=2C or a group of architects from Ja=
+pan or Holland who wanted to see the &ldquo;Sack House&rdquo;&mdash; all w=
+ere welcomed. Siegfried opened his home for many BAHA events over the year=
+s; the last time being the afternoon that Maybeck&rsquo;s Packard made an=
+ appearance on Buena Vista Way one summer afternoon in 2016.</span></span>=
+</span></p>
+
+<p style=3D"text-align: center;"><img data-file-id=3D"6725229" height=3D"2=
+76" src=3D"https://mcusercontent.com/cf07d73ef679275ea4445c763/images/cf2b=
+f700-98d0-907b-a732-62ff3566b35a.gif" style=3D"border: 0px;width: 432px;he=
+ight: 276px;margin: 0px;line-height: 100%;outline: none;text-decoration: n=
+one;display: inline;max-width: 460px;" width=3D"432"><br>
+Siegfried=2C on the left=2C with guests at the BAHA &quot;Maybeck Country&=
+quot; tour. Daniella Thompson=2C 2009</p>
+
+<p><span style=3D"color:#000000"><span style=3D"font-size:16px"><span styl=
+e=3D"font-family:georgia=2C times=2C times new roman=2C serif">As did Mrs.=
+ Cole before him=2C Siegfried made improvements to the property. He create=
+d a terrace in front of the house=2C using the same type of aggregate pavi=
+ng that the Maybecks had used elsewhere in the garden. He added counters a=
+nd cupboards to the bare walls of the tiny kitchen=2C and put in central h=
+eating=2C which=2C along with Mrs. Cole&rsquo;s heavy &ldquo;Maybeck&rdquo=
+; draperies=2C assured that the Studio was warm and welcoming in winter. S=
+iegfried enjoyed working in the garden and relaxing on the terrace as the=
+ sun set over the bay in the distance.</span></span></span></p>
+
+<p style=3D"text-align: center;"><img data-file-id=3D"6725230" height=3D"3=
+73" src=3D"https://mcusercontent.com/cf07d73ef679275ea4445c763/images/9517=
+a714-3da4-a238-2eff-607b1260564a.gif" style=3D"border: 0px;width: 432px;he=
+ight: 373px;margin: 0px;line-height: 100%;outline: none;text-decoration: n=
+one;display: inline;max-width: 460px;" width=3D"432"></p>
+
+<p><span style=3D"color:#000000"><span style=3D"font-size:16px"><span styl=
+e=3D"font-family:georgia=2C times=2C times new roman=2C serif">Siegfried d=
+ied on December 27=2C 2025=2C his 97th birthday. The Siegfried E. Brockman=
+n Trust is pleased that BAHA members will&nbsp; enjoy the Maybeck Studio t=
+his weekend. Soon=2C &nbsp;a new chapter in the history of the house will=
+ begin.</span></span></span></p>
+
+<p><span style=3D"color:#000000"><span style=3D"font-size:16px"><span styl=
+e=3D"font-family:georgia=2C times=2C times new roman=2C serif">&mdash;Anth=
+ony Bruce 2026</span></span></span></p>
+</div>
+
+<p style=3D"text-align: center;"><strong><span style=3D"font-size:18px"><s=
+pan style=3D"color:#6666ff"><span style=3D"font-family:georgia=2C times=2C=
+ times new roman=2C serif">VOLUNTEERS WANTED</span></span></span></strong>=
+</p>
+
+<p style=3D"text-align: left;"><strong><font color=3D"#000000" face=3D"geo=
+rgia=2C times=2C times new roman=2C serif" size=3D"3">Volunteers are neede=
+d to help in different&nbsp;<span style=3D"caret-color:rgb(0=2C 0=2C 0)">c=
+apacities during&nbsp;</span>&nbsp;the two days&nbsp;of the Sale. </font><=
+font color=3D"#000000" face=3D"georgia=2C times=2C times new roman=2C seri=
+f" size=3D"3">Most of Saturday is covered; there are still quite a few shi=
+fts open for Sunday</font></strong></p>
+
+<p style=3D"text-align: center;"><br>
+<span style=3D"color:#000000"><em><span style=3D"font-size:16px"><span sty=
+le=3D"font-family:georgia=2C times=2C times new roman=2C serif"><strong>Vo=
+lunteers receive free&nbsp;</strong></span></span></em><strong><em><font f=
+ace=3D"georgia=2C times=2C times new roman=2C serif" size=3D"3">admission=
+ to the event.</font></em><br>
+<br>
+<span style=3D"font-size:16px"><span style=3D"font-family:georgia=2C times=
+=2C times new roman=2C serif">To volunteer=2C<br>
+e-mail BAHA at </span></span></strong></span><span style=3D"color:#6699ff"=
+><strong><span style=3D"font-size:16px"><span style=3D"font-family:georgia=
+=2C times=2C times new roman=2C serif">baha@berkeleyheritage.com</span></s=
+pan></strong></span><span style=3D"color:#000000"><strong><span style=3D"f=
+ont-size:16px"><span style=3D"font-family:georgia=2C times=2C times new ro=
+man=2C serif"> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<br>
+or call 510-847-1379</span></span></strong></span><br>
+<br>
+<span style=3D"color:#ff3366"><span style=3D"font-size:24px"><span style=
+=3D"font-family:comic sans ms=2C marker felt-thin=2C arial=2C sans-serif">=
+to buy admission tickets=2C&nbsp;please go to</span></span></span><br>
+<a href=3D"https://us.list-manage.com/rPvRlWvWCiJ?e=3Df5e22bbbe8&c2id=3D80994c361251829d80cd744664a99ecc" target=3D"_blank" style=3D"color: #3B5998;font-weight: norm=
+al;text-decoration: underline;"><span style=3D"color:#0000FF"><span style=
+=3D"font-size:24px"><span style=3D"font-family:georgia=2C times=2C times n=
+ew roman=2C serif">Eventbrite</span></span></span></a><br>
+&nbsp;</p>
+
+<p style=3D"text-align: left;"><font color=3D"#000000" face=3D"georgia=2C=
+ times=2C times new roman=2C serif" size=3D"3"><span style=3D"caret-color:=
+rgb(0=2C 0=2C 0)">Through the&nbsp;generosity of the&nbsp;Siegfried&nbsp;E=
+=2E Brockmann Trust=2C BAHA will receive 100% of the proceeds from this&nbsp=
+;summertime fundraising event.</span></font></p>
+
+<p style=3D"text-align: center;"><img data-file-id=3D"6724251" height=3D"1=
+18" src=3D"https://mcusercontent.com/cf07d73ef679275ea4445c763/images/06dd=
+298b-18be-3e8b-d3e4-10991ff10c92.gif" style=3D"border: 0px;width: 432px;he=
+ight: 118px;margin: 0px;line-height: 100%;outline: none;text-decoration: n=
+one;display: inline;max-width: 460px;" width=3D"432"></p>
+
+<p style=3D"text-align: center;">&nbsp;</p>
+</div>
+</div>
+=09=09=09=09=09=09=09=09=09=09=09=09=09=09</td>
+                                                    </tr>
+                                                </table>
+                                                <!-- // End Module: Standa=
+rd Content \\ -->
+
+                                            </td>
+                                        </tr>
+                                    </table>
+                                    <!-- // End Template Body \\ -->
+                                </td>
+                            </tr>
+                        =09<tr>
+                            =09<td align=3D"center" valign=3D"top">
+                                    <!-- // Begin Template Footer \\ -->
+                                =09<table border=3D"0" cellpadding=3D"10"=
+ cellspacing=3D"0" width=3D"500" id=3D"templateFooter" style=3D"background=
+-color: #E0E4EF;border-top: 5px solid #3B5998;">
+                                    =09<tr>
+                                        =09<td valign=3D"top" class=3D"foo=
+terContent">
+
+                                                <!-- // Begin Module: Stan=
+dard Footer \\ -->
+                                                <table border=3D"0" cellpa=
+dding=3D"10" cellspacing=3D"0" width=3D"100%">
+                                                    <tr>
+                                                        <td valign=3D"top"=
+ width=3D"250">
+                                                            <div style=3D"=
+color: #627EAF;font-family: Arial;font-size: 11px;line-height: 125%;text-a=
+lign: left;"></div>
+                                                        </td>
+                                                        <td valign=3D"top"=
+ width=3D"190" id=3D"monkeyRewards">
+                                                            <div style=3D"=
+color: #627EAF;font-family: Arial;font-size: 11px;line-height: 125%;text-a=
+lign: left;"></div>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td colspan=3D"2"=
+ valign=3D"middle" id=3D"utility" style=3D"background-color: #E0E4EF;borde=
+r: 0;">
+                                                            <div style=3D"=
+color: #627EAF;font-family: Arial;font-size: 11px;line-height: 125%;text-a=
+lign: center;">&nbsp;<a href=3D"https://berkeleyheritage.us2.list-manage.c=
+om/unsubscribe?u=3Dcf07d73ef679275ea4445c763&id=3Dc7350fddaa&t=3Db&e=3Df5e22bbbe8&c=3D889d53a973" style=3D"color: #3B5998;font-weight: normal;text-dec=
+oration: underline;">unsubscribe</a>&nbsp;| <a href=3D"https://berkeleyher=
+itage.us2.list-manage.com/profile?u=3Dcf07d73ef679275ea4445c763&id=3Dc7350=
+fddaa&e=3Df5e22bbbe8&c=3D889d53a973" style=3D"color: #3B5998;font-weight: no=
+rmal;text-decoration: underline;">update subscription</a>
+ | <a href=3D"https://mailchi.mp/92d494aa4ba6/victory-for-berkeley-preserv=
+ation-in-court-of-appeal-9715215?e=3Df5e22bbbe8" style=3D"color: #3B5998;fon=
+t-weight: normal;text-decoration: underline;">view e-mail in browser</a>
+&nbsp;</div>
+                                                        </td>
+                                                    </tr>
+                                                </table>
+                                                <!-- // End Module: Standa=
+rd Footer \\ -->
+
+                                            </td>
+                                        </tr>
+                                    </table>
+                                    <!-- // End Template Footer \\ -->
+                                </td>
+                            </tr>
+                        </table>
+                        <br>
+                    </td>
+                </tr>
+            </table>
+        </center>
+    <div style=3D"display:none;"><img src=3D"https://us.list-manage.com/CJ=
+vBu86VBZO6IA2GqqT7hg?e=3Df5e22bbbe8&c2id=3D80994c361251829d80cd744664a99ecc" height=3D"1" w=
+idth=3D"1" style=3D"display:none;" alt=3D""></div></body>
+</html>
+--_----------=_MCPart_505319481--

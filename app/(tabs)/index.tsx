@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { StyleSheet, Text, View, useWindowDimensions } from "react-native";
 import Animated, {
   Easing,
@@ -18,9 +18,28 @@ import { RIBBON_COLUMN, useBookHead } from "@/components/bookmark-ribbons";
 import { StreetsLogo } from "@/components/logo-walkers";
 import { Bar, InkPlane } from "@/components/print";
 import { FONT, INK, PAPER } from "@/constants/book";
+import { launchScreenLifted, liftLaunchScreen } from "@/lib/launch-screen";
 
 const LOGO_ASPECT = 648 / 737;
 const EASE = Easing.bezier(0.3, 0, 0.1, 1);
+/** The launch screen's sheet (scripts/splash.mjs): its size, and its Campanile's width and rise above centre, in points. */
+const SPLASH = { w: 430, h: 932, logo: 240, rise: 58 };
+
+/**
+ * Where the launch screen shows the Campanile, as a move and scale from where
+ * the cover lays it out: its sheet fills the screen, cropped to fit. (Only on
+ * a phone — on a tablet the sheet is blown up, and the cover just fades in.)
+ */
+function fromSplash(screen: { width: number; height: number }, at: { x: number; y: number; w: number; h: number }) {
+  const fill = Math.max(screen.width / SPLASH.w, screen.height / SPLASH.h);
+  const s = (SPLASH.logo * fill) / at.w;
+  if (s < 0.8 || s > 1.25) return { dx: 0, dy: 0, s: 1 };
+  return {
+    dx: screen.width / 2 - (at.x + at.w / 2),
+    dy: screen.height / 2 - SPLASH.rise * fill - (at.y + at.h / 2),
+    s,
+  };
+}
 
 /**
  * The cover: solid blue board — the same blue as the launch screen, so the
@@ -30,9 +49,32 @@ const EASE = Easing.bezier(0.3, 0, 0.1, 1);
 export default function CoverScreen() {
   const insets = useSafeAreaInsets();
   const { contentTop } = useBookHead();
-  const { width } = useWindowDimensions();
+  const { width, height } = useWindowDimensions();
   const reduceMotion = useReducedMotion();
   const press = useSharedValue(reduceMotion ? 1 : 0);
+  // The Campanile starts where the launch screen had it, so the two meet
+  // without a seam, then settles into its place as the type prints.
+  const settle = useSharedValue(reduceMotion ? 1 : 0);
+  const [start, setStart] = useState({ dx: 0, dy: 0, s: 1 });
+  const logoRef = useRef<View>(null);
+  const ready = useRef({ drawn: false, placed: false });
+  const readyFor = (part: "drawn" | "placed") => {
+    ready.current[part] = true;
+    if (ready.current.drawn && ready.current.placed) liftLaunchScreen();
+  };
+  // (Measured once, before it has moved.)
+  const place = () =>
+    !ready.current.placed &&
+    logoRef.current?.measureInWindow((x, y, w, h) => {
+      if (w > 0) setStart(fromSplash({ width, height }, { x, y, w, h }));
+      readyFor("placed");
+    });
+  const settleStyle = useAnimatedStyle(() => {
+    const k = 1 - settle.value;
+    return {
+      transform: [{ translateX: start.dx * k }, { translateY: start.dy * k }, { scale: 1 + (start.s - 1) * k }],
+    };
+  });
 
   // Cream status-bar lettering on the blue board; charcoal everywhere else.
   useFocusEffect(
@@ -42,10 +84,19 @@ export default function CoverScreen() {
     }, []),
   );
 
+  // The type prints up once the launch screen has lifted off the board.
   useEffect(() => {
     if (reduceMotion) return;
-    press.value = withDelay(120, withTiming(1, { duration: 1100, easing: EASE }));
-  }, [press, reduceMotion]);
+    let live = true;
+    launchScreenLifted().then(() => {
+      if (!live) return;
+      settle.value = withDelay(80, withTiming(1, { duration: 900, easing: EASE }));
+      press.value = withDelay(80, withTiming(1, { duration: 1100, easing: EASE }));
+    });
+    return () => {
+      live = false;
+    };
+  }, [press, settle, reduceMotion]);
 
   const logoW = Math.min(width * 0.58, 240);
 
@@ -56,16 +107,17 @@ export default function CoverScreen() {
           <Text style={styles.kicker}>A field guide{"\n"}to the city</Text>
         </Printed>
 
+        {/* Already on the board as the launch screen fades: it isn't printed again. */}
         <View style={styles.device}>
-          <Printed press={press} from={0} to={0.6} lift={4}>
-            <View
-              style={{ width: logoW, height: logoW / LOGO_ASPECT }}
-              accessibilityRole="image"
-              accessibilityLabel="Berkeley Tours — the Campanile"
-            >
-              <StreetsLogo width={logoW} height={logoW / LOGO_ASPECT} />
-            </View>
-          </Printed>
+          <Animated.View
+            ref={logoRef}
+            onLayout={place}
+            style={[{ width: logoW, height: logoW / LOGO_ASPECT }, settleStyle]}
+            accessibilityRole="image"
+            accessibilityLabel="Berkeley Tours — the Campanile"
+          >
+            <StreetsLogo width={logoW} height={logoW / LOGO_ASPECT} onLoad={() => readyFor("drawn")} />
+          </Animated.View>
         </View>
 
         <Printed press={press} from={0.4} to={0.85}>
