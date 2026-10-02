@@ -27,6 +27,9 @@ export interface GalleryPhoto {
 const THUMB_W = 150;
 const THUMB_H = 112;
 const OFFSET = 5;
+/** The full-size photograph's margins: at the sides, and above and below. */
+const VIEWER_SIDE = 12;
+const VIEWER_HEAD = 90;
 
 /**
  * A landmark's photographs as a strip of small plates, numbered as figures,
@@ -107,7 +110,12 @@ export function PhotoViewer({
             onMomentumScrollEnd={onScroll}
             renderItem={({ item }) => (
               <Pressable onPress={onClose} style={{ width, height }} accessibilityLabel="Close the photograph">
-                <Image source={photoSource(item.uri)} style={styles.viewerImage} resizeMode="contain" />
+                {/* Sized to the screen: a bundled print otherwise takes its own pixel size. */}
+                <Image
+                  source={photoSource(item.uri)}
+                  style={[styles.viewerImage, { width: width - VIEWER_SIDE * 2, height: height - VIEWER_HEAD * 2 }]}
+                  resizeMode="contain"
+                />
               </Pressable>
             )}
           />
@@ -146,9 +154,8 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(20,18,16,0.96)",
   },
   viewerImage: {
-    flex: 1,
-    marginHorizontal: 12,
-    marginVertical: 90,
+    marginHorizontal: VIEWER_SIDE,
+    marginVertical: VIEWER_HEAD,
   },
   viewerFoot: {
     position: "absolute",

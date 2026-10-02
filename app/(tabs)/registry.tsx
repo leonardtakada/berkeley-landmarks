@@ -14,14 +14,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Svg, { Path, SvgXml } from "react-native-svg";
 
 import { ArchitectPortrait } from "@/components/architect-portrait";
-import {
-  ChapterOpener,
-  Folio,
-  InkIn,
-  Leader,
-  SectionPage,
-  useFirstReveal,
-} from "@/components/book-page";
+import { ChapterOpener, Folio, Leader, SectionPage } from "@/components/book-page";
 import { CheckStamp } from "@/components/copy-marks";
 import { REGISTRY_FRIEZE_SVG } from "@/components/print-art.generated";
 import { Annotation, Rule } from "@/components/print";
@@ -57,7 +50,7 @@ const CATEGORIES: (LandmarkCategory | null)[] = [
 type Arrangement = "name" | "year" | "architect" | "style" | "district";
 const ARRANGEMENTS: Arrangement[] = ["name", "year", "architect", "style", "district"];
 
-type Entry = Landmark & { seq: number; metres?: number };
+type Entry = Landmark & { metres?: number };
 type Section = {
   key: string;
   title: string;
@@ -144,7 +137,6 @@ function nearBand(metres: number): string {
 export default function RegistryScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const reveal = useFirstReveal();
   const clock = useScrollClockHandler();
   const params = useLocalSearchParams<{ q?: string }>();
   const { copy } = useReaderCopy();
@@ -215,16 +207,16 @@ export default function RegistryScreen() {
       // Near the reader: within a quarter hour's walk, the nearest first.
       entries = here
         ? found
-            .map((l) => ({ ...l, seq: 0, metres: metresBetween(here, l) }))
+            .map((l) => ({ ...l, metres: metresBetween(here, l) }))
             .filter((l) => l.metres <= WALKING_M)
             .sort((a, b) => a.metres - b.metres)
         : [];
     } else {
-      entries = [...found].sort((a, b) => compare(a, b, arrangement)).map((l) => ({ ...l, seq: 0 }));
+      entries = [...found].sort((a, b) => compare(a, b, arrangement));
     }
 
     const out: Section[] = [];
-    entries.forEach((l, i) => {
+    entries.forEach((l) => {
       const key = near ? nearBand(l.metres ?? 0) : sectionKey(l, arrangement);
       let s = out[out.length - 1];
       if (!s || s.key !== key) {
@@ -239,7 +231,7 @@ export default function RegistryScreen() {
         };
         out.push(s);
       }
-      s.data.push({ ...l, seq: i });
+      s.data.push(l);
     });
     return { sections: out, readAsWords: asWords };
   }, [query, parsed, category, arrangement, near, here]);
@@ -276,9 +268,8 @@ export default function RegistryScreen() {
               kicker="Part Two"
               title="The Registry"
               note="Every designated landmark in the city, set out as an index."
-              reveal={reveal}
             />
-            <InkIn reveal={reveal} index={1} style={styles.frieze}>
+            <View style={styles.frieze}>
               <View
                 style={styles.friezeArt}
                 accessible
@@ -287,8 +278,8 @@ export default function RegistryScreen() {
               >
                 <SvgXml xml={REGISTRY_FRIEZE_SVG} width="100%" height="100%" />
               </View>
-            </InkIn>
-            <InkIn reveal={reveal} index={2} style={styles.controls}>
+            </View>
+            <View style={styles.controls}>
               <View style={styles.findRow}>
                 <Text style={styles.controlLabel}>Find</Text>
                 <TextInput
@@ -374,7 +365,7 @@ export default function RegistryScreen() {
                   <Text style={styles.nrMark}>※ </Text>National Register
                 </Text>
               </View>
-            </InkIn>
+            </View>
           </View>
         }
         renderSectionHeader={({ section }) => {
@@ -387,26 +378,17 @@ export default function RegistryScreen() {
             />
           );
         }}
-        renderItem={({ item, index, section }) => {
-          const row = (
-            <IndexEntry
-              landmark={item}
-              arrangement={near ? "name" : arrangement}
-              metres={item.metres}
-              visited={!!copy.visited[item.id]}
-              corner={!!copy.corners[item.id]}
-              last={index === section.data.length - 1}
-              onPress={() => router.push(`/landmark/${item.id}`)}
-            />
-          );
-          return item.seq < 12 ? (
-            <InkIn reveal={reveal} index={3 + item.seq} step={0.04}>
-              {row}
-            </InkIn>
-          ) : (
-            row
-          );
-        }}
+        renderItem={({ item, index, section }) => (
+          <IndexEntry
+            landmark={item}
+            arrangement={near ? "name" : arrangement}
+            metres={item.metres}
+            visited={!!copy.visited[item.id]}
+            corner={!!copy.corners[item.id]}
+            last={index === section.data.length - 1}
+            onPress={() => router.push(`/landmark/${item.id}`)}
+          />
+        )}
         ListEmptyComponent={
           near && where.state !== "here" ? null : (
             <View style={styles.empty}>
@@ -524,7 +506,7 @@ function SectionHead({
       accessibilityHint={onNarrow ? "Shows only these" : undefined}
     >
       {section.architect ? (
-        <ArchitectPortrait architect={section.architect} width={76} style={styles.headPortrait} />
+        <ArchitectPortrait architect={section.architect} width={76} animated={false} style={styles.headPortrait} />
       ) : null}
       <View style={styles.sectionTitleRow}>
         <Text style={styles.sectionTitle} numberOfLines={2}>

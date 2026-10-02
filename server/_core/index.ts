@@ -86,7 +86,7 @@ async function startServer() {
         .replace(/(?<!<strong>[^<]*)\*([^*]+)\*/g, "<em>$1</em>")
         .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>')
         .replace(/\n{2,}/g, "\n<p>\n").replace(/\n(?!<)/g, "<br>\n");
-      res.send(`<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Privacy Policy — Berkeley Landmarks</title><style>body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#F7F3EC;color:#2A2520;max-width:720px;margin:0 auto;padding:32px 20px;line-height:1.6}h1,h2,h3{color:#1E3F32}a{color:#3D6B5C}</style></head><body>${body}</body></html>`);
+      res.send(`<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Privacy Policy — Berkeley Tours</title><style>body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#F7F3EC;color:#2A2520;max-width:720px;margin:0 auto;padding:32px 20px;line-height:1.6}h1,h2,h3{color:#1E3F32}a{color:#3D6B5C}</style></head><body>${body}</body></html>`);
     } catch (e: any) {
       res.status(500).send("Privacy policy unavailable");
     }

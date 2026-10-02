@@ -7,7 +7,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ArchitectPortrait } from "@/components/architect-portrait";
 import { EntryPage, RunningHead } from "@/components/entry-page";
 import { Annotation, Arrow, Bar, Rule } from "@/components/print";
-import { FONT, INK, MARGIN, PAGE_TURN_MS, TYPE } from "@/constants/book";
+import { FONT, INK, MARGIN, TYPE } from "@/constants/book";
 import { BIOGRAPHIES, citations } from "@/lib/architect-bios";
 import { ARCHITECTS, worksBy, type ArchitectKey } from "@/lib/architects";
 
@@ -43,7 +43,7 @@ export default function ArchitectScreen() {
 
       {/* The sitter, held in frame while the text scrolls beneath */}
       <View style={styles.sitter}>
-        <ArchitectPortrait architect={architect.key} width={112} delay={PAGE_TURN_MS * 0.6} loop={focused} />
+        <ArchitectPortrait architect={architect.key} width={112} animated={false} loop={focused} />
         <View style={styles.sitterText}>
           <Bar />
           <Text style={[TYPE.kicker, styles.kicker]}>{architect.years}</Text>

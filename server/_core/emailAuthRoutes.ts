@@ -3,6 +3,7 @@ import type { Express, Request, Response } from "express";
 import { RateLimitError, requestCode, verifyCode } from "./emailAuth";
 import { getSessionCookieOptions } from "./cookies";
 import { sdk } from "./sdk";
+import { HttpError } from "../../shared/_core/errors.js";
 
 function getUserJson(user: {
   id?: number;
@@ -66,7 +67,9 @@ async function handleVerifyCode(req: Request, res: Response) {
     });
     const cookieOptions = getSessionCookieOptions(req);
     res.cookie(COOKIE_NAME, sessionToken, { ...cookieOptions, maxAge: ONE_YEAR_MS });
-    res.json({ success: true, user: getUserJson(user) });
+    // The app on a phone keeps no cookies: it signs each call with this
+    // token instead (as the OAuth mobile flow does with app_session_id).
+    res.json({ success: true, user: getUserJson(user), sessionToken });
   } catch (error) {
     console.error("[EmailAuth] verify-code failed:", error);
     const message = error instanceof Error ? error.message : "Verification failed";
@@ -94,13 +97,19 @@ export function registerEmailAuthRoutes(app: Express) {
   });
 
   // Current authenticated user (cookie or Bearer token).
+  // A 401 means the session is gone (the app then lets it go); any other
+  // failure is the server's, and the app keeps its reader signed in.
   app.get("/api/auth/me", async (req: Request, res: Response) => {
     try {
       const user = await sdk.authenticateRequest(req);
       res.json({ user: getUserJson(user) });
     } catch (error) {
+      if (error instanceof HttpError && (error.statusCode === 401 || error.statusCode === 403)) {
+        res.status(401).json({ error: "Not authenticated", user: null });
+        return;
+      }
       console.error("[Auth] /api/auth/me failed:", error);
-      res.status(401).json({ error: "Not authenticated", user: null });
+      res.status(503).json({ error: "Couldn't check the session just now", user: null });
     }
   });
 }

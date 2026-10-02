@@ -56,13 +56,13 @@ export async function logout(): Promise<void> {
   await apiCall<void>("/api/auth/logout", { method: "POST" });
 }
 
-interface AuthUser {
+export interface AuthUser {
   id: number;
   openId: string;
   name: string | null;
   email: string | null;
   loginMethod: string | null;
-  lastSignedIn: string;
+  lastSignedIn?: string;
 }
 
 export async function getMe(): Promise<AuthUser | null> {
@@ -71,6 +71,30 @@ export async function getMe(): Promise<AuthUser | null> {
     return result.user || null;
   } catch {
     return null;
+  }
+}
+
+/**
+ * Asks the server whether this phone's session still holds: the reader if it
+ * does, null if it's gone (expired, or the account deleted), and undefined
+ * if the server couldn't say (offline, or having trouble of its own).
+ */
+export async function checkSession(): Promise<AuthUser | null | undefined> {
+  const baseUrl = getApiBaseUrl().replace(/\/$/, "");
+  if (!baseUrl && Platform.OS !== "web") return undefined;
+  const headers: Record<string, string> = {};
+  if (Platform.OS !== "web") {
+    const token = await Auth.getSessionToken();
+    if (token) headers["Authorization"] = `Bearer ${token}`;
+  }
+  try {
+    const response = await fetch(`${baseUrl}/api/auth/me`, { headers, credentials: "include" });
+    if (response.status === 401) return null;
+    if (!response.ok) return undefined;
+    const body = (await response.json()) as { user?: AuthUser | null };
+    return body.user ?? null;
+  } catch {
+    return undefined;
   }
 }
 

@@ -40,6 +40,11 @@ function safeEqualHex(a: string, b: string): boolean {
   return timingSafeEqual(bufA, bufB);
 }
 
+/** Whether this is App Review's address (REVIEW_EMAIL, with a six-figure REVIEW_CODE). */
+export function isReviewEmail(email: string): boolean {
+  return !!ENV.reviewEmail && /^\d{6}$/.test(ENV.reviewCode) && normalizeEmail(email) === ENV.reviewEmail;
+}
+
 function generateCode(): string {
   return String(randomInt(0, 1_000_000)).padStart(6, "0");
 }
@@ -101,15 +106,21 @@ export async function requestCode(rawEmail: string): Promise<{ expiresInMinutes:
     .set({ consumedAt: new Date() })
     .where(and(eq(loginCodes.email, email), isNull(loginCodes.consumedAt)));
 
-  const code = generateCode();
+  // App Review signs in with a standing code instead of an emailed one.
+  const review = isReviewEmail(email);
+  const code = review ? ENV.reviewCode : generateCode();
   await db.insert(loginCodes).values({
     email,
     codeHash: hashCode(email, code),
+    // Written here, not left to the column's default: MySQL's now() is in
+    // the server's local time and the window above is in UTC, so defaulted
+    // codes never fell inside it and the limit never held.
+    createdAt: new Date(),
     expiresAt: new Date(Date.now() + CODE_TTL_MINUTES * 60 * 1000),
     attempts: 0,
   });
 
-  await sendCodeEmail(email, code);
+  if (!review) await sendCodeEmail(email, code);
 
   return { expiresInMinutes: CODE_TTL_MINUTES };
 }

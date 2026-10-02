@@ -7,6 +7,9 @@ export const ENV = {
   ownerEmail: process.env.OWNER_EMAIL ?? "",
   resendApiKey: process.env.RESEND_API_KEY ?? "",
   emailFrom: process.env.EMAIL_FROM ?? "Berkeley Tours <onboarding@resend.dev>",
+  /** App Review's sign-in: this address signs in with REVIEW_CODE, no email sent. Off unless both are set. */
+  reviewEmail: (process.env.REVIEW_EMAIL ?? "").trim().toLowerCase(),
+  reviewCode: process.env.REVIEW_CODE ?? "",
   isProduction: process.env.NODE_ENV === "production",
   forgeApiUrl: process.env.BUILT_IN_FORGE_API_URL ?? "",
   forgeApiKey: process.env.BUILT_IN_FORGE_API_KEY ?? "",

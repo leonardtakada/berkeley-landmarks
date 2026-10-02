@@ -46,7 +46,9 @@ Auto Indicator LLC — in the Appendix only, never on the cover.
   page, so a turn clears them first: all of them fade out quickly, change
   while they're away, and fade back as the leaf lands — nothing moves but the
   leaf, which starts `PAGE_TURN_DELAY_MS` behind the fade.
-- **Sections**: leaves bound at the left spine, ~650ms page turn
+- **Sections**: leaves bound at the left spine, ~500ms page turn that
+  lands flat rather than easing to rest (a leaf creeping its last degrees
+  drew its type soft, read as a blur; `PAGE_EASING` in `lib/page-turn.ts`)
   (`components/book-pages.tsx`). Part One The Tours, Part Two The Registry,
   Appendix. The book begins at the head-band: the strip above it (the status
   bar) is not the book, and stays put in the open page's stock — paper, or
@@ -55,7 +57,9 @@ Auto Indicator LLC — in the Appendix only, never on the cover.
   the band instead of rising past it, and the ribbons always hang over paper.
   (The frame clips, so a lifted leaf can't be drawn over the ribbons.)
   The leaf is flat paper all the way over: no shading as it tilts and no
-  shadow cast on the page beneath, which read as a blur.
+  shadow cast on the page beneath, which read as a blur. The page beneath
+  is fully printed before it's uncovered — nothing on it fades or settles
+  in after the turn.
 - **Entries**: leaves laid over the book, hinged at the right
   (`lib/page-turn.ts`); swipe back from the left edge. A tiny haptic tick
   as a leaf turns over (the ribbons tick too). No shade or edge shadow.
@@ -272,9 +276,10 @@ Sans on the maps), the inks and stock, the sources of the registry, the maps
 (`app/about.tsx`) says how each part was gathered.
 
 ## Motion
-Page turns, entry leaves, ribbons drawn out, cover printing, printed matter
-fading up on reveal (labels and the frieze with it), labels and portraits
-laid down as an entry settles, the fold-out map. Eased curves, no springs or bounce.
+Page turns, entry leaves, ribbons drawn out, cover printing, the fold-out
+map. Pages themselves arrive printed: text, labels and portraits are sharp
+from the first frame of a turn, never fading or settling in after it. Eased
+curves, no springs or bounce.
 Reduce Motion swaps turns for dissolves and skips the rest.
 
 ### Living illustrations

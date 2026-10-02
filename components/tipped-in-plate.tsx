@@ -53,7 +53,8 @@ export function TippedInPlate({
           <InkPlane color={INK.vermilion} style={[styles.block, { left: offset, top: offset, width, height }]} />
         ) : null}
         <View style={[styles.photo, { width, height }]}>
-          <Image source={source} style={StyleSheet.absoluteFill} resizeMode="cover" />
+          {/* Sized to the plate: a bundled print otherwise takes its own pixel size and is cut off. */}
+          <Image source={source} style={{ width, height }} resizeMode="cover" />
           {/* One-ink duotone: drain the colour, screen in the blue, multiply the cream. */}
           <View pointerEvents="none" style={[StyleSheet.absoluteFill, styles.grey]} />
           <View pointerEvents="none" style={[StyleSheet.absoluteFill, styles.ink]} />

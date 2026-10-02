@@ -6,15 +6,16 @@ import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { ArchitectPortrait } from "@/components/architect-portrait";
-import { ChapterOpener, InkIn, SectionPage, useFirstReveal } from "@/components/book-page";
+import { ChapterOpener, SectionPage } from "@/components/book-page";
 import { Arrow, InkPlane, Rule } from "@/components/print";
 import { ScrollClock, useScrollClockHandler } from "@/components/scroll-clock";
 import { FONT, INK, MARGIN, PAPER, TYPE } from "@/constants/book";
-import { useAuth } from "@/hooks/use-auth";
+import { forgetSession, isSignedOutError, useAuth } from "@/hooks/use-auth";
 import { tours } from "@/data/tours";
 import { ARCHITECTS, worksBy, type ArchitectKey } from "@/lib/architects";
 import { commonsPhotographers, otherPhotoSources } from "@/lib/credits";
 import { useReaderCopy } from "@/lib/reader-copy-context";
+import { trpc } from "@/lib/trpc";
 
 const PHOTOGRAPHERS = commonsPhotographers();
 const OTHER_SOURCES = otherPhotoSources();
@@ -40,9 +41,9 @@ const GALLERY: ArchitectKey[] = [
 export default function AppendixScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const reveal = useFirstReveal();
   const clock = useScrollClockHandler();
   const { user, logout } = useAuth({ autoFetch: true });
+  const closeAccount = trpc.auth.deleteAccount.useMutation();
   const { copy } = useReaderCopy();
   const walked = tours.filter((t) => copy.walked[t.id]).length;
   const visited = Object.keys(copy.visited).length;
@@ -62,13 +63,12 @@ export default function AppendixScreen() {
           kicker="Appendix"
           title="The Architects"
           note="The hands behind many of the city's landmarks."
-          reveal={reveal}
         />
 
         {/* The label sheet */}
         <View style={styles.gallery}>
           {GALLERY.map((k, i) => (
-            <InkIn key={k} reveal={reveal} index={2 + i} step={0.1} style={styles.sitter}>
+            <View key={k} style={styles.sitter}>
               <Pressable
                 onPress={() => router.push(`/architect/${k}`)}
                 style={({ pressed }) => [styles.sitterInner, pressed && { opacity: 0.6 }]}
@@ -100,12 +100,12 @@ export default function AppendixScreen() {
                 <Text style={styles.link}>Biography</Text>
                 <Arrow length={16} />
               </Pressable>
-            </InkIn>
+            </View>
           ))}
         </View>
 
         {/* The owner's plate */}
-        <InkIn reveal={reveal} index={7} style={styles.plateWrap}>
+        <View style={styles.plateWrap}>
           <InkPlane color={INK.blue} style={styles.bookplate}>
             <View style={styles.plateSun} />
             <Text style={styles.exLibris}>Your Guide</Text>
@@ -119,9 +119,49 @@ export default function AppendixScreen() {
             )}
           </InkPlane>
           {user ? (
-            <Pressable onPress={logout} hitSlop={8} style={styles.plateAction}>
-              <Text style={styles.link}>Sign out</Text>
-            </Pressable>
+            <View style={styles.accountRow}>
+              <Pressable onPress={logout} hitSlop={8} style={styles.plateAction} accessibilityRole="button">
+                <Text style={styles.link}>Sign out</Text>
+              </Pressable>
+              <Pressable
+                onPress={() =>
+                  Alert.alert(
+                    "Delete your account?",
+                    "Your sign-in is deleted from the guide's server, with any photographs, corrections and proposals the editors haven't yet printed. What they've printed stays in the guide, with no name on it. Your stamps and visits stay on this phone.",
+                    [
+                      { text: "Keep it", style: "cancel" },
+                      {
+                        text: "Delete",
+                        style: "destructive",
+                        onPress: async () => {
+                          try {
+                            await closeAccount.mutateAsync();
+                            await forgetSession();
+                            Alert.alert("Your account is deleted", "You can sign in again any time; it starts a new one.");
+                          } catch (e) {
+                            if (isSignedOutError(e)) {
+                              await forgetSession();
+                              Alert.alert("Sign in again first", "Your sign-in had lapsed. Sign in, then delete the account.");
+                            } else {
+                              Alert.alert("Couldn't delete the account", "The guide couldn't reach its editors. Try again in a moment.");
+                            }
+                          }
+                        },
+                      },
+                    ],
+                  )
+                }
+                disabled={closeAccount.isPending}
+                hitSlop={8}
+                style={[styles.plateAction, closeAccount.isPending && { opacity: 0.5 }]}
+                accessibilityRole="button"
+                accessibilityHint="Asks before deleting"
+              >
+                <Text style={[styles.link, styles.deleteLink]}>
+                  {closeAccount.isPending ? "Deleting…" : "Delete your account"}
+                </Text>
+              </Pressable>
+            </View>
           ) : (
             <>
               <Pressable onPress={() => router.push("/login")} hitSlop={8} style={styles.plateAction}>
@@ -131,10 +171,10 @@ export default function AppendixScreen() {
               <Text style={styles.plateNote}>Needed only to send photographs and corrections to the editors.</Text>
             </>
           )}
-        </InkIn>
+        </View>
 
         {/* The reader's stamps */}
-        <InkIn reveal={reveal} index={8} style={styles.propose}>
+        <View style={styles.propose}>
           <Rule color={INK.charcoal} weight={1} />
           <Text style={[TYPE.kicker, styles.colophonHead]}>Stamps</Text>
           <Text style={styles.colophonBody}>
@@ -157,10 +197,10 @@ export default function AppendixScreen() {
             <Text style={styles.link}>Your stamps</Text>
             <Arrow length={16} />
           </Pressable>
-        </InkIn>
+        </View>
 
         {/* Proposals */}
-        <InkIn reveal={reveal} index={9} style={styles.propose}>
+        <View style={styles.propose}>
           <Rule color={INK.charcoal} weight={1} />
           <Text style={[TYPE.kicker, styles.colophonHead]}>A place for the guide</Text>
           <Text style={styles.colophonBody}>
@@ -183,10 +223,10 @@ export default function AppendixScreen() {
             <Text style={styles.proposeText}>Propose a landmark</Text>
             <Arrow length={22} color={PAPER.cover} />
           </Pressable>
-        </InkIn>
+        </View>
 
         {/* Colophon */}
-        <InkIn reveal={reveal} index={10} style={styles.colophon}>
+        <View style={styles.colophon}>
           <Rule color={INK.charcoal} weight={1} />
           <Text style={[TYPE.kicker, styles.colophonHead]}>Colophon</Text>
           <Text style={styles.colophonBody}>
@@ -227,7 +267,7 @@ export default function AppendixScreen() {
             <Text style={styles.creditFirm}>Auto Indicator LLC</Text>
           </View>
           <Text style={[TYPE.label, styles.edition]}>© 2026 Auto Indicator LLC · Version {version}</Text>
-        </InkIn>
+        </View>
       </Animated.ScrollView>
       </ScrollClock>
     </SectionPage>
@@ -326,6 +366,13 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 8,
     marginTop: 16,
+  },
+  accountRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  deleteLink: {
+    color: INK.vermilion,
   },
   plateNote: {
     fontFamily: FONT.regular,

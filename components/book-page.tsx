@@ -1,21 +1,10 @@
-import React, { useEffect, useRef } from "react";
-import { StyleSheet, Text, View, type StyleProp, type ViewStyle } from "react-native";
-import Animated, {
-  Easing,
-  interpolate,
-  useAnimatedStyle,
-  useReducedMotion,
-  useSharedValue,
-  withDelay,
-  withTiming,
-  type SharedValue,
-} from "react-native-reanimated";
-import { useIsFocused } from "expo-router";
+import React from "react";
+import { StyleSheet, Text, View } from "react-native";
 
 import { RIBBON_COLUMN, useBookHead } from "@/components/bookmark-ribbons";
 import { PaperSheet } from "@/components/paper-grain";
 import { Bar, DotRule } from "@/components/print";
-import { FONT, INK, MARGIN, PAGE_TURN_DELAY_MS, PAGE_TURN_MS, PAPER, TYPE } from "@/constants/book";
+import { FONT, INK, MARGIN, PAPER, TYPE } from "@/constants/book";
 
 /**
  * A section leaf of the book: paper stock, with content beginning just
@@ -38,56 +27,6 @@ export function SectionPage({
 }
 
 /**
- * 0 → 1 once, the first time this page is turned to — after the leaf has
- * mostly cleared — so printed matter can come up as the page is revealed.
- * (Section pages are bound in while hidden, so mount-time animation would
- * play unseen.)
- */
-export function useFirstReveal(duration = 800): SharedValue<number> {
-  const reduceMotion = useReducedMotion();
-  const focused = useIsFocused();
-  const done = useRef(false);
-  const reveal = useSharedValue(reduceMotion ? 1 : 0);
-
-  useEffect(() => {
-    if (!focused || done.current) return;
-    done.current = true;
-    if (reduceMotion) {
-      reveal.value = 1;
-      return;
-    }
-    reveal.value = withDelay(
-      PAGE_TURN_DELAY_MS + Math.round(PAGE_TURN_MS * 0.45),
-      withTiming(1, { duration, easing: Easing.bezier(0.3, 0, 0.1, 1) }),
-    );
-  }, [focused, duration, reduceMotion, reveal]);
-
-  return reveal;
-}
-
-/** Printed matter coming up with the page reveal; `index` staggers a column. */
-export function InkIn({
-  reveal,
-  index = 0,
-  step = 0.06,
-  style,
-  children,
-}: {
-  reveal: SharedValue<number>;
-  index?: number;
-  step?: number;
-  style?: StyleProp<ViewStyle>;
-  children: React.ReactNode;
-}) {
-  const start = Math.min(0.7, index * step);
-  const anim = useAnimatedStyle(() => {
-    const t = interpolate(reveal.value, [start, start + 0.3], [0, 1], "clamp");
-    return { opacity: t, transform: [{ translateY: (1 - t) * 8 }] };
-  });
-  return <Animated.View style={[style, anim]}>{children}</Animated.View>;
-}
-
-/**
  * Section opener: a vermilion bar and tracked kicker, the title in the
  * cut-paper display face, and a line of description.
  */
@@ -95,16 +34,14 @@ export function ChapterOpener({
   kicker,
   title,
   note,
-  reveal,
   clearRibbons = true,
 }: {
   kicker: string;
   title: string;
   note?: string;
-  reveal?: SharedValue<number>;
   clearRibbons?: boolean;
 }) {
-  const body = (
+  return (
     <View style={[styles.opener, clearRibbons && { paddingRight: RIBBON_COLUMN }]}>
       <Bar />
       <Text style={[TYPE.kicker, styles.kicker]}>{kicker}</Text>
@@ -114,7 +51,6 @@ export function ChapterOpener({
       {note ? <Text style={styles.note}>{note}</Text> : null}
     </View>
   );
-  return reveal ? <InkIn reveal={reveal}>{body}</InkIn> : body;
 }
 
 /** Dotted leader between an entry and its number; fills the space left. */

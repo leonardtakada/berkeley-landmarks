@@ -77,8 +77,8 @@ export const FONT_ASSETS = {
   BerkeleyPost: require("../assets/fonts/BerkeleyPost.otf"),
 };
 
-/** One page turn, cover to colophon. */
-export const PAGE_TURN_MS = 650;
+/** One page turn, cover to colophon: lifted, over, and down flat. */
+export const PAGE_TURN_MS = 500;
 
 /**
  * Turning to a section, the ribbons start to fade away; the leaf starts to

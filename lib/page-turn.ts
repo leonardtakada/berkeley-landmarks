@@ -1,4 +1,5 @@
 import { Easing } from "react-native";
+import { Easing as Ease } from "react-native-reanimated";
 import type {
   StackCardInterpolatedStyle,
   StackCardInterpolationProps,
@@ -24,8 +25,22 @@ import { PAGE_TURN_MS } from "@/constants/book";
  */
 export const PERSPECTIVE = 1500;
 
-/** Paper accelerates as it's lifted and settles as it lands. */
-export const PAGE_EASING = Easing.bezier(0.45, 0.05, 0.2, 1);
+const LIFT = Ease.bezierFn(0.45, 0.05, 0.2, 1);
+/** How far along that curve the leaf is let fall flat. */
+const LANDS_AT = 0.7;
+const LANDED = LIFT(LANDS_AT);
+
+/**
+ * Paper accelerates as it's lifted, and lands: it comes down flat with a
+ * little speed of its own instead of easing to rest. (Eased to rest, a leaf
+ * crept its last few degrees for a third of a second — looking landed, but
+ * tilted enough to draw its type soft, which read as a blur.) A worklet, so
+ * the section leaves (Reanimated) and entry leaves (the stack) share it.
+ */
+export function PAGE_EASING(t: number): number {
+  "worklet";
+  return Math.min(1, LIFT(t * LANDS_AT) / LANDED);
+}
 
 // ---------------------------------------------------------------------------
 // Stack: entry leaves, hinged at the right edge.

@@ -1,9 +1,7 @@
 import React, { useEffect } from "react";
-import { Animated, Platform, Pressable, StyleSheet, Text, View } from "react-native";
+import { Platform, Pressable, StyleSheet, Text, View } from "react-native";
 import * as Haptics from "expo-haptics";
 import { useRouter } from "expo-router";
-import { useCardAnimation } from "expo-router/js-stack";
-import { LinearGradient } from "expo-linear-gradient";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { CornerFold } from "@/components/copy-marks";
@@ -13,8 +11,8 @@ import { INK, MARGIN, PAPER, TYPE } from "@/constants/book";
 
 /**
  * An entry leaf — a landmark or a tour — laid over the book and hinged at
- * its right edge. Carries the paper and the shading the leaf picks up while
- * it is lifted mid-turn.
+ * its right edge: flat paper, with no shading as it turns, so the page is as
+ * sharp mid-turn as when it lands.
  */
 export function EntryPage({ children }: { children: React.ReactNode }) {
   // A tiny tick as the leaf turns over, like the section pages' ribbons.
@@ -25,29 +23,7 @@ export function EntryPage({ children }: { children: React.ReactNode }) {
     <View style={styles.page}>
       <PaperGrain />
       {children}
-      <LiftShade />
     </View>
-  );
-}
-
-/** Darkens the leaf toward its free (left) edge while it is off the page. */
-function LiftShade() {
-  const { current } = useCardAnimation();
-  const opacity = current.progress.interpolate({
-    inputRange: [0, 0.6, 1],
-    outputRange: [0.6, 0.18, 0],
-    extrapolate: "clamp",
-  });
-  return (
-    <Animated.View pointerEvents="none" style={[StyleSheet.absoluteFill, { opacity }]}>
-      <LinearGradient
-        colors={["rgba(40,30,18,0.5)", "rgba(40,30,18,0.18)", "rgba(40,30,18,0.03)"]}
-        locations={[0, 0.45, 1]}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 0 }}
-        style={StyleSheet.absoluteFill}
-      />
-    </Animated.View>
   );
 }
 

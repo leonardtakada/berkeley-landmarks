@@ -5,7 +5,7 @@ import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { ArchitectPortrait } from "@/components/architect-portrait";
-import { ChapterOpener, Folio, InkIn, SectionPage, useFirstReveal } from "@/components/book-page";
+import { ChapterOpener, Folio, SectionPage } from "@/components/book-page";
 import { CheckStamp } from "@/components/copy-marks";
 import { Rule } from "@/components/print";
 import { ScrollClock, useScrollClockHandler } from "@/components/scroll-clock";
@@ -25,7 +25,6 @@ import { useReaderCopy } from "@/lib/reader-copy-context";
 export default function ToursScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const reveal = useFirstReveal();
   const clock = useScrollClockHandler();
   const { copy } = useReaderCopy();
 
@@ -45,19 +44,16 @@ export default function ToursScreen() {
             kicker="Part One"
             title="The Tours"
             note={`${spell(tours.length)} walks through the city, each with its own map.`}
-            reveal={reveal}
           />
         }
         renderItem={({ item, index }) => (
-          <InkIn reveal={reveal} index={2 + index} step={0.07}>
-            <ContentsEntry
-              tour={item}
-              number={index + 1}
-              last={index === tours.length - 1}
-              walked={copy.walked[item.id]}
-              onPress={() => router.push(`/tour/${item.id}`)}
-            />
-          </InkIn>
+          <ContentsEntry
+            tour={item}
+            number={index + 1}
+            last={index === tours.length - 1}
+            walked={copy.walked[item.id]}
+            onPress={() => router.push(`/tour/${item.id}`)}
+          />
         )}
         ListFooterComponent={<Folio>The Tours · Berkeley</Folio>}
       />

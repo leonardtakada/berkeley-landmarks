@@ -16,7 +16,7 @@ import {
 import { Annotation, Arrow, Bar, Rule } from "@/components/print";
 import { ScreenContainer } from "@/components/screen-container";
 import { FONT, INK, MARGIN, PAPER, TYPE } from "@/constants/book";
-import { useAuth } from "@/hooks/use-auth";
+import { forgetSession, isSignedOutError, useAuth } from "@/hooks/use-auth";
 import { pickPhotos, type PreparedPhoto } from "@/lib/photo-prep";
 import { trpc } from "@/lib/trpc";
 import { MAX_PROPOSAL_PHOTOS, proposalError } from "@/shared/proposals";
@@ -75,7 +75,9 @@ export default function ProposeScreen() {
       await submit.mutateAsync(input);
       setSent(true);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Couldn't send the proposal. Try again.");
+      // A lapsed sign-in: the page asks for a new one, keeping what's written.
+      if (isSignedOutError(e)) await forgetSession();
+      else setError(e instanceof Error ? e.message : "Couldn't send the proposal. Try again.");
     }
   };
 

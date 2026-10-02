@@ -1,7 +1,6 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { StyleSheet, View, useWindowDimensions } from "react-native";
 import Animated, {
-  Easing,
   runOnJS,
   useAnimatedStyle,
   useReducedMotion,
@@ -15,7 +14,7 @@ import { useBookHead } from "@/components/bookmark-ribbons";
 import { PaperSheet } from "@/components/paper-grain";
 import { InkPlane } from "@/components/print";
 import { PAGE_TURN_DELAY_MS, PAGE_TURN_MS, PAPER } from "@/constants/book";
-import { PERSPECTIVE } from "@/lib/page-turn";
+import { PAGE_EASING, PERSPECTIVE } from "@/lib/page-turn";
 
 type Route = { key: string; name: string };
 type Descriptors = Record<string, { render: () => React.ReactNode }>;
@@ -25,7 +24,6 @@ type Turn = { id: number; from: string; to: string; forward: boolean };
 
 type Role = "rest" | "moving" | "beneath" | "hidden";
 
-const EASE = Easing.bezier(0.45, 0.05, 0.2, 1);
 const DISSOLVE_MS = 200;
 
 /**
@@ -34,7 +32,7 @@ const DISSOLVE_MS = 200;
  * Turning forward (cover → tours → registry → appendix) lifts the current
  * leaf off by its free edge and swings it over the spine, revealing the next
  * page underneath; turning back brings the previous leaf down over the
- * current one. Both pages are live during the ~650ms turn. The leaf is flat
+ * current one. Both pages are live during the ~500ms turn. The leaf is flat
  * paper throughout — no shading or cast shadow, which read as a blur.
  *
  * The book begins at the head-band. Above it (the status bar's strip) is
@@ -116,7 +114,7 @@ export function BookPages({
     // (A beat behind the ribbons fading out of its way.)
     progress.value = withDelay(
       reduceMotion ? 0 : PAGE_TURN_DELAY_MS,
-      withTiming(1, { duration: reduceMotion ? DISSOLVE_MS : PAGE_TURN_MS, easing: EASE }, (finished) => {
+      withTiming(1, { duration: reduceMotion ? DISSOLVE_MS : PAGE_TURN_MS, easing: PAGE_EASING }, (finished) => {
         if (finished) runOnJS(finish)(id);
       }),
     );

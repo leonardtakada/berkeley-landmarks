@@ -26,9 +26,9 @@ import { Annotation, Arrow, Bar, Rule } from "@/components/print";
 import { ScrollClock, useScrollClockHandler } from "@/components/scroll-clock";
 import { DrawnPlate, TippedInPlate } from "@/components/tipped-in-plate";
 import { getApiBaseUrl } from "@/constants/api";
-import { FONT, INK, MARGIN, PAGE_TURN_MS, PAPER, TYPE } from "@/constants/book";
+import { FONT, INK, MARGIN, PAPER, TYPE } from "@/constants/book";
 import { CATEGORY_LABELS, landmarks, type Landmark } from "@/data/landmarks";
-import { useAuth } from "@/hooks/use-auth";
+import { forgetSession, isSignedOutError, useAuth } from "@/hooks/use-auth";
 import { ARCHITECTS, architectOf, worksBy } from "@/lib/architects";
 import { howFar, placeCheck } from "@/lib/arrival";
 import { photoCredit, photoSource } from "@/lib/photo-source";
@@ -151,11 +151,18 @@ export default function LandmarkEntryScreen() {
       setEditSent(true);
       setTimeout(() => setEditOpen(false), 1600);
     } catch (e: any) {
-      Alert.alert("Couldn't send the correction", e?.message ?? "Something went wrong.");
+      if (isSignedOutError(e)) {
+        await forgetSession();
+        setEditOpen(false);
+        Alert.alert("Sign in again", "Your sign-in had lapsed. Sign in, and send it again.", [
+          { text: "Not now", style: "cancel" },
+          { text: "Sign in", onPress: () => router.push("/login") },
+        ]);
+      } else Alert.alert("Couldn't send the correction", e?.message ?? "Something went wrong.");
     } finally {
       setEditSending(false);
     }
-  }, [landmark, editFields, editNote, submitEdit]);
+  }, [landmark, editFields, editNote, submitEdit, router]);
 
   const addPhotos = useCallback(async () => {
     if (!user) {
@@ -178,7 +185,13 @@ export default function LandmarkEntryScreen() {
       }
       setUploaded(sent);
     } catch (e: any) {
-      Alert.alert("Couldn't add the photographs", e?.message ?? "Something went wrong.");
+      if (isSignedOutError(e)) {
+        await forgetSession();
+        Alert.alert("Sign in again", "Your sign-in had lapsed. Sign in, and send it again.", [
+          { text: "Not now", style: "cancel" },
+          { text: "Sign in", onPress: () => router.push("/login") },
+        ]);
+      } else Alert.alert("Couldn't add the photographs", e?.message ?? "Something went wrong.");
     } finally {
       setUploading(false);
     }
@@ -292,7 +305,7 @@ export default function LandmarkEntryScreen() {
         {/* The architect, drawn */}
         {architect ? (
           <View style={[styles.block, styles.architect]}>
-            <ArchitectPortrait architect={architect} width={108} delay={PAGE_TURN_MS} />
+            <ArchitectPortrait architect={architect} width={108} animated={false} />
             <View style={styles.architectText}>
               <Text style={TYPE.label}>The Architect</Text>
               <Text style={styles.architectName}>{ARCHITECTS[architect].name}</Text>

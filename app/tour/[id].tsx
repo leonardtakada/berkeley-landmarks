@@ -12,7 +12,7 @@ import { Annotation, Arrow, Bar, Rule } from "@/components/print";
 import { ScrollClock, useScrollClockHandler } from "@/components/scroll-clock";
 import { TravelStamp } from "@/components/travel-stamp";
 import { WalkLabel } from "@/components/walk-label";
-import { FONT, INK, MARGIN, PAGE_TURN_MS, PAPER, TYPE, chapterNo } from "@/constants/book";
+import { FONT, INK, MARGIN, PAPER, TYPE, chapterNo } from "@/constants/book";
 import { landmarks } from "@/data/landmarks";
 import { tours } from "@/data/tours";
 import { ARCHITECTS, architectOf, architectsOnTour } from "@/lib/architects";
@@ -70,7 +70,7 @@ export default function TourChapterScreen() {
         {/* Chapter opener */}
         <View style={styles.opener}>
           <View style={styles.labelBox}>
-            <WalkLabel tourId={tour.id} title={tour.name} width={140} delay={PAGE_TURN_MS * 0.6} />
+            <WalkLabel tourId={tour.id} title={tour.name} width={140} animated={false} />
             {walked ? (
               <View style={styles.ring} accessible accessibilityLabel={`Stamped: walked ${formatDay(walked)}`}>
                 <RingStamp walk={index + 1} day={walked} size={84} />
@@ -111,7 +111,7 @@ export default function TourChapterScreen() {
         {/* The walk's own architect */}
         {lead ? (
           <View style={[styles.block, styles.leadRow]}>
-            <ArchitectPortrait architect={lead} width={116} delay={PAGE_TURN_MS} />
+            <ArchitectPortrait architect={lead} width={116} animated={false} />
             <View style={styles.leadText}>
               <Text style={TYPE.label}>Your guide on this walk</Text>
               <Text style={styles.leadName}>{ARCHITECTS[lead].name}</Text>
@@ -145,7 +145,7 @@ export default function TourChapterScreen() {
               <View style={styles.cameoRow}>
                 {others.map((k, i) => (
                   <View key={k} style={styles.cameo}>
-                    <ArchitectPortrait architect={k} width={64} delay={PAGE_TURN_MS + 120 * (i + 1)} />
+                    <ArchitectPortrait architect={k} width={64} animated={false} />
                     <Text style={styles.cameoName}>{ARCHITECTS[k].surname}</Text>
                   </View>
                 ))}
