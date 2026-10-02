@@ -4,6 +4,7 @@ import {
   ActivityIndicator,
   Alert,
   KeyboardAvoidingView,
+  Linking,
   Modal,
   Platform,
   Pressable,
@@ -31,9 +32,11 @@ import { CATEGORY_LABELS, landmarks, type Landmark } from "@/data/landmarks";
 import { forgetSession, isSignedOutError, useAuth } from "@/hooks/use-auth";
 import { ARCHITECTS, architectOf, worksBy } from "@/lib/architects";
 import { howFar, placeCheck } from "@/lib/arrival";
+import { isLapsed, type Watch } from "@/lib/watches";
 import { photoCredit, photoSource } from "@/lib/photo-source";
 import { pickPhotos } from "@/lib/photo-prep";
 import { useReaderCopy } from "@/lib/reader-copy-context";
+import { useWatchPlaces } from "@/lib/watch-places";
 import { trpc } from "@/lib/trpc";
 import { whereYouAre } from "@/lib/where-you-are";
 
@@ -83,6 +86,7 @@ export default function LandmarkEntryScreen() {
   const submitEdit = trpc.submissions.submit.useMutation();
   const { user } = useAuth({ autoFetch: true });
   const { copy, mark } = useReaderCopy();
+  const { ledger, toggle, retire, activeWatches } = useWatchPlaces();
 
   const [uploading, setUploading] = useState(false);
   const [uploaded, setUploaded] = useState(0);
@@ -273,10 +277,21 @@ export default function LandmarkEntryScreen() {
             word="Visited"
             day={copy.visited[landmark.id]}
             prompt="Mark as visited"
-            onStamp={() => mark("visited", landmark.id, true)}
+            onStamp={() => {
+              mark("visited", landmark.id, true);
+              // The stamp retires the watch: watch → go → stamped.
+              void retire(landmark.id);
+            }}
             onErase={() => mark("visited", landmark.id, false)}
             check={() => visitCheck(landmark)}
             style={styles.visited}
+          />
+          <WatchToggle
+            landmark={landmark}
+            watch={ledger.watches[landmark.id]}
+            oldest={activeWatches[0]}
+            onToggle={() => toggle(landmark)}
+            onRetire={retire}
           />
         </View>
 
@@ -537,6 +552,33 @@ const styles = StyleSheet.create({
   visited: {
     marginTop: 16,
   },
+  watchRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    marginTop: 14,
+  },
+  watchEye: {
+    width: 9,
+    height: 9,
+    borderRadius: 5,
+    backgroundColor: INK.vermilion,
+  },
+  watchEyeOutline: {
+    width: 9,
+    height: 9,
+    borderRadius: 5,
+    borderWidth: 1.2,
+    borderColor: INK.sepia,
+  },
+  watchText: {
+    flexShrink: 1,
+    fontFamily: FONT.medium,
+    fontSize: 11.5,
+    letterSpacing: 1.6,
+    textTransform: "uppercase",
+    color: INK.vermilion,
+  },
   address: {
     fontFamily: FONT.regular,
     fontSize: 15,
@@ -739,4 +781,118 @@ async function visitCheck(landmark: Landmark): Promise<string | null> {
   if (at) return null;
   if (unsure) return "Your position is too rough to tell just now. Try again in a moment, in the open.";
   return `You’re ${howFar(metres)} away. A visit is stamped on the spot.`;
+}
+
+/**
+ * The watch toggle: “Watch this place,” in the guide's small capitals, with
+ * a vermilion eye when set. Watching asks for location at the moment of
+ * intent; denied, it holds as a bookmark. A watch six months unvisited is
+ * asked after — kept, or let go — never renewed silently. A reader's fullest
+ * case holds twenty watches; the twenty-first offers to let the oldest go.
+ */
+function WatchToggle({
+  landmark,
+  watch,
+  oldest,
+  onToggle,
+  onRetire,
+}: {
+  landmark: Landmark;
+  watch: Watch | undefined;
+  /** The longest-standing watch, offered up when the case is full. */
+  oldest: Watch | undefined;
+  onToggle: () => Promise<"watching" | "removed" | "full" | "denied">;
+  onRetire: (landmarkId: string) => Promise<void>;
+}) {
+  const live = watch && watch.status !== "retired";
+  const lapsed = live && isLapsed(watch);
+  const waiting = watch?.status === "fired";
+
+  const settings = {
+    text: "Open Settings",
+    onPress: () => void Linking.openSettings(),
+  };
+
+  const press = async () => {
+    // A bookmark asks first: the reader may want it to notify, not to go.
+    if (live && !watch.notifying) {
+      Alert.alert(
+        "Kept as a bookmark",
+        "To say when you're near, the guide needs your location set to Always and its notices allowed.",
+        [{ text: "Not now", style: "cancel" }, settings, { text: "Stop watching", style: "destructive", onPress: () => void onToggle() }],
+      );
+      return;
+    }
+    const result = await onToggle();
+    if (result === "full") {
+      const name = oldest ? landmarks.find((l) => l.id === oldest.landmarkId)?.name : undefined;
+      Alert.alert(
+        "The case holds twenty",
+        `A reader's fullest case holds twenty watches.${name ? ` Let ${name}, the longest watched, go to make room?` : ""}`,
+        [
+          { text: "Not now", style: "cancel" },
+          ...(oldest && name
+            ? [
+                {
+                  text: `Let ${name} go`,
+                  onPress: async () => {
+                    await onRetire(oldest.landmarkId);
+                    await press();
+                  },
+                },
+              ]
+            : []),
+        ],
+      );
+    } else if (result === "denied") {
+      Alert.alert(
+        "Kept as a bookmark",
+        "To say when you're near, the guide needs your location set to Always and its notices allowed. Until then the place is kept here, in your copy.",
+        [{ text: "Not now", style: "cancel" }, settings],
+      );
+    }
+  };
+
+  // “Still watching?” — asked on the page, never by notice. Keep, or let go.
+  if (live && lapsed) {
+    return (
+      <View style={styles.watchRow}>
+        <View style={styles.watchEye} />
+        <Pressable
+          onPress={() =>
+            Alert.alert("Still watching?", `It's been half a year since you chose ${landmark.name}.`, [
+              { text: "Let it go", style: "destructive", onPress: () => void onRetire(landmark.id) },
+              { text: "Keep watching", style: "cancel" },
+            ])
+          }
+          style={({ pressed }) => [pressed && { opacity: 0.5 }]}
+          accessibilityRole="button"
+        >
+          <Text style={styles.watchText}>Still watching this place? · keep or let go</Text>
+        </Pressable>
+      </View>
+    );
+  }
+
+  return (
+    <Pressable
+      onPress={press}
+      hitSlop={8}
+      style={({ pressed }) => [styles.watchRow, pressed && { opacity: 0.5 }]}
+      accessibilityRole="button"
+      accessibilityLabel={live ? `Watching ${landmark.name}` : `Watch ${landmark.name}`}
+      accessibilityHint={live ? "Stops watching it" : "The guide will say when you're near it"}
+    >
+      {live ? <View style={styles.watchEye} /> : <View style={styles.watchEyeOutline} />}
+      <Text style={[styles.watchText, !live && { color: INK.sepia }]}>
+        {!live
+          ? "Watch this place"
+          : !watch.notifying
+            ? "Kept as a bookmark · notices need Always location"
+            : waiting
+              ? "Watching · its notice went out — walk up and stamp it"
+              : "Watching · the guide will say when you're near"}
+      </Text>
+    </Pressable>
+  );
 }

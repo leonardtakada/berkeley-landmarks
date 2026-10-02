@@ -62,9 +62,9 @@
 	<key>NSLocalNetworkUsageDescription</key>
 	<string>Expo Dev Launcher uses the local network to discover and connect to development servers running on your computer.</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-	<string>The guide uses your location to show where you are on the map, to collect each stop of a walk as you reach it, and to stamp the places you visit.</string>
+	<string>The guide uses your location to show where you are on the map, to collect each stop of a walk as you reach it, and to stamp the places you visit — and, for a place you ask it to watch, to tell you when you're near, even with the guide closed. Your location stays on this phone.</string>
 	<key>NSLocationAlwaysUsageDescription</key>
-	<string>The guide uses your location to show where you are on the map, to collect each stop of a walk as you reach it, and to stamp the places you visit.</string>
+	<string>The guide uses your location to show where you are on the map, to collect each stop of a walk as you reach it, and to stamp the places you visit — and, for a place you ask it to watch, to tell you when you're near, even with the guide closed. Your location stays on this phone.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>The guide uses your location to show where you are on the map, to collect each stop of a walk as you reach it, and to stamp the places you visit.</string>
 	<key>NSMicrophoneUsageDescription</key>
@@ -86,6 +86,10 @@
 		<key>UIApplicationSupportsMultipleScenes</key>
 		<false/>
 	</dict>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>location</string>
+	</array>
 	<key>UILaunchStoryboardName</key>
 	<string>SplashScreen</string>
 	<key>UIRequiredDeviceCapabilities</key>

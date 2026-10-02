@@ -14,6 +14,7 @@ import { landmarks } from "@/data/landmarks";
 import { tours } from "@/data/tours";
 import { formatDay } from "@/lib/reader-copy";
 import { useReaderCopy } from "@/lib/reader-copy-context";
+import { useWatchPlaces } from "@/lib/watch-places";
 
 const byId = new Map(landmarks.map((l) => [l.id, l]));
 
@@ -28,6 +29,7 @@ export default function StampsScreen() {
   const clock = useScrollClockHandler();
   const { width } = useWindowDimensions();
   const { copy } = useReaderCopy();
+  const { ledger } = useWatchPlaces();
 
   const cols = 3;
   const gap = 14;
@@ -44,6 +46,9 @@ export default function StampsScreen() {
     .filter(([id]) => byId.has(id))
     .sort(([, a], [, b]) => b.localeCompare(a));
   const walked = tours.filter((t) => copy.walked[t.id]).length;
+  const watching = Object.values(ledger.watches)
+    .filter((w) => w.status !== "retired" && byId.has(w.landmarkId))
+    .sort((a, b) => b.watchedAt.localeCompare(a.watchedAt));
 
   return (
     <EntryPage>
@@ -133,6 +138,42 @@ export default function StampsScreen() {
                   ))}
                 </View>
               ))
+            )}
+          </View>
+
+          {/* Places you're watching */}
+          <View style={styles.block}>
+            <View style={styles.head}>
+              <Text style={TYPE.label}>Places you&apos;re watching</Text>
+              <Text style={styles.count}>{watching.length}</Text>
+            </View>
+            <Rule color={INK.charcoal} weight={1} />
+            {watching.length === 0 ? (
+              <Text style={styles.hint}>
+                Turn a page of the guide toward a place — “Watch this place” on its entry — and the guide will say, next time
+                you&apos;re near it with the phone in your pocket, that it&apos;s close by.
+              </Text>
+            ) : (
+              watching.map((w) => {
+                const l = byId.get(w.landmarkId)!;
+                const waiting = w.status === "fired";
+                return (
+                  <Pressable
+                    key={w.landmarkId}
+                    onPress={() => router.push(`/landmark/${w.landmarkId}`)}
+                    style={({ pressed }) => [styles.entry, pressed && { opacity: 0.5 }]}
+                    accessibilityRole="button"
+                    accessibilityLabel={`${l.name}${waiting ? ", waiting at the door" : ", watching"}`}
+                  >
+                    <View style={styles.watchDot} />
+                    <Text style={styles.entryName} numberOfLines={1}>
+                      {l.name}
+                    </Text>
+                    <Leader />
+                    <Text style={styles.watchNote}>{waiting ? "waiting at the door" : w.notifying ? "watching" : "kept as a bookmark"}</Text>
+                  </Pressable>
+                );
+              })
             )}
           </View>
 
@@ -262,6 +303,23 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "flex-end",
     paddingVertical: 8,
+  },
+  watchDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    borderColor: INK.vermilion,
+    borderWidth: 1.3,
+    marginRight: 8,
+    marginBottom: 6,
+  },
+  watchNote: {
+    fontFamily: FONT.medium,
+    fontSize: 10.5,
+    letterSpacing: 1,
+    color: INK.vermilion,
+    marginBottom: 2,
+    marginLeft: 8,
   },
   entryName: {
     flexShrink: 1,

@@ -11,6 +11,7 @@ import { Platform } from "react-native";
 import "@/lib/_core/nativewind-pressable";
 import { ThemeProvider } from "@/lib/theme-provider";
 import { ReaderCopyProvider } from "@/lib/reader-copy-context";
+import { WatchPlacesProvider } from "@/lib/watch-places";
 import { trpc, createTRPCClient } from "@/lib/trpc";
 import { SourceSerif4_400Regular } from "@expo-google-fonts/source-serif-4/400Regular";
 import { SourceSerif4_500Medium } from "@expo-google-fonts/source-serif-4/500Medium";
@@ -108,6 +109,7 @@ export default function RootLayout() {
 
   const content = (
     <GestureHandlerRootView style={{ flex: 1 }}>
+      <WatchPlacesProvider>
       <ReaderCopyProvider>
         <QueryClientProvider client={queryClient}>
           <trpc.Provider client={trpcClient} queryClient={queryClient}>
@@ -146,6 +148,7 @@ export default function RootLayout() {
           </trpc.Provider>
         </QueryClientProvider>
       </ReaderCopyProvider>
+      </WatchPlacesProvider>
     </GestureHandlerRootView>
   );
 

@@ -260,13 +260,31 @@ Stamps are earned on the spot (`lib/arrival.ts`):
   its label on its page, a tick on the Tours contents, and its stamp in the
   Appendix. There's no stamping it by hand.
 - **Turned-down pages**: the corner in an entry's running head.
+- **Watched places** ("Watch this place" on an entry; `lib/watches.ts`,
+  `lib/watch-places.tsx`, spec in `docs/nearby-notifications-requirements.md`):
+  an OS geofence at the place's visit radius, so a notice — "You're at the
+  door of…", "walking the edge of…" for a district — can come with the app
+  closed. Never more than one an hour or three a day; tapping it opens the
+  entry and retires the watch, as does stamping the place; a notice left
+  unread re-arms after thirty days. Twenty at most (iOS's region limit);
+  half a year on, the entry asks "still watching?". Always-location and
+  notices are asked for only at the tap; refused, the watch is kept as a
+  bookmark. A vermilion eye on the entry, ring in the Registry, pin on the
+  map, and a list on the Stamps page.
+  Built to survive the OS's habits: the task is defined when the module is
+  first read (a fence wakes the app headless, before any screen); fences are
+  re-set only when they change (each setting reports every fence the reader
+  stands in as newly entered); every ledger change, here or in the task,
+  goes through one lock; and each place's notice has one identifier, so a
+  repeat replaces rather than stacks.
 - **Stamps** (`app/stamps.tsx`, from the Appendix): the walks as a passport
   page — each walked walk's label with its ring stamp — then places visited,
-  day by day, and pages turned down. The Registry marks visited entries
-  with a tick and turned-down ones with a corner.
-Silence is a feature: no notifications, no badges, nothing asks the reader
-back. Location is asked for only on the map, a walk, "near me", or to stamp
-a visit.
+  day by day, places watched, and pages turned down. The Registry marks
+  visited entries with a tick and turned-down ones with a corner.
+Quiet is a feature: no badges, nothing asks the reader back, and the only
+notice is one the reader asked for by watching a place. Location is asked
+for only on the map, a walk, "near me", to stamp a visit, or to watch a
+place.
 
 ## Colophon
 The Appendix's colophon credits the typefaces (Jost, Berkeley Post, Noto

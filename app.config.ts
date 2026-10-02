@@ -33,6 +33,10 @@ const env = {
   androidPackage: bundleId,
 };
 
+/** Why the guide may ask for location "Always" — for watched places. */
+const ALWAYS =
+  "The guide uses your location to show where you are on the map, to collect each stop of a walk as you reach it, and to stamp the places you visit — and, for a place you ask it to watch, to tell you when you're near, even with the guide closed. Your location stays on this phone.";
+
 const config: ExpoConfig = {
   name: env.appName,
   slug: env.appSlug,
@@ -87,8 +91,16 @@ const config: ExpoConfig = {
       {
         locationWhenInUsePermission:
           "The guide uses your location to show where you are on the map, to collect each stop of a walk as you reach it, and to stamp the places you visit.",
+        // "Always" is asked only when a reader watches a place: its fence
+        // must be able to wake the guide. (expo-location won't set fences
+        // without the background mode, though iOS itself would.)
+        locationAlwaysAndWhenInUsePermission: ALWAYS,
+        locationAlwaysPermission: ALWAYS,
+        isIosBackgroundLocationEnabled: true,
+        isAndroidBackgroundLocationEnabled: true,
       },
     ],
+    "expo-notifications",
     [
       "expo-image-picker",
       {

@@ -45,7 +45,11 @@ export default function AboutScreen() {
     ],
     [
       "Your copy",
-      "The stamps and visits are earned on the spot — the guide stamps them only where your phone finds you standing — and they, and the pages you turn down, are kept on this phone and nowhere else. Nothing in the guide asks you to sign in — you'd sign in only to send photographs and corrections to the editors. No notifications, no badges, no tracking.",
+      "The stamps and visits are earned on the spot — the guide stamps them only where your phone finds you standing — and they, and the pages you turn down, and the places you ask it to watch, are kept on this phone and nowhere else. Nothing in the guide asks you to sign in — you'd sign in only to send photographs and corrections to the editors. No badges, no tracking.",
+    ],
+    [
+      "The watches",
+      "The guide tells you a place is close by only if you asked it to — only from this phone, nothing sent anywhere. No tracking. Watching needs your location set to Always, and a watch lasts until you've had its notice, stamped the place, or let it go. Fences re-arm themselves; after a restart the first notice may wait until the guide is next opened.",
     ],
     [
       "Corrections",

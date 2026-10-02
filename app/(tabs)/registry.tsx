@@ -23,6 +23,7 @@ import { FONT, INK, MARGIN, PAPER, TYPE } from "@/constants/book";
 import { landmarks, type Landmark, type LandmarkCategory } from "@/data/landmarks";
 import { ARCHITECTS, architectOf, type ArchitectKey } from "@/lib/architects";
 import { useReaderCopy } from "@/lib/reader-copy-context";
+import { useWatchPlaces } from "@/lib/watch-places";
 import {
   WALKING_M,
   answers,
@@ -140,6 +141,7 @@ export default function RegistryScreen() {
   const clock = useScrollClockHandler();
   const params = useLocalSearchParams<{ q?: string }>();
   const { copy } = useReaderCopy();
+  const { ledger } = useWatchPlaces();
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState<LandmarkCategory | null>(null);
   const [arrangement, setArrangement] = useState<Arrangement>("name");
@@ -385,6 +387,7 @@ export default function RegistryScreen() {
             metres={item.metres}
             visited={!!copy.visited[item.id]}
             corner={!!copy.corners[item.id]}
+            watched={!!ledger.watches[item.id] && ledger.watches[item.id].status !== "retired"}
             last={index === section.data.length - 1}
             onPress={() => router.push(`/landmark/${item.id}`)}
           />
@@ -555,6 +558,7 @@ function IndexEntry({
   metres,
   visited,
   corner,
+  watched,
   last,
   onPress,
 }: {
@@ -562,9 +566,10 @@ function IndexEntry({
   arrangement: Arrangement;
   /** How far the reader is from it, when the index is of what's near. */
   metres?: number;
-  /** The reader's marks: been there; turned its page down. */
+  /** The reader's marks: been there; turned its page down; watching it. */
   visited: boolean;
   corner: boolean;
+  watched: boolean;
   last: boolean;
   onPress: () => void;
 }) {
@@ -589,6 +594,7 @@ function IndexEntry({
         metres != null ? `${walkMinutes(metres)} minutes' walk` : null,
         visited ? "visited" : null,
         corner ? "page turned down" : null,
+        watched ? "watching" : null,
       ]
         .filter(Boolean)
         .join(", ")}
@@ -600,6 +606,7 @@ function IndexEntry({
         </Text>
         {visited ? <CheckStamp size={13} style={styles.mark} /> : null}
         {corner ? <View style={[styles.cornerMark, !visited && styles.mark]} /> : null}
+        {watched ? <View style={[styles.watchMark, !visited && !corner && styles.mark]} /> : null}
         <Leader />
         <Text style={styles.entryNo}>{number ? `No. ${number}` : "—"}</Text>
       </View>
@@ -843,5 +850,14 @@ const styles = StyleSheet.create({
     borderLeftWidth: 11,
     borderTopColor: INK.vermilion,
     borderLeftColor: "transparent",
+  },
+  watchMark: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    borderColor: INK.vermilion,
+    borderWidth: 1.4,
+    marginLeft: 4,
+    marginBottom: 3,
   },
 });

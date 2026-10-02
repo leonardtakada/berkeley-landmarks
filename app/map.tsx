@@ -33,6 +33,7 @@ import { StampCollectOverlay } from "@/components/travel-stamp";
 import { WalkStampOverlay } from "@/components/copy-marks";
 import { today } from "@/lib/reader-copy";
 import { useReaderCopy } from "@/lib/reader-copy-context";
+import { useWatchPlaces } from "@/lib/watch-places";
 import { MapUnfold } from "@/components/map-unfold";
 import { ArchitectPortrait } from "@/components/architect-portrait";
 import { Arrow, Rule } from "@/components/print";
@@ -124,6 +125,8 @@ export default function MapScreen() {
   // A walk's labels: each stop the walker reaches adds its label to the
   // walk's page; the last presses the walk's stamp into the Appendix.
   const { collect } = useReaderCopy();
+  const { activeWatches } = useWatchPlaces();
+  const watching = useMemo(() => new Set(activeWatches.map((w) => w.landmarkId)), [activeWatches]);
   const [collectedFlash, setCollectedFlash] = useState<{
     landmarkName: string;
     tourName: string;
@@ -274,7 +277,8 @@ export default function MapScreen() {
         clusterMarkers={filteredLandmarks.map((landmark) => ({
           id: landmark.id,
           coordinate: { latitude: landmark.latitude, longitude: landmark.longitude },
-          pinColor: INK.blue,
+          // The places the reader is watching wear vermilion.
+          pinColor: watching.has(landmark.id) ? INK.vermilion : INK.blue,
           label: stopOrder.get(landmark.id),
           onPress: () => handleMarkerPress(landmark),
         }))}
@@ -322,7 +326,8 @@ export default function MapScreen() {
         clusterMarkers={filteredLandmarks.map((landmark) => ({
           id: landmark.id,
           coordinate: { latitude: landmark.latitude, longitude: landmark.longitude },
-          pinColor: INK.blue,
+          // The places the reader is watching wear vermilion.
+          pinColor: watching.has(landmark.id) ? INK.vermilion : INK.blue,
           onPress: () => handleMarkerPress(landmark),
         }))}
       >
