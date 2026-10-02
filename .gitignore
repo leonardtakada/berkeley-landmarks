@@ -75,3 +75,6 @@ secrets/
 
 # fetched map data for scripts
 scripts/.cache/
+
+# raw scrape HTML (processed .md is committed instead)
+data/scraped/**/_raw/
