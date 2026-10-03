@@ -89,6 +89,15 @@ Auto Indicator LLC — in the Appendix only, never on the cover.
   does) until the map is moved by hand; in walk mode following keeps the
   camera on them instead of framing each leg. If they're off the map, or
   location is off, a slip says so.
+  Opened on its own, the map starts at z14.6 on downtown and the campus's
+  west edge, where the landmarks gather — buildings and single landmarks in
+  view, not the whole city in clusters.
+  Pressing a landmark — its pin, or close in (z14.5+) its building, from the
+  foot up past the pin and about its width either side — lays its entry
+  over the foot of the map, and the map slides only if the landmark would
+  be hidden under it. Pressing a cluster draws in on it; pressing the
+  ground puts the entry away. (A pin's press stops there: the map would
+  otherwise hear it too and put the entry straight away again.)
   The guide's architects walk its streets from z15.6, as on the cover
   (`components/iso-walkers.tsx`): a few in view, strolling on the right of
   the street, turning at corners, stopping, hidden where a house or rise
@@ -173,7 +182,24 @@ slight seeded wobble so edges read as cut. The drawing kit is
   (alternating sides down the page, the guide's portrait tucked against
   the label) and each walk's opener.
 - **Registry frieze**: a street of Berkeley buildings in cream line knocked
-  out of a blue band, under the Registry's opener.
+  out of a blue band, under the Registry's opener. It's the city map,
+  folded — its cover — and "Unfold the city map" sits under it. Pressed
+  (`components/plate-unfold.tsx`, `lib/map-plate.ts`), it lifts off the page
+  to the strip of the screen it's nearest, growing to the screen's width;
+  the page beneath darkens a shade. The map is folded as a strip map, in
+  strips as wide as the screen and as deep as the plate (six on most
+  phones), so the plate is one strip and its cover is the next strip's
+  back: the cover swings open toward the side with more to unfold, and the
+  strips fan out from there both ways, one after another. Seen flat, from
+  straight above: a strip swinging down shows as much of its depth as it
+  lies flat, shaded while it's steep; the map itself shows only where the
+  paper lies open, so it's the live map that opens out, and the folds stay
+  pressed in (a faint line each) until it's all flat, then relax away.
+  The map's slips (Close, the legend, where-am-I) come in as it lands.
+  Closing it, any way, runs it all backward into its place on the page,
+  which is empty while the map is out. The lifted plate waits for the
+  map's first frame (at most 1.2 s) before it opens. Reduce Motion opens
+  the map as any other way in does.
 - Both are baked by `npx tsx scripts/build-print-art.ts`
   (→ `components/print-art.generated.ts`; `--preview <png>` for a sheet).
 - **Index letters**: each letter of the Registry cut out of a block of ink,

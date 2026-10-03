@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useMemo, useRef, useState } from "react";
 import {
   Pressable,
   ScrollView,
@@ -9,7 +9,7 @@ import {
   View,
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import Animated from "react-native-reanimated";
+import Animated, { useAnimatedStyle, useReducedMotion } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Svg, { Path, SvgXml } from "react-native-svg";
 
@@ -17,11 +17,12 @@ import { ArchitectPortrait } from "@/components/architect-portrait";
 import { ChapterOpener, Folio, Leader, SectionPage } from "@/components/book-page";
 import { CheckStamp } from "@/components/copy-marks";
 import { REGISTRY_FRIEZE_SVG } from "@/components/print-art.generated";
-import { Annotation, Rule } from "@/components/print";
+import { Annotation, Arrow, Rule } from "@/components/print";
 import { ScrollClock, useScrollClockHandler } from "@/components/scroll-clock";
 import { FONT, INK, MARGIN, PAPER, TYPE } from "@/constants/book";
 import { landmarks, type Landmark, type LandmarkCategory } from "@/data/landmarks";
 import { ARCHITECTS, architectOf, type ArchitectKey } from "@/lib/architects";
+import { FROM_PLATE, layPlate, plateOut } from "@/lib/map-plate";
 import { useReaderCopy } from "@/lib/reader-copy-context";
 import { useWatchPlaces } from "@/lib/watch-places";
 import {
@@ -148,6 +149,26 @@ export default function RegistryScreen() {
   const [nearOn, setNearOn] = useState(false);
   const [where, setWhere] = useState<Where>({ state: "idle" });
 
+  // The plate is the city map, folded: it lifts off the page and unfolds.
+  const reduceMotion = useReducedMotion();
+  const plateRef = useRef<View>(null);
+  const unfoldingAt = useRef(0);
+  const plateAway = useAnimatedStyle(() => ({ opacity: plateOut.get() ? 0 : 1 }));
+  const unfoldMap = () => {
+    // (One map at a time, however quick the second press.)
+    if (Date.now() - unfoldingAt.current < 1000) return;
+    unfoldingAt.current = Date.now();
+    const plate = plateRef.current;
+    if (reduceMotion || !plate) {
+      router.push("/map");
+      return;
+    }
+    plate.measureInWindow((x, y, width, height) => {
+      layPlate({ x, y, width, height });
+      router.push({ pathname: "/map", params: { unfold: FROM_PLATE } });
+    });
+  };
+
   const parsed = useMemo(() => parseQuery(query, VOCABULARY), [query]);
   const near = nearOn || !!parsed.near;
 
@@ -272,14 +293,28 @@ export default function RegistryScreen() {
               note="Every designated landmark in the city, set out as an index."
             />
             <View style={styles.frieze}>
-              <View
-                style={styles.friezeArt}
-                accessible
-                accessibilityRole="image"
-                accessibilityLabel="A street of Berkeley buildings: a church, a Queen Anne house, the Campanile, City Hall, the library, a cottage and a bungalow"
+              <Pressable
+                onPress={unfoldMap}
+                accessibilityRole="button"
+                accessibilityLabel="The city map"
+                accessibilityHint="Unfolds the map of the city"
               >
-                <SvgXml xml={REGISTRY_FRIEZE_SVG} width="100%" height="100%" />
-              </View>
+                <Animated.View style={plateAway}>
+                  <View ref={plateRef} style={styles.friezeArt}>
+                    <SvgXml xml={REGISTRY_FRIEZE_SVG} width="100%" height="100%" />
+                  </View>
+                </Animated.View>
+              </Pressable>
+              <Pressable
+                onPress={unfoldMap}
+                hitSlop={8}
+                style={({ pressed }) => [styles.mapLink, pressed && { opacity: 0.6 }]}
+                accessibilityRole="button"
+                accessibilityHint="Unfolds the map of the city"
+              >
+                <Text style={styles.link}>Unfold the city map</Text>
+                <Arrow length={16} />
+              </Pressable>
             </View>
             <View style={styles.controls}>
               <View style={styles.findRow}>
@@ -623,11 +658,25 @@ function IndexEntry({
 const styles = StyleSheet.create({
   frieze: {
     paddingHorizontal: MARGIN.outer,
-    marginBottom: 26,
+    marginBottom: 22,
   },
   friezeArt: {
     width: "100%",
     aspectRatio: 400 / 140,
+  },
+  mapLink: {
+    flexDirection: "row",
+    alignItems: "center",
+    alignSelf: "flex-end",
+    gap: 8,
+    marginTop: 12,
+  },
+  link: {
+    fontFamily: FONT.medium,
+    fontSize: 11.5,
+    letterSpacing: 1.8,
+    textTransform: "uppercase",
+    color: INK.blue,
   },
   controls: {
     paddingHorizontal: MARGIN.outer,

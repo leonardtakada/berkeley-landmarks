@@ -7,6 +7,7 @@ import {
   ScrollView,
 } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
+import Animated from "react-native-reanimated";
 import Svg, { Circle, Path, Text as SvgText } from "react-native-svg";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/hooks/use-colors";
@@ -35,6 +36,7 @@ import { today } from "@/lib/reader-copy";
 import { useReaderCopy } from "@/lib/reader-copy-context";
 import { useWatchPlaces } from "@/lib/watch-places";
 import { MapUnfold } from "@/components/map-unfold";
+import { PlateUnfold, usePlateUnfold, type PlateUnfolding } from "@/components/plate-unfold";
 import { ArchitectPortrait } from "@/components/architect-portrait";
 import { Arrow, Rule } from "@/components/print";
 import { PaperGrain } from "@/components/paper-grain";
@@ -43,6 +45,7 @@ import { FONT, INK, PAPER, TYPE, chapterNo } from "@/constants/book";
 import { architectOf } from "@/lib/architects";
 import { photoSource } from "@/lib/photo-source";
 import { legBetween } from "@/lib/route-legs";
+import { FROM_PLATE, takePlate } from "@/lib/map-plate";
 
 const ALL_CATEGORIES: LandmarkCategory[] = [
   "civic",
@@ -57,6 +60,13 @@ const ALL_CATEGORIES: LandmarkCategory[] = [
 // spreading into the paper — the same line as the fold-out map. Hex-alpha in the underlayer
 // color works on all three engines (react-native-maps, MapLibre, Leaflet).
 const INK_RED = INK.vermilion;
+/**
+ * Where the city map opens: on downtown and the campus's west edge, where
+ * the registry's landmarks gather, close enough to see the buildings and
+ * single landmarks rather than the whole city in clusters.
+ */
+const OPENING = { latitude: 37.8712, longitude: -122.2662, latitudeDelta: 0.012, longitudeDelta: 0.012 };
+const OPENING_ZOOM = 14.6;
 /** Rough height of the landmark entry sheet, for camera padding. */
 const SHEET_ESTIMATE = 330;
 const INK_RED_UNDER = "#E4592B38"; // vermilion @ ~22% opacity
@@ -65,11 +75,14 @@ const INK_UNDER_WIDTH = 9;
 
 export default function MapScreen() {
   const router = useRouter();
-  const params = useLocalSearchParams<{ tourId?: string; landmarkId?: string; walk?: string }>();
+  const params = useLocalSearchParams<{ tourId?: string; landmarkId?: string; walk?: string; unfold?: string }>();
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const mapRef = useRef<MapCameraHandle | null>(null);
   const { engine, isMapLibre, isIso, toggleEngine, ready: engineReady } = useMapEngine();
+  // Opened from the Landmarks page, the map is that page's plate, unfolded.
+  const [plate] = useState(() => (params.unfold === FROM_PLATE ? takePlate() : null));
+  const unfold = usePlateUnfold(plate);
 
   const [selectedLandmark, setSelectedLandmark] = useState<Landmark | null>(null);
   const [activeCategories, setActiveCategories] = useState<Set<LandmarkCategory>>(
@@ -230,9 +243,15 @@ export default function MapScreen() {
     });
   }, []);
 
-  const handleMarkerPress = useCallback((landmark: Landmark) => {
-    setSelectedLandmark(landmark);
-  }, []);
+  // A landmark pressed on the map: its entry is laid over the map, and the
+  // map moves, if it must, to keep the landmark in sight above it.
+  const handleMarkerPress = useCallback(
+    (landmark: Landmark) => {
+      setSelectedLandmark(landmark);
+      mapRef.current?.reveal?.({ latitude: landmark.latitude, longitude: landmark.longitude }, padFor(SHEET_ESTIMATE));
+    },
+    [padFor],
+  );
 
   const handleMapPress = useCallback(() => {
     setSelectedLandmark(null);
@@ -251,21 +270,23 @@ export default function MapScreen() {
   }, [router]);
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.pageBackground }]}>
+    <View style={[styles.container, { backgroundColor: unfold.g ? "transparent" : colors.pageBackground }]}>
       {/* Unfolds once, when the screen mounts; later pushes reuse it in place. */}
-      <MapUnfold animated>
+      <Unfolding unfold={unfold}>
       {isMapLibre ? (
         <MapLibreMapView
         key={isIso ? "iso" : "flat"}
         iso={isIso}
         ref={mapRef}
         style={styles.map}
-        initialRegion={BERKELEY_CENTER}
+        initialRegion={OPENING}
+        initialZoom={OPENING_ZOOM}
         minZoomLevel={12}
         maxZoomLevel={17}
         onPress={handleMapPress}
         showsUserLocation
         onFollowChange={setFollowingReader}
+        onLoaded={unfold.onMapLoaded}
         highlight={
           selectedLandmark
             ? {
@@ -372,8 +393,13 @@ export default function MapScreen() {
         )}
       </MapViewWrapper>
       )}
-      </MapUnfold>
+      </Unfolding>
 
+      {/* What's laid over the map waits for it to open. */}
+      <Animated.View
+        pointerEvents={unfold.opened ? "box-none" : "none"}
+        style={[StyleSheet.absoluteFill, unfold.chromeStyle]}
+      >
       {/* Fold the map away — the map is a loose sheet with no ribbons to escape by. */}
       <Pressable
         accessibilityLabel="Fold the map away"
@@ -633,7 +659,19 @@ export default function MapScreen() {
           onDismiss={() => setWalkStamp(null)}
         />
       )}
+      </Animated.View>
     </View>
+  );
+}
+
+/** The map's way in: off the Landmarks page as its plate, or (any other way) opening out as it lands. */
+function Unfolding({ unfold, children }: { unfold: PlateUnfolding; children: React.ReactNode }) {
+  return unfold.g ? (
+    <PlateUnfold g={unfold.g} lift={unfold.lift} clock={unfold.clock} opened={unfold.opened}>
+      {children}
+    </PlateUnfold>
+  ) : (
+    <MapUnfold animated>{children}</MapUnfold>
   );
 }
 

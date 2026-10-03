@@ -30,7 +30,7 @@ import {
   Map as MLMap,
   UserLocation,
 } from "@maplibre/maplibre-react-native";
-import type { CameraRef, GeoJSONSourceRef } from "@maplibre/maplibre-react-native";
+import type { CameraRef, GeoJSONSourceRef, MapRef } from "@maplibre/maplibre-react-native";
 import { useReducedMotion, useSharedValue } from "react-native-reanimated";
 import { Asset } from "expo-asset";
 import { Directory, File, Paths } from "expo-file-system";
@@ -91,6 +91,8 @@ export interface CameraPadding {
 /** The camera API map screens use, whichever engine is mounted. */
 export interface MapCameraHandle {
   flyToCoord: (coord: Coordinate, zoom?: number, padding?: CameraPadding) => void;
+  /** Brings a place into the clear (inside `padding`) if it isn't already, at the same zoom. */
+  reveal?: (coord: Coordinate, padding: CameraPadding) => void;
   fitCoords: (coords: Coordinate[], padding?: CameraPadding) => void;
   /**
    * Finds the reader and keeps them in view as they walk, until the map is
@@ -114,6 +116,8 @@ interface ClusterMarker {
 interface MapLibreViewProps {
   style?: any;
   initialRegion?: RegionLike;
+  /** Where the camera opens, overriding the zoom `initialRegion`'s span would give. */
+  initialZoom?: number;
   minZoomLevel?: number;
   maxZoomLevel?: number;
   onPress?: () => void;
@@ -131,6 +135,8 @@ interface MapLibreViewProps {
   iso?: boolean;
   /** Hears when following the reader starts, and stops (the map moved by hand, or sent elsewhere). */
   onFollowChange?: (following: boolean) => void;
+  /** Hears when the map has first drawn, tiles and all. */
+  onLoaded?: () => void;
   children?: React.ReactNode;
 }
 
@@ -398,6 +404,7 @@ const MapLibreMapView = forwardRef<MapCameraHandle | null, MapLibreViewProps>(
     {
       style,
       initialRegion,
+      initialZoom: openingZoom,
       minZoomLevel = 12,
       maxZoomLevel = 17,
       onPress,
@@ -408,6 +415,7 @@ const MapLibreMapView = forwardRef<MapCameraHandle | null, MapLibreViewProps>(
       highlight,
       iso = false,
       onFollowChange,
+      onLoaded,
       children,
     },
     ref
@@ -421,7 +429,9 @@ const MapLibreMapView = forwardRef<MapCameraHandle | null, MapLibreViewProps>(
       [iso],
     );
     const cameraRef = useRef<CameraRef>(null);
+    const mapRef = useRef<MapRef>(null);
     const shapeRef = useRef<GeoJSONSourceRef>(null);
+    const size = useRef({ width: 0, height: 0 });
 
     // Camera moves asked for before the map has loaded (the offline tiles
     // stage asynchronously) wait here and run once it has; only the latest
@@ -434,11 +444,12 @@ const MapLibreMapView = forwardRef<MapCameraHandle | null, MapLibreViewProps>(
     }, []);
     const onMapLoaded = useCallback(() => {
       loaded.current = true;
+      onLoaded?.();
       const move = pending.current;
       pending.current = null;
       // One frame for the camera to attach before it is driven.
       if (move) requestAnimationFrame(move);
-    }, []);
+    }, [onLoaded]);
 
     // Following the reader: the camera keeps them in view as they walk,
     // until the map is moved by hand or sent somewhere else.
@@ -491,6 +502,25 @@ const MapLibreMapView = forwardRef<MapCameraHandle | null, MapLibreViewProps>(
               duration: 900,
             }),
           );
+        },
+        reveal: (coord, padding) => {
+          run(async () => {
+            const at = place(coord, 6);
+            try {
+              const [x, y] = (await mapRef.current?.project(at)) ?? [0, 0];
+              const { width, height } = size.current;
+              const clear =
+                x >= (padding.left ?? 0) &&
+                x <= width - (padding.right ?? 0) &&
+                y >= (padding.top ?? 0) &&
+                y <= height - (padding.bottom ?? 0);
+              if (clear) return;
+            } catch {
+              /* (unknown: move it to be sure) */
+            }
+            follow(false);
+            cameraRef.current?.easeTo({ center: at, padding, duration: 500 });
+          });
         },
         fitCoords: (coords, padding = DEFAULT_PADDING) => {
           if (coords.length === 0) return;
@@ -581,7 +611,9 @@ const MapLibreMapView = forwardRef<MapCameraHandle | null, MapLibreViewProps>(
 
     const handleShapePress = useCallback(
       async (event: any) => {
-        const feature = event?.features?.[0];
+        // (The press also reaches the map, which would put the entry away.)
+        event?.stopPropagation?.();
+        const feature = event?.nativeEvent?.features?.[0];
         if (!feature) return;
         if (feature.properties?.cluster) {
           try {
@@ -600,6 +632,46 @@ const MapLibreMapView = forwardRef<MapCameraHandle | null, MapLibreViewProps>(
         cb?.();
       },
       [pressById, minZoomLevel]
+    );
+
+    /**
+     * On the drawing, the landmarks are buildings as well as pins: close in,
+     * a press on a landmark's building — anywhere from its foot up past its
+     * pin, or a little to either side — opens it, the nearest if two are
+     * close. Further out, where buildings are specks, the pins answer alone.
+     */
+    const landmarkAt = useCallback(
+      (lngLat: [number, number]) => {
+        if (!iso || zoom.current < 14.5 || !clusterMarkers?.length) return null;
+        const perDeg = (512 * 2 ** zoom.current) / 360;
+        let best: { mk: ClusterMarker; d: number } | null = null;
+        for (const mk of clusterMarkers) {
+          if (!mk.onPress) continue;
+          const foot = place(mk.coordinate, 0);
+          const top = place(mk.coordinate, 20);
+          // Points from the press to the building's upright, foot to top.
+          const [ax, ay, bx, by] = [foot[0], foot[1], top[0], top[1]];
+          const [px, py] = lngLat;
+          const len2 = (bx - ax) ** 2 + (by - ay) ** 2 || 1;
+          const t = Math.max(0, Math.min(1, ((px - ax) * (bx - ax) + (py - ay) * (by - ay)) / len2));
+          const d = Math.hypot(px - (ax + t * (bx - ax)), py - (ay + t * (by - ay))) * perDeg;
+          // As wide as the building, roughly (about 12 m either side), never under a fingertip.
+          const reach = Math.max(22, (Math.sqrt(len2) / 20) * 12 * perDeg);
+          if (d <= reach && (!best || d < best.d)) best = { mk, d };
+        }
+        return best?.mk ?? null;
+      },
+      [iso, clusterMarkers, place],
+    );
+
+    const handleMapPress = useCallback(
+      (event: any) => {
+        const lngLat = event?.nativeEvent?.lngLat as [number, number] | undefined;
+        const hit = lngLat ? landmarkAt(lngLat) : null;
+        if (hit) hit.onPress?.();
+        else onPress?.();
+      },
+      [landmarkAt, onPress],
     );
 
     if (Platform.OS === "web" || error) {
@@ -628,18 +700,25 @@ const MapLibreMapView = forwardRef<MapCameraHandle | null, MapLibreViewProps>(
       initialRegion ? initialRegion : { latitude: 37.8716, longitude: -122.2727 },
     );
     const initialZoom =
+      openingZoom ??
       (initialRegion ? Math.log2(360 / Math.max(initialRegion.latitudeDelta, 0.0001)) : 15) - (iso ? 0.6 : 0);
 
     return (
-      <View style={[styles.container, style]}>
+      <View
+        style={[styles.container, style]}
+        onLayout={(e) => {
+          size.current = { width: e.nativeEvent.layout.width, height: e.nativeEvent.layout.height };
+        }}
+      >
         <MLMap
+          ref={mapRef}
           style={styles.map}
           mapStyle={styleJSON}
           attribution={false}
           logo={false}
           touchRotate={!iso}
           touchPitch={!iso}
-          onPress={onPress as any}
+          onPress={handleMapPress}
           onDidFinishLoadingMap={onMapLoaded}
           onRegionWillChange={(e) => {
             if (e.nativeEvent.userInteraction) follow(false);

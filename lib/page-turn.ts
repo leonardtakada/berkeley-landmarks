@@ -95,6 +95,11 @@ export function forUnfold({ current }: StackCardInterpolationProps): StackCardIn
   };
 }
 
+/** No transition of its own: the screen brings itself in (the map off the Landmarks page's plate). */
+export function forNoTransition(): StackCardInterpolatedStyle {
+  return {};
+}
+
 /** Reduce Motion: a plain dissolve, no hinge and no travel. */
 export function forDissolve({ current }: StackCardInterpolationProps): StackCardInterpolatedStyle {
   return {

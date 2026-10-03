@@ -21,10 +21,12 @@ import { FONT_ASSETS, PAPER } from "@/constants/book";
 import {
   dissolveSpec,
   forDissolve,
+  forNoTransition,
   forPageTurn,
   forUnfold,
   pageTurnSpec,
 } from "@/lib/page-turn";
+import { FROM_PLATE } from "@/lib/map-plate";
 import {
   SafeAreaFrameContext,
   SafeAreaInsetsContext,
@@ -138,11 +140,25 @@ export default function RootLayout() {
             <Stack.Screen name="about" />
             <Stack.Screen
               name="map"
-              options={{
-                // Panning the map must never be mistaken for turning back.
-                gestureEnabled: false,
-                ...(reduceMotion ? null : { cardStyleInterpolator: forUnfold, cardShadowEnabled: false }),
-              }}
+              options={({ route }: { route: { params?: object } }) =>
+                (route.params as { unfold?: string } | undefined)?.unfold === FROM_PLATE
+                  ? {
+                      // Off the Landmarks page as its plate: the map unfolds over
+                      // the page itself, and folds back into it, on its own.
+                      presentation: "transparentModal",
+                      animation: "none",
+                      gestureEnabled: false,
+                      cardStyle: { backgroundColor: "transparent" },
+                      cardStyleInterpolator: forNoTransition,
+                      cardOverlayEnabled: false,
+                      cardShadowEnabled: false,
+                    }
+                  : {
+                      // Panning the map must never be mistaken for turning back.
+                      gestureEnabled: false,
+                      ...(reduceMotion ? null : { cardStyleInterpolator: forUnfold, cardShadowEnabled: false }),
+                    }
+              }
             />
           </Stack>
           </trpc.Provider>
