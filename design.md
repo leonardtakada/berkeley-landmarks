@@ -267,6 +267,38 @@ sending things to the editors need the network.
 `__tests__/offline.test.ts` fails if a photograph isn't bundled.
 Both maps carry the OpenStreetMap credit (ODbL).
 
+## Editing the guide — `scripts/editor/`
+`pnpm editor` opens a page at http://localhost:4777 for adding and managing
+landmarks and walks. It runs on this machine only (it answers to localhost
+and refuses anything cross-origin), not through the live server, because it
+writes the files the app is built from.
+
+- **What it writes:** `data/landmarks.ts` (what the app reads) and
+  `data/landmarks.json` (the mirror the admin page and photo scripts read),
+  and `data/tours.ts`. An edit replaces that entry's block and nothing else,
+  so git shows only what changed; each save backs up the files it touches to
+  `scripts/.cache/editor-backups` and reads the data back to check, undoing
+  the save if it isn't what was meant. The database isn't touched
+  (`server/seedLandmarks.ts` syncs it).
+- **Landmarks:** search and filter; every field; a map to place the pin
+  (click, drag, or find the address); a photograph gallery; a warning when a
+  place repeats another's name, street address or spot. A landmark that a
+  walk uses can't be deleted. Places that are only in the JSON are listed
+  for review, with those that copy a place the app already has marked.
+  Where the JSON and the app differ (a reader's approved edit lands only in
+  the JSON), the entry says how, and either can be made to match the other.
+- **Walks:** name, colour, notes, and stops — added by search (nearest to the
+  last stop first), reordered, removed. Changing the stops resets the route
+  to a straight line (flagged "route") until it's redrawn; a note change
+  keeps it.
+- **After an edit:** the page shows what's left to do and runs it — print
+  new photographs (`scripts/bundle-photos.mjs`), draw a walk's route and
+  street names (`route-walks.ts`, `bake-walk-streets.ts`), print its
+  fold-out map (`scripts/iso/plates.ts`), and check the data. Only those
+  scripts, with a walk's id as the one argument.
+- `__tests__/editor.test.ts` checks the files come apart and go back
+  together byte for byte, and that every entry survives a write.
+
 ## The reader's copy
 What the reader does with the guide is kept on the phone
 (`lib/reader-copy.ts`, kept by `lib/reader-copy-context.tsx`), with the day:

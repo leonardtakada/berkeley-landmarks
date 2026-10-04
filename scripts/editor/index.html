@@ -1,0 +1,858 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Guide editor</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%230B2E8C'/%3E%3Cpath d='M8 23V9l8 8 8-8v14' fill='none' stroke='%23F2F0E6' stroke-width='3'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Jost:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js" defer></script>
+<style>
+  :root {
+    --page: #FAF6EC; --slip: #FDFAF2; --shade: #E6DFCC; --line: #DDD5C2;
+    --blue: #0B2E8C; --blue-tint: #C9D0E4; --vermilion: #E4592B; --vermilion-tint: #F4CDB9;
+    --ink: #2E2A27; --sepia: #7A6E62; --faded: #A79C8E;
+    --ok: #2F6B4F; --ok-tint: #D8E8DD; --warn-tint: #F7E7C2; --warn: #7A5A10;
+    --font: "Jost", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --body: system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --page: #1B1A18; --slip: #232220; --shade: #2D2B28; --line: #3A3733;
+      --blue: #8FA6F0; --blue-tint: #2A3560; --vermilion: #F07A52; --vermilion-tint: #4A2A1F;
+      --ink: #EDE7DB; --sepia: #A89E91; --faded: #7C746A;
+      --ok: #7FC4A0; --ok-tint: #213529; --warn-tint: #3C3217; --warn: #E6C46A;
+    }
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; }
+  body { background: var(--page); color: var(--ink); font: 14px/1.45 var(--body); display: flex; flex-direction: column; }
+  button, input, select, textarea { font: inherit; color: inherit; }
+  button { cursor: pointer; }
+
+  /* Header */
+  header { display: flex; align-items: center; gap: 20px; padding: 0 20px; height: 54px; flex: none; border-bottom: 1px solid var(--line); background: var(--slip); }
+  header h1 { font: 500 17px var(--font); letter-spacing: 2px; text-transform: uppercase; color: var(--blue); margin: 0; }
+  nav { display: flex; gap: 4px; }
+  nav button { border: 0; background: none; padding: 7px 14px; border-radius: 6px; font: 500 14px var(--font); color: var(--sepia); }
+  nav button[aria-selected="true"] { background: var(--blue); color: var(--page); }
+  nav button:not([aria-selected="true"]):hover { background: var(--shade); }
+  nav .count { opacity: .7; margin-left: 6px; font-weight: 400; }
+  .grow { flex: 1; }
+  header .tools { display: flex; gap: 8px; align-items: center; }
+
+  /* Buttons */
+  .btn { white-space: nowrap; border: 1px solid var(--line); background: var(--slip); padding: 6px 13px; border-radius: 6px; font-weight: 500; }
+  .btn:hover:not(:disabled) { border-color: var(--blue); color: var(--blue); }
+  .btn.primary { background: var(--blue); border-color: var(--blue); color: var(--page); }
+  .btn.primary:hover:not(:disabled) { color: var(--page); filter: brightness(1.15); }
+  .btn.danger { color: var(--vermilion); }
+  .btn.danger:hover:not(:disabled) { border-color: var(--vermilion); color: var(--vermilion); }
+  .btn.small { padding: 3px 9px; font-size: 12.5px; }
+  .btn:disabled { opacity: .45; cursor: default; }
+  .btn.icon { padding: 3px 8px; }
+
+  /* Two panes */
+  main { flex: 1; min-height: 0; display: grid; grid-template-columns: 340px 1fr; }
+  aside { border-right: 1px solid var(--line); display: flex; flex-direction: column; min-height: 0; background: var(--slip); }
+  .filters { padding: 12px; display: grid; gap: 8px; border-bottom: 1px solid var(--line); }
+  .filters .two { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .list { overflow: auto; flex: 1; }
+  .list-head { display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; color: var(--sepia); font-size: 12.5px; }
+  .item { display: block; width: 100%; text-align: left; border: 0; border-bottom: 1px solid var(--line); background: none; padding: 9px 14px 9px 12px; border-left: 3px solid transparent; }
+  .item:hover { background: var(--shade); }
+  .item[aria-current="true"] { background: var(--blue-tint); border-left-color: var(--blue); }
+  .item .name { font-weight: 500; display: flex; align-items: center; gap: 8px; }
+  .item .sub { color: var(--sepia); font-size: 12.5px; margin-left: 17px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .dot { width: 9px; height: 9px; border-radius: 50%; flex: none; }
+  .flag { margin-left: auto; font-size: 11px; padding: 1px 6px; border-radius: 9px; background: var(--warn-tint); color: var(--warn); font-weight: 500; }
+  .banner { margin: 10px 12px 0; padding: 9px 11px; background: var(--warn-tint); color: var(--warn); border-radius: 6px; font-size: 13px; }
+  .banner button { margin-top: 6px; }
+
+  section.detail { overflow: auto; min-height: 0; position: relative; }
+  .empty { color: var(--sepia); padding: 60px 30px; text-align: center; max-width: 460px; margin: 0 auto; }
+  .empty h2 { font: 500 20px var(--font); color: var(--ink); margin: 0 0 8px; }
+
+  /* Form */
+  .bar { position: sticky; top: 0; z-index: 500; display: flex; align-items: center; gap: 10px; padding: 12px 24px; background: var(--page); border-bottom: 1px solid var(--line); }
+  .bar h2 { font: 500 20px var(--font); margin: 0; flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .bar .id { font-size: 12px; color: var(--sepia); margin-left: 8px; font-weight: 400; letter-spacing: .5px; }
+  .form { padding: 18px 24px 80px; max-width: 920px; display: grid; gap: 18px; }
+  .card { background: var(--slip); border: 1px solid var(--line); border-radius: 8px; padding: 16px 18px; display: grid; gap: 12px; }
+  .card > h3 { font: 500 11.5px var(--font); letter-spacing: 2px; text-transform: uppercase; color: var(--sepia); margin: 0; }
+  .row { display: grid; gap: 12px; }
+  .row.two { grid-template-columns: 1fr 1fr; }
+  .row.three { grid-template-columns: 1fr 1fr 1fr; }
+  .row.lead { grid-template-columns: 2fr 1fr; }
+  label.f { display: grid; gap: 4px; font-size: 12.5px; color: var(--sepia); font-weight: 500; }
+  label.f .hint { font-weight: 400; color: var(--faded); }
+  input[type=text], input[type=url], select, textarea { width: 100%; padding: 7px 9px; border: 1px solid var(--line); border-radius: 6px; background: var(--page); color: var(--ink); }
+  input[readonly] { color: var(--sepia); background: var(--shade); }
+  textarea { resize: vertical; line-height: 1.5; }
+  input:focus, select:focus, textarea:focus { outline: 2px solid var(--blue); outline-offset: -1px; border-color: transparent; }
+  input[type=color] { width: 100%; height: 34px; padding: 2px; border: 1px solid var(--line); border-radius: 6px; background: var(--page); }
+  .check { display: flex; gap: 8px; align-items: center; font-size: 14px; color: var(--ink); font-weight: 400; }
+
+  .notice { padding: 10px 13px; border-radius: 6px; font-size: 13.5px; }
+  .notice.err { background: var(--vermilion-tint); color: var(--vermilion); }
+  .notice.ok { background: var(--ok-tint); color: var(--ok); }
+  .notice.warn { background: var(--warn-tint); color: var(--warn); }
+  .notice ul { margin: 4px 0 0; padding-left: 18px; }
+  .notice .btn { margin-top: 8px; }
+
+  .map { height: 280px; border-radius: 6px; border: 1px solid var(--line); background: var(--shade); z-index: 0; }
+  .map.tall { height: 340px; }
+  .map-note { color: var(--sepia); font-size: 12.5px; }
+  .pin { width: 20px; height: 20px; margin: -10px 0 0 -10px; border-radius: 50%; background: var(--vermilion); border: 3px solid #fff; box-shadow: 0 1px 4px rgba(0,0,0,.4); }
+  .num { width: 24px; height: 24px; margin: -12px 0 0 -12px; border-radius: 50%; color: #fff; font: 600 12px/24px var(--font); text-align: center; border: 2px solid #fff; box-shadow: 0 1px 4px rgba(0,0,0,.4); }
+
+  .photo { display: grid; grid-template-columns: 84px 1fr auto; gap: 12px; align-items: start; }
+  .thumb { width: 84px; height: 64px; border-radius: 4px; background: var(--shade); object-fit: cover; border: 1px solid var(--line); }
+  .photo .fields { display: grid; gap: 6px; }
+
+  /* Stops */
+  .stop { display: grid; grid-template-columns: 28px 1fr 1fr auto; gap: 10px; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--line); }
+  .stop:last-of-type { border-bottom: 0; }
+  .stop .n { width: 24px; height: 24px; border-radius: 50%; color: #fff; font: 600 12px/24px var(--font); text-align: center; }
+  .stop .who b { font-weight: 500; }
+  .stop .who small { display: block; color: var(--sepia); font-size: 12.5px; }
+  .stop .btns { display: flex; gap: 4px; }
+  .picker { position: relative; margin-top: 4px; }
+  .results { position: absolute; left: 0; right: 0; top: 100%; z-index: 600; background: var(--slip); border: 1px solid var(--line); border-radius: 6px; box-shadow: 0 6px 18px rgba(0,0,0,.18); max-height: 300px; overflow: auto; }
+  .results button { display: block; width: 100%; text-align: left; border: 0; border-bottom: 1px solid var(--line); background: none; padding: 7px 11px; }
+  .results button:hover, .results button.on { background: var(--blue-tint); }
+  .results small { color: var(--sepia); }
+  .used a { color: var(--blue); cursor: pointer; text-decoration: underline; }
+  table.diff { border-collapse: collapse; width: 100%; font-size: 12.5px; margin-top: 6px; }
+  table.diff td, table.diff th { text-align: left; vertical-align: top; padding: 3px 8px 3px 0; border-top: 1px solid rgba(0,0,0,.1); }
+  table.diff td { max-width: 280px; overflow-wrap: anywhere; }
+
+  .import-row { display: flex; gap: 10px; align-items: baseline; padding: 6px 0; border-bottom: 1px solid var(--line); }
+  .import-row small { color: var(--sepia); }
+  .import-row { cursor: pointer; }
+
+  /* Console */
+  #console { flex: none; border-top: 1px solid var(--line); background: var(--slip); display: none; }
+  #console.on { display: block; }
+  #console header { height: 38px; padding: 0 16px; border-bottom: 1px solid var(--line); gap: 12px; font-size: 13px; background: none; }
+  #console pre { margin: 0; padding: 10px 16px; height: 200px; overflow: auto; font: 12px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; white-space: pre-wrap; word-break: break-all; }
+  .led { width: 10px; height: 10px; border-radius: 50%; background: var(--faded); }
+  .led.running { background: var(--warn); animation: blink 1s ease-in-out infinite; }
+  .led.ok { background: var(--ok); }
+  .led.failed { background: var(--vermilion); }
+  @keyframes blink { 50% { opacity: .3; } }
+  @media (prefers-reduced-motion: reduce) { .led.running { animation: none; } }
+
+  @media (max-width: 900px) {
+    main { grid-template-columns: 1fr; }
+    aside { max-height: 40vh; border-right: 0; border-bottom: 1px solid var(--line); }
+    .row.two, .row.three, .row.lead { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>Guide editor</h1>
+  <nav role="tablist" id="tabs"></nav>
+  <span class="grow"></span>
+  <div class="tools" id="tools"></div>
+</header>
+<main>
+  <aside id="side"></aside>
+  <section class="detail" id="detail"></section>
+</main>
+<div id="console">
+  <header><span class="led" id="led"></span><strong id="job-label"></strong><span id="job-status" style="color:var(--sepia)"></span><span class="grow"></span><button class="btn small" id="close-console">Hide</button></header>
+  <pre id="job-out"></pre>
+</div>
+
+<script>
+"use strict";
+
+// ---------------------------------------------------------------------------
+// Small helpers
+// ---------------------------------------------------------------------------
+
+function add(el, kids) {
+  for (const k of kids.flat(Infinity)) {
+    if (k == null || k === false) continue;
+    el.append(k.nodeType ? k : document.createTextNode(String(k)));
+  }
+}
+
+/** h("div", { class: "x", onclick }, ...children): elements without innerHTML, so nothing typed into the guide can run. */
+function h(tag, props, ...kids) {
+  const el = document.createElement(tag);
+  for (const [k, v] of Object.entries(props || {})) {
+    if (v == null || v === false) continue;
+    if (k === "class") el.className = v;
+    else if (k.startsWith("on")) el.addEventListener(k.slice(2).toLowerCase(), v);
+    else if (k === "style" && typeof v === "object") Object.assign(el.style, v);
+    else if (k in el) el[k] = v;
+    else el.setAttribute(k, v === true ? "" : v);
+  }
+  add(el, kids);
+  return el;
+}
+
+const $ = (id) => document.getElementById(id);
+const clone = (x) => JSON.parse(JSON.stringify(x));
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+const plural = (n, one, many) => `${n} ${n === 1 ? one : many || one + "s"}`;
+
+async function api(method, path, data) {
+  const res = await fetch("/api" + path, {
+    method,
+    headers: method === "GET" ? {} : { "Content-Type": "application/json" },
+    body: data === undefined ? undefined : JSON.stringify(data),
+  });
+  const out = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const e = new Error(out.error || res.statusText);
+    e.details = out.details || [];
+    throw e;
+  }
+  return out;
+}
+
+// Berkeley, with longitude scaled for the latitude, as the data checks measure.
+const K = Math.cos((37.87 * Math.PI) / 180);
+const metres = (a, b) => Math.hypot((a.longitude - b.longitude) * K, a.latitude - b.latitude) * 111320;
+const miles = (m) => (m / 1609.344).toFixed(2).replace(/0$/, "");
+
+// ---------------------------------------------------------------------------
+// State
+// ---------------------------------------------------------------------------
+
+let S = null; // what the server last sent
+let byId = new Map();
+let tab = "landmarks";
+const pick = { landmarks: null, tours: null }; // selected id, "new", or "import"
+let draft = null;
+let baseline = "";
+let dirty = false;
+let notice = null; // { kind, text, list, action }
+const filters = { q: "", cat: "", flag: "" };
+let map = null;
+
+const CENTER = [37.8716, -122.2727];
+
+function blankLandmark() {
+  return {
+    id: "", name: "", address: "", latitude: "", longitude: "", architect: "", yearBuilt: "",
+    category: "residential", landmarkNumber: "", description: "", style: "", nationalRegister: false,
+    neighborhood: "", designationType: "", photoUrl: "", photos: [],
+  };
+}
+
+function blankTour() {
+  return { id: "", name: "", neighborhood: "", description: "", author: "Berkeley Tours", color: "#0B2E8C", stops: [] };
+}
+
+function toDraft(kind, id) {
+  if (id === "new") return kind === "landmarks" ? blankLandmark() : blankTour();
+  if (kind === "landmarks") {
+    const l = clone(byId.get(id));
+    return { ...blankLandmark(), ...l, designationType: l.designationType || "", photoUrl: l.photoUrl || "", photos: l.photos || [] };
+  }
+  const t = clone(S.tours.find((x) => x.id === id));
+  return {
+    id: t.id, name: t.name, neighborhood: t.neighborhood, description: t.description, author: t.author, color: t.color,
+    stops: [...t.stops].sort((a, b) => a.order - b.order).map((s) => ({ landmarkId: s.landmarkId, note: s.note || "" })),
+  };
+}
+
+function loadDraft() {
+  const id = pick[tab];
+  draft = id && id !== "import" ? toDraft(tab, id) : null;
+  baseline = JSON.stringify(draft);
+  dirty = false;
+}
+
+function touch() {
+  dirty = JSON.stringify(draft) !== baseline;
+  const save = $("save");
+  if (save) save.disabled = !dirty && pick[tab] !== "new";
+}
+
+function confirmDiscard() {
+  return !dirty || confirm("You have changes that aren't saved. Leave them behind?");
+}
+
+const findTour = (id) => S.tours.find((t) => t.id === id);
+const toursUsing = (id) => S.tours.filter((t) => t.stops.some((s) => s.landmarkId === id));
+const catOf = (key) => S.categories.find((c) => c.key === key);
+
+// ---------------------------------------------------------------------------
+// Header
+// ---------------------------------------------------------------------------
+
+function renderHeader() {
+  const tabs = $("tabs");
+  tabs.replaceChildren(
+    ...[["landmarks", "Landmarks", S.landmarks.length], ["tours", "Walks", S.tours.length]].map(([key, label, n]) =>
+      h("button", { role: "tab", "aria-selected": String(tab === key), onclick: () => switchTab(key) }, label, h("span", { class: "count" }, n)),
+    ),
+  );
+  const tools = $("tools");
+  const running = S.job && S.job.status === "running";
+  tools.replaceChildren();
+  add(tools, [
+    S.unbundled.length
+      ? h("button", { class: "btn small", disabled: running, title: S.unbundled.slice(0, 8).map((u) => u.landmarkId).join(", "), onclick: () => runTask("photos") },
+          `${plural(S.unbundled.length, "photograph")} not yet in the app — print`)
+      : null,
+    h("button", { class: "btn small", disabled: running, onclick: () => runTask("checks") }, "Check the data"),
+  ]);
+}
+
+function switchTab(key) {
+  if (key === tab || !confirmDiscard()) return;
+  tab = key;
+  notice = null;
+  loadDraft();
+  renderAll();
+}
+
+// ---------------------------------------------------------------------------
+// The list
+// ---------------------------------------------------------------------------
+
+const sortName = (s) => s.replace(/^the\s+/i, "").toLowerCase();
+
+function matchingLandmarks() {
+  const q = filters.q.trim().toLowerCase();
+  return S.landmarks
+    .filter((l) => !filters.cat || l.category === filters.cat)
+    .filter((l) => !filters.flag || (filters.flag === "any" ? landmarkFlags(l).length : landmarkFlags(l).includes(filters.flag)))
+    .filter((l) => !q || [l.name, l.address, l.architect, l.neighborhood, l.id, l.style].some((x) => (x || "").toLowerCase().includes(q)))
+    .sort((a, b) => sortName(a.name).localeCompare(sortName(b.name)));
+}
+
+function landmarkFlags(l) {
+  const flags = [];
+  if (S.drift.some((d) => d.id === l.id)) flags.push("differs");
+  if (!l.photoUrl && !(l.photos && l.photos.length)) flags.push("no photo");
+  else if (S.unbundled.some((u) => u.landmarkId === l.id)) flags.push("photo to print");
+  return flags;
+}
+
+function renderList() {
+  const side = $("side");
+  if (tab === "landmarks") {
+    const q$ = h("input", { type: "text", placeholder: "Search name, address, architect…", value: filters.q, "aria-label": "Search", onInput: (e) => { filters.q = e.target.value; renderRows(); } });
+    const rowsEl = h("div", { class: "list" });
+    const head = h("div", { class: "list-head" });
+    const renderRows = () => {
+      const shown = matchingLandmarks();
+      head.replaceChildren(h("span", {}, `${shown.length} of ${S.landmarks.length}`), h("button", { class: "btn small primary", onclick: () => select("new") }, "+ New landmark"));
+      rowsEl.replaceChildren(
+        ...(S.jsonOnly.length && !filters.q && !filters.cat && !filters.flag
+          ? [h("div", { class: "banner" }, `${plural(S.jsonOnly.length, "place")} in the JSON ${S.jsonOnly.length === 1 ? "isn't" : "aren't"} in the app`, S.jsonOnly.some((l) => l.twins.length) ? ` — ${S.jsonOnly.filter((l) => l.twins.length).length} look like copies of places that are.` : ".", h("br"), h("button", { class: "btn small", onclick: () => select("import") }, "Review"))]
+          : []),
+        ...shown.map((l) => {
+          const flags = landmarkFlags(l);
+          return h("button", { class: "item", "aria-current": String(pick.landmarks === l.id), onclick: () => select(l.id) },
+            h("div", { class: "name" }, h("span", { class: "dot", style: { background: (catOf(l.category) || {}).color } }), l.name, flags.includes("differs") ? h("span", { class: "flag" }, "differs") : flags.includes("photo to print") ? h("span", { class: "flag" }, "photo to print") : null),
+            h("div", { class: "sub" }, [l.address, l.yearBuilt].filter(Boolean).join(" · ")));
+        }),
+      );
+    };
+    side.replaceChildren(
+      h("div", { class: "filters" }, q$,
+        h("div", { class: "two" },
+          h("select", { "aria-label": "Category", onChange: (e) => { filters.cat = e.target.value; renderRows(); } },
+            h("option", { value: "" }, "All categories"), ...S.categories.map((c) => h("option", { value: c.key, selected: filters.cat === c.key }, c.label))),
+          h("select", { "aria-label": "Show", onChange: (e) => { filters.flag = e.target.value; renderRows(); } },
+            ...[["", "Everything"], ["any", "Needs a look"], ["no photo", "No photograph"], ["photo to print", "Photo to print"], ["differs", "Differs from JSON"]].map(([v, t]) => h("option", { value: v, selected: filters.flag === v }, t))))),
+      head, rowsEl);
+    renderRows();
+  } else {
+    side.replaceChildren(
+      h("div", { class: "list-head" }, h("span", {}, plural(S.tours.length, "walk")), h("button", { class: "btn small primary", onclick: () => select("new") }, "+ New walk")),
+      h("div", { class: "list" },
+        ...S.tours.map((t) =>
+          h("button", { class: "item", "aria-current": String(pick.tours === t.id), onclick: () => select(t.id) },
+            h("div", { class: "name" }, h("span", { class: "dot", style: { background: t.color } }), t.name, t.problems.length ? h("span", { class: "flag" }, "route") : null),
+            h("div", { class: "sub" }, `${plural(t.stops.length, "stop")} · ${t.distance} · ${t.duration} · ${t.neighborhood}`)))));
+  }
+}
+
+function select(id) {
+  if (!confirmDiscard()) return;
+  pick[tab] = id;
+  notice = null;
+  loadDraft();
+  renderList();
+  renderDetail();
+}
+
+// ---------------------------------------------------------------------------
+// Form pieces
+// ---------------------------------------------------------------------------
+
+function field(label, input, hint) {
+  return h("label", { class: "f" }, h("span", {}, label, hint ? h("span", { class: "hint" }, "  " + hint) : null), input);
+}
+
+function bound(key, opts = {}) {
+  const tag = opts.area ? "textarea" : "input";
+  return h(tag, {
+    type: opts.area ? undefined : "text", value: draft[key] ?? "", rows: opts.rows, placeholder: opts.placeholder, readOnly: opts.readOnly,
+    inputMode: opts.numeric ? "decimal" : undefined, spellcheck: opts.area || key === "name" || key === "description" ? true : false,
+    onInput: (e) => { draft[key] = e.target.value; touch(); if (opts.after) opts.after(e.target.value); },
+  });
+}
+
+function select$(key, options, blank) {
+  return h("select", { onChange: (e) => { draft[key] = e.target.value; touch(); } },
+    blank != null ? h("option", { value: "" }, blank) : null,
+    ...options.map(([v, t]) => h("option", { value: v, selected: draft[key] === v }, t)));
+}
+
+function noticeEl() {
+  if (!notice) return null;
+  return h("div", { class: `notice ${notice.kind}` }, notice.text,
+    notice.list && notice.list.length ? h("ul", {}, ...notice.list.map((x) => h("li", {}, x))) : null,
+    notice.action ? h("div", {}, h("button", { class: "btn small", onclick: notice.action.run }, notice.action.label)) : null);
+}
+
+function destroyMap() {
+  if (map) { map.remove(); map = null; }
+}
+
+const haveMap = () => typeof L !== "undefined";
+const mapMissing = () => h("div", { class: "map-note" }, "The map needs a connection to load.");
+
+function tiles(m) {
+  L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 19, attribution: "© OpenStreetMap contributors" }).addTo(m);
+}
+
+// ---------------------------------------------------------------------------
+// Landmark form
+// ---------------------------------------------------------------------------
+
+function landmarkForm() {
+  const isNew = pick.landmarks === "new";
+  const d = draft;
+  const drift = !isNew && S.drift.find((x) => x.id === d.id);
+  let marker = null;
+  let lat$, lng$;
+
+  const place = (lat, lng, fromMap) => {
+    d.latitude = Number(lat).toFixed(6);
+    d.longitude = Number(lng).toFixed(6);
+    if (lat$) { lat$.value = d.latitude; lng$.value = d.longitude; }
+    if (marker) marker.setLatLng([lat, lng]);
+    touch();
+    void fromMap;
+  };
+  const moved = () => {
+    const lat = parseFloat(d.latitude), lng = parseFloat(d.longitude);
+    if (marker && isFinite(lat) && isFinite(lng)) { marker.setLatLng([lat, lng]); map.panTo([lat, lng]); }
+  };
+  lat$ = bound("latitude", { numeric: true, after: moved });
+  lng$ = bound("longitude", { numeric: true, after: moved });
+
+  const mapBox = h("div", { class: "map" });
+  const geocodeNote = h("span", { class: "map-note" }, "Click the map or drag the pin to place it. The grey dots are the guide's other places.");
+  const find = h("button", { class: "btn small", type: "button", onclick: async () => {
+    if (!d.address.trim()) { geocodeNote.textContent = "Type the address first."; return; }
+    geocodeNote.textContent = "Looking…";
+    try {
+      const q = encodeURIComponent(`${d.address}, Berkeley, CA`);
+      const res = await fetch(`https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&q=${q}`);
+      const hit = (await res.json())[0];
+      if (!hit) { geocodeNote.textContent = "No match for that address. Place it by hand."; return; }
+      place(parseFloat(hit.lat), parseFloat(hit.lon));
+      map.setView([parseFloat(hit.lat), parseFloat(hit.lon)], 18);
+      geocodeNote.textContent = `Found: ${hit.display_name}. Check that the pin is on the building.`;
+    } catch (e) {
+      geocodeNote.textContent = "Couldn't reach the address lookup.";
+    }
+  } }, "Find the address on the map");
+
+  setTimeout(() => {
+    if (!haveMap() || !mapBox.isConnected) return;
+    const lat = parseFloat(d.latitude), lng = parseFloat(d.longitude);
+    const has = isFinite(lat) && isFinite(lng);
+    map = L.map(mapBox, { scrollWheelZoom: false }).setView(has ? [lat, lng] : CENTER, has ? 18 : 13);
+    tiles(map);
+    for (const o of S.landmarks) {
+      if (o.id === d.id) continue;
+      L.circleMarker([o.latitude, o.longitude], { radius: 4, weight: 1, color: "#fff", fillColor: "#7A6E62", fillOpacity: 0.8 }).bindTooltip(o.name).addTo(map);
+    }
+    marker = L.marker(has ? [lat, lng] : CENTER, { draggable: true, opacity: has ? 1 : 0.4, icon: L.divIcon({ className: "", html: '<div class="pin"></div>', iconSize: [0, 0] }) }).addTo(map);
+    marker.on("dragend", () => { const p = marker.getLatLng(); marker.setOpacity(1); place(p.lat, p.lng, true); });
+    map.on("click", (e) => { marker.setOpacity(1); place(e.latlng.lat, e.latlng.lng, true); });
+  }, 0);
+
+  const photoRow = (p, i) => {
+    const thumb = h("img", { class: "thumb", alt: "", src: p.url || "", onerror: (e) => { e.target.style.visibility = "hidden"; }, onload: (e) => { e.target.style.visibility = "visible"; } });
+    const url = h("input", { type: "text", value: p.url, placeholder: "https://…", "aria-label": "Photograph address", onInput: (e) => { p.url = e.target.value; thumb.src = p.url; touch(); } });
+    return h("div", { class: "photo" }, thumb,
+      h("div", { class: "fields" }, url,
+        h("input", { type: "text", value: p.caption || "", placeholder: "Caption (optional)", "aria-label": "Caption", onInput: (e) => { p.caption = e.target.value; touch(); } }),
+        h("input", { type: "text", value: p.credit || "", placeholder: "Credit — who took it and on what licence", "aria-label": "Credit", onInput: (e) => { p.credit = e.target.value; touch(); } })),
+      h("button", { class: "btn small icon", type: "button", title: "Remove", onclick: () => { d.photos.splice(i, 1); touch(); drawPhotos(); } }, "✕"));
+  };
+  const gallery = h("div", { class: "card-body", style: { display: "grid", gap: "14px" } });
+  const drawPhotos = () => gallery.replaceChildren(...d.photos.map(photoRow));
+  drawPhotos();
+
+  const leadThumb = h("img", { class: "thumb", alt: "", src: d.photoUrl || "", onerror: (e) => { e.target.style.visibility = "hidden"; }, onload: (e) => { e.target.style.visibility = "visible"; } });
+  const lead = h("input", { type: "text", value: d.photoUrl, placeholder: "https://…", onInput: (e) => { d.photoUrl = e.target.value; leadThumb.src = d.photoUrl; touch(); } });
+
+  const used = isNew ? [] : toursUsing(d.id);
+
+  return h("div", { class: "form" },
+    noticeEl(),
+    drift ? h("div", { class: "notice warn" }, "The JSON copy of this place differs from the app's:",
+      h("table", { class: "diff" }, h("tr", {}, h("th", {}, "Field"), h("th", {}, "In the app"), h("th", {}, "In the JSON")),
+        ...drift.fields.map((f) => h("tr", {}, h("td", {}, f), h("td", {}, showAt(d[f], drift.json[f])), h("td", {}, showAt(drift.json[f], d[f]))))),
+      h("div", {}, h("button", { class: "btn small", type: "button", style: { marginRight: "8px" }, onclick: () => { for (const f of drift.fields) d[f] = clone(drift.json[f] ?? (f === "photos" ? [] : "")); touch(); renderDetail(true); } }, "Use the JSON's values"),
+        h("button", { class: "btn small", type: "button", onclick: () => save(true) }, "Make the JSON match the app"))) : null,
+
+    h("div", { class: "card" }, h("h3", {}, "The place"),
+      h("div", { class: "row lead" }, field("Name", bound("name")), field("Category", select$("category", S.categories.map((c) => [c.key, c.label])))),
+      h("div", { class: "row two" }, field("Address", bound("address")), field("Neighborhood", bound("neighborhood"))),
+      h("div", { class: "row three" }, field("Designation", select$("designationType", S.designations.map((x) => [x, x]), "None"), ""), field("Landmark number", bound("landmarkNumber", { placeholder: "#84" })),
+        h("label", { class: "check", style: { alignSelf: "end", paddingBottom: "7px" } }, h("input", { type: "checkbox", checked: d.nationalRegister, onChange: (e) => { d.nationalRegister = e.target.checked; touch(); } }), "On the National Register"))),
+
+    h("div", { class: "card" }, h("h3", {}, "On the map"),
+      h("div", { class: "row three" }, field("Latitude", lat$), field("Longitude", lng$), h("div", { style: { alignSelf: "end" } }, find)),
+      haveMap() ? mapBox : mapMissing(), geocodeNote),
+
+    h("div", { class: "card" }, h("h3", {}, "The building"),
+      h("div", { class: "row three" }, field("Architect", bound("architect")), field("Year built", bound("yearBuilt")), field("Style", bound("style"))),
+      field("Description", bound("description", { area: true, rows: 9 }), "A blank line starts a new paragraph")),
+
+    h("div", { class: "card" }, h("h3", {}, "Photographs"),
+      field("Lead photograph", h("div", { class: "photo" }, leadThumb, lead, h("span")), "Printed as the entry's plate"),
+      gallery,
+      h("div", {}, h("button", { class: "btn small", type: "button", onclick: () => { d.photos.push({ url: "", caption: "", credit: "" }); touch(); drawPhotos(); } }, "+ Add to the gallery")),
+      h("div", { class: "map-note" }, "New photographs are fetched and printed into the app by “print” in the header, after you save.")),
+
+    used.length ? h("div", { class: "card used" }, h("h3", {}, "On the walks"), h("div", {}, "A stop on ", ...used.flatMap((t, i) => [i ? ", " : "", h("a", { onclick: () => { if (confirmDiscard()) { tab = "tours"; pick.tours = t.id; notice = null; loadDraft(); renderAll(); } } }, t.name)]), ". If you move it, redraw those routes.")) : null,
+  );
+}
+
+/** A value for the difference table: for text, the stretch around where it first differs from `other`, line breaks drawn as ⏎. */
+function showAt(v, other) {
+  if (typeof v !== "string" || typeof other !== "string") return show(v);
+  let i = 0;
+  while (i < v.length && i < other.length && v[i] === other[i]) i++;
+  const from = Math.max(0, i - 40);
+  const to = i + 80;
+  return (from ? "…" : "") + v.slice(from, to).replace(/\n/g, "⏎") + (to < v.length ? "…" : "");
+}
+
+const show = (v) => (Array.isArray(v) ? (v.length ? `${v.length} photographs` : "—") : v === "" || v == null ? "—" : String(v).length > 220 ? String(v).slice(0, 220) + "…" : String(v));
+
+// ---------------------------------------------------------------------------
+// Review: places the JSON has that the app doesn't
+// ---------------------------------------------------------------------------
+
+/** Opens a place from the JSON in the form, to be fixed up and added to the app under its own id. */
+function adopt(l) {
+  pick.landmarks = "new";
+  draft = { ...blankLandmark(), ...clone(l), twins: undefined, designationType: l.designationType || "", photoUrl: l.photoUrl || "", photos: clone(l.photos || []) };
+  baseline = JSON.stringify(draft);
+  dirty = false;
+  notice = null;
+  renderList();
+  renderDetail();
+}
+
+function importPanel() {
+  const chosen = new Set(S.jsonOnly.filter((l) => !l.twins.length).map((l) => l.id));
+  const go = h("button", { class: "btn primary", disabled: !chosen.size, onclick: async () => {
+    go.disabled = true;
+    try {
+      const out = await api("POST", "/landmarks/import", { ids: [...chosen] });
+      await refresh();
+      pick.landmarks = null;
+      notice = { kind: "ok", text: `Added ${plural(out.added.length, "place")} to the app.`, list: out.skipped };
+      loadDraft();
+      renderAll();
+    } catch (e) {
+      notice = { kind: "err", text: e.message, list: e.details };
+      renderDetail();
+    }
+  } }, "Add to the app");
+  return h("div", {},
+    h("div", { class: "bar" }, h("h2", {}, "In the JSON, not in the app"), go),
+    h("div", { class: "form" }, noticeEl(),
+      h("div", { class: "card" },
+        h("div", { class: "map-note" }, "These are in data/landmarks.json and the database, but the app is built from data/landmarks.ts, so readers never see them. Many are second copies of places the app already has under another id; those are left unticked. Tick any you want to add."),
+        ...S.jsonOnly.map((l) => h("label", { class: "import-row" }, h("input", { type: "checkbox", checked: chosen.has(l.id), onChange: (e) => { e.target.checked ? chosen.add(l.id) : chosen.delete(l.id); go.disabled = !chosen.size; } }), h("b", {}, l.name), h("small", {}, l.twins.length ? `${l.id} · looks like ${l.twins[0].name} (${l.twins[0].id}), which the app has` : `${l.address} · ${l.id}`), h("span", { class: "grow" }), h("button", { class: "btn small", type: "button", onclick: (e) => { e.preventDefault(); adopt(l); } }, "Edit first"))))));
+}
+
+// ---------------------------------------------------------------------------
+// Walk form
+// ---------------------------------------------------------------------------
+
+function tourForm() {
+  const d = draft;
+  const isNew = pick.tours === "new";
+  const saved = isNew ? null : findTour(d.id);
+  const stopsBox = h("div");
+  const mapBox = h("div", { class: "map tall" });
+  let layer = null;
+
+  const drawMap = () => {
+    if (!map) return;
+    if (layer) layer.remove();
+    layer = L.layerGroup().addTo(map);
+    const pts = [];
+    if (saved && saved.routeCoordinates.length) {
+      const line = saved.routeCoordinates.map((p) => [p.latitude, p.longitude]);
+      L.polyline(line, { color: d.color, weight: 4, opacity: 0.8 }).addTo(layer);
+      pts.push(...line);
+    }
+    d.stops.forEach((s, i) => {
+      const l = byId.get(s.landmarkId);
+      if (!l) return;
+      pts.push([l.latitude, l.longitude]);
+      L.marker([l.latitude, l.longitude], { icon: L.divIcon({ className: "", html: `<div class="num" style="background:${d.color}">${i + 1}</div>`, iconSize: [0, 0] }) }).bindTooltip(l.name).addTo(layer);
+    });
+    if (pts.length && !map._fitted) { map.fitBounds(pts, { padding: [24, 24] }); map._fitted = true; }
+  };
+
+  setTimeout(() => {
+    if (!haveMap() || !mapBox.isConnected) return;
+    map = L.map(mapBox, { scrollWheelZoom: false }).setView(CENTER, 13);
+    tiles(map);
+    drawMap();
+  }, 0);
+
+  const move = (i, by) => { const j = i + by; if (j < 0 || j >= d.stops.length) return; [d.stops[i], d.stops[j]] = [d.stops[j], d.stops[i]]; touch(); drawStops(); };
+
+  const stopRow = (s, i) => {
+    const l = byId.get(s.landmarkId);
+    const prev = i ? byId.get(d.stops[i - 1].landmarkId) : null;
+    const gap = l && prev ? `${miles(metres(l, prev))} mi from the last stop (straight line)` : l ? l.address : "";
+    return h("div", { class: "stop" },
+      h("div", { class: "n", style: { background: d.color } }, i + 1),
+      h("div", { class: "who" }, h("b", {}, l ? l.name : `Unknown (${s.landmarkId})`), h("small", {}, gap)),
+      h("input", { type: "text", value: s.note || "", placeholder: "A line for this stop (optional)", "aria-label": "Note", onInput: (e) => { s.note = e.target.value; touch(); } }),
+      h("div", { class: "btns" },
+        h("button", { class: "btn small icon", type: "button", title: "Move up", disabled: i === 0, onclick: () => move(i, -1) }, "↑"),
+        h("button", { class: "btn small icon", type: "button", title: "Move down", disabled: i === d.stops.length - 1, onclick: () => move(i, 1) }, "↓"),
+        h("button", { class: "btn small icon", type: "button", title: "Remove", onclick: () => { d.stops.splice(i, 1); touch(); drawStops(); } }, "✕")));
+  };
+
+  const picker = () => {
+    const results = h("div", { class: "results", hidden: true });
+    const input = h("input", { type: "text", placeholder: "Add a stop — search by name, address or architect", "aria-label": "Add a stop" });
+    let hits = [];
+    let on = 0;
+    const choose = (l) => { d.stops.push({ landmarkId: l.id, note: "" }); touch(); drawStops(); };
+    const draw = () => {
+      const q = input.value.trim().toLowerCase();
+      results.hidden = !q;
+      if (!q) return;
+      const last = d.stops.length ? byId.get(d.stops[d.stops.length - 1].landmarkId) : null;
+      const taken = new Set(d.stops.map((s) => s.landmarkId));
+      hits = S.landmarks
+        .filter((l) => !taken.has(l.id) && [l.name, l.address, l.architect, l.id].some((x) => (x || "").toLowerCase().includes(q)))
+        .map((l) => ({ l, m: last ? metres(l, last) : 0 }))
+        .sort((a, b) => (last ? a.m - b.m : sortName(a.l.name).localeCompare(sortName(b.l.name))))
+        .slice(0, 8);
+      on = 0;
+      results.replaceChildren(...(hits.length
+        ? hits.map(({ l, m }, i) => h("button", { type: "button", class: i === on ? "on" : "", onmousedown: (e) => { e.preventDefault(); choose(l); } }, h("b", {}, l.name), " ", h("small", {}, `${l.address}${last ? ` · ${miles(m)} mi from the last stop` : ""}`)))
+        : [h("div", { style: { padding: "9px 11px", color: "var(--sepia)" } }, "Nothing in the guide matches.")]));
+    };
+    input.addEventListener("input", draw);
+    input.addEventListener("keydown", (e) => { if (e.key === "Enter" && hits[0]) { e.preventDefault(); choose(hits[0].l); } if (e.key === "Escape") { input.value = ""; draw(); } });
+    input.addEventListener("blur", () => { results.hidden = true; });
+    input.addEventListener("focus", draw);
+    return h("div", { class: "picker" }, input, results);
+  };
+
+  const drawStops = () => {
+    stopsBox.replaceChildren(...d.stops.map(stopRow), picker());
+    drawMap();
+  };
+  drawStops();
+
+  const problems = saved ? saved.problems : [];
+  const running = S.job && S.job.status === "running";
+
+  return h("div", { class: "form" },
+    noticeEl(),
+    saved && problems.length ? h("div", { class: "notice warn" }, "This walk's route needs attention:",
+      h("ul", {}, ...problems.map((p) => h("li", {}, p))),
+      h("div", {}, h("button", { class: "btn small", style: { marginRight: "8px" }, disabled: dirty || running, title: dirty ? "Save your changes first" : "", onclick: () => runTask("route", saved.id) }, "Draw the route along the streets"))) : null,
+
+    h("div", { class: "card" }, h("h3", {}, "The walk"),
+      h("div", { class: "row lead" }, field("Name", bound("name")), field("Neighborhood", bound("neighborhood"))),
+      h("div", { class: "row lead" }, field("Author", bound("author")),
+        field("Colour", h("input", { type: "color", value: d.color, onInput: (e) => { d.color = e.target.value; touch(); drawStops(); } }))),
+      field("Description", bound("description", { area: true, rows: 4 }))),
+
+    h("div", { class: "card" }, h("h3", {}, "Stops, in walking order"), stopsBox,
+      saved ? h("div", { class: "map-note" }, `${saved.distance} · ${saved.duration} on the route as drawn. Changing the stops resets the route to a straight line until it is drawn again.`) : h("div", { class: "map-note" }, "A new walk starts as a straight line between its stops. After saving, draw it along the streets.")),
+
+    h("div", { class: "card" }, h("h3", {}, "Map"), haveMap() ? mapBox : mapMissing()),
+
+    saved ? h("div", { class: "card" }, h("h3", {}, "After a change"),
+      h("div", { class: "map-note" }, "The route, the street names on the fold-out map, and the fold-out map itself are drawn by scripts. Run them in this order once the stops are as you want them."),
+      h("div", {}, h("button", { class: "btn small", style: { marginRight: "8px" }, disabled: dirty || running, onclick: () => runTask("route", saved.id) }, "1. Draw the route"),
+        h("button", { class: "btn small", disabled: dirty || running, onclick: () => runTask("plate", saved.id) }, "2. Print the fold-out map"))) : null,
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Detail pane
+// ---------------------------------------------------------------------------
+
+function renderDetail(keepScroll) {
+  destroyMap();
+  const el = $("detail");
+  const id = pick[tab];
+  if (id === "import") return el.replaceChildren(importPanel());
+  if (!id) {
+    return el.replaceChildren(h("div", { class: "form" }, noticeEl()), h("div", { class: "empty" },
+      h("h2", {}, tab === "landmarks" ? "Choose a landmark" : "Choose a walk"),
+      tab === "landmarks"
+        ? `Pick one from the list to edit it, or add a new one. Edits are written to the files the app is built from, so they appear in the next build.`
+        : `Pick a walk to change its stops, notes and order, or start a new one.`));
+  }
+  const isNew = id === "new";
+  const title = isNew ? (draft.id ? `Add ${draft.name}` : tab === "landmarks" ? "New landmark" : "New walk") : draft.name || id;
+  const saveBtn = h("button", { class: "btn primary", id: "save", disabled: !dirty && !isNew, onclick: () => save(false) }, isNew ? "Add to the guide" : "Save");
+  const bar = h("div", { class: "bar" },
+    h("h2", {}, title, !isNew ? h("span", { class: "id" }, id) : null),
+    dirty || isNew ? h("button", { class: "btn", onclick: () => { if (isNew) { pick[tab] = null; } loadDraft(); notice = null; renderList(); renderDetail(); } }, isNew ? "Cancel" : "Revert") : null,
+    !isNew ? h("button", { class: "btn danger", onclick: remove }, "Delete") : null,
+    saveBtn);
+  el.replaceChildren(bar, tab === "landmarks" ? landmarkForm() : tourForm());
+  if (!keepScroll) el.scrollTop = 0;
+}
+
+async function save(force) {
+  const isNew = pick[tab] === "new";
+  if (!force && !dirty && !isNew) return;
+  const kind = tab;
+  const data = clone(draft);
+  if (kind === "landmarks") { data.latitude = data.latitude === "" ? NaN : data.latitude; data.longitude = data.longitude === "" ? NaN : data.longitude; }
+  try {
+    const out = await api(isNew ? "POST" : "PUT", isNew ? `/${kind}` : `/${kind}/${data.id}`, data);
+    const saved = kind === "landmarks" ? out.landmark : out.tour;
+    pick[kind] = saved.id;
+    await refresh(true);
+    if (kind === "landmarks") {
+      notice = { kind: out.warnings && out.warnings.length ? "warn" : "ok", text: isNew ? "Added to the guide." : "Saved.", list: out.warnings };
+      const t = toursUsing(saved.id).filter((x) => x.problems.length);
+      if (t.length) notice = { kind: "warn", text: "Saved. These walks now need their routes redrawn:", list: t.map((x) => x.name) };
+    } else {
+      const t = findTour(saved.id);
+      notice = t.problems.length
+        ? { kind: "warn", text: "Saved. " + t.problems[0], action: { label: "Draw the route along the streets", run: () => runTask("route", t.id) } }
+        : { kind: "ok", text: "Saved." };
+    }
+    loadDraft();
+    renderAll();
+  } catch (e) {
+    notice = { kind: "err", text: e.message, list: e.details };
+    renderDetail(true);
+    $("detail").scrollTop = 0;
+  }
+}
+
+async function remove() {
+  const id = pick[tab];
+  const name = draft.name || id;
+  const what = tab === "landmarks"
+    ? `Delete ${name} from the guide? It comes out of the app's data and the JSON. (The database keeps its row.)`
+    : `Delete the walk ${name}? Its baked street names and fold-out map stay in the repo until you remove them.`;
+  if (!confirm(what)) return;
+  try {
+    await api("DELETE", `/${tab}/${id}`);
+    pick[tab] = null;
+    await refresh(true);
+    loadDraft();
+    notice = { kind: "ok", text: `Deleted ${name}.` };
+    renderAll();
+  } catch (e) {
+    notice = { kind: "err", text: e.message, list: e.details };
+    renderDetail(true);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Scripts
+// ---------------------------------------------------------------------------
+
+let polling = false;
+
+async function runTask(name, arg) {
+  try {
+    await api("POST", "/run", { task: name, arg });
+    $("console").classList.add("on");
+    poll();
+    await refresh(true);
+  } catch (e) {
+    notice = { kind: "err", text: e.message, list: e.details };
+    renderDetail(true);
+  }
+}
+
+async function poll() {
+  if (polling) return;
+  polling = true;
+  try {
+    for (;;) {
+      const { job } = await api("GET", "/job");
+      if (!job) break;
+      $("led").className = `led ${job.status}`;
+      $("job-label").textContent = job.label;
+      $("job-status").textContent = job.status === "running" ? "running…" : job.status === "ok" ? "finished" : "stopped";
+      const out = $("job-out");
+      const atEnd = out.scrollTop + out.clientHeight >= out.scrollHeight - 20;
+      out.textContent = job.output;
+      if (atEnd) out.scrollTop = out.scrollHeight;
+      if (job.status !== "running") {
+        await refresh(true);
+        if (!dirty) { loadDraft(); renderDetail(true); }
+        break;
+      }
+      await sleep(800);
+    }
+  } finally {
+    polling = false;
+  }
+}
+
+$("close-console").onclick = () => $("console").classList.remove("on");
+
+// ---------------------------------------------------------------------------
+
+function renderAll() {
+  renderHeader();
+  renderList();
+  renderDetail();
+}
+
+async function refresh(quiet) {
+  S = await api("GET", "/state");
+  byId = new Map(S.landmarks.map((l) => [l.id, l]));
+  if (!quiet) renderAll();
+  else { renderHeader(); renderList(); }
+}
+
+document.addEventListener("keydown", (e) => {
+  if ((e.metaKey || e.ctrlKey) && e.key === "s") { e.preventDefault(); save(false); }
+});
+window.addEventListener("beforeunload", (e) => { if (dirty) { e.preventDefault(); e.returnValue = ""; } });
+
+refresh().then(() => { if (S.job) { $("console").classList.add("on"); poll(); } }).catch((e) => {
+  $("detail").replaceChildren(h("div", { class: "empty" }, h("h2", {}, "Couldn't load the guide"), e.message));
+});
+</script>
+</body>
+</html>
