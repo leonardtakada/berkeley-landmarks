@@ -1,8 +1,13 @@
+import { execFileSync } from "node:child_process";
 import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
+import sharp from "sharp";
 import { describe, expect, it } from "vitest";
 
 import { landmarks } from "../data/landmarks";
 import { tours } from "../data/tours";
+import { makePrint } from "../scripts/editor/photos";
 import {
   applyTour,
   checkLandmark,
@@ -12,6 +17,8 @@ import {
   differences,
   dropBlock,
   dropJson,
+  highestNumber,
+  isUpload,
   isPlaceholder,
   joinBlocks,
   landmarkBlock,
@@ -20,12 +27,15 @@ import {
   parseJson,
   placeholderRoute,
   printJson,
+  printUploads,
   putBlock,
   putJson,
   routeProblems,
   splitBlocks,
+  tidyNumber,
   tourBlock,
   twinsOf,
+  uploadFile,
 } from "../scripts/editor/store";
 
 // The guide editor (scripts/editor) rewrites data/landmarks.ts, data/tours.ts
@@ -163,7 +173,7 @@ describe("checking what a reader of the form sends", () => {
         "It needs a name",
         "It needs a description",
         "Choose a category",
-        "The lead photograph should be a web address",
+        "The lead photograph should be a web address or an upload",
       ]),
     );
     expect(errors.some((e) => e.startsWith("Latitude"))).toBe(true);
@@ -253,5 +263,111 @@ describe("tours", () => {
     const stop = tours[0].stops[0].landmarkId;
     const moved = landmarks.map((l) => (l.id === stop ? { ...l, latitude: l.latitude + 0.01 } : l));
     expect(routeProblems(tours[0], moved).join()).toMatch(/misses/);
+  });
+});
+
+describe("the city's landmark number", () => {
+  it("writes a plain number as #n and leaves other forms alone", () => {
+    expect(tidyNumber("5")).toBe("#5");
+    expect(tidyNumber(" # 05 ")).toBe("#5");
+    expect(tidyNumber("#369")).toBe("#369");
+    expect(tidyNumber("UC12")).toBe("UC12");
+    expect(tidyNumber("N/A")).toBe("N/A");
+    expect(tidyNumber("")).toBe("");
+    expect(cleanLandmark({ ...landmarks[0], landmarkNumber: "84" }).landmarkNumber).toBe("#84");
+  });
+
+  it("finds the highest number in use", () => {
+    const top = Math.max(...landmarks.map((l) => parseInt(l.landmarkNumber.replace(/\D/g, "")) || 0));
+    expect(highestNumber(landmarks)).toBe(top);
+  });
+
+  it("warns when another place of the same designation has the number", () => {
+    const l = landmarks.find((x) => /^#\d+$/.test(x.landmarkNumber) && x.designationType)!;
+    const twin = { ...l, id: "lm-9999", name: "Elsewhere", address: "9 Elsewhere Rd", latitude: 37.86, longitude: -122.25 };
+    expect(checkLandmark(twin, landmarks).warnings.join()).toMatch(/has the same number/);
+    const other = { ...twin, designationType: l.designationType === "Landmark" ? ("Notable" as const) : ("Landmark" as const) };
+    expect(checkLandmark(other, landmarks).warnings.join()).not.toMatch(/has the same number/);
+  });
+});
+
+describe("uploaded photographs", () => {
+  const jpeg = (width: number, height: number, opts: { orientation?: number } = {}) =>
+    sharp({ create: { width, height, channels: 3, background: "#6b8e5a" } })
+      .jpeg()
+      .withMetadata(opts.orientation ? { orientation: opts.orientation } : {})
+      .toBuffer();
+
+  it("prints 960 px wide and names the print for its bytes", async () => {
+    const a = await makePrint(await jpeg(2400, 1600));
+    expect([a.width, a.height]).toEqual([960, 640]);
+    expect(a.file).toMatch(/^u-[0-9a-f]{12}\.jpg$/);
+    expect((await sharp(a.buffer).metadata()).format).toBe("jpeg");
+    expect(a.buffer.length).toBeLessThan(150_000);
+    // The same photograph again is the same print.
+    expect((await makePrint(await jpeg(2400, 1600))).file).toBe(a.file);
+  });
+
+  it("never enlarges, and says when a photograph is small", async () => {
+    const p = await makePrint(await jpeg(600, 400));
+    expect([p.width, p.height]).toEqual([600, 400]);
+    expect(p.warning).toMatch(/small/);
+    expect((await makePrint(await jpeg(1200, 800))).warning).toBeUndefined();
+  });
+
+  it("turns a sideways photograph upright", async () => {
+    // Orientation 6: stored 2000 × 1000, shown 1000 × 2000.
+    const p = await makePrint(await jpeg(2000, 1000, { orientation: 6 }));
+    expect([p.width, p.height]).toEqual([960, 1920]);
+  });
+
+  it("prints a transparent PNG on white, not black", async () => {
+    const png = await sharp({ create: { width: 1200, height: 800, channels: 4, background: { r: 0, g: 0, b: 0, alpha: 0 } } }).png().toBuffer();
+    const { data } = await sharp((await makePrint(png)).buffer).raw().toBuffer({ resolveWithObject: true });
+    expect(data[0]).toBeGreaterThan(240);
+  });
+
+  // An iPhone's photographs are HEIC; sharp here can't read them, so macOS's own converter does.
+  it.runIf(process.platform === "darwin")("prints a HEIC photograph, converted by macOS", async () => {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "heic-test-"));
+    try {
+      fs.writeFileSync(path.join(dir, "in.jpg"), await jpeg(1600, 1200));
+      execFileSync("/usr/bin/sips", ["-s", "format", "heic", path.join(dir, "in.jpg"), "--out", path.join(dir, "in.heic")], { stdio: "ignore" });
+      const p = await makePrint(fs.readFileSync(path.join(dir, "in.heic")));
+      expect([p.width, p.height]).toEqual([960, 720]);
+      expect(p.file).toMatch(/^u-[0-9a-f]{12}\.jpg$/);
+      expect((await sharp(p.buffer).metadata()).format).toBe("jpeg");
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it("says plainly why it can't print a file", async () => {
+    await expect(makePrint(Buffer.from("not a photograph at all"))).rejects.toThrow(/couldn't be read/);
+    await expect(makePrint(await jpeg(100, 100))).rejects.toThrow(/only 100 px wide/);
+    const heic = Buffer.concat([Buffer.from([0, 0, 0, 24]), Buffer.from("ftypheic"), Buffer.alloc(32)]);
+    await expect(makePrint(heic)).rejects.toThrow(/HEIC/);
+  });
+
+  it("knows an upload's address, and needs a credit and a print for it", () => {
+    expect(isUpload("upload:u-0123456789ab.jpg")).toBe(true);
+    expect(isUpload("upload:../../etc/passwd")).toBe(false);
+    expect(isUpload("https://example.test/a.jpg")).toBe(false);
+    expect(uploadFile("upload:u-0123456789ab.jpg")).toBe("u-0123456789ab.jpg");
+
+    const url = "upload:u-0123456789ab.jpg";
+    const l = { ...landmarks[0], photoUrl: url, photos: [] };
+    const facts = (has: boolean, credit?: string) => ({ has: () => has, credit: () => credit });
+    expect(checkLandmark(l, landmarks, facts(true, "Me · CC BY 4.0")).errors).toEqual([]);
+    expect(checkLandmark(l, landmarks, facts(true)).errors.join()).toMatch(/Say who took/);
+    expect(checkLandmark(l, landmarks, facts(false, "Me")).errors.join()).toMatch(/upload it again/);
+    // Not a web address, and not an upload.
+    expect(checkLandmark({ ...l, photoUrl: "upload:nope" }, landmarks, facts(true, "x")).errors.join()).toMatch(/web address or an upload/);
+  });
+
+  it("keeps who took each upload, in order", () => {
+    const text = printUploads({ "upload:u-bbbbbbbbbbbb.jpg": { credit: "B", added: "2026-10-04" }, "upload:u-aaaaaaaaaaaa.jpg": { credit: "A", added: "2026-10-04" } });
+    expect(text.indexOf("aaaa")).toBeLessThan(text.indexOf("bbbb"));
+    expect(text.endsWith("}\n")).toBe(true);
   });
 });

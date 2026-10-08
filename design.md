@@ -261,7 +261,8 @@ printed into the app: `node scripts/bundle-photos.mjs` fetches each one
 `assets/photos/`, asks Commons who took it and on what licence, and writes
 `lib/photos.generated.ts`; `photoSource()` serves the bundled print wherever
 the URL appears, and `photoCredit()` its credit, set small under the plate.
-Re-run it after adding photographs. The large map is bundled PMTiles and
+Re-run it after adding photographs (the guide editor does, on save);
+photographs uploaded there are `upload:` names it only lists. The large map is bundled PMTiles and
 glyphs; the fold-out maps are baked. Only readers' photographs, sign-in and
 sending things to the editors need the network.
 `__tests__/offline.test.ts` fails if a photograph isn't bundled.
@@ -269,9 +270,10 @@ Both maps carry the OpenStreetMap credit (ODbL).
 
 ## Editing the guide — `scripts/editor/`
 `pnpm editor` opens a page at http://localhost:4777 for adding and managing
-landmarks and walks. It runs on this machine only (it answers to localhost
-and refuses anything cross-origin), not through the live server, because it
-writes the files the app is built from.
+landmarks and walks. It runs on this machine, not through the live server,
+because it writes the files the app is built from. By default it answers
+only to localhost and refuses anything cross-origin; "Phone" in the header
+lets an iPhone in (below).
 
 - **What it writes:** `data/landmarks.ts` (what the app reads) and
   `data/landmarks.json` (the mirror the admin page and photo scripts read),
@@ -280,9 +282,31 @@ writes the files the app is built from.
   `scripts/.cache/editor-backups` and reads the data back to check, undoing
   the save if it isn't what was meant. The database isn't touched
   (`server/seedLandmarks.ts` syncs it).
-- **Landmarks:** search and filter; every field; a map to place the pin
-  (click, drag, or find the address); a photograph gallery; a warning when a
-  place repeats another's name, street address or spot. A landmark that a
+- **Landmarks:** search and filter; every field; a map to place the pin; a
+  photograph gallery; a warning when a place repeats another's name, street
+  address or spot.
+- **The pin:** type a street address and the pin is placed from it
+  (OpenStreetMap's Nominatim, asked from the server at a request a second).
+  A pin placed by hand is never moved on its own; on an existing landmark
+  a changed address only offers to move it. Check the pin is on the
+  building: a street with no match places it on the street.
+- **Landmark number:** the city's own designation number (#1 is City Hall;
+  there are gaps, and the Landmark, Structure of Merit and District series
+  repeat numbers), so it is typed, never worked out. "5" is written #5, a
+  repeat within a designation is warned of, and the field shows the highest
+  in use. Leave it blank for a place the city hasn't designated.
+- **Uploaded photographs:** drop files on the Photographs card or use
+  Upload. Each is turned upright, flattened onto white, resized to 960px
+  wide (never enlarged) and printed through mozjpeg exactly as
+  `bundle-photos.mjs` prints the rest (`scripts/editor/photos.ts`; JPEG,
+  PNG, WebP, AVIF, and HEIC, which macOS's `sips` converts first). The print is named for its bytes
+  (`u-<hash>.jpg`), waits in `scripts/.cache/editor-uploads` until the
+  landmark is saved, then joins `assets/photos`; the data names it
+  `upload:u-<hash>.jpg`, and `data/photo-uploads.json` says who took it (a
+  credit is required). The original is kept in `scripts/.cache/photos`.
+  Saving a landmark whose photographs changed runs the bundler, which lists
+  uploads without fetching them. The colophon names an upload's
+  photographer among the other sources (`lib/credits.ts`). A landmark that a
   walk uses can't be deleted. Places that are only in the JSON are listed
   for review, with those that copy a place the app already has marked.
   Where the JSON and the app differ (a reader's approved edit lands only in
@@ -296,8 +320,36 @@ writes the files the app is built from.
   street names (`route-walks.ts`, `bake-walk-streets.ts`), print its
   fold-out map (`scripts/iso/plates.ts`), and check the data. Only those
   scripts, with a walk's id as the one argument.
+- **On an iPhone:** the same page is the phone's: at 820px or narrower it
+  shows one screen at a time (the list, then the place; Back and the edge
+  swipe return through the history), the page itself scrolls, inputs are 16px
+  so iOS doesn't zoom, and Save/Revert sit in a bar along the bottom once
+  something has changed. Photographs come from the camera or library
+  ("Take or choose photographs"); the phone redraws a large one at 2400px as
+  a JPEG before sending (a 4000px photo goes as about 600 KB; the server
+  still prints it at 960), and the last credit typed is offered for the next
+  upload. The header's tools fold into "Tools" above the list. It can be
+  added to the Home Screen (`/icon.png`).
+- **Letting a phone in** (`scripts/editor/phone.ts`): "Phone" in the header
+  (shown only on this Mac) is a switch, off by default and remembered in
+  `scripts/.cache/editor-phone.json`. On, the editor listens on every
+  interface and answers to this Mac's own names, and only those: its
+  Tailscale name, its `.local` name and its IPs (so a page that points its
+  own domain here still arrives with the wrong Host). A browser on this Mac
+  asking for localhost needs nothing; anything else must send the cookie
+  that comes from typing the passcode (`XXXX-XXXX-XXXX`, ~59 bits, shown in
+  the Phone sheet with a QR code for the best address). Five wrong tries,
+  then a minute's wait that doubles. The cookie is signed, HttpOnly,
+  SameSite=Strict and lasts 90 days; a new passcode signs every phone out.
+  `/api/phone` is for this Mac alone. It is plain HTTP, so on a shared
+  Wi-Fi the passcode and edits travel in the clear; Tailscale (the
+  `ts.net` name) encrypts them and works away from home. Anything carrying
+  a proxy's headers (`X-Forwarded-For`, Cloudflare's) is never treated as
+  local.
 - `__tests__/editor.test.ts` checks the files come apart and go back
-  together byte for byte, and that every entry survives a write.
+  together byte for byte, and that every entry survives a write;
+  `__tests__/editor-phone.test.ts` checks the passcode, cookie, guess limit
+  and which Host headers are let through.
 
 ## The reader's copy
 What the reader does with the guide is kept on the phone

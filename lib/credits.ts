@@ -7,7 +7,8 @@ import { BUNDLED_PHOTOS } from "@/lib/photos.generated";
  */
 export function commonsPhotographers(): string[] {
   const names = new Set<string>();
-  for (const { credit } of Object.values(BUNDLED_PHOTOS)) {
+  for (const [url, { credit }] of Object.entries(BUNDLED_PHOTOS)) {
+    if (url.startsWith("upload:")) continue;
     const parts = credit.split(" · ");
     if (parts[parts.length - 1] !== "Wikimedia Commons") continue;
     const name = parts[0].trim();
@@ -22,10 +23,17 @@ const SOURCE_NAMES: Record<string, string> = {
   "Calisphere, University of California": "Calisphere, the University of California's collections",
 };
 
-/** Other sources of the guide's plates, named as a sentence would. */
+/**
+ * Other sources of the guide's plates, named as a sentence would: the
+ * catalogues and archives, and whoever took the photographs uploaded in the
+ * guide editor (the name before the licence in their credit).
+ */
 export function otherPhotoSources(): string[] {
   const sources = new Set<string>();
-  for (const { credit } of Object.values(BUNDLED_PHOTOS)) if (!credit.includes(" · ")) sources.add(credit);
+  for (const [url, { credit }] of Object.entries(BUNDLED_PHOTOS)) {
+    if (url.startsWith("upload:")) sources.add(credit.split(" · ")[0].trim());
+    else if (!credit.includes(" · ")) sources.add(credit);
+  }
   return [...sources].sort().map((s) => SOURCE_NAMES[s] ?? s);
 }
 

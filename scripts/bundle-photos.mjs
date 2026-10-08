@@ -11,6 +11,11 @@
 //   node scripts/bundle-photos.mjs          # fetch what's new, rewrite the module
 //   node scripts/bundle-photos.mjs --report # sizes and credits, fetch nothing
 //
+// Photographs uploaded in the guide editor (scripts/editor) are already
+// printed: they're named `upload:u-<hash>.jpg` in the data, live in
+// assets/photos, and are credited in data/photo-uploads.json. They're only
+// listed here, never fetched.
+//
 // Originals are kept in scripts/.cache/photos (not committed); re-runs only
 // fetch photographs added since.
 import crypto from "node:crypto";
@@ -27,6 +32,10 @@ const CREDITS = "scripts/.cache/photo-credits.json";
 const UA = "BerkeleyTours/1.0 (leonardtakada@yahoo.com) photo-bundler";
 const report = process.argv.includes("--report");
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+const UPLOADS = "data/photo-uploads.json";
+const uploads = fs.existsSync(UPLOADS) ? JSON.parse(fs.readFileSync(UPLOADS, "utf8")) : {};
+const isUpload = (url) => url.startsWith("upload:");
 
 const landmarks = JSON.parse(fs.readFileSync("data/landmarks.json", "utf8"));
 const photos = new Map(); // url → { credit? }
@@ -118,6 +127,17 @@ const fetched = new Map(); // url → bundled file name
 let bytes = 0;
 const failed = [];
 for (const [i, url] of urls.entries()) {
+  if (isUpload(url)) {
+    const file = url.slice("upload:".length);
+    const out = path.join(OUT_DIR, file);
+    if (!fs.existsSync(out)) failed.push(`${url} — ${out} is missing`);
+    else if (!(uploads[url]?.credit || photos.get(url).credit)) failed.push(`${url} — no credit in ${UPLOADS}`);
+    else {
+      fetched.set(url, file);
+      bytes += fs.statSync(out).size;
+    }
+    continue;
+  }
   const file = name(url);
   const out = path.join(OUT_DIR, file);
   if (!fs.existsSync(out)) {
@@ -145,7 +165,7 @@ for (const [i, url] of urls.entries()) {
   bytes += fs.statSync(out).size;
 }
 
-const credits = report ? {} : await commonsCredits(urls.filter((u) => !photos.get(u).credit));
+const credits = report ? {} : await commonsCredits(urls.filter((u) => !isUpload(u) && !photos.get(u).credit));
 /** Credits as a caption sets them: the photographer's name, not their user page or a catalogue's notes. */
 function tidy(credit) {
   const [who, ...rest] = credit.split(" · ");
@@ -156,7 +176,7 @@ function tidy(credit) {
   if (/^(related names:|unknown( \/ uncredited)? photographer|author$)/i.test(name)) name = "Unknown";
   return [name, ...rest].join(" · ");
 }
-const creditOf = (u) => tidy(photos.get(u).credit ?? credits[u] ?? otherCredit(u));
+const creditOf = (u) => (isUpload(u) ? (uploads[u]?.credit ?? photos.get(u).credit).trim() : tidy(photos.get(u).credit ?? credits[u] ?? otherCredit(u)));
 
 // Prints no longer in the guide are dropped.
 const keep = new Set(fetched.values());
@@ -180,5 +200,5 @@ if (!report) {
 
 console.log(`${fetched.size}/${urls.length} photographs bundled, ${(bytes / 1e6).toFixed(1)} MB`);
 if (failed.length) console.log(`failed:\n  ${failed.join("\n  ")}`);
-const unlicensed = urls.filter((u) => !commonsTitle(u));
+const unlicensed = urls.filter((u) => !isUpload(u) && !commonsTitle(u));
 console.log(`${unlicensed.length} not from Commons (check the rights): ${[...new Set(unlicensed.map((u) => new URL(u).host))].join(", ")}`);

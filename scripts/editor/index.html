@@ -2,8 +2,13 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Guide">
+<meta name="theme-color" content="#FAF6EC">
 <title>Guide editor</title>
+<link rel="apple-touch-icon" href="/icon.png">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%230B2E8C'/%3E%3Cpath d='M8 23V9l8 8 8-8v14' fill='none' stroke='%23F2F0E6' stroke-width='3'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Jost:wght@400;500;600&display=swap" rel="stylesheet">
@@ -38,18 +43,14 @@
   nav { display: flex; gap: 4px; }
   nav button { border: 0; background: none; padding: 7px 14px; border-radius: 6px; font: 500 14px var(--font); color: var(--sepia); }
   nav button[aria-selected="true"] { background: var(--blue); color: var(--page); }
-  nav button:not([aria-selected="true"]):hover { background: var(--shade); }
   nav .count { opacity: .7; margin-left: 6px; font-weight: 400; }
   .grow { flex: 1; }
   header .tools { display: flex; gap: 8px; align-items: center; }
 
   /* Buttons */
   .btn { white-space: nowrap; border: 1px solid var(--line); background: var(--slip); padding: 6px 13px; border-radius: 6px; font-weight: 500; }
-  .btn:hover:not(:disabled) { border-color: var(--blue); color: var(--blue); }
   .btn.primary { background: var(--blue); border-color: var(--blue); color: var(--page); }
-  .btn.primary:hover:not(:disabled) { color: var(--page); filter: brightness(1.15); }
   .btn.danger { color: var(--vermilion); }
-  .btn.danger:hover:not(:disabled) { border-color: var(--vermilion); color: var(--vermilion); }
   .btn.small { padding: 3px 9px; font-size: 12.5px; }
   .btn:disabled { opacity: .45; cursor: default; }
   .btn.icon { padding: 3px 8px; }
@@ -62,7 +63,6 @@
   .list { overflow: auto; flex: 1; }
   .list-head { display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; color: var(--sepia); font-size: 12.5px; }
   .item { display: block; width: 100%; text-align: left; border: 0; border-bottom: 1px solid var(--line); background: none; padding: 9px 14px 9px 12px; border-left: 3px solid transparent; }
-  .item:hover { background: var(--shade); }
   .item[aria-current="true"] { background: var(--blue-tint); border-left-color: var(--blue); }
   .item .name { font-weight: 500; display: flex; align-items: center; gap: 8px; }
   .item .sub { color: var(--sepia); font-size: 12.5px; margin-left: 17px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -111,6 +111,9 @@
   .photo { display: grid; grid-template-columns: 84px 1fr auto; gap: 12px; align-items: start; }
   .thumb { width: 84px; height: 64px; border-radius: 4px; background: var(--shade); object-fit: cover; border: 1px solid var(--line); }
   .photo .fields { display: grid; gap: 6px; }
+  .btns2 { display: grid; gap: 6px; align-content: start; }
+  .btnrow { display: flex; gap: 8px; flex-wrap: wrap; }
+  .card.dropping { outline: 2px dashed var(--blue); outline-offset: -5px; }
 
   /* Stops */
   .stop { display: grid; grid-template-columns: 28px 1fr 1fr auto; gap: 10px; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--line); }
@@ -122,7 +125,6 @@
   .picker { position: relative; margin-top: 4px; }
   .results { position: absolute; left: 0; right: 0; top: 100%; z-index: 600; background: var(--slip); border: 1px solid var(--line); border-radius: 6px; box-shadow: 0 6px 18px rgba(0,0,0,.18); max-height: 300px; overflow: auto; }
   .results button { display: block; width: 100%; text-align: left; border: 0; border-bottom: 1px solid var(--line); background: none; padding: 7px 11px; }
-  .results button:hover, .results button.on { background: var(--blue-tint); }
   .results small { color: var(--sepia); }
   .used a { color: var(--blue); cursor: pointer; text-decoration: underline; }
   table.diff { border-collapse: collapse; width: 100%; font-size: 12.5px; margin-top: 6px; }
@@ -132,6 +134,32 @@
   .import-row { display: flex; gap: 10px; align-items: baseline; padding: 6px 0; border-bottom: 1px solid var(--line); }
   .import-row small { color: var(--sepia); }
   .import-row { cursor: pointer; }
+
+  /* Hover colours only where there is a pointer: on a touch screen they would stick after a tap. */
+  @media (hover: hover) {
+    nav button:not([aria-selected="true"]):hover { background: var(--shade); }
+    .btn:hover:not(:disabled) { border-color: var(--blue); color: var(--blue); }
+    .btn.primary:hover:not(:disabled) { color: var(--page); filter: brightness(1.15); }
+    .btn.danger:hover:not(:disabled) { border-color: var(--vermilion); color: var(--vermilion); }
+    .item:hover { background: var(--shade); }
+    .results button:hover { background: var(--blue-tint); }
+  }
+  .results button.on { background: var(--blue-tint); }
+  .back, .only-phone { display: none; }
+  .actions { display: contents; }
+  .overlay { position: fixed; inset: 0; z-index: 2000; background: rgba(0,0,0,.45); display: grid; place-items: center; padding: 16px; overflow: auto; }
+  .sheet { background: var(--page); border: 1px solid var(--line); border-radius: 12px; width: min(560px, 100%); max-height: 100%; overflow: auto; padding: 20px 22px; display: grid; gap: 14px; }
+  .sheet h2 { font: 500 20px var(--font); margin: 0; }
+  .sheet .lines { display: grid; gap: 10px; }
+  .way { display: grid; grid-template-columns: 1fr auto; gap: 4px 12px; align-items: center; padding: 10px 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--slip); }
+  .way b { font-weight: 500; }
+  .way small { color: var(--sepia); grid-column: 1; overflow-wrap: anywhere; }
+  .way img { grid-column: 2; grid-row: 1 / span 2; width: 132px; height: 132px; border-radius: 4px; background: #fff; }
+  .code { font: 600 22px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: 2px; padding: 12px; background: var(--slip); border: 1px solid var(--line); border-radius: 8px; text-align: center; user-select: all; }
+  .sheet ol { margin: 0; padding-left: 20px; color: var(--sepia); display: grid; gap: 4px; }
+  .dot-on { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--ok); margin-left: 6px; }
+  details.phone-tools summary { cursor: pointer; padding: 10px 14px; color: var(--sepia); font-weight: 500; }
+  details.phone-tools .btnrow { padding: 0 14px 12px; }
 
   /* Console */
   #console { flex: none; border-top: 1px solid var(--line); background: var(--slip); display: none; }
@@ -146,9 +174,73 @@
   @media (prefers-reduced-motion: reduce) { .led.running { animation: none; } }
 
   @media (max-width: 900px) {
-    main { grid-template-columns: 1fr; }
-    aside { max-height: 40vh; border-right: 0; border-bottom: 1px solid var(--line); }
     .row.two, .row.three, .row.lead { grid-template-columns: 1fr; }
+  }
+
+  /* On a phone: one screen at a time (the list, then the place), the page itself scrolls, and Save sits under the thumb. */
+  @media (max-width: 820px) {
+    html, body { height: auto; }
+    body { display: block; font-size: 16px; -webkit-text-size-adjust: 100%; }
+    body[data-view="detail"] > header, body[data-view="detail"] aside { display: none; }
+    body[data-view="list"] section.detail { display: none; }
+    body > header { position: sticky; top: 0; z-index: 800; height: auto; padding: 8px 14px; padding-top: calc(8px + env(safe-area-inset-top)); padding-left: max(14px, env(safe-area-inset-left)); padding-right: max(14px, env(safe-area-inset-right)); gap: 10px; }
+    header h1 { font-size: 14px; letter-spacing: 1.5px; }
+    body > header .grow, body > header .tools { display: none; }
+    nav { flex: 1; justify-content: flex-end; }
+    nav button { padding: 10px 14px; font-size: 15px; }
+    main { display: block; }
+    aside { max-height: none; border: 0; display: block; }
+    .list { overflow: visible; }
+    section.detail { overflow: visible; }
+    .only-phone { display: block; }
+    .card.only-phone { display: grid; }
+    .back { display: inline-flex; align-items: center; justify-content: center; }
+
+    .filters { padding: 12px 14px; }
+    .list-head { padding: 10px 14px; font-size: 14px; }
+    .item { padding: 13px 16px 13px 14px; }
+    .item .name { font-size: 16px; }
+    .item .sub { font-size: 13.5px; }
+    .banner { display: none; } /* housekeeping for the desktop */
+
+    input[type=text], input[type=url], select, textarea { font-size: 16px; padding: 11px 12px; min-height: 46px; border-radius: 8px; }
+    textarea { min-height: 120px; }
+    label.f { font-size: 14px; }
+    .btn { min-height: 44px; padding: 10px 16px; font-size: 15px; border-radius: 8px; }
+    .btn.small { min-height: 42px; padding: 8px 14px; font-size: 14.5px; }
+    .btn.icon { min-width: 44px; }
+    .check { font-size: 16px; }
+    .check input { width: 22px; height: 22px; }
+
+    .bar { top: 0; padding: 8px 12px; padding-top: calc(8px + env(safe-area-inset-top)); padding-left: max(12px, env(safe-area-inset-left)); gap: 6px; }
+    .bar h2 { font-size: 17px; }
+    .bar .id { display: none; }
+    .back { flex: none; min-width: 44px; font-size: 22px; padding: 0 10px; }
+    .actions { position: fixed; left: 0; right: 0; bottom: 0; z-index: 900; display: flex; gap: 10px; padding: 10px 14px calc(10px + env(safe-area-inset-bottom)); background: var(--slip); border-top: 1px solid var(--line); box-shadow: 0 -4px 14px rgba(0,0,0,.1); }
+    .actions.idle { display: none; }
+    .actions .btn.primary { flex: 1; }
+    .actions .btn.danger { display: none; }
+
+    .form { padding: 14px 12px 130px; gap: 14px; max-width: none; }
+    .card { padding: 14px; }
+    .c-place { order: 1; } .c-photos { order: 2; } .c-building { order: 3; } .c-map { order: 4; } .used { order: 5; } .c-danger { order: 9; }
+    .map { height: 320px; } .map.tall { height: 360px; }
+
+    .photo { grid-template-columns: 1fr; }
+    .thumb { width: 100%; height: auto; max-height: 240px; object-fit: contain; }
+    .thumb[src=""] { display: none; }
+    .btns2 { grid-auto-flow: column; grid-auto-columns: max-content; }
+    .stop { grid-template-columns: 30px 1fr; }
+    .stop input, .stop .btns { grid-column: 1 / -1; }
+    .stop .btns { justify-content: flex-end; gap: 8px; }
+    .results button { padding: 12px 12px; }
+
+    #console { position: fixed; left: 8px; right: 8px; top: calc(8px + env(safe-area-inset-top)); z-index: 1500; border: 1px solid var(--line); border-radius: 10px; box-shadow: 0 6px 20px rgba(0,0,0,.25); overflow: hidden; }
+    #console header { position: static; height: 46px; padding: 0 12px; }
+    #console pre { display: none; height: 40vh; }
+    #console.open pre { display: block; }
+    .overlay { place-items: end center; padding: 0; }
+    .sheet { border-radius: 14px 14px 0 0; width: 100%; padding: 18px 16px calc(18px + env(safe-area-inset-bottom)); }
   }
 </style>
 </head>
@@ -203,11 +295,18 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const plural = (n, one, many) => `${n} ${n === 1 ? one : many || one + "s"}`;
 
 async function api(method, path, data) {
-  const res = await fetch("/api" + path, {
-    method,
-    headers: method === "GET" ? {} : { "Content-Type": "application/json" },
-    body: data === undefined ? undefined : JSON.stringify(data),
-  });
+  let res;
+  try {
+    res = await fetch("/api" + path, {
+      method,
+      headers: method === "GET" ? {} : { "Content-Type": "application/json" },
+      body: data === undefined ? undefined : JSON.stringify(data),
+    });
+  } catch {
+    throw new Error("Can't reach the editor. Is the Mac awake, and is this phone on the same Wi-Fi or Tailscale?");
+  }
+  // A phone whose sign-in has lapsed (or was reset) is sent back to the passcode page.
+  if (res.status === 401) { location.reload(); throw new Error("Signing in again…"); }
   const out = await res.json().catch(() => ({}));
   if (!res.ok) {
     const e = new Error(out.error || res.statusText);
@@ -237,6 +336,13 @@ let notice = null; // { kind, text, list, action }
 const filters = { q: "", cat: "", flag: "" };
 let map = null;
 
+const phoneQuery = window.matchMedia("(max-width: 820px)");
+const onPhone = () => phoneQuery.matches;
+/** On a phone only one screen shows at a time: the place when one is chosen, otherwise the list. */
+const setView = () => { document.body.dataset.view = pick[tab] ? "detail" : "list"; };
+const toTop = () => { $("detail").scrollTop = 0; window.scrollTo(0, 0); };
+let listScroll = 0;
+
 const CENTER = [37.8716, -122.2727];
 
 function blankLandmark() {
@@ -244,6 +350,8 @@ function blankLandmark() {
     id: "", name: "", address: "", latitude: "", longitude: "", architect: "", yearBuilt: "",
     category: "residential", landmarkNumber: "", description: "", style: "", nationalRegister: false,
     neighborhood: "", designationType: "", photoUrl: "", photos: [],
+    // Who took the lead photograph when it is an upload (a gallery row has its own credit).
+    credits: {},
   };
 }
 
@@ -255,7 +363,9 @@ function toDraft(kind, id) {
   if (id === "new") return kind === "landmarks" ? blankLandmark() : blankTour();
   if (kind === "landmarks") {
     const l = clone(byId.get(id));
-    return { ...blankLandmark(), ...l, designationType: l.designationType || "", photoUrl: l.photoUrl || "", photos: l.photos || [] };
+    const photos = (l.photos || []).map((p) => (isUpload(p.url) && !p.credit ? { ...p, credit: (S.uploads[p.url] || {}).credit || "" } : p));
+    const credits = l.photoUrl && isUpload(l.photoUrl) ? { [l.photoUrl]: (S.uploads[l.photoUrl] || {}).credit || "" } : {};
+    return { ...blankLandmark(), ...l, designationType: l.designationType || "", photoUrl: l.photoUrl || "", photos, credits };
   }
   const t = clone(S.tours.find((x) => x.id === id));
   return {
@@ -274,7 +384,12 @@ function loadDraft() {
 function touch() {
   dirty = JSON.stringify(draft) !== baseline;
   const save = $("save");
-  if (save) save.disabled = !dirty && pick[tab] !== "new";
+  const fresh = pick[tab] === "new";
+  if (save) save.disabled = !dirty && !fresh;
+  const actions = $("actions");
+  if (actions) actions.classList.toggle("idle", !dirty && !fresh);
+  const revert = $("revert");
+  if (revert) revert.hidden = !dirty && !fresh;
 }
 
 function confirmDiscard() {
@@ -297,20 +412,29 @@ function renderHeader() {
     ),
   );
   const tools = $("tools");
-  const running = S.job && S.job.status === "running";
   tools.replaceChildren();
-  add(tools, [
+  add(tools, toolButtons());
+}
+
+/** The header's buttons; on a phone they sit in a fold-out above the list instead. */
+function toolButtons() {
+  const running = S.job && S.job.status === "running";
+  return [
     S.unbundled.length
       ? h("button", { class: "btn small", disabled: running, title: S.unbundled.slice(0, 8).map((u) => u.landmarkId).join(", "), onclick: () => runTask("photos") },
           `${plural(S.unbundled.length, "photograph")} not yet in the app — print`)
       : null,
     h("button", { class: "btn small", disabled: running, onclick: () => runTask("checks") }, "Check the data"),
-  ]);
+    S.local ? h("button", { class: "btn small", onclick: openPhone }, "Phone", S.phones ? h("span", { class: "dot-on", title: "Phones can sign in" }) : null) : null,
+  ];
 }
+
+const phoneTools = () => h("details", { class: "only-phone phone-tools" }, h("summary", {}, "Tools"), h("div", { class: "btnrow" }, ...toolButtons()));
 
 function switchTab(key) {
   if (key === tab || !confirmDiscard()) return;
   tab = key;
+  if (onPhone()) pick[key] = null; // the tabs show on the list, so the other tab opens at its own list
   notice = null;
   loadDraft();
   renderAll();
@@ -367,10 +491,11 @@ function renderList() {
             h("option", { value: "" }, "All categories"), ...S.categories.map((c) => h("option", { value: c.key, selected: filters.cat === c.key }, c.label))),
           h("select", { "aria-label": "Show", onChange: (e) => { filters.flag = e.target.value; renderRows(); } },
             ...[["", "Everything"], ["any", "Needs a look"], ["no photo", "No photograph"], ["photo to print", "Photo to print"], ["differs", "Differs from JSON"]].map(([v, t]) => h("option", { value: v, selected: filters.flag === v }, t))))),
-      head, rowsEl);
+      phoneTools(), head, rowsEl);
     renderRows();
   } else {
     side.replaceChildren(
+      phoneTools(),
       h("div", { class: "list-head" }, h("span", {}, plural(S.tours.length, "walk")), h("button", { class: "btn small primary", onclick: () => select("new") }, "+ New walk")),
       h("div", { class: "list" },
         ...S.tours.map((t) =>
@@ -382,6 +507,11 @@ function renderList() {
 
 function select(id) {
   if (!confirmDiscard()) return;
+  if (onPhone()) {
+    if (!pick[tab]) listScroll = window.scrollY;
+    // The phone's Back (or swipe) returns to the list instead of leaving the page.
+    if (!(history.state && history.state.detail)) history.pushState({ detail: true }, "");
+  }
   pick[tab] = id;
   notice = null;
   loadDraft();
@@ -389,9 +519,91 @@ function select(id) {
   renderDetail();
 }
 
+/** Back to the list (a phone shows one screen at a time). */
+function closeDetail() {
+  if (!confirmDiscard()) return false;
+  pick[tab] = null;
+  notice = null;
+  loadDraft();
+  renderList();
+  renderDetail();
+  requestAnimationFrame(() => window.scrollTo(0, listScroll));
+  return true;
+}
+
+function backToList() {
+  if (history.state && history.state.detail) history.back(); // popstate closes it
+  else closeDetail();
+}
+
+window.addEventListener("popstate", () => {
+  if (!pick[tab] || (history.state && history.state.detail)) return;
+  if (!closeDetail()) history.pushState({ detail: true }, "");
+});
+
+const backButton = () => h("button", { class: "btn back", type: "button", "aria-label": "Back to the list", onclick: backToList }, "‹");
+
 // ---------------------------------------------------------------------------
 // Form pieces
 // ---------------------------------------------------------------------------
+
+// Uploaded photographs are named upload:u-<hash>.jpg; the server shows them at /photo/.
+const isUpload = (u) => /^upload:u-[0-9a-f]{12}\.jpg$/.test(u || "");
+const previewSrc = (u) => (isUpload(u) ? "/photo/" + u.slice("upload:".length) : u || "");
+/** What each print in this session measured, for the row that shows it. */
+const printed = {};
+
+function readBase64(file) {
+  return new Promise((resolve, reject) => {
+    const r = new FileReader();
+    r.onload = () => resolve(String(r.result).split(",")[1] || "");
+    r.onerror = () => reject(new Error("Couldn't read that file"));
+    r.readAsDataURL(file);
+  });
+}
+
+/**
+ * A phone's photograph is 3-8 MB and, from the library, may be HEIC. Redrawn here at 2400 px as a JPEG it is a few hundred KB (quick over
+ * Wi-Fi or Tailscale) and upright; the server still prints it at 960. If the browser can't redraw it, the original goes as it is.
+ */
+const SEND_SIDE = 2400;
+async function shrink(file) {
+  if (/^image\/(jpeg|png|webp)$/.test(file.type) && file.size < 700_000) return file;
+  const url = URL.createObjectURL(file);
+  try {
+    const img = new Image();
+    img.src = url;
+    await img.decode();
+    const k = Math.min(1, SEND_SIDE / Math.max(img.naturalWidth, img.naturalHeight));
+    const canvas = document.createElement("canvas");
+    canvas.width = Math.max(1, Math.round(img.naturalWidth * k));
+    canvas.height = Math.max(1, Math.round(img.naturalHeight * k));
+    const ctx = canvas.getContext("2d");
+    ctx.fillStyle = "#fff";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+    const blob = await new Promise((resolve) => canvas.toBlob(resolve, "image/jpeg", 0.9));
+    if (!blob || blob.size >= file.size) return file;
+    return new File([blob], file.name.replace(/\.[^.]*$/, "") + ".jpg", { type: "image/jpeg" });
+  } catch {
+    return file;
+  } finally {
+    URL.revokeObjectURL(url);
+  }
+}
+
+const sendPhoto = async (file) => api("POST", "/photos", { data: await readBase64(await shrink(file)), name: file.name });
+
+/** Who took the last photograph uploaded from this browser, offered for the next (the credit is required, and awkward to type on a phone). */
+const CREDIT_KEY = "guide-editor-credit";
+const lastCredit = () => { try { return localStorage.getItem(CREDIT_KEY) || ""; } catch { return ""; } };
+const rememberCredit = (v) => { try { if (v.trim()) localStorage.setItem(CREDIT_KEY, v.trim()); } catch { /* private browsing */ } };
+
+/** "5" and "# 5" are written #5; anything else ("UC…") is left as typed. */
+const tidyNumber = (v) => {
+  const m = /^#?\s*(\d+)$/.exec(v.trim());
+  return m ? "#" + Number(m[1]) : v.trim();
+};
 
 function field(label, input, hint) {
   return h("label", { class: "f" }, h("span", {}, label, hint ? h("span", { class: "hint" }, "  " + hint) : null), input);
@@ -441,15 +653,23 @@ function landmarkForm() {
   let marker = null;
   let lat$, lng$;
 
-  const place = (lat, lng, fromMap) => {
+  const hasCoords = () => isFinite(parseFloat(d.latitude)) && isFinite(parseFloat(d.longitude));
+  const original = isNew ? null : byId.get(d.id);
+  let autoPlaced = false; // the pin came from the address, not from a hand
+  let lookupId = 0;
+  let timer = null;
+
+  const place = (lat, lng, how) => {
     d.latitude = Number(lat).toFixed(6);
     d.longitude = Number(lng).toFixed(6);
+    autoPlaced = how === "address";
+    suggestion.replaceChildren();
     if (lat$) { lat$.value = d.latitude; lng$.value = d.longitude; }
-    if (marker) marker.setLatLng([lat, lng]);
+    if (marker) { marker.setLatLng([lat, lng]); marker.setOpacity(1); }
     touch();
-    void fromMap;
   };
   const moved = () => {
+    autoPlaced = false;
     const lat = parseFloat(d.latitude), lng = parseFloat(d.longitude);
     if (marker && isFinite(lat) && isFinite(lng)) { marker.setLatLng([lat, lng]); map.panTo([lat, lng]); }
   };
@@ -457,22 +677,60 @@ function landmarkForm() {
   lng$ = bound("longitude", { numeric: true, after: moved });
 
   const mapBox = h("div", { class: "map" });
-  const geocodeNote = h("span", { class: "map-note" }, "Click the map or drag the pin to place it. The grey dots are the guide's other places.");
-  const find = h("button", { class: "btn small", type: "button", onclick: async () => {
-    if (!d.address.trim()) { geocodeNote.textContent = "Type the address first."; return; }
-    geocodeNote.textContent = "Looking…";
+  const geocodeNote = h("span", { class: "map-note" }, isNew
+    ? "Type the street address and the pin is placed for you; or click the map. The grey dots are the guide's other places."
+    : "Click the map or drag the pin to place it. The grey dots are the guide's other places.");
+  const suggestion = h("div");
+
+  /** Asks where the address is. "button" always places the pin; "typing" never overrides a pin placed by hand. */
+  const lookUp = async (how) => {
+    const address = d.address.trim();
+    if (!address) { geocodeNote.textContent = "Type the address first."; return; }
+    const mine = ++lookupId;
+    geocodeNote.textContent = "Looking up the address…";
+    let results;
     try {
-      const q = encodeURIComponent(`${d.address}, Berkeley, CA`);
-      const res = await fetch(`https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&q=${q}`);
-      const hit = (await res.json())[0];
-      if (!hit) { geocodeNote.textContent = "No match for that address. Place it by hand."; return; }
-      place(parseFloat(hit.lat), parseFloat(hit.lon));
-      map.setView([parseFloat(hit.lat), parseFloat(hit.lon)], 18);
-      geocodeNote.textContent = `Found: ${hit.display_name}. Check that the pin is on the building.`;
+      results = (await api("GET", "/geocode?q=" + encodeURIComponent(address))).results;
     } catch (e) {
-      geocodeNote.textContent = "Couldn't reach the address lookup.";
+      if (mine === lookupId) geocodeNote.textContent = e.message;
+      return;
     }
-  } }, "Find the address on the map");
+    if (mine !== lookupId) return; // the address has changed since
+    const hit = results[0];
+    if (!hit) { geocodeNote.textContent = "No match for that address. Place the pin by hand."; return; }
+    const check = hit.building ? "Check the pin is on the building." : "Only the street was found. Drag the pin onto the building.";
+    if (how === "typing" && hasCoords() && !autoPlaced) {
+      // An existing pin is never moved on its own; the move is offered.
+      const away = metres({ latitude: parseFloat(d.latitude), longitude: parseFloat(d.longitude) }, hit);
+      if (away < 15) { geocodeNote.textContent = "The pin already matches this address."; return; }
+      geocodeNote.textContent = `This address is ${Math.round(away)} m from the pin.`;
+      suggestion.replaceChildren(h("button", { class: "btn small", type: "button", onclick: () => {
+        place(hit.latitude, hit.longitude, "address");
+        if (map) map.setView([hit.latitude, hit.longitude], 18);
+        geocodeNote.textContent = `Moved to ${hit.name}. ${check}`;
+      } }, "Move the pin to this address"));
+      return;
+    }
+    place(hit.latitude, hit.longitude, "address");
+    if (map) map.setView([hit.latitude, hit.longitude], 18);
+    geocodeNote.textContent = `Placed from the address: ${hit.name}. ${check}`;
+  };
+  const find = h("button", { class: "btn small", type: "button", onclick: () => lookUp("button") }, "Find the address on the map");
+
+  /** A street address (a number, then a street) is looked up once typing pauses, or on leaving the field. */
+  const onAddress = (soon) => {
+    clearTimeout(timer);
+    const a = d.address.trim();
+    const eligible = /^\d+\s+\S{2,}/.test(a) && (isNew ? !hasCoords() || autoPlaced : a !== original.address);
+    if (!eligible) return;
+    timer = soon ? setTimeout(() => lookUp("typing"), 1200) : null;
+    if (!soon) lookUp("typing");
+  };
+  const address$ = bound("address", { after: () => onAddress(true) });
+  address$.addEventListener("change", () => onAddress(false));
+
+  const number$ = bound("landmarkNumber", { placeholder: "#5" });
+  number$.addEventListener("change", () => { d.landmarkNumber = tidyNumber(d.landmarkNumber); number$.value = d.landmarkNumber; touch(); });
 
   setTimeout(() => {
     if (!haveMap() || !mapBox.isConnected) return;
@@ -485,25 +743,75 @@ function landmarkForm() {
       L.circleMarker([o.latitude, o.longitude], { radius: 4, weight: 1, color: "#fff", fillColor: "#7A6E62", fillOpacity: 0.8 }).bindTooltip(o.name).addTo(map);
     }
     marker = L.marker(has ? [lat, lng] : CENTER, { draggable: true, opacity: has ? 1 : 0.4, icon: L.divIcon({ className: "", html: '<div class="pin"></div>', iconSize: [0, 0] }) }).addTo(map);
-    marker.on("dragend", () => { const p = marker.getLatLng(); marker.setOpacity(1); place(p.lat, p.lng, true); });
-    map.on("click", (e) => { marker.setOpacity(1); place(e.latlng.lat, e.latlng.lng, true); });
+    marker.on("dragend", () => { const p = marker.getLatLng(); place(p.lat, p.lng, "hand"); });
+    map.on("click", (e) => place(e.latlng.lat, e.latlng.lng, "hand"));
   }, 0);
 
+  const photoNote = h("div", { class: "map-note" });
+  /** One line to a photograph, so one that failed isn't lost under the next one's. */
+  const show = (lines) => photoNote.replaceChildren(...lines.map(([text, bad]) => h("div", { style: bad ? { color: "var(--vermilion)" } : {} }, text)));
+  const thumbOf = (url) => h("img", { class: "thumb", alt: "", src: previewSrc(url), onerror: (e) => { e.target.style.visibility = "hidden"; }, onload: (e) => { e.target.style.visibility = "visible"; } });
+  const named = (url) => `Uploaded photograph${printed[url] ? " · " + printed[url] : ""}`;
+  const chooser = (multiple, onFiles) =>
+    h("input", { type: "file", accept: "image/*", multiple, hidden: true, onChange: (e) => { const files = [...e.target.files]; e.target.value = ""; onFiles(files); } });
+
+  /** Sends photographs to be turned upright, resized to 960 px and printed; `put` is handed each new address. */
+  const takePhotos = async (files, put) => {
+    const lines = [];
+    for (const [n, file] of [...files].entries()) {
+      show([...lines, [`Printing ${file.name}…`]]);
+      try {
+        const out = await sendPhoto(file);
+        printed[out.url] = `${out.width} × ${out.height}, ${Math.round(out.bytes / 1000)} KB`;
+        put(out.url, n);
+        touch();
+        drawLead();
+        drawPhotos();
+        const credited = lastCredit() ? `Credited as "${lastCredit()}"; change it if someone else took it, then save.` : "Say who took it, then save.";
+        lines.push([out.warning ? `${file.name}: ${out.warning} ${credited}` : `Printed ${file.name} at ${printed[out.url]}. ${credited}`]);
+      } catch (e) {
+        lines.push([`${file.name}: ${e.message}`, true]);
+      }
+      show(lines);
+    }
+  };
+  /** The first photograph fills an empty lead; the rest join the gallery. */
+  const putNew = (url) => { if (!d.photoUrl) { d.photoUrl = url; d.credits[url] = lastCredit(); } else d.photos.push({ url, caption: "", credit: lastCredit() }); };
+
+  const leadBox = h("div");
+  const drawLead = () => {
+    const up = isUpload(d.photoUrl);
+    const thumb = thumbOf(d.photoUrl);
+    const file$ = chooser(false, (files) => takePhotos(files, (url, n) => (n === 0 ? ((d.photoUrl = url), (d.credits[url] = lastCredit())) : d.photos.push({ url, caption: "", credit: lastCredit() }))));
+    leadBox.replaceChildren(h("div", { class: "photo" }, thumb,
+      h("div", { class: "fields" },
+        h("input", { type: "text", value: up ? named(d.photoUrl) : d.photoUrl, readOnly: up, placeholder: "A web address, or upload a file", "aria-label": "Lead photograph", onInput: (e) => { d.photoUrl = e.target.value; thumb.src = previewSrc(d.photoUrl); touch(); } }),
+        up ? h("input", { type: "text", value: d.credits[d.photoUrl] || "", placeholder: "Credit: who took it · licence (required)", "aria-label": "Credit", onInput: (e) => { d.credits[d.photoUrl] = e.target.value; rememberCredit(e.target.value); touch(); } }) : null),
+      h("div", { class: "btns2" },
+        h("button", { class: "btn small", type: "button", onclick: () => file$.click() }, d.photoUrl ? "Replace…" : "Upload…"),
+        d.photoUrl ? h("button", { class: "btn small icon", type: "button", title: "Remove", onclick: () => { d.photoUrl = ""; touch(); drawLead(); } }, "✕") : null,
+        file$)));
+  };
+
   const photoRow = (p, i) => {
-    const thumb = h("img", { class: "thumb", alt: "", src: p.url || "", onerror: (e) => { e.target.style.visibility = "hidden"; }, onload: (e) => { e.target.style.visibility = "visible"; } });
-    const url = h("input", { type: "text", value: p.url, placeholder: "https://…", "aria-label": "Photograph address", onInput: (e) => { p.url = e.target.value; thumb.src = p.url; touch(); } });
+    const up = isUpload(p.url);
+    const thumb = thumbOf(p.url);
+    const file$ = chooser(false, (files) => takePhotos(files, (url) => { p.url = url; if (!p.credit) p.credit = lastCredit(); }));
     return h("div", { class: "photo" }, thumb,
-      h("div", { class: "fields" }, url,
+      h("div", { class: "fields" },
+        h("input", { type: "text", value: up ? named(p.url) : p.url, readOnly: up, placeholder: "A web address, or upload a file", "aria-label": "Photograph", onInput: (e) => { p.url = e.target.value; thumb.src = previewSrc(p.url); touch(); } }),
         h("input", { type: "text", value: p.caption || "", placeholder: "Caption (optional)", "aria-label": "Caption", onInput: (e) => { p.caption = e.target.value; touch(); } }),
-        h("input", { type: "text", value: p.credit || "", placeholder: "Credit — who took it and on what licence", "aria-label": "Credit", onInput: (e) => { p.credit = e.target.value; touch(); } })),
-      h("button", { class: "btn small icon", type: "button", title: "Remove", onclick: () => { d.photos.splice(i, 1); touch(); drawPhotos(); } }, "✕"));
+        h("input", { type: "text", value: p.credit || "", placeholder: up ? "Credit: who took it · licence (required)" : "Credit — who took it and on what licence", "aria-label": "Credit", onInput: (e) => { p.credit = e.target.value; if (up) rememberCredit(e.target.value); touch(); } })),
+      h("div", { class: "btns2" },
+        h("button", { class: "btn small", type: "button", onclick: () => file$.click() }, "Replace…"),
+        h("button", { class: "btn small icon", type: "button", title: "Remove", onclick: () => { d.photos.splice(i, 1); touch(); drawPhotos(); } }, "✕"),
+        file$));
   };
   const gallery = h("div", { class: "card-body", style: { display: "grid", gap: "14px" } });
   const drawPhotos = () => gallery.replaceChildren(...d.photos.map(photoRow));
+  drawLead();
   drawPhotos();
-
-  const leadThumb = h("img", { class: "thumb", alt: "", src: d.photoUrl || "", onerror: (e) => { e.target.style.visibility = "hidden"; }, onload: (e) => { e.target.style.visibility = "visible"; } });
-  const lead = h("input", { type: "text", value: d.photoUrl, placeholder: "https://…", onInput: (e) => { d.photoUrl = e.target.value; leadThumb.src = d.photoUrl; touch(); } });
+  const many$ = chooser(true, (files) => takePhotos(files, putNew));
 
   const used = isNew ? [] : toursUsing(d.id);
 
@@ -515,25 +823,32 @@ function landmarkForm() {
       h("div", {}, h("button", { class: "btn small", type: "button", style: { marginRight: "8px" }, onclick: () => { for (const f of drift.fields) d[f] = clone(drift.json[f] ?? (f === "photos" ? [] : "")); touch(); renderDetail(true); } }, "Use the JSON's values"),
         h("button", { class: "btn small", type: "button", onclick: () => save(true) }, "Make the JSON match the app"))) : null,
 
-    h("div", { class: "card" }, h("h3", {}, "The place"),
+    h("div", { class: "card c-place" }, h("h3", {}, "The place"),
       h("div", { class: "row lead" }, field("Name", bound("name")), field("Category", select$("category", S.categories.map((c) => [c.key, c.label])))),
-      h("div", { class: "row two" }, field("Address", bound("address")), field("Neighborhood", bound("neighborhood"))),
-      h("div", { class: "row three" }, field("Designation", select$("designationType", S.designations.map((x) => [x, x]), "None"), ""), field("Landmark number", bound("landmarkNumber", { placeholder: "#84" })),
+      h("div", { class: "row two" }, field("Address", address$), field("Neighborhood", bound("neighborhood"))),
+      h("div", { class: "row three" }, field("Designation", select$("designationType", S.designations.map((x) => [x, x]), "None"), ""),
+        h("div", {}, field("Landmark number", number$), h("div", { class: "map-note", style: { marginTop: "4px" } }, `The city's own number — 5 or #5. Leave it blank if the city hasn't designated the place; it can't be worked out. Highest in the guide: #${S.highestNumber}.`)),
         h("label", { class: "check", style: { alignSelf: "end", paddingBottom: "7px" } }, h("input", { type: "checkbox", checked: d.nationalRegister, onChange: (e) => { d.nationalRegister = e.target.checked; touch(); } }), "On the National Register"))),
 
-    h("div", { class: "card" }, h("h3", {}, "On the map"),
+    h("div", { class: "card c-map" }, h("h3", {}, "On the map"),
       h("div", { class: "row three" }, field("Latitude", lat$), field("Longitude", lng$), h("div", { style: { alignSelf: "end" } }, find)),
-      haveMap() ? mapBox : mapMissing(), geocodeNote),
+      haveMap() ? mapBox : mapMissing(), h("div", {}, geocodeNote, suggestion)),
 
-    h("div", { class: "card" }, h("h3", {}, "The building"),
+    h("div", { class: "card c-building" }, h("h3", {}, "The building"),
       h("div", { class: "row three" }, field("Architect", bound("architect")), field("Year built", bound("yearBuilt")), field("Style", bound("style"))),
       field("Description", bound("description", { area: true, rows: 9 }), "A blank line starts a new paragraph")),
 
-    h("div", { class: "card" }, h("h3", {}, "Photographs"),
-      field("Lead photograph", h("div", { class: "photo" }, leadThumb, lead, h("span")), "Printed as the entry's plate"),
+    h("div", { class: "card c-photos", ondragover: (e) => { e.preventDefault(); e.currentTarget.classList.add("dropping"); }, ondragleave: (e) => e.currentTarget.classList.remove("dropping"),
+        ondrop: (e) => { e.preventDefault(); e.currentTarget.classList.remove("dropping"); takePhotos(e.dataTransfer.files, putNew); } },
+      h("h3", {}, "Photographs"),
+      field("Lead photograph", leadBox, "Printed as the entry's plate"),
       gallery,
-      h("div", {}, h("button", { class: "btn small", type: "button", onclick: () => { d.photos.push({ url: "", caption: "", credit: "" }); touch(); drawPhotos(); } }, "+ Add to the gallery")),
-      h("div", { class: "map-note" }, "New photographs are fetched and printed into the app by “print” in the header, after you save.")),
+      h("div", { class: "btnrow" },
+        h("button", { class: "btn small", type: "button", onclick: () => many$.click() }, onPhone() ? "Take or choose photographs…" : "Upload photographs…"),
+        h("button", { class: "btn small", type: "button", onclick: () => { d.photos.push({ url: "", caption: "", credit: "" }); touch(); drawPhotos(); } }, "+ Add a web address"),
+        many$),
+      photoNote,
+      h("div", { class: "map-note" }, `${onPhone() ? "Tap the button to take a photograph or pick from your library." : "Drop photographs anywhere on this card, or use Upload."} Each is turned upright, resized to 960 px wide and printed into the app when you save; it needs a credit. JPEG, HEIC, PNG, WebP and AVIF work.`)),
 
     used.length ? h("div", { class: "card used" }, h("h3", {}, "On the walks"), h("div", {}, "A stop on ", ...used.flatMap((t, i) => [i ? ", " : "", h("a", { onclick: () => { if (confirmDiscard()) { tab = "tours"; pick.tours = t.id; notice = null; loadDraft(); renderAll(); } } }, t.name)]), ". If you move it, redraw those routes.")) : null,
   );
@@ -583,7 +898,7 @@ function importPanel() {
     }
   } }, "Add to the app");
   return h("div", {},
-    h("div", { class: "bar" }, h("h2", {}, "In the JSON, not in the app"), go),
+    h("div", { class: "bar" }, backButton(), h("h2", {}, "In the JSON, not in the app"), go),
     h("div", { class: "form" }, noticeEl(),
       h("div", { class: "card" },
         h("div", { class: "map-note" }, "These are in data/landmarks.json and the database, but the app is built from data/landmarks.ts, so readers never see them. Many are second copies of places the app already has under another id; those are left unticked. Tick any you want to add."),
@@ -663,12 +978,12 @@ function tourForm() {
         .slice(0, 8);
       on = 0;
       results.replaceChildren(...(hits.length
-        ? hits.map(({ l, m }, i) => h("button", { type: "button", class: i === on ? "on" : "", onmousedown: (e) => { e.preventDefault(); choose(l); } }, h("b", {}, l.name), " ", h("small", {}, `${l.address}${last ? ` · ${miles(m)} mi from the last stop` : ""}`)))
+        ? hits.map(({ l, m }, i) => h("button", { type: "button", class: i === on ? "on" : "", onmousedown: (e) => e.preventDefault(), onclick: () => choose(l) }, h("b", {}, l.name), " ", h("small", {}, `${l.address}${last ? ` · ${miles(m)} mi from the last stop` : ""}`)))
         : [h("div", { style: { padding: "9px 11px", color: "var(--sepia)" } }, "Nothing in the guide matches.")]));
     };
     input.addEventListener("input", draw);
     input.addEventListener("keydown", (e) => { if (e.key === "Enter" && hits[0]) { e.preventDefault(); choose(hits[0].l); } if (e.key === "Escape") { input.value = ""; draw(); } });
-    input.addEventListener("blur", () => { results.hidden = true; });
+    input.addEventListener("blur", () => { setTimeout(() => { results.hidden = true; }, 250); }); // after a tap on a result has landed
     input.addEventListener("focus", draw);
     return h("div", { class: "picker" }, input, results);
   };
@@ -712,9 +1027,10 @@ function tourForm() {
 
 function renderDetail(keepScroll) {
   destroyMap();
+  setView();
   const el = $("detail");
   const id = pick[tab];
-  if (id === "import") return el.replaceChildren(importPanel());
+  if (id === "import") { el.replaceChildren(importPanel()); if (!keepScroll) toTop(); return; }
   if (!id) {
     return el.replaceChildren(h("div", { class: "form" }, noticeEl()), h("div", { class: "empty" },
       h("h2", {}, tab === "landmarks" ? "Choose a landmark" : "Choose a walk"),
@@ -725,13 +1041,18 @@ function renderDetail(keepScroll) {
   const isNew = id === "new";
   const title = isNew ? (draft.id ? `Add ${draft.name}` : tab === "landmarks" ? "New landmark" : "New walk") : draft.name || id;
   const saveBtn = h("button", { class: "btn primary", id: "save", disabled: !dirty && !isNew, onclick: () => save(false) }, isNew ? "Add to the guide" : "Save");
-  const bar = h("div", { class: "bar" },
-    h("h2", {}, title, !isNew ? h("span", { class: "id" }, id) : null),
-    dirty || isNew ? h("button", { class: "btn", onclick: () => { if (isNew) { pick[tab] = null; } loadDraft(); notice = null; renderList(); renderDetail(); } }, isNew ? "Cancel" : "Revert") : null,
-    !isNew ? h("button", { class: "btn danger", onclick: remove }, "Delete") : null,
-    saveBtn);
-  el.replaceChildren(bar, tab === "landmarks" ? landmarkForm() : tourForm());
-  if (!keepScroll) el.scrollTop = 0;
+  const revert = h("button", { class: "btn", id: "revert", hidden: !dirty && !isNew, onclick: () => {
+    if (isNew) pick[tab] = null;
+    loadDraft(); notice = null; renderList(); renderDetail();
+    if (isNew && history.state && history.state.detail) history.back();
+  } }, isNew ? "Cancel" : "Revert");
+  // On a phone these sit in a bar along the bottom, shown once there is something to save.
+  const actions = h("div", { class: "actions" + (!dirty && !isNew ? " idle" : ""), id: "actions" }, revert, !isNew ? h("button", { class: "btn danger", onclick: remove }, "Delete") : null, saveBtn);
+  const bar = h("div", { class: "bar" }, backButton(), h("h2", {}, title, !isNew ? h("span", { class: "id" }, id) : null), actions);
+  const form = tab === "landmarks" ? landmarkForm() : tourForm();
+  if (!isNew) form.append(h("div", { class: "card c-danger only-phone" }, h("h3", {}, "Danger zone"), h("button", { class: "btn danger", onclick: remove }, `Delete this ${tab === "landmarks" ? "landmark" : "walk"}`)));
+  el.replaceChildren(bar, form);
+  if (!keepScroll) toTop();
 }
 
 async function save(force) {
@@ -757,10 +1078,12 @@ async function save(force) {
     }
     loadDraft();
     renderAll();
+    // New or changed photographs are printed into the app (and credited) as soon as the entry is saved.
+    if (kind === "landmarks" && out.photosChanged) runTask("photos");
   } catch (e) {
     notice = { kind: "err", text: e.message, list: e.details };
     renderDetail(true);
-    $("detail").scrollTop = 0;
+    toTop();
   }
 }
 
@@ -778,9 +1101,67 @@ async function remove() {
     loadDraft();
     notice = { kind: "ok", text: `Deleted ${name}.` };
     renderAll();
+    if (history.state && history.state.detail) history.back();
   } catch (e) {
     notice = { kind: "err", text: e.message, list: e.details };
     renderDetail(true);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Phone access
+// ---------------------------------------------------------------------------
+
+/** The sheet where the person at the Mac lets a phone in, and reads off the address and passcode. */
+async function openPhone() {
+  const sheet = h("div", { class: "sheet", role: "dialog", "aria-modal": "true", "aria-label": "Use the editor from a phone" });
+  const overlay = h("div", { class: "overlay", onclick: (e) => { if (e.target === overlay) overlay.remove(); } }, sheet);
+  document.body.append(overlay);
+
+  const draw = (info, problem) => {
+    const lines = [
+      h("h2", {}, "Use the editor from an iPhone"),
+      problem ? h("div", { class: "notice err" }, problem) : null,
+      h("label", { class: "check" }, h("input", { type: "checkbox", checked: info.enabled, onChange: (e) => change({ enabled: e.target.checked }) }), "Let a phone use the editor"),
+    ];
+    if (!info.enabled) {
+      lines.push(h("div", { class: "map-note" }, "Off, the editor answers only to this Mac. On, a phone can open it after typing a passcode, and can add photographs and edit places and walks just as this page does. The first time, macOS may ask whether node may accept incoming connections: choose Allow."));
+    } else {
+      const [first, ...others] = info.urls;
+      lines.push(
+        h("div", { class: "map-note" }, "On the iPhone, open this in Safari (scan the code, or type it), then enter the passcode:"),
+        first ? h("div", { class: "way" }, h("b", {}, first.label), first.qr ? h("img", { alt: `Scan to open ${first.url}`, src: "data:image/svg+xml;utf8," + encodeURIComponent(first.qr) }) : null, h("small", {}, first.url)) : h("div", { class: "notice warn" }, "This Mac has no network address to offer."),
+        h("div", { class: "code", "aria-label": "Passcode" }, info.passcode),
+        h("div", { class: "btnrow" }, h("button", { class: "btn small", onclick: () => { if (confirm("Make a new passcode? Every phone signed in now will have to sign in again.")) change({ renew: true }); } }, "Make a new passcode")),
+        others.length ? h("details", {}, h("summary", { class: "map-note" }, "Other addresses"), h("div", { class: "lines", style: { marginTop: "8px" } }, ...others.map((w) => h("div", {}, h("b", {}, w.label), h("div", { class: "map-note", style: { overflowWrap: "anywhere" } }, w.url))))) : null,
+        h("ol", {},
+          h("li", {}, first && /Tailscale/.test(first.label) ? "The Tailscale address works from anywhere, as long as the Tailscale app is turned on, on the iPhone." : "Away from home, turn on Tailscale on the Mac and the iPhone and use the Tailscale address."),
+          h("li", {}, "The Wi-Fi addresses work only while the iPhone and this Mac are on the same network."),
+          h("li", {}, "In Safari, Share, then Add to Home Screen, puts the editor on the Home Screen like an app."),
+          h("li", {}, "Edits are made to the files on this Mac, like the ones made here. They reach readers with the next app build.")));
+    }
+    lines.push(h("div", { class: "btnrow" }, h("button", { class: "btn", onclick: () => overlay.remove() }, "Done")));
+    sheet.replaceChildren(...lines.filter(Boolean));
+  };
+
+  const change = async (what) => {
+    try {
+      const info = await api("POST", "/phone", what);
+      // The editor moves between "this Mac only" and "every interface" a moment after it answers.
+      await sleep(400);
+      for (let i = 0; i < 20; i++) { try { await api("GET", "/state"); break; } catch { await sleep(250); } }
+      S.phones = info.enabled;
+      renderHeader();
+      draw(info);
+    } catch (e) {
+      draw(await api("GET", "/phone").catch(() => ({ enabled: false, urls: [] })), e.message);
+    }
+  };
+
+  try {
+    draw(await api("GET", "/phone"));
+  } catch (e) {
+    sheet.replaceChildren(h("div", { class: "notice err" }, e.message), h("div", { class: "btnrow" }, h("button", { class: "btn", onclick: () => overlay.remove() }, "Close")));
   }
 }
 
@@ -816,6 +1197,9 @@ async function poll() {
       const atEnd = out.scrollTop + out.clientHeight >= out.scrollHeight - 20;
       out.textContent = job.output;
       if (atEnd) out.scrollTop = out.scrollHeight;
+      if (job.status === "failed") $("console").classList.add("open");
+      // On a phone the notice covers the top of the page, so a job that went well clears itself.
+      if (job.status === "ok" && onPhone() && !$("console").classList.contains("open")) setTimeout(() => $("console").classList.remove("on"), 4000);
       if (job.status !== "running") {
         await refresh(true);
         if (!dirty) { loadDraft(); renderDetail(true); }
@@ -829,6 +1213,7 @@ async function poll() {
 }
 
 $("close-console").onclick = () => $("console").classList.remove("on");
+$("console").querySelector("header").addEventListener("click", (e) => { if (!e.target.closest("button")) $("console").classList.toggle("open"); });
 
 // ---------------------------------------------------------------------------
 

@@ -25,27 +25,41 @@ import {
   dropBlock,
   dropJson,
   fromJson,
+  highestNumber,
+  isUpload,
   joinBlocks,
   landmarkBlock,
   nextLandmarkId,
   nextTourId,
   parseJson,
   printJson,
+  printUploads,
   putBlock,
   putJson,
   routeProblems,
   splitBlocks,
   twinsOf,
   tourBlock,
+  uploadFile,
+  uploadUrl,
   type Blocks,
   type JsonEntry,
   type Twin,
+  type UploadFacts,
+  type Uploads,
 } from "./store";
+import { MAX_UPLOAD_BYTES, makePrint } from "./photos";
 
 const LANDMARKS_TS = "data/landmarks.ts";
 const LANDMARKS_JSON = "data/landmarks.json";
 const TOURS_TS = "data/tours.ts";
 const PHOTOS_MODULE = "lib/photos.generated.ts";
+const UPLOADS_JSON = "data/photo-uploads.json";
+const PRINTS = "assets/photos";
+/** Uploaded prints wait here until the landmark they're for is saved. */
+const STAGING = "scripts/.cache/editor-uploads";
+/** Originals are kept where scripts/bundle-photos.mjs keeps what it fetched. */
+const ORIGINALS = "scripts/.cache/photos";
 const BACKUPS = "scripts/.cache/editor-backups";
 const KEEP_BACKUPS = 40;
 
@@ -84,6 +98,10 @@ export type Snapshot = {
   categories: { key: string; label: string; color: string }[];
   designations: readonly string[];
   nextId: string;
+  /** Who took each uploaded photograph. */
+  uploads: Uploads;
+  /** The highest city landmark number in the guide, for the hint beside the field. */
+  highestNumber: number;
 };
 
 type Disk = {
@@ -146,7 +164,48 @@ export class Guide {
       categories: CATEGORIES.map((key) => ({ key, label: CATEGORY_LABELS[key], color: CATEGORY_COLORS[key] })),
       designations: DESIGNATIONS,
       nextId: nextLandmarkId([...d.landmarks.map((l) => l.id), ...d.json.map((e) => e.id)]),
+      uploads: this.uploads(),
+      highestNumber: highestNumber(d.landmarks),
     };
+  }
+
+  // -- photographs ----------------------------------------------------------
+
+  private uploads(): Uploads {
+    try {
+      return JSON.parse(this.read(UPLOADS_JSON));
+    } catch {
+      return {};
+    }
+  }
+
+  /** Where an uploaded print is: in the app's prints, or waiting to be. */
+  photoPath(file: string): string | undefined {
+    if (!/^[up]-[0-9a-f]{12}\.jpg$/.test(file)) return undefined;
+    return [PRINTS, STAGING].map((dir) => this.path(path.join(dir, file))).find((f) => fs.existsSync(f));
+  }
+
+  /** Prints an uploaded photograph and holds it until its landmark is saved. */
+  async stageUpload(base64: string) {
+    const original = Buffer.from(base64, "base64");
+    if (!original.length) throw new Refusal("That file was empty");
+    if (original.length > MAX_UPLOAD_BYTES) throw new Refusal(`That file is ${(original.length / 1e6).toFixed(0)} MB; the most is ${MAX_UPLOAD_BYTES / 1e6} MB`);
+    let print;
+    try {
+      print = await makePrint(original);
+    } catch (e) {
+      throw new Refusal(e instanceof Error ? e.message : String(e));
+    }
+    if (!this.photoPath(print.file)) {
+      fs.mkdirSync(this.path(STAGING), { recursive: true });
+      fs.writeFileSync(this.path(path.join(STAGING, print.file)), print.buffer);
+    }
+    const kept = this.path(path.join(ORIGINALS, print.file.replace(/\.jpg$/, "")));
+    if (!fs.existsSync(kept)) {
+      fs.mkdirSync(path.dirname(kept), { recursive: true });
+      fs.writeFileSync(kept, original);
+    }
+    return { url: uploadUrl(print.file), width: print.width, height: print.height, bytes: print.buffer.length, ...(print.warning ? { warning: print.warning } : {}) };
   }
 
   // -- landmarks ------------------------------------------------------------
@@ -154,6 +213,12 @@ export class Guide {
   saveLandmark(raw: unknown, mode: "create" | "update") {
     const d = this.disk();
     const l = cleanLandmark(raw);
+    // Credits for uploaded photographs: a gallery row's own, else what the form sent for the lead.
+    const sent = ((raw as { credits?: Record<string, unknown> } | null)?.credits ?? {}) as Record<string, unknown>;
+    const stored = this.uploads();
+    const credit = (url: string) =>
+      ((l.photos ?? []).find((p) => p.url === url)?.credit || (typeof sent[url] === "string" ? (sent[url] as string).trim() : "") || stored[url]?.credit || "").trim() || undefined;
+    const facts: UploadFacts = { has: (file) => !!this.photoPath(file), credit };
     const known = d.landmarks.some((x) => x.id === l.id);
     if (mode === "create") {
       // A place that's only in the JSON keeps its id when it's added to the app.
@@ -162,20 +227,41 @@ export class Guide {
     } else if (!known) {
       throw new Refusal(`${l.id} isn't in the guide`);
     }
-    const { errors, warnings } = checkLandmark(l, d.landmarks);
+    const { errors, warnings } = checkLandmark(l, d.landmarks, facts);
     if (errors.length) throw new Refusal("That can't be saved yet", errors);
+
+    // Uploaded prints join the app's, with who took them.
+    const photoUrls = [l.photoUrl, ...(l.photos ?? []).map((p) => p.url)].filter((u): u is string => !!u && isUpload(u));
+    const uploads: Uploads = { ...stored };
+    const copies: [string, string][] = [];
+    const now = new Date();
+    const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+    for (const url of photoUrls) {
+      const file = uploadFile(url)!;
+      uploads[url] = { credit: credit(url)!, added: stored[url]?.added ?? today };
+      const waiting = this.path(path.join(STAGING, file));
+      if (fs.existsSync(waiting) && !fs.existsSync(this.path(path.join(PRINTS, file)))) copies.push([waiting, this.path(path.join(PRINTS, file))]);
+    }
+    const uploadsChanged = !isDeepStrictEqual(uploads, stored);
+
+    const before = d.landmarks.find((x) => x.id === l.id);
+    const photoFields = (x?: Landmark) => [x?.photoUrl, x?.photos ?? []];
+    const photosChanged = uploadsChanged || !isDeepStrictEqual(photoFields(before), photoFields(l));
 
     this.commit(
       {
         [LANDMARKS_TS]: joinBlocks(putBlock(d.lmParts, l.id, landmarkBlock(l))),
         [LANDMARKS_JSON]: printJson(putJson(d.json, l)),
+        ...(uploadsChanged ? { [UPLOADS_JSON]: printUploads(uploads) } : {}),
       },
       () => {
         const back = this.disk().landmarks.find((x) => x.id === l.id);
         if (!back || !isDeepStrictEqual(cleanLandmark(back), l)) throw new Error("It didn't read back the same");
       },
+      copies,
     );
-    return { landmark: l, warnings };
+    for (const [from] of copies) fs.rmSync(from, { force: true });
+    return { landmark: l, warnings, photosChanged };
   }
 
   deleteLandmark(id: string) {
@@ -257,22 +343,33 @@ export class Guide {
   // -- writing --------------------------------------------------------------
 
   /** Writes the new text of each file, undoing it all if the data doesn't read back as intended. */
-  private commit(files: Record<string, string>, verify: () => void) {
+  private commit(files: Record<string, string>, verify: () => void, copies: [from: string, to: string][] = []) {
     const stamp = new Date().toISOString().replace(/[:.]/g, "-");
     const backup = this.path(path.join(BACKUPS, stamp));
-    for (const rel of Object.keys(files)) {
+    // A file this save creates has nothing to back up; undoing the save removes it.
+    const existed = new Set(Object.keys(files).filter((rel) => fs.existsSync(this.path(rel))));
+    for (const rel of existed) {
       fs.mkdirSync(path.dirname(path.join(backup, rel)), { recursive: true });
       fs.copyFileSync(this.path(rel), path.join(backup, rel));
     }
     try {
+      for (const [from, to] of copies) {
+        fs.mkdirSync(path.dirname(to), { recursive: true });
+        fs.copyFileSync(from, to);
+      }
       for (const [rel, content] of Object.entries(files)) {
+        fs.mkdirSync(path.dirname(this.path(rel)), { recursive: true });
         const tmp = `${this.path(rel)}.editing`;
         fs.writeFileSync(tmp, content);
         fs.renameSync(tmp, this.path(rel));
       }
       verify();
     } catch (e) {
-      for (const rel of Object.keys(files)) fs.copyFileSync(path.join(backup, rel), this.path(rel));
+      for (const rel of Object.keys(files)) {
+        if (existed.has(rel)) fs.copyFileSync(path.join(backup, rel), this.path(rel));
+        else fs.rmSync(this.path(rel), { force: true });
+      }
+      for (const [, to] of copies) fs.rmSync(to, { force: true });
       throw new Refusal(`Nothing was saved: ${e instanceof Error ? e.message : String(e)}`);
     }
     this.prune();

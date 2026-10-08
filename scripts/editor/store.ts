@@ -172,6 +172,14 @@ export function putJson(all: JsonEntry[], l: Landmark): JsonEntry[] {
 }
 
 export const dropJson = (all: JsonEntry[], id: string) => all.filter((x) => x.id !== id);
+
+/** data/photo-uploads.json: who took each uploaded photograph. */
+export type Uploads = Record<string, { credit: string; added: string }>;
+
+export function printUploads(u: Uploads): string {
+  const sorted = Object.fromEntries(Object.entries(u).sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0)));
+  return JSON.stringify(sorted, null, 2) + "\n";
+}
 export const printJson = (all: JsonEntry[]) => JSON.stringify(all, null, 2) + "\n";
 
 export function tourBlock(t: Tour): string {
@@ -205,6 +213,31 @@ export function tourBlock(t: Tour): string {
 const text = (v: unknown) => (typeof v === "string" ? v.replace(/\r\n?/g, "\n").trim() : "");
 const url = (v: unknown) => text(v);
 
+/**
+ * A photograph uploaded in the editor has no address on the web. It is
+ * printed into assets/photos as u-<hash>.jpg and named in the data as
+ * `upload:u-<hash>.jpg`, which the app finds in its bundled prints the way it
+ * finds a web address.
+ */
+const UPLOAD_URL = /^upload:(u-[0-9a-f]{12}\.jpg)$/;
+export const isUpload = (u: string) => UPLOAD_URL.test(u);
+/** The file name of an upload's print. */
+export const uploadFile = (u: string) => UPLOAD_URL.exec(u)?.[1];
+export const uploadUrl = (file: string) => `upload:${file}`;
+
+/** The city's number as the guide writes it: "5" and "# 5" become "#5"; "UC…" and the like are left alone. */
+export function tidyNumber(v: string): string {
+  const m = /^#?\s*(\d+)$/.exec(v.trim());
+  return m ? `#${Number(m[1])}` : v.trim();
+}
+
+const numberOf = (v: string) => /^#(\d+)$/.exec(v)?.[1];
+
+/** The highest city number in the guide, for the hint beside the field. */
+export function highestNumber(all: Landmark[]): number {
+  return Math.max(0, ...all.map((l) => Number(numberOf(tidyNumber(l.landmarkNumber ?? ""))) || 0));
+}
+
 export function cleanLandmark(raw: unknown): Landmark {
   const r = (raw && typeof raw === "object" ? raw : {}) as Record<string, unknown>;
   const photos = (Array.isArray(r.photos) ? r.photos : [])
@@ -227,7 +260,7 @@ export function cleanLandmark(raw: unknown): Landmark {
     architect: text(r.architect),
     yearBuilt: text(r.yearBuilt),
     category: text(r.category) as LandmarkCategory,
-    landmarkNumber: text(r.landmarkNumber),
+    landmarkNumber: tidyNumber(text(r.landmarkNumber)),
     description: text(r.description),
     style: text(r.style),
     nationalRegister: r.nationalRegister === true,
@@ -285,7 +318,10 @@ export function twinsOf(l: Landmark, others: Landmark[]): Twin[] {
 
 export type Check = { errors: string[]; warnings: string[] };
 
-export function checkLandmark(l: Landmark, others: Landmark[]): Check {
+/** What the check needs to know about uploaded photographs, which only the disk can say. */
+export type UploadFacts = { has: (file: string) => boolean; credit: (url: string) => string | undefined };
+
+export function checkLandmark(l: Landmark, others: Landmark[], uploads?: UploadFacts): Check {
   const errors: string[] = [];
   const warnings: string[] = [];
   if (!/^lm-[a-z0-9-]+$/.test(l.id)) errors.push("The id should look like lm-400");
@@ -296,10 +332,22 @@ export function checkLandmark(l: Landmark, others: Landmark[]): Check {
     errors.push(`Longitude should be a number between ${LNG[0]} and ${LNG[1]}`);
   if (!CATEGORIES.includes(l.category)) errors.push("Choose a category");
   if (l.designationType && !DESIGNATIONS.includes(l.designationType)) errors.push("Unknown designation");
-  if (l.photoUrl && !isWeb(l.photoUrl)) errors.push("The lead photograph should be a web address");
-  for (const p of l.photos ?? []) if (!isWeb(p.url)) errors.push(`"${p.url.slice(0, 40)}" is not a web address`);
+  const urls = [l.photoUrl, ...(l.photos ?? []).map((p) => p.url)].filter((u): u is string => !!u);
+  for (const u of urls) {
+    if (isUpload(u)) {
+      if (uploads && !uploads.has(uploadFile(u)!)) errors.push("A photograph you uploaded is gone; upload it again");
+      else if (uploads && !uploads.credit(u)) errors.push("Say who took each photograph you upload (the credit)");
+    } else if (!isWeb(u)) {
+      errors.push(u === l.photoUrl ? "The lead photograph should be a web address or an upload" : `"${u.slice(0, 40)}" is not a web address`);
+    }
+  }
 
   for (const t of twinsOf(l, others).slice(0, 3)) warnings.push(`${t.name} (${t.id}) ${t.why}`);
+  const number = numberOf(l.landmarkNumber);
+  if (number) {
+    const same = others.filter((o) => o.id !== l.id && o.landmarkNumber === l.landmarkNumber && o.designationType === l.designationType);
+    for (const o of same.slice(0, 2)) warnings.push(`${o.name} (${o.id}) has the same number`);
+  }
   return { errors, warnings };
 }
 
