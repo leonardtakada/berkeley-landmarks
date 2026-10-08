@@ -48,7 +48,12 @@ Auto Indicator LLC — in the Appendix only, never on the cover.
   leaf, which starts `PAGE_TURN_DELAY_MS` behind the fade.
 - **Sections**: leaves bound at the left spine, ~500ms page turn that
   lands flat rather than easing to rest (a leaf creeping its last degrees
-  drew its type soft, read as a blur; `PAGE_EASING` in `lib/page-turn.ts`)
+  drew its type soft, read as a blur; `PAGE_EASING` in `lib/page-turn.ts`).
+  A page doesn't have to look tilted to look soft: measured in the
+  simulator, a leftover 0.05° costs about a tenth of its fine detail (paper
+  tooth, type edges), 0.2° nearly a fifth. So a leaf within 0.2° of flat is
+  laid flat at once (no transform at all, not `rotateY(0)`), and the book's
+  own card, which never turns, carries no perspective matrix (`forResting`)
   (`components/book-pages.tsx`). Part One The Tours, Part Two The Registry,
   Appendix. The book begins at the head-band: the strip above it (the status
   bar) is not the book, and stays put in the open page's stock — paper, or

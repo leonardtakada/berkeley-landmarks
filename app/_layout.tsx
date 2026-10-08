@@ -23,6 +23,7 @@ import {
   forDissolve,
   forNoTransition,
   forPageTurn,
+  forResting,
   forUnfold,
   pageTurnSpec,
 } from "@/lib/page-turn";
@@ -124,7 +125,8 @@ export default function RootLayout() {
               ...leafOptions,
             }}
           >
-            <Stack.Screen name="(tabs)" />
+            {/* The book never turns in or out, so it carries no transform (see forResting). */}
+            <Stack.Screen name="(tabs)" options={reduceMotion ? undefined : { cardStyleInterpolator: forResting }} />
             <Stack.Screen
               name="login"
               options={{ presentation: "modal", ...TransitionPresets.ModalSlideFromBottomIOS }}

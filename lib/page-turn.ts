@@ -79,6 +79,19 @@ export function forPageTurn({
   };
 }
 
+/**
+ * The book itself, the first leaf of the stack, which is never turned in or
+ * out: no transform at all. Left with the turn's perspective matrix (even at
+ * 0°), iOS draws everything inside it, every section page, through its 3D
+ * compositing path, where type and paper tooth come out soft; and a page
+ * only needs to be a fraction of a degree off to look blurred (0.05° costs
+ * about a tenth of its fine detail). The leaves laid over the book still turn
+ * with `forPageTurn`.
+ */
+export function forResting(): StackCardInterpolatedStyle {
+  return {};
+}
+
 // ---------------------------------------------------------------------------
 // Map: a folded sheet pulled from the back pocket — no hinge, just a quick
 // dissolve; the map screen runs its own unfold once it lands.

@@ -25,6 +25,8 @@ type Turn = { id: number; from: string; to: string; forward: boolean };
 type Role = "rest" | "moving" | "beneath" | "hidden";
 
 const DISSOLVE_MS = 200;
+/** A moving leaf this near flat (of a quarter turn: about a fifth of a degree) is laid flat. */
+const FLAT = 0.002;
 
 /**
  * The section pages of the book, bound at the left spine.
@@ -224,6 +226,10 @@ function Leaf({
     if (!moving) return { opacity: 1, transform: [] };
     const lift = liftOf(progress.value);
     if (dissolve) return { opacity: 1 - lift, transform: [] };
+    // Landed: flat means no transform at all, not a rotation of about zero —
+    // and a leaf a fraction of a degree off already draws its type soft. This
+    // doesn't wait for the page to be marked at rest.
+    if (lift < FLAT) return { opacity: 1, transform: [] };
     return {
       opacity: 1,
       transform: [
