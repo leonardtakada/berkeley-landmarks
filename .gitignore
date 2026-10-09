@@ -78,3 +78,4 @@ scripts/.cache/
 
 # raw scrape HTML (processed .md is committed instead)
 data/scraped/**/_raw/
+dist-web/

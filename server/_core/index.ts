@@ -213,6 +213,20 @@ async function startServer() {
     }),
   );
 
+  // Web app (Expo web export in dist-web/) — registered last so API routes,
+  // /uploads, /admin, /privacy and /landmarks.json always take precedence.
+  const webDist = path.resolve(process.cwd(), "dist-web");
+  if (fs.existsSync(path.join(webDist, "index.html"))) {
+    app.use(express.static(webDist, { index: "index.html", maxAge: "1h" }));
+    // SPA fallback: any other GET renders the app (expo-router deep links)
+    app.use((req, res, next) => {
+      if (req.method !== "GET" && req.method !== "HEAD") return next();
+      if (req.path.startsWith("/api/") || req.path.startsWith("/uploads/")) return next();
+      res.sendFile(path.join(webDist, "index.html"));
+    });
+    console.log("[web] serving web app from dist-web/");
+  }
+
   const preferredPort = parseInt(process.env.PORT || "3000");
   const port = await findAvailablePort(preferredPort);
 
