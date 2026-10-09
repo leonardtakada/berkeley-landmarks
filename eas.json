@@ -30,7 +30,8 @@
     "production": {
       "ios": {
         "simulator": false,
-        "image": "latest"
+        "image": "latest",
+        "autoIncrement": true
       },
       "android": {
         "buildType": "app-bundle"
