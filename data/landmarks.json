@@ -2276,7 +2276,24 @@
     "nationalRegister": false,
     "neighborhood": "Southside",
     "designationType": "Landmark",
-    "photoUrl": "https://berkeleyplaques.org/wp-content/uploads/2013/12/Piano-Club-entry-photo-2014-R.-Kehlmann.jpg"
+    "photoUrl": "https://berkeleyplaques.org/wp-content/uploads/2013/12/Piano-Club-entry-photo-2014-R.-Kehlmann.jpg",
+    "photos": [
+      {
+        "url": "upload:u-85d476723a72.jpg",
+        "caption": "Entrance and ramp on Haste Street",
+        "credit": "Leo"
+      },
+      {
+        "url": "upload:u-ae63a9442e58.jpg",
+        "caption": "City of Berkeley Landmark plaque, designated 2005",
+        "credit": "Leo"
+      },
+      {
+        "url": "upload:u-055d3a698531.jpg",
+        "caption": "The redwood-clad concert hall",
+        "credit": "Leo"
+      }
+    ]
   },
   {
     "id": "lm-211",
