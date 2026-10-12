@@ -4240,7 +4240,7 @@
   },
   {
     "id": "lm-309",
-    "name": "North Branch Berkeley Public",
+    "name": "North Branch Berkeley Public Library",
     "address": "1170 The Alameda",
     "latitude": 37.8854519,
     "longitude": -122.2754378,
@@ -4248,12 +4248,29 @@
     "yearBuilt": "1936",
     "category": "civic",
     "landmarkNumber": "#363",
-    "description": "Designed by James W. Plachek in 1936, this Art Deco branch library at 1170 The Alameda is one of several Berkeley libraries designed by Plachek. He also designed the Art Deco Central Library (1930), now listed on the National Register of Historic Places. Both buildings showcase his characteristic geometric ornamentation and streamlined Moderne detailing.",
-    "style": "Art Deco",
+    "description": "Designed by James W. Plachek in 1936 and funded by the Works Progress Administration and the city, this Spanish Revival branch library sits in a triangular park at the gateway to the Northbrae neighborhood. Its low-pitched red tile roof, central tower, and deeply inset arched windows led civic leaders to call it one of the most beautiful public buildings in the City of Berkeley at its opening. Plachek's other Berkeley civic works include the Central Library (1930) and the Claremont Branch (1924).",
+    "style": "Spanish Revival",
     "nationalRegister": false,
     "neighborhood": "North Berkeley",
     "designationType": "Landmark",
-    "photoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/54/North_Branch_Library.jpg/960px-North_Branch_Library.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail"
+    "photoUrl": "upload:u-ece2ff3d69af.jpg",
+    "photos": [
+      {
+        "url": "upload:u-eebf217c1f50.jpg",
+        "caption": "City of Berkeley Landmark plaque, designated 2001",
+        "credit": "Leo"
+      },
+      {
+        "url": "upload:u-12246f654127.jpg",
+        "caption": "Garden side with olive tree and accessible ramp",
+        "credit": "Leo"
+      },
+      {
+        "url": "upload:u-0ca932492ef2.jpg",
+        "caption": "View across the park grounds",
+        "credit": "Leo"
+      }
+    ]
   },
   {
     "id": "lm-31",
