@@ -159,6 +159,11 @@ went. Controls moved down so the NEXT STOP tab clears the Volume row, the
 stamps moved off the host's face, and the narration screens gained a "15"
 button that goes back fifteen seconds. Stamp lettering is 16 px and the credit italic 18. The lower button now only ever goes back or opens the menu (on Walks it returns to the cover; turning walks is swipe or the chevrons), and the Controls menu has a Map button beside Last stop.
 
+The map (schematic, until the Phase 6 tiles): every stop is a 22 px disc with
+its number, and touching one names it on the slip at the top; the leg from you
+to the next stop is drawn in vermilion; a scale bar gives the route's scale.
+It still has no streets: that needs the baked tiles and the SD card.
+
 ### Getting about (2026-10-22)
 
 Walking a walk the first time, it wasn't clear how to get from one stop to
@@ -320,14 +325,18 @@ Motion stills it.
   picked take becomes the voice's reference, and every line after is cloned
   from it (Qwen's Base model), so a voice doesn't drift between stops. Then
   loudness to −16 LUFS → 64 kbps mono MP3. A voice change is just a re-render.
-- **Locked (2026-10-22):** all twelve, each on the take closest to its brief
-  (`lock_voices.py`; references in `data/narration/voices/*.flac`).
-  `speak.py` speaks lines in a locked voice; `check_voices.py` compares each
-  line with the voices' references by speaker fingerprint. Eight of the ten
-  voices with scripts hold clearly on a line they had never spoken. The guide
-  and Julia Morgan each stay nearest themselves but sound too alike, on every
-  Morgan take: her brief needs to set her further from the guide. Most takes
-  read 10–30% quicker than their briefs; pace is set at render time.
+- **Locked (2026-10-22):** all twelve (`lock_voices.py`; references in
+  `data/narration/voices/*.flac`). `speak.py` speaks lines in a locked voice;
+  `check_voices.py` and `apart.py` compare voices by speaker fingerprint
+  (`fingerprint.py`), each against the voices of its own register, with four
+  calibration voices from outside the cast filling out the high register.
+  (Centred on the whole cast, ten men to two women, any two women scored about
+  0.7 alike, which first made the guide and Julia Morgan look too alike.) All
+  ten voices with scripts hold on a line they had never spoken: 0.62–0.77 to
+  their own reference, 0.10–0.34 to the most alike other. Julia Morgan was
+  recast anyway, in her own era (about 55, reedy, crisp period diction), and
+  sits further from the guide (0.10). Most takes read 10–30% quicker than
+  their briefs; pace is set at render time.
 - **How a stop plays:** the door holds 7 s, a guest's voice starts 0.4 s after
   their screen, a change of speaker within a script (the guide's coda) is a
   0.7 s gap with the credit changing and no sound, and 1.5 s after the last

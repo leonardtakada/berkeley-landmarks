@@ -15,9 +15,9 @@
 
 /* The route fits in this box, under the slip, above Back and clear of the lower button's tab. */
 #define ROUTE_X1 78
-#define ROUTE_Y1 108
+#define ROUTE_Y1 116
 #define ROUTE_X2 388
-#define ROUTE_Y2 322
+#define ROUTE_Y2 306
 #define MAX_PX_PER_M 0.8f
 
 #define FLAG_H 46
@@ -134,6 +134,42 @@ static lv_obj_t *custom(lv_obj_t *parent, int32_t x, int32_t y, int32_t w, int32
     return o;
 }
 
+/* The label at the top names whichever stop was touched last (the one you're walking to, to begin with). */
+static lv_obj_t *label_kick, *label_name;
+
+static void name_stop(int i)
+{
+    const walk_t *w = walk_now();
+    lv_label_set_text_fmt(label_kick, "STOP %d OF %d", i + 1, w->stop_count);
+    lv_label_set_text(label_name, w->stops[i].name);
+}
+
+static void stop_touched(lv_event_t *e)
+{
+    name_stop((int)(intptr_t)lv_event_get_user_data(e));
+}
+
+/** A ruler for the route: the longest round distance that fits in about 90 px. */
+static void scale_bar(lv_obj_t *scr, float px_per_m)
+{
+    static const int steps[] = {20, 50, 100, 200, 500, 1000, 2000};
+    int m = steps[0];
+    for (size_t i = 0; i < sizeof steps / sizeof *steps; i++) {
+        if ((float)steps[i] * px_per_m <= 90) m = steps[i];
+    }
+    int32_t len = (int32_t)((float)m * px_per_m);
+    lv_obj_t *bar = box(scr, 120, 366, len, 3);
+    lv_obj_set_style_bg_color(bar, C_BLUE, 0);
+    lv_obj_set_style_bg_opa(bar, LV_OPA_COVER, 0);
+    for (int e = 0; e < 2; e++) {
+        lv_obj_t *tick = box(scr, 120 + e * (len - 2), 360, 2, 14);
+        lv_obj_set_style_bg_color(tick, C_BLUE, 0);
+        lv_obj_set_style_bg_opa(tick, LV_OPA_COVER, 0);
+    }
+    if (m >= 1000) lv_label_set_text_fmt(text_at(scr, &jost_medium_16, C_BLUE, 120 + len + 10, 356, ""), "%d km", m / 1000);
+    else lv_label_set_text_fmt(text_at(scr, &jost_medium_16, C_BLUE, 120 + len + 10, 356, ""), "%d m", m);
+}
+
 lv_obj_t *screen_map(void)
 {
     const walk_t *w = walk_now();
@@ -152,9 +188,16 @@ lv_obj_t *screen_map(void)
     lv_obj_set_style_line_rounded(route, true, 0);
     for (int i = 0; i < n; i++) {
         if (i == at) continue;
-        lv_obj_t *d = disc(scr, (int32_t)pts[i].x - 7, (int32_t)pts[i].y - 7, 14, walk_collected(i) ? C_BLUE : C_SLIP);
+        bool got = walk_collected(i);
+        lv_obj_t *d = disc(scr, (int32_t)pts[i].x - 11, (int32_t)pts[i].y - 11, 22, got ? C_BLUE : C_SLIP);
         lv_obj_set_style_border_width(d, 2, 0);
         lv_obj_set_style_border_color(d, C_BLUE, 0);
+        lv_obj_t *num = text_in(d, &jost_medium_14, got ? C_SLIP : C_BLUE, "");
+        lv_label_set_text_fmt(num, "%d", i + 1);
+        lv_obj_center(num);
+        lv_obj_add_flag(d, LV_OBJ_FLAG_CLICKABLE);
+        lv_obj_set_ext_click_area(d, 12);
+        lv_obj_add_event_cb(d, stop_touched, LV_EVENT_CLICKED, (void *)(intptr_t)i);
     }
 
     /* You: on the way from the stop before, as far along as the distance left says. */
@@ -163,6 +206,13 @@ lv_obj_t *screen_map(void)
     float r = (float)stop->bearing * (float)M_PI / 180.0f;
     int32_t me_x = (int32_t)(to.x - left * sinf(r)), me_y = (int32_t)(to.y + left * cosf(r));
     me_x = LV_CLAMP(60, me_x, SCREEN_W - 60), me_y = LV_CLAMP(100, me_y, 370);
+    static lv_point_precise_t leg[2];
+    leg[0].x = me_x, leg[0].y = me_y, leg[1].x = to.x, leg[1].y = to.y;
+    lv_obj_t *leg_line = lv_line_create(scr);
+    lv_line_set_points_mutable(leg_line, leg, 2);
+    lv_obj_set_style_line_width(leg_line, 4, 0);
+    lv_obj_set_style_line_color(leg_line, C_VERMILION, 0);
+    lv_obj_set_style_line_rounded(leg_line, true, 0);
     lv_obj_t *pulse_box = box(scr, me_x - 55, me_y - 55, 110, 110);
     lv_obj_t *pulse = disc(pulse_box, 40, 40, 30, C_VERMILION);
     motion_loop(pulse, KF({0, 30}, {300, 72}, {600, 96}, {1000, 108}), 2200, 0, m_size);
@@ -198,15 +248,21 @@ lv_obj_t *screen_map(void)
     lv_obj_set_pos(text_in(north, &jost_regular_16, C_BLUE, "N"), 5, 3);
     motion_loop(north, KF({0, 0}, {500, -60}, {1000, 0}), 9000, 0, m_turn);
 
-    char buf[24];
-    snprintf(buf, sizeof buf, "STOP %d OF %d", at + 1, w->stop_count);
-    lv_obj_t *where = slip(scr, 143, 50, 180, 34);
+    lv_obj_t *where = slip(scr, 108, 40, 250, 62);
     lv_obj_set_style_radius(where, 4, 0);
-    lv_obj_t *kk = text_in(where, &jost_medium_16, C_BLUE, buf);
-    lv_obj_set_style_text_letter_space(kk, 3, 0);
-    lv_obj_center(kk);
+    lv_obj_set_flex_flow(where, LV_FLEX_FLOW_COLUMN);
+    lv_obj_set_flex_align(where, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+    label_kick = text_in(where, &jost_medium_16, C_BLUE, "");
+    lv_obj_set_style_text_letter_space(label_kick, 3, 0);
+    label_name = text_in(where, &jost_regular_18, C_CHARCOAL, "");
+    lv_obj_set_width(label_name, 226);
+    lv_obj_set_style_text_align(label_name, LV_TEXT_ALIGN_CENTER, 0);
+    lv_label_set_long_mode(label_name, LV_LABEL_LONG_MODE_DOTS);
+    name_stop(at);
     motion_once(where, 0, 255, 500, 300, m_opa);
     motion_once(where, -14, 0, 500, 300, m_y);
+
+    scale_bar(scr, k);
 
     ui_hints(scr, 0xFAF6EC, NULL, "BACK");
     return scr;
