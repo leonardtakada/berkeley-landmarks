@@ -1,0 +1,9 @@
+build/
+managed_components/
+sdkconfig
+sdkconfig.old
+# The board's factory flash image (16 MB): kept on this Mac, not in git.
+backup/
+
+# Baked pictures: regenerate with node scripts/device/build-art.mjs (8.7 MB)
+main/art/*.bin
