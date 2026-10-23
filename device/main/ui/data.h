@@ -14,6 +14,7 @@ typedef struct {
     const char *caption; /* the narration's opening lines */
     int16_t metres;      /* from the stop before, as the crow flies (0 for the first) */
     int16_t bearing;     /* from the stop before, degrees clockwise from north */
+    int16_t lm;          /* its landmark (lm-N): its narration on the card is lm<N>.caf */
 } stop_t;
 
 typedef struct {

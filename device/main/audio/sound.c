@@ -16,14 +16,14 @@ static esp_codec_dev_handle_t speaker;
 static volatile bool busy;
 static SemaphoreHandle_t turn; /* one sound at a time */
 
-static bool open_speaker(int volume)
+static bool open_speaker(int rate, int volume)
 {
     if (!speaker) speaker = bsp_audio_codec_speaker_init();
     if (!speaker) {
         ESP_LOGE(TAG, "no speaker codec");
         return false;
     }
-    esp_codec_dev_sample_info_t fs = {.bits_per_sample = 16, .channel = 1, .sample_rate = RATE};
+    esp_codec_dev_sample_info_t fs = {.bits_per_sample = 16, .channel = 1, .sample_rate = rate};
     if (esp_codec_dev_open(speaker, &fs) != ESP_CODEC_DEV_OK) return false;
     esp_codec_dev_set_out_vol(speaker, volume);
     return true;
@@ -50,7 +50,7 @@ static void play(const note_t *notes, int n, int ms, int volume)
     /* Codec setup/volume/close use the same I2C bus as the GPS. The samples
      * use I2S, so leave the bus free while the sound itself plays. */
     board_bus_lock();
-    bool opened = open_speaker(volume);
+    bool opened = open_speaker(RATE, volume);
     board_bus_unlock();
     if (!opened) {
         xSemaphoreGive(turn);
@@ -108,4 +108,32 @@ bool sound_chime_async(int volume)
         return false;
     }
     return true;
+}
+
+esp_codec_dev_handle_t sound_take(int rate, int volume)
+{
+    xSemaphoreTake(turn, portMAX_DELAY);
+    board_bus_lock();
+    bool opened = open_speaker(rate, volume);
+    board_bus_unlock();
+    if (!opened) {
+        xSemaphoreGive(turn);
+        return NULL;
+    }
+    return speaker;
+}
+
+void sound_volume(int volume)
+{
+    board_bus_lock();
+    esp_codec_dev_set_out_vol(speaker, volume);
+    board_bus_unlock();
+}
+
+void sound_give(void)
+{
+    board_bus_lock();
+    esp_codec_dev_close(speaker);
+    board_bus_unlock();
+    xSemaphoreGive(turn);
 }

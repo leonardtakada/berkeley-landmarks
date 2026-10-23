@@ -12,11 +12,14 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "lvgl.h"
+#include <sys/stat.h>
+#include "audio/player.h"
 #include "audio/sound.h"
 #include "board.h"
 #include "buttons.h"
 #include "gnss/gnss.h"
 #include "heading/imu.h"
+#include "hw.h"
 #include "mbedtls/base64.h"
 #include "power/pmu.h"
 #include "storage/card.h"
@@ -383,9 +386,10 @@ static void print_pmu(void)
            p.ok, p.usb, p.usb_mv, p.battery, p.battery_mv, p.percent, p.charging, p.system_mv, p.temp_c);
 }
 
+/* The card is checked on its own task (hw.c): the first look at a big card is slow. */
 static void print_card(void)
 {
-    card_state_t c = card_check();
+    card_state_t c = card_state();
     printf("OK card mounted=%d rw=%d name=%s size_mb=%llu free_mb=%llu error=%s\n", c.mounted, c.read_write_ok, c.name,
            (unsigned long long)c.size_mb, (unsigned long long)c.free_mb, c.error[0] ? c.error : "-");
 }
@@ -400,6 +404,115 @@ static void stats(void)
     bsp_display_unlock();
     printf("STATS fps=%u idle=%u%% free_internal=%u free_psram=%u\n", (unsigned)((f1 - f0) / 2), (unsigned)idle,
            (unsigned)heap_caps_get_free_size(MALLOC_CAP_INTERNAL), (unsigned)heap_caps_get_free_size(MALLOC_CAP_SPIRAM));
+}
+
+/* --- Files onto the card: the narration (scripts/device/load-narration.py) ---- */
+
+static uint32_t crc32(uint32_t crc, const uint8_t *p, size_t n)
+{
+    crc = ~crc;
+    while (n--) {
+        crc ^= *p++;
+        for (int k = 0; k < 8; k++) crc = (crc >> 1) ^ (0xEDB88320u & -(crc & 1));
+    }
+    return ~crc;
+}
+
+/** A plain file name in the guide's folder: letters, digits and dots, nothing that climbs out. */
+static bool guide_path(const char *name, char *path, size_t len)
+{
+    if (!name || !*name || strlen(name) > 16 || strspn(name, "abcdefghijklmnopqrstuvwxyz0123456789.") != strlen(name)) {
+        printf("ERR bad name\n");
+        return false;
+    }
+    if (!card_state().mounted) {
+        printf("ERR no card\n");
+        return false;
+    }
+    mkdir(PLAYER_DIR, 0777);
+    snprintf(path, len, PLAYER_DIR "/%s", name);
+    return true;
+}
+
+/** stat <name>: its size and CRC-32 (as zlib reckons it), or ERR none. */
+static void stat_file(const char *name)
+{
+    char path[48];
+    if (!guide_path(name, path, sizeof path)) return;
+    FILE *f = fopen(path, "rb");
+    if (!f) {
+        printf("ERR none\n");
+        return;
+    }
+    static uint8_t buf[4096];
+    uint32_t crc = 0;
+    size_t n, size = 0;
+    while ((n = fread(buf, 1, sizeof buf, f)) > 0) crc = crc32(crc, buf, n), size += n;
+    fclose(f);
+    printf("OK %u %08lx\n", (unsigned)size, (unsigned long)crc);
+}
+
+/**
+ * put <name> <size>: answers READY, then takes exactly <size> raw bytes in
+ * chunks of PUT_CHUNK, answering "+" when each is on the card (the USB
+ * receive buffer drops what it can't hold, so the sender waits for each "+");
+ * at the end answers OK <size> <crc>. Gives up after five quiet seconds.
+ */
+#define PUT_CHUNK 8192
+
+static void put_file(char *arg)
+{
+    char *sp = arg ? strchr(arg, ' ') : NULL;
+    if (!sp) {
+        printf("ERR put <name> <size>\n");
+        return;
+    }
+    *sp = '\0';
+    long size = atol(sp + 1);
+    char path[48];
+    if (size <= 0 || !guide_path(arg, path, sizeof path)) {
+        if (size <= 0) printf("ERR bad size\n");
+        return;
+    }
+    FILE *f = fopen(path, "wb");
+    if (!f) {
+        printf("ERR can't write %s\n", path);
+        return;
+    }
+    printf("READY\n");
+    fflush(stdout);
+    static uint8_t buf[PUT_CHUNK];
+    uint32_t crc = 0;
+    long left = size;
+    while (left > 0) {
+        int want = left < PUT_CHUNK ? (int)left : PUT_CHUNK, have = 0;
+        while (have < want) {
+            int got = usb_serial_jtag_read_bytes(buf + have, want - have, pdMS_TO_TICKS(5000));
+            if (got <= 0) break;
+            have += got;
+        }
+        if (have < want) break;
+        if (fwrite(buf, 1, want, f) != (size_t)want) {
+            left = -1;
+            break;
+        }
+        crc = crc32(crc, buf, want);
+        left -= want;
+        printf("+\n");
+        fflush(stdout);
+    }
+    fclose(f);
+    if (left != 0) {
+        remove(path);
+        printf(left < 0 ? "ERR write failed\n" : "ERR timed out with %ld to go\n", left);
+        return;
+    }
+    if (strcmp(arg, "parts.txt") == 0) {
+        bsp_display_lock(LOCK_FOREVER);
+        player_forget_index();
+        bsp_display_unlock();
+    }
+    printf("OK %ld %08lx\n", size, (unsigned long)crc);
 }
 
 static void run(char *cmd)
@@ -471,7 +584,31 @@ static void run(char *cmd)
     } else if (strcmp(cmd, "pmu") == 0) {
         print_pmu();
     } else if (strcmp(cmd, "sd") == 0) {
-        print_card();
+        if (arg && strcmp(arg, "check") == 0) {
+            hw_check_card();
+            printf("OK checking\n");
+        } else {
+            print_card();
+        }
+    } else if (strcmp(cmd, "stat") == 0) {
+        stat_file(arg);
+    } else if (strcmp(cmd, "put") == 0) {
+        put_file(arg);
+    } else if (strcmp(cmd, "play") == 0 && arg) {
+        /* play <part> [ms]: straight from the card, as a narration screen would. */
+        char *ms = strchr(arg, ' ');
+        if (ms) *ms++ = '\0';
+        bsp_display_lock(LOCK_FOREVER);
+        bool ok = player_play(arg, ms ? (uint32_t)atol(ms) : 0);
+        bsp_display_unlock();
+        printf(ok ? "OK\n" : "ERR no %s on the card\n", arg);
+    } else if (strcmp(cmd, "player") == 0) {
+        if (arg && strcmp(arg, "stop") == 0) player_stop();
+        if (arg && strcmp(arg, "pause") == 0) player_pause(true);
+        if (arg && strcmp(arg, "resume") == 0) player_pause(false);
+        player_state_t p = player_state();
+        printf("OK player active=%d playing=%d done=%d at_ms=%lu length_ms=%lu\n", p.active, p.playing, p.done,
+               (unsigned long)p.at_ms, (unsigned long)p.length_ms);
     } else if (strcmp(cmd, "chime") == 0) {
         int vol = arg ? atoi(arg) : 70;
         printf(sound_chime_async(vol) ? "OK\n" : "ERR busy\n");
@@ -558,6 +695,7 @@ void console_start(void)
 {
     usb_serial_jtag_driver_config_t cfg = USB_SERIAL_JTAG_DRIVER_CONFIG_DEFAULT();
     cfg.tx_buffer_size = 4096;
+    cfg.rx_buffer_size = 16384; /* the narration comes in this way (put), a chunk at a time */
     ESP_ERROR_CHECK(usb_serial_jtag_driver_install(&cfg));
     usb_serial_jtag_vfs_use_driver();
 

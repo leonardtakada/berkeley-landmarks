@@ -7,6 +7,8 @@
 #include "ui.h"
 #include <stdio.h>
 #include <string.h>
+#include "audio/player.h"
+#include "audio/sound.h"
 #include "gnss/gnss.h"
 #include "motion.h"
 #include "portrait.h"
@@ -97,6 +99,8 @@ lv_obj_t *screen_arrived(void)
     const walk_t *w = walk_now();
     int at = walk_at();
     walk_collect();
+    /* The door's chime, at the controls' volume (silent at 0). */
+    if (ui_volume() > 0) sound_chime_async(player_codec_volume(ui_volume()));
 
     lv_obj_t *scr = ui_screen(lv_color_hex(walk_ground(walk_host())));
     uint32_t ground = glad(scr);
@@ -124,6 +128,14 @@ lv_obj_t *screen_arrived(void)
     return scr;
 }
 
+/* The walk's end, read by the guide once the stamp and its bells have settled. */
+static void play_outro(void)
+{
+    char part[8];
+    snprintf(part, sizeof part, "w%02do", ui_walk + 1);
+    player_play(part, 0);
+}
+
 lv_obj_t *screen_walked(void)
 {
     const walk_t *w = walk_now();
@@ -134,6 +146,7 @@ lv_obj_t *screen_walked(void)
     uint32_t ground = glad(scr);
 
     if (walk_host()) say_once(scr, 22, 150, 124, all ? "Well walked." : "Until next time.", 1800);
+    ui_after(scr, 2500, play_outro);
 
     char top[12], buf[48];
     snprintf(top, sizeof top, "WALK %02d", ui_walk + 1);

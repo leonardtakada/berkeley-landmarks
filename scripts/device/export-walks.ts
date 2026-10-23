@@ -92,7 +92,7 @@ tours.forEach((t, w) => {
     const { speaker, caption } = narration(l.id);
     const m = prev ? Math.round(metres(prev, l)) : 0;
     const b = prev ? Math.round(bearing(prev, l)) : 0;
-    return `    {${cstr(l.name)}, ${speaker ? cstr(speaker) : "NULL"}, ${cstr(caption)}, ${m}, ${b}},`;
+    return `    {${cstr(l.name)}, ${speaker ? cstr(speaker) : "NULL"}, ${cstr(caption)}, ${m}, ${b}, ${Number(l.id.replace("lm-", ""))}},`;
   });
   const id = `walk_${String(w + 1).padStart(2, "0")}`;
   lines.push(`static const stop_t ${id}[] = {`, ...rows, "};", "");

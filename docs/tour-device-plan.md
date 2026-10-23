@@ -92,6 +92,32 @@ MP3, `minmea` for NMEA.
 /guide/art/{architect}.png     cut-paper portraits for the arrival card
 ```
 
+**The narration is on the card now (2026-10-23)**, in `/sdcard/guide` rather
+than `/guide/audio`: one file per part, not MP3 but IMA4 ADPCM at 16 kHz mono
+in a CAF (8.5 KB a second, the same size as 64 kbps MP3; macOS's `afconvert`
+makes it, the guide decodes it in a few dozen lines with no codec library, and
+it can start anywhere, for pause and the 15-second step back). `lm<N>.caf` is a
+stop's narration, shared by every walk; `w<NN>i.caf` and `w<NN>o.caf` are walk
+NN's introduction and end; `parts.txt` gives each part's length and who speaks
+from when. 101 files, 41.6 MB. `scripts/narration/pack_guide.py` packs them
+from the renders, `scripts/device/load-narration.py` copies them over the USB
+console (`put`, checked by CRC-32 with `stat`, only what changed), and
+`device/main/audio/player.c` plays them: the narration screens play the stop's
+part (the clock and ring follow it, the credit and the portrait's mood change
+where the speaker does, it plays on under the controls), Finding plays the
+walk's introduction, Walked its end, and the door rings the chime, all at the
+controls' volume. Without the card's part a stop falls back to the simulation.
+The card is checked on its own task: a big card's first mount counts its free
+space for most of a minute, and the buttons no longer wait for it. Copying over
+USB runs at about 400 KB/s (37 MB in 93 s): the guide's USB receive buffer
+drops whatever it can't hold, so files go in 8 KB chunks each acknowledged once
+written, and the odd chunk that still goes missing is sent again. Checked on
+the guide: Walk 01's introduction on Finding; Plachek's stop played from the
+card at its real 0:49, playing on under the controls and taken up where it was,
+the credit turning to "read by the guide" for the coda with Plachek listening,
+and the walk moving on to stop 9 when it ended. The caption still loops the
+stop's opening lines, whoever is speaking.
+
 The existing `assets/tiles.bin` (JPEG, z11–z16, 6.4 MB) shows the pipeline
 works. It's baked from OSM raster tiles in the light paper style, though. For
 the device, re-bake from the vector `berkeley.pmtiles` in a navy/black style

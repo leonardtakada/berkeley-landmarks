@@ -23,6 +23,10 @@ card_state_t card_check(void)
         s.mounted = true;
         snprintf(s.name, sizeof s.name, "%s", bsp_sdcard->cid.name);
         s.size_mb = (uint64_t)bsp_sdcard->csd.capacity * bsp_sdcard->csd.sector_size / (1024 * 1024);
+        /* Mounted is enough for the narration: say so before the slow count of free space. */
+        portENTER_CRITICAL(&lock);
+        if (!state.mounted) state = s;
+        portEXIT_CRITICAL(&lock);
         uint64_t total = 0, free = 0;
         if (esp_vfs_fat_info(BSP_SD_MOUNT_POINT, &total, &free) == ESP_OK) s.free_mb = free / (1024 * 1024);
 

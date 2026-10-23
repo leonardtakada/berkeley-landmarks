@@ -48,6 +48,9 @@ const char *ui_current_name(void);
 /** A new, empty screen on `bg`, not yet shown. */
 lv_obj_t *ui_screen(lv_color_t bg);
 
+/** The volume on the controls, 0 (silent) to 10; the narration and the guide's sounds follow it. */
+int ui_volume(void);
+
 /** The walk being chosen or walked (0-based). */
 extern int ui_walk;
 

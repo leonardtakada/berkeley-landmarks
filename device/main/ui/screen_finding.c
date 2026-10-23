@@ -12,6 +12,7 @@
 #include "ui.h"
 #include <stdio.h>
 #include "art.h"
+#include "audio/player.h"
 #include "data.h"
 #include "motion.h"
 #include "portrait.h"
@@ -53,6 +54,10 @@ lv_obj_t *screen_finding(void)
 {
     /* Setting out: the first stop, nothing collected yet. */
     walk_begin();
+    /* The walk's introduction, read by the guide while it looks for the sky (if the card has it). */
+    char intro[8];
+    snprintf(intro, sizeof intro, "w%02di", ui_walk + 1);
+    player_play(intro, 0);
     const walk_t *w = walk_now();
     const art_portrait_t *host = walk_host();
     palette_t pal = palette_for(host ? host->ground : 0xFAF6EC);

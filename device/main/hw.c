@@ -24,11 +24,23 @@ static void task(void *arg)
         buttons_poll();
         if (started.imu) imu_poll();
         if (started.pmu && n % PMU_TICKS == 0) pmu_poll();
+        vTaskDelay(pdMS_TO_TICKS(TICK_MS));
+    }
+}
+
+/*
+ * The card on a task of its own: the first look at a big card can take most of
+ * a minute (FAT counts its free space), and the buttons mustn't wait for it.
+ */
+static void card_task(void *arg)
+{
+    (void)arg;
+    for (;;) {
         if (card_wanted) {
             card_wanted = false;
             card_check();
         }
-        vTaskDelay(pdMS_TO_TICKS(TICK_MS));
+        vTaskDelay(pdMS_TO_TICKS(200));
     }
 }
 
@@ -66,6 +78,7 @@ hw_started_t hw_start(void)
     buttons_init();
     card_wanted = true;
     xTaskCreate(task, "sensors", 4096, NULL, 4, NULL);
+    xTaskCreate(card_task, "card", 4096, NULL, 3, NULL);
     ESP_LOGI("hw", "started: power %d, motion %d, gnss %d", started.pmu, started.imu, started.gnss);
     return started;
 }

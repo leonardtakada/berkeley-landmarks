@@ -6,6 +6,7 @@
  * the live GPS connection and battery; walk navigation remains simulated.
  */
 #include "ui.h"
+#include "audio/player.h"
 #include "esp_timer.h"
 #include "gnss/gnss.h"
 #include "motion.h"
@@ -66,6 +67,12 @@ static void louder(lv_event_t *e)
 {
     volume = LV_CLAMP(0, volume + (int)(intptr_t)lv_event_get_user_data(e), VOLUME_STEPS);
     show_volume();
+    player_set_volume(volume);
+}
+
+int ui_volume(void)
+{
+    return volume;
 }
 
 static void close_shade(lv_event_t *e)

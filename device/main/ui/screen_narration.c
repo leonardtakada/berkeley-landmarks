@@ -6,13 +6,18 @@
  * left. When it's told, the walk goes on to the next stop by itself; the
  * upper button goes on sooner.
  *
- * Until audio arrives (Phase 5) the narration is simulated: a running clock,
- * the opening lines looping as the caption, the ring filling. It picks up
- * where it was if the controls come down over it.
+ * The voice comes from the SD card (audio/player.c) when the card has the
+ * stop's narration: the clock and ring follow it, and where the speaker
+ * changes (the guide's coda after an architect) the credit changes and the
+ * architect stops talking and listens. It plays on under the controls. A card
+ * without the stop falls back to a simulation: a running clock, the ring
+ * filling. Either way the opening lines loop as the caption, and it picks up
+ * where it was if the screen is left and come back to.
  */
 #include "ui.h"
 #include <stdio.h>
 #include <string.h>
+#include "audio/player.h"
 #include "motion.h"
 #include "portrait.h"
 #include "theme.h"
@@ -27,6 +32,9 @@ typedef struct {
     const char *caption;
     char credit[48];
     int32_t total_s; /* how long the stop runs */
+    const char *who; /* whose portrait is on screen (an architect's key), or NULL */
+    char part[8];    /* the stop's narration on the card ("lm17") */
+    const player_part_t *real; /* its length and speakers, if the card has it; NULL: simulated */
 } narration_t;
 
 /* The slip, clear of the lower button's tab, its foot near the rim. */
@@ -34,7 +42,7 @@ typedef struct {
 #define CARD_W 272
 #define CARD_BOTTOM 424
 
-/* Until audio (Phase 5), a stop runs about as long as a short narration would. */
+/* Without the card's narration, a stop runs about as long as a short narration would. */
 static int32_t simulated_s(const char *caption)
 {
     return 40 + (int32_t)strlen(caption) / 4;
@@ -50,8 +58,10 @@ static int32_t simulated_s(const char *caption)
 typedef struct {
     narration_t n_; /* the stop's, built for this screen */
     const narration_t *n;
-    lv_obj_t *scr, *host, *caption, *clock, *ring, *pause, *play;
+    lv_obj_t *scr, *host, *caption, *clock, *ring, *pause, *play, *credit;
     uint32_t ms; /* played so far */
+    int shown_s; /* the second the clock shows */
+    const char *speaking_now; /* the section's speaker, from the card's parts.txt */
     bool playing, finished;
     int lit;
     int words;
@@ -93,15 +103,52 @@ static void show_caption(narration_state_t *st)
 static void show_clock(narration_state_t *st)
 {
     int32_t at = LV_MIN((int32_t)st->ms / 1000, st->n->total_s);
+    st->shown_s = at;
     lv_label_set_text_fmt(st->clock, "%d:%02d / %d:%02d", (int)(at / 60), (int)(at % 60), (int)(st->n->total_s / 60),
                           (int)(st->n->total_s % 60));
+}
+
+/** Who's speaking at `ms`, by the card's sections ("guide", an architect's key). */
+static const char *speaker_at(const narration_t *n, uint32_t ms)
+{
+    const char *who = NULL;
+    for (int i = 0; n->real && i < n->real->sections; i++) {
+        if (n->real->section[i].from_ms <= ms) who = n->real->section[i].speaker;
+    }
+    return who;
+}
+
+/** The portrait talks while its own architect's voice plays, and listens to anyone else's. */
+static mood_t mood_now(narration_state_t *st)
+{
+    if (!st->playing) return st->n->waiting;
+    if (!st->n->real) return st->n->speaking;
+    return st->n->who && st->speaking_now && strcmp(st->n->who, st->speaking_now) == 0 ? MOOD_TALK : MOOD_LISTEN;
+}
+
+/** Where the speaker changes, the credit and the portrait's mood follow. */
+static void follow_speaker(narration_state_t *st)
+{
+    const char *who = speaker_at(st->n, st->ms);
+    if (!who || (st->speaking_now && strcmp(who, st->speaking_now) == 0)) return;
+    st->speaking_now = who;
+    if (strcmp(who, "guide") == 0) lv_label_set_text(st->credit, "read by the guide");
+    else lv_label_set_text_fmt(st->credit, "in the voice of %s", architect_name(who));
+    if (st->host) portrait_set_mood(st->host, mood_now(st));
 }
 
 static void tick(lv_timer_t *t)
 {
     narration_state_t *st = lv_timer_get_user_data(t);
     if (!st->playing) return;
-    st->ms += TICK_MS;
+    player_state_t ps = {0};
+    if (st->n->real) {
+        ps = player_state();
+        st->ms = ps.at_ms;
+        follow_speaker(st);
+    } else {
+        st->ms += TICK_MS;
+    }
 
     uint32_t in_cycle = st->ms % CAPTION_MS;
     int lit = 0;
@@ -116,10 +163,12 @@ static void tick(lv_timer_t *t)
     int32_t total = st->n->total_s * 1000;
     int32_t at = LV_MIN((int32_t)st->ms, total);
     rim_progress_set(st->ring, (int32_t)((int64_t)at * 3600 / total));
-    if (st->ms % 1000 == 0) show_clock(st);
+    if ((int32_t)st->ms / 1000 != st->shown_s) show_clock(st);
 
     /* Told: a moment's pause, then on to the next stop. */
-    if (at == total && !st->finished) {
+    bool told = st->n->real ? ps.done : at == total;
+    if (told && !st->finished) {
+        rim_progress_set(st->ring, 3600);
         st->finished = true;
         st->playing = false;
         if (st->host) portrait_set_mood(st->host, st->n->waiting);
@@ -132,7 +181,8 @@ static void toggle(lv_event_t *e)
     narration_state_t *st = lv_event_get_user_data(e);
     if (st->finished) return;
     st->playing = !st->playing;
-    if (st->host) portrait_set_mood(st->host, st->playing ? st->n->speaking : st->n->waiting);
+    if (st->n->real) player_pause(!st->playing);
+    if (st->host) portrait_set_mood(st->host, mood_now(st));
     if (st->playing) {
         lv_obj_remove_flag(st->pause, LV_OBJ_FLAG_HIDDEN);
         lv_obj_add_flag(st->play, LV_OBJ_FLAG_HIDDEN);
@@ -150,6 +200,7 @@ static void back15(lv_event_t *e)
     st->ms = st->ms > 15000 ? st->ms - 15000 : 0;
     st->ms -= st->ms % TICK_MS;
     st->lit = -1;
+    if (st->n->real) player_seek(st->ms);
     rim_progress_set(st->ring, (int32_t)((int64_t)st->ms * 3600 / ((int64_t)st->n->total_s * 1000)));
     show_clock(st);
 }
@@ -229,7 +280,19 @@ static lv_obj_t *narration_screen(narration_state_t *st)
     st->playing = true;
     st->ms = LV_MIN(walk_heard_ms(), (uint32_t)n->total_s * 1000 - 1000);
     st->ms -= st->ms % TICK_MS;
+    st->shown_s = -1;
     time_words(st);
+    if (n->real) {
+        /* Back from the controls, the voice has played on: take it up where it is. */
+        if (player_is(n->part)) {
+            player_state_t ps = player_state();
+            st->ms = ps.at_ms;
+            /* Paused before stays paused; told while away moves straight on (tick sees it done). */
+            st->playing = ps.playing || ps.done;
+        } else {
+            player_play(n->part, st->ms);
+        }
+    }
 
     st->host = walk_companion(scr, n->host, n->speaking);
 
@@ -241,6 +304,10 @@ static lv_obj_t *narration_screen(narration_state_t *st)
 
     kicker(scr, pal.kick, 40, n->kicker);
     play_button(scr, st, pal.dark);
+    if (!st->playing) {
+        lv_obj_add_flag(st->pause, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_remove_flag(st->play, LV_OBJ_FLAG_HIDDEN);
+    }
     back_button(scr, st, pal.dark);
 
     lv_obj_t *card = slip(scr, 0, 0, CARD_W, LV_SIZE_CONTENT);
@@ -268,9 +335,10 @@ static lv_obj_t *narration_screen(narration_state_t *st)
     lv_obj_set_flex_align(row, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
     lv_obj_set_style_pad_column(row, 12, 0);
     lv_obj_set_style_pad_row(row, 2, 0);
-    text_in(row, &jost_light_italic_18, C_SEPIA, n->credit);
+    st->credit = text_in(row, &jost_light_italic_18, C_SEPIA, n->credit);
     st->clock = text_in(row, &jost_regular_16, C_SEPIA, "");
     show_clock(st);
+    follow_speaker(st);
 
     st->timer = lv_timer_create(tick, TICK_MS, st);
     lv_obj_add_event_cb(scr, done, LV_EVENT_DELETE, st);
@@ -294,7 +362,9 @@ static narration_state_t *stop_narration(const art_portrait_t *host, mood_t spea
     n->caption = s->caption;
     if (s->speaker) snprintf(n->credit, sizeof n->credit, "in the voice of %s", architect_name(s->speaker));
     else snprintf(n->credit, sizeof n->credit, "read by the guide");
-    n->total_s = simulated_s(s->caption);
+    snprintf(n->part, sizeof n->part, "lm%d", s->lm);
+    n->real = player_part(n->part);
+    n->total_s = n->real ? (int32_t)((n->real->length_ms + 999) / 1000) : simulated_s(s->caption);
     st->n = n;
     return st;
 }
@@ -304,11 +374,15 @@ lv_obj_t *screen_listening(void)
 {
     const art_portrait_t *speaker = walk_speaker();
     if (!speaker) return screen_guidestop();
-    return narration_screen(stop_narration(speaker, MOOD_TALK, false));
+    narration_state_t *st = stop_narration(speaker, MOOD_TALK, false);
+    st->n_.who = walk_stop()->speaker;
+    return narration_screen(st);
 }
 
 /* The guide (or an architect not yet drawn) telling it, the host listening. */
 lv_obj_t *screen_guidestop(void)
 {
-    return narration_screen(stop_narration(walk_host(), MOOD_LISTEN, true));
+    narration_state_t *st = stop_narration(walk_host(), MOOD_LISTEN, true);
+    st->n_.who = walk_now()->host;
+    return narration_screen(st);
 }

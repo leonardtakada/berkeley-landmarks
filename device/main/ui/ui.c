@@ -1,4 +1,5 @@
 #include "ui.h"
+#include "audio/player.h"
 #include <string.h>
 #include "theme.h"
 
@@ -40,6 +41,10 @@ void ui_show_anim(screen_id_t id, lv_screen_load_anim_t anim, uint32_t ms)
 {
     if (id >= SCR_COUNT) return;
     current = id;
+    /* The narration plays on under the controls (and what opens from them); shown anything else, it stops. */
+    if (id != SCR_LISTENING && id != SCR_GUIDESTOP && id != SCR_CONTROLS && id != SCR_HARDWARE && id != SCR_ENDWALK) {
+        player_stop();
+    }
     lv_obj_t *scr = screens[id].build();
     current_scr = scr;
     /* The old screen and its motions are deleted once the new one is in. */
