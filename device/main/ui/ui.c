@@ -25,6 +25,7 @@ static const struct {
     [SCR_WALKED] = {"walked", screen_walked},
     [SCR_HARDWARE] = {"hw", screen_hardware},
     [SCR_ENDWALK] = {"end", screen_endwalk},
+    [SCR_EXPLORE] = {"explore", screen_explore},
 };
 
 lv_obj_t *ui_screen(lv_color_t bg)

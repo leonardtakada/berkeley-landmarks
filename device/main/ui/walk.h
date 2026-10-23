@@ -10,6 +10,7 @@
 #pragma once
 #include <stdbool.h>
 #include "data.h"
+#include "landmarks.h"
 #include "portrait.h"
 #include "ui.h"
 
@@ -53,6 +54,14 @@ bool walk_step(int metres);
 /** How much of the stop's narration has played, so it picks up where it was. */
 uint32_t walk_heard_ms(void);
 void walk_set_heard_ms(uint32_t ms);
+
+/**
+ * On your own (the free map): one landmark as if it were a walk of one stop,
+ * so the narration screens can tell it. Ended when the map comes back.
+ */
+void walk_free(const landmark_t *l);
+void walk_end_free(void);
+bool walk_is_free(void);
 
 /** Where the stop's narration plays: the speaker's own screen, a handover to them first, or the guide's. */
 screen_id_t walk_narration_screen(void);

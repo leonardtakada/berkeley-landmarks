@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""Copies the packed narration (scripts/narration/pack_guide.py) onto the guide's SD card, over
+"""Copies the guide's card bundle (scripts/narration/pack_guide.py: the narration and the map's
+tiles) onto the guide's SD card, over
 the same USB console as snap.py; the guide writes it to /sdcard/guide (console put).
 
     python scripts/device/load-narration.py [--dir narration-takes/guide] [--port /dev/cu.usbmodem31101]
@@ -73,7 +74,7 @@ def send(s, path):
 
 
 folder = Path(a.dir)
-files = sorted(p for p in folder.iterdir() if p.suffix == ".caf")
+files = sorted(p for p in folder.iterdir() if p.is_file() and p.name != "parts.txt" and not p.name.startswith("."))
 files.append(folder / "parts.txt")
 s = snap.open_port(a.port)
 sent = skipped = retries = 0

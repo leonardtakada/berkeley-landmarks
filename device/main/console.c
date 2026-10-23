@@ -25,6 +25,7 @@
 #include "storage/card.h"
 #include "ui.h"
 #include "walk.h"
+#include "position.h"
 
 #define LOCK_FOREVER ((uint32_t)-1)
 
@@ -590,6 +591,13 @@ static void run(char *cmd)
         } else {
             print_card();
         }
+    } else if (strcmp(cmd, "here") == 0) {
+        /* here <lat> <lon>: pretend you're there (the free map then walks you where you go); here off: the sky. */
+        double lat, lon;
+        if (arg && strcmp(arg, "off") == 0) position_pretend_off();
+        else if (arg && sscanf(arg, "%lf %lf", &lat, &lon) == 2) position_pretend(lat, lon);
+        position_t p = position_now();
+        printf("OK here known=%d pretend=%d lat=%.6f lon=%.6f\n", p.known, p.pretend, p.lat, p.lon);
     } else if (strcmp(cmd, "stat") == 0) {
         stat_file(arg);
     } else if (strcmp(cmd, "put") == 0) {

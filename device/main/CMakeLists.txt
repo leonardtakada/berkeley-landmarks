@@ -7,6 +7,6 @@ idf_component_register(
          power/pmu.c heading/imu.c gnss/gnss.c storage/card.c audio/sound.c audio/player.c
     INCLUDE_DIRS . fonts art ui
     EMBED_FILES ${ART_FILES}
-    REQUIRES esp_driver_usb_serial_jtag esp_driver_uart esp_timer mbedtls nvs_flash fatfs)
+    REQUIRES esp_driver_usb_serial_jtag esp_driver_uart esp_timer mbedtls nvs_flash fatfs espressif__esp_new_jpeg)
 
 target_compile_definitions(${COMPONENT_LIB} PRIVATE LV_LVGL_H_INCLUDE_SIMPLE)

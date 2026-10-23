@@ -119,7 +119,8 @@ and the walk moving on to stop 9 when it ended. The caption still loops the
 stop's opening lines, whoever is speaking.
 
 The existing `assets/tiles.bin` (JPEG, z11–z16, 6.4 MB) shows the pipeline
-works. It's baked from OSM raster tiles in the light paper style, though. For
+works, and since 2026-10-23 the free map uses it as it is (see "On your own:
+the map"). It's baked from OSM raster tiles in the light paper style, though. For
 the device, re-bake from the vector `berkeley.pmtiles` in a navy/black style
 with a z17 layer, which also avoids bulk-pulling OSM tiles again.
 
@@ -228,6 +229,50 @@ label scene.
 Console, for testing at the desk: `button upper|lower|hold` presses one,
 `buttons` shows each button's state and the last eight real presses, `stop n`
 jumps to a stop, `where` says the screen, walk, stop, labels and distance.
+
+### On your own: the map (2026-10-23)
+
+Not everyone wants a walk. The cover's lower button is now *Map*: the paper
+map with you in the middle of it and every landmark in the guide round about,
+to wander to whichever you like.
+
+- **The map is the app's.** `assets/tiles.bin` (the paper style, z11–z16)
+  goes on the card as `tiles.bin` and `tiles.idx` (2,933 tiles, 5.9 MB),
+  packed by `scripts/device/pack-tiles.mjs` from `pack_guide.py`. The app's
+  tiles are progressive JPEGs, which the guide's decoder (`esp_new_jpeg`)
+  can't read, so each is saved again as baseline. `device/main/ui/mapview.c`
+  decodes them as they come into view, to RGB565 in PSRAM, and keeps the last
+  twelve (1.5 MB); the screen holds about 45 fps. The navy re-bake below is
+  still open; the paper reads well on the panel.
+- **North up, centred on you**, following you as you walk; while you're moving
+  (1.5 km/h or more) a vermilion beam shows which way. + and − on the left go
+  between z13 and z16 (scale bar at the foot). Without a fix it opens on
+  downtown (City Hall) and says "Finding you. This is downtown."
+- **Every landmark**: all 392 in `data/landmarks.ts`, exported by
+  `export-walks.ts` into `device/main/ui/landmarks_gen.c` with where each is,
+  its architect and year, and, for the 77 with a story on the card, who tells
+  it. The storied ones are ringed in blue.
+- **Tap one** and the slip at the top names it with how far it is ("210 m ·
+  3 min", at 80 m a minute). The upper button (*GO*) draws a dashed vermilion
+  leg from you to it and the slip says *On the way*; *Stop* drops it.
+- **At the door** (25 m) the guide chimes. A storied landmark is told three
+  seconds later on the narration screens, kicker *On your own*, both buttons
+  back to the map (*Done*, *Map*), and the map then waits for the next pick.
+  Any other landmark gets its architect and year on the slip.
+
+A landmark told this way is a one-stop walk to the narration screens
+(`walk_free` in `walk.c`), so they play, caption and credit it as they would
+on a walk; the walk you were on, if any, is left where it was.
+
+For the desk: `here <lat> <lon>` pretends you're there, and while going the
+pretend position walks to the landmark at 1.4 m/s; `here off` hands back to
+the GNSS, `here` says which. Checked on the guide: the tiles at z16 to z14;
+picking the Berkeley Public Library from 210 m, going, the leg and beam
+following the pretend position, the chime at the door, Plachek's story from
+the card three seconds later, *Map* back to the map with nothing picked; and
+the Downtown YMCA (no story) giving "Benjamin G. McDougall · 1910" at the
+door. Not yet tried outdoors with a real fix. The walk's own Map is still the
+schematic one and could move onto the same tiles.
 
 ### Motion and the companion (2026-10-21, second pass)
 

@@ -47,6 +47,10 @@ void ui_listen(void)
 
 void ui_next_stop(void)
 {
+    if (walk_is_free()) {
+        ui_show(SCR_EXPLORE); /* on your own: told, back to the map */
+        return;
+    }
     if (walk_at_last()) {
         ui_show(SCR_WALKED);
         return;
@@ -87,13 +91,17 @@ void ui_button(button_t b)
 {
     screen_id_t s = ui_current();
     if (b == BTN_LOWER_HELD) {
-        if (walking(s)) ui_ask_end();
+        if (walking(s) && !walk_is_free()) ui_ask_end();
         return;
     }
     bool upper = b == BTN_UPPER;
     switch (s) {
     case SCR_COVER:
-        if (upper) ui_show(SCR_WALKS);
+        ui_show(upper ? SCR_WALKS : SCR_EXPLORE);
+        break;
+    case SCR_EXPLORE:
+        if (upper) explore_go();
+        else ui_show(SCR_COVER);
         break;
     case SCR_WALKS:
         if (upper) ui_show(SCR_FINDING);
@@ -126,7 +134,8 @@ void ui_button(button_t b)
         break;
     case SCR_LISTENING:
     case SCR_GUIDESTOP:
-        if (upper) ui_next_stop();
+        if (walk_is_free()) ui_show(SCR_EXPLORE); /* on your own: either button, back to the map */
+        else if (upper) ui_next_stop();
         else ui_open_controls();
         break;
     case SCR_RESTING:
@@ -179,9 +188,10 @@ static lv_obj_t *tab(lv_obj_t *scr, bool dark, button_t b, const char *s)
     return t;
 }
 
-void ui_hints(lv_obj_t *scr, uint32_t ground, const char *upper, const char *lower)
+lv_obj_t *ui_hints(lv_obj_t *scr, uint32_t ground, const char *upper, const char *lower)
 {
     bool dark = palette_for(ground).dark;
-    if (upper) tab(scr, dark, BTN_UPPER, upper);
+    lv_obj_t *t = upper ? tab(scr, dark, BTN_UPPER, upper) : NULL;
     if (lower) tab(scr, dark, BTN_LOWER, lower);
+    return t;
 }

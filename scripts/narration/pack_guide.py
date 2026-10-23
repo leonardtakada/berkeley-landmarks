@@ -10,6 +10,9 @@ about 8.5 KB a second, simple enough to decode on the guide without a codec libr
 and parts.txt, a line per file: its name, its length in ms, and who speaks from when
 ("lm18 62600 ratcliff@0 guide@53600"), so the guide can change the credit and the
 portrait's mood when the speaker does. The names are 8.3, for the card's FAT.
+
+Also the free map's tiles (device/main/ui/mapview.c), tiles.bin and tiles.idx, by
+scripts/device/pack-tiles.mjs.
 """
 import argparse
 import json
@@ -61,4 +64,7 @@ for n, tour in enumerate(tours, 1):
         index[stem] = f"{stem} {round(part['seconds'] * 1000)} " + " ".join(sections(part))
         total += caf.stat().st_size
 (out / "parts.txt").write_text("\n".join(index[k] for k in sorted(index)) + "\n")
-print(f"{len(index)} files, {total / 1e6:.1f} MB → {out}")
+print(f"{len(index)} narration files, {total / 1e6:.1f} MB → {out}")
+
+# The map's tiles: saved again as baseline JPEGs, which the guide's decoder can read.
+subprocess.run(["node", "scripts/device/pack-tiles.mjs", str(out)], check=True)

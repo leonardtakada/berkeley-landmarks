@@ -117,6 +117,6 @@ lv_obj_t *screen_cover(void)
     print_in(begin, 600, 1300);
     lv_obj_add_event_cb(begin, begin_clicked, LV_EVENT_CLICKED, NULL);
 
-    ui_hints(scr, 0x0A2C8D, "WALKS", NULL);
+    ui_hints(scr, 0x0A2C8D, "WALKS", "MAP");
     return scr;
 }

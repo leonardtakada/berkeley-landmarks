@@ -19,6 +19,7 @@ typedef enum {
     SCR_WALKED,
     SCR_HARDWARE,
     SCR_ENDWALK,
+    SCR_EXPLORE,
     SCR_COUNT,
 } screen_id_t;
 
@@ -68,7 +69,7 @@ void ui_button(button_t b);
  * tapping a tab presses its button. Either may be NULL. `ground` is the
  * screen's colour, for the tabs' inks.
  */
-void ui_hints(lv_obj_t *scr, uint32_t ground, const char *upper, const char *lower);
+lv_obj_t *ui_hints(lv_obj_t *scr, uint32_t ground, const char *upper, const char *lower); /* returns the upper tab */
 
 /* Moving through a walk, for the screens' own taps as well as the buttons. */
 void ui_arrive(void);         /* at the stop: its label, then its narration */
@@ -96,3 +97,7 @@ lv_obj_t *screen_resting(void);
 lv_obj_t *screen_walked(void);
 lv_obj_t *screen_hardware(void);
 lv_obj_t *screen_endwalk(void);
+lv_obj_t *screen_explore(void);
+
+/** The free map's upper button: go to the landmark picked, or stop going. */
+void explore_go(void);

@@ -343,7 +343,8 @@ static lv_obj_t *narration_screen(narration_state_t *st)
     st->timer = lv_timer_create(tick, TICK_MS, st);
     lv_obj_add_event_cb(scr, done, LV_EVENT_DELETE, st);
 
-    ui_hints(scr, ground, walk_at_last() ? "FINISH" : "NEXT STOP", "MENU");
+    if (walk_is_free()) ui_hints(scr, ground, "DONE", "MAP");
+    else ui_hints(scr, ground, walk_at_last() ? "FINISH" : "NEXT STOP", "MENU");
     return scr;
 }
 
@@ -357,7 +358,8 @@ static narration_state_t *stop_narration(const art_portrait_t *host, mood_t spea
     n->host = host;
     n->speaking = speaking;
     n->waiting = MOOD_IDLE;
-    snprintf(n->kicker, sizeof n->kicker, "STOP %d OF %d", walk_at() + 1, walk_now()->stop_count);
+    if (walk_is_free()) snprintf(n->kicker, sizeof n->kicker, "ON YOUR OWN");
+    else snprintf(n->kicker, sizeof n->kicker, "STOP %d OF %d", walk_at() + 1, walk_now()->stop_count);
     n->title = titled ? s->name : NULL;
     n->caption = s->caption;
     if (s->speaker) snprintf(n->credit, sizeof n->credit, "in the voice of %s", architect_name(s->speaker));

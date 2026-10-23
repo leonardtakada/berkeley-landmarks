@@ -10,24 +10,47 @@ static uint32_t collected; /* bit i: stop i's label */
 static int metres_left = FIRST_STOP_METRES;
 static uint32_t heard_ms;
 
+/* On your own: the landmark picked on the free map, as a walk of one stop with no host. */
+static bool free_mode;
+static stop_t free_stop;
+static const walk_t free_walk = {"On your own", "", "", NULL, &free_stop, 1};
+static uint32_t free_heard_ms;
+
+void walk_free(const landmark_t *l)
+{
+    free_stop = (stop_t){l->name, l->speaker, l->caption ? l->caption : "", 0, 0, l->lm};
+    free_mode = true;
+    free_heard_ms = 0;
+}
+
+void walk_end_free(void)
+{
+    free_mode = false;
+}
+
+bool walk_is_free(void)
+{
+    return free_mode;
+}
+
 const walk_t *walk_now(void)
 {
-    return &walks[ui_walk];
+    return free_mode ? &free_walk : &walks[ui_walk];
 }
 
 int walk_at(void)
 {
-    return at;
+    return free_mode ? 0 : at;
 }
 
 const stop_t *walk_stop(void)
 {
-    return &walk_now()->stops[at];
+    return &walk_now()->stops[walk_at()];
 }
 
 bool walk_at_last(void)
 {
-    return at == walk_now()->stop_count - 1;
+    return walk_at() == walk_now()->stop_count - 1;
 }
 
 const art_portrait_t *walk_host(void)
@@ -43,7 +66,7 @@ uint32_t walk_ground(const art_portrait_t *art)
 lv_obj_t *walk_companion(lv_obj_t *scr, const art_portrait_t *art, mood_t mood)
 {
     if (art) return portrait_create(scr, art, mood);
-    scene_create(scr, &art_scenes[ui_walk]);
+    if (!free_mode) scene_create(scr, &art_scenes[ui_walk]); /* on your own there's no walk's scene: just paper */
     return NULL;
 }
 
@@ -99,16 +122,18 @@ bool walk_step(int metres)
 
 uint32_t walk_heard_ms(void)
 {
-    return heard_ms;
+    return free_mode ? free_heard_ms : heard_ms;
 }
 
 void walk_set_heard_ms(uint32_t ms)
 {
-    heard_ms = ms;
+    if (free_mode) free_heard_ms = ms;
+    else heard_ms = ms;
 }
 
 screen_id_t walk_narration_screen(void)
 {
     if (!walk_speaker()) return SCR_GUIDESTOP;
+    if (free_mode) return SCR_LISTENING; /* no host to hand over from */
     return walk_host_speaks() ? SCR_LISTENING : SCR_HANDOVER;
 }
