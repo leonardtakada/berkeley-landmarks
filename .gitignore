@@ -79,3 +79,6 @@ scripts/.cache/
 # raw scrape HTML (processed .md is committed instead)
 data/scraped/**/_raw/
 dist-web/
+
+# Voice auditions and renders (scripts/narration), kept out of git
+narration-takes/

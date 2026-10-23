@@ -1,0 +1,89 @@
+{
+  "about": "The narration's cast: one voice per speaker key in data/narration (an ArchitectKey, or guide). Each voice is made by a voice-design TTS from its brief, matched to the architect's portrait; target is the pitch (Hz, median) and pace (words a minute) the brief asks for, checked by scripts/narration/measure.py. line is what auditions speak: the speaker's own script text, or for an architect with no script yet, their note in lib/architects.ts in the first person. Pitch and pace are said outright in every brief: left to words like 'alto', the model ran higher and quicker than asked.",
+  "voices": {
+    "guide": {
+      "name": "The guide",
+      "brief": "A contemporary Californian woman of about 40 with a low, warm alto voice, lower-pitched than most women. She speaks slowly and steadily, unhurried, calm and close to the ear, like a good museum guide: plain facts, gently told, with a little warmth and no performance. Never bright, high or salesy.",
+      "target": { "hz": 185, "wpm": 155 },
+      "line": "This is the commercial heart of the city: the civic buildings around the park, the banks and the grand hotel on Shattuck Avenue, and the Art Deco library.",
+      "from": "data/narration/walks/tour-downtown.md"
+    },
+    "maybeck": {
+      "name": "Bernard Maybeck",
+      "brief": "An American man of about 80 with a soft, airy baritone and a faint old-world lilt. He speaks slowly and warmly, smiling as he talks, a chuckle never far away, with small pauses of wonder between ideas. Gentle and romantic, delighted by ordinary materials. Close and intimate, never booming.",
+      "target": { "hz": 110, "wpm": 125 },
+      "line": "The Christian Scientists asked me for a church in 1910. Most of their churches were plain and classical, as rational as the faith. I wanted this one to feel like what happens inside it.",
+      "from": "data/narration/stops/lm-1.md"
+    },
+    "morgan": {
+      "name": "Julia Morgan",
+      "brief": "A Californian woman of about 50 with a light, clear mezzo voice, mid-pitched. Quiet and exact: precise consonants, an even, measured pace, no wasted words. Reserved and businesslike, with a dry wit she never underlines. Warm underneath but never effusive; she lets the building speak.",
+      "target": { "hz": 205, "wpm": 150 },
+      "line": "This was St. John's Presbyterian Church. Its congregation formed in 1907, some of them families who had lost their homes in San Francisco the year before, and they wanted a church for the lowest possible price.",
+      "from": "data/narration/stops/lm-4.md"
+    },
+    "howard": {
+      "name": "John Galen Howard",
+      "brief": "An American man of about 55 with a deep, resonant bass-baritone and formal East-coast diction, rounded vowels. He speaks slowly and deliberately, building each sentence to land, like a professor addressing a full hall. Grand but not pompous, warming when he speaks of his own house. Early twentieth-century polish.",
+      "target": { "hz": 92, "wpm": 135 },
+      "line": "This was my own house. I built it in 1912 on the corner of Le Roy Avenue and Rose Street, and we called it Rose Le Roy. By then I had been the university's supervising architect for eleven years.",
+      "from": "data/narration/stops/lm-11.md"
+    },
+    "ratcliff": {
+      "name": "Walter H. Ratcliff Jr.",
+      "brief": "An American man of about 40 with a bright, clean light-tenor voice and a smile you can hear. Brisk and friendly, a quick walking pace, as if alongside you; plain-spoken and practical, proud of his town without boasting. Neighbourly, cheerful, easy to follow.",
+      "target": { "hz": 135, "wpm": 165 },
+      "line": "I was Berkeley's first city architect, and I spent most of my working life in this town. In 1925 the Central Berkeley Building Company asked me for something Berkeley had never had: a tall building.",
+      "from": "data/narration/stops/lm-18.md"
+    },
+    "hays": {
+      "name": "William Charles Hays",
+      "brief": "An American man of about 60 with a lean, dry baritone, slightly nasal and very precise. He speaks deliberately, at an unhurried pace, with crisp consonants: the patient exactness of a professor who has explained this for forty years. A wry undertone, never a joke spelled out.",
+      "target": { "hz": 125, "wpm": 140 },
+      "line": "I taught architecture at the university for nearly forty years, and I designed buildings for it too.",
+      "from": "data/narration/stops/lm-255.md"
+    },
+    "coxhead": {
+      "name": "Ernest Coxhead",
+      "brief": "An Englishman of about 65 with a low, quiet baritone and an older southern English accent. He speaks slowly and with restraint, with a church architect's reverence and a little gruffness at the edges. Clipped where it counts; dry humour held well back.",
+      "target": { "hz": 100, "wpm": 130 },
+      "line": "I trained in England as an architect of churches. In 1886 my brother Almeric and I set up practice in Los Angeles, and four years later we moved to San Francisco.",
+      "from": "data/narration/stops/lm-53.md"
+    },
+    "thomas": {
+      "name": "John Hudson Thomas",
+      "brief": "An American man of about 40 with a bright, lively baritone and a grin in his voice. He talks quickly, ideas tumbling out, inventive and pleased with the rule he is about to break. Playful and a little mischievous, but always clear.",
+      "target": { "hz": 128, "wpm": 170 },
+      "line": "I designed houses, mostly, and I liked to mix things that weren't supposed to go together: Arts and Crafts with the Vienna Secession, the medieval with the new.",
+      "from": "data/narration/stops/lm-25.md"
+    },
+    "plachek": {
+      "name": "James W. Plachek",
+      "brief": "An American man of about 45 with a smooth, warm, fairly low baritone and polished 1930s diction, clean as a radio announcer. Confident and civic-minded, at an easy, even pace, quietly proud, glad to show you around downtown. Assured without swagger.",
+      "target": { "hz": 108, "wpm": 155 },
+      "line": "If you've walked around downtown, you've walked past my work: the annex behind the old City Hall, the Odd Fellows' Temple on Fulton Street, the Corder Building down at Bancroft. But this is the one I'd want you to see.",
+      "from": "data/narration/stops/lm-17.md"
+    },
+    "gutterson": {
+      "name": "Henry Gutterson",
+      "brief": "An American man of about 60 with a mellow, low baritone and a soft gravel, a pipe smoker's warmth. Easygoing and content, he speaks slowly, in no hurry at all, generous with credit to others. Relaxed, close, companionable.",
+      "target": { "hz": 96, "wpm": 120 },
+      "line": "I trained in the Beaux-Arts way, and I worked alongside Bernard Maybeck. The Berkeley Community Theater is mine.",
+      "from": "lib/architects.ts (no script yet)"
+    },
+    "yelland": {
+      "name": "William R. Yelland",
+      "brief": "A Californian man of about 35 with a light, bright tenor that ranges widely in pitch. Theatrical and full of wonder, a storyteller who paints pictures as he goes, at a lively pace, delighted by fairy-tale roofs; charming, never arch.",
+      "target": { "hz": 145, "wpm": 160 },
+      "line": "I grew up in Saratoga, studied architecture at the University here, and then the war sent me to France. I came home with Normandy in my head, the farmhouses and steep roofs and old brick, and I never quite got it out.",
+      "from": "data/narration/stops/lm-16.md"
+    },
+    "esherick": {
+      "name": "Joseph Esherick",
+      "brief": "A West Coast American man of about 65 with a dry, understated mid baritone and a little gravel. Laconic and conversational, at a relaxed pace, the modernist professor who says less than he knows. Cool and plainspoken, late twentieth century; no flourish.",
+      "target": { "hz": 112, "wpm": 145 },
+      "line": "I was a modernist of the Bay tradition, and I taught at Berkeley for a long time. Greenwood Common is mine, and the Sea Ranch.",
+      "from": "lib/architects.ts (no script yet)"
+    }
+  }
+}
