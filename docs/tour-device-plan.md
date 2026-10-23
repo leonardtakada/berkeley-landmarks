@@ -337,6 +337,40 @@ Motion stills it.
   recast anyway, in her own era (about 55, reedy, crisp period diction), and
   sits further from the guide (0.10). Most takes read 10–30% quicker than
   their briefs; pace is set at render time.
+- **Walk 01 rendered (2026-10-22):** `render_walk.py` speaks a whole walk,
+  paragraph by paragraph, in the locked voices (0.45 s between paragraphs,
+  0.7 s between speakers, every paragraph at the same speech level), and
+  writes each part plus a whole-walk listen with the chime before each stop;
+  `check_walk.py` confirms each paragraph is in the right voice. The voices
+  read 12–26% quicker than their briefs, so each paragraph is then slowed to
+  its brief by WSOLA (`audiotsm`), which keeps the pitch: never sped up, never
+  slowed past 28%, short lines taking their voice's usual slowing. Walk 01:
+  11.8 minutes, made in about 12 on the Mac; all 46 paragraphs in the right
+  voice; loudness within 0.4 dB; the guide at 154 words a minute (brief 155),
+  Ratcliff 166 (165), Plachek 154 (155), Yelland 163 (160).
+- **All twelve rendered (2026-10-23):** each script is spoken once into
+  `narration-takes/parts/` and shared by every walk it's on (reused while its
+  script, voices and pace are unchanged), so a stop sounds the same on any
+  walk; `render_walk.py --all` then assembles each walk. 80.7 minutes of unique
+  narration in 101 parts (more than the drafts' 67-minute estimate, at the
+  briefs' slower pace), about an hour on the Mac; 116.6 minutes for the twelve
+  heard back to back. Every paragraph of every walk checks out in the right
+  voice. All voices within 2% of their briefs' pace except Maybeck, 130 words
+  a minute against 125: the model reads him near 175, and ten of his 42
+  paragraphs reach the 28% slowing limit. He stays at 130 by choice: slowing
+  him further would smear his speech. The scripts are still drafts.
+- **With the guide's sounds (2026-10-23):** `scripts/narration/sounds.py`
+  makes the ten sounds from the design canvas's recipes, and each whole-walk
+  recording now plays as the guide will, on the "A stop, start to finish"
+  timeline (its `timeline.json` lists every moment): the intro while it finds
+  you, then Found you; at each stop the chime, the stamp at 1 s, the door held
+  7 s, the narration 0.4 s after its screen, with the handover swish and the
+  guest's bell first where another drawn architect tells the stop (11.9 s);
+  On you go 1.5 s after the last word; the Walked stamp and bells, then the
+  outro. Handovers follow the firmware's rule (a drawn architect who isn't
+  the host), so Howard, Yelland and the others not yet drawn are heard with
+  the host listening. The walking is cut to 2 s; the twelve run 130.6 minutes
+  back to back.
 - **How a stop plays:** the door holds 7 s, a guest's voice starts 0.4 s after
   their screen, a change of speaker within a script (the guide's coda) is a
   0.7 s gap with the credit changing and no sound, and 1.5 s after the last
@@ -382,7 +416,7 @@ order.
 | 4 | **Real location + heading.** GNSS driver, COG/gyro fusion, port of arrival logic | Arrow is right on a real walk; no false arrivals |
 | 5 | **Audio.** MP3 from SD, chime, auto-play on arrival, pause/resume/volume | Clean playback, no pops at PA on/off |
 | 6 | **Map.** Bake dark tiles; tile view with route and you-dot | Smooth pan at ≥ 20 fps |
-| 7 | **Narration content.** Scripts → review → TTS → bundle (one walk first, then all 12) | Walk 01 fully narrated |
+| 7 | **Narration content.** Scripts → review → TTS → bundle (one walk first, then all 12) | Walk 01 fully narrated. Rendered 2026-10-23: all 12 walks in the locked voices, from the draft scripts; review and the bundle still to come |
 | 8 | **Power + field test.** Screen dim/off between stops, GNSS duty cycle, battery gauge | A 1.5 h walk uses < 50 % of the battery |
 | 9 | *Later:* stamp sync to the app over BLE, content updates over Wi-Fi, "ask the architect" voice Q&A using the mics | — |
 
