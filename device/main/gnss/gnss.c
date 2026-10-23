@@ -53,6 +53,8 @@
 #define BOOT_BACK_OFF_MS 200
 #define SILENT_MS 3000    /* it speaks every second; this long without a word, it's stuck: */
 #define RECOVER_EVERY_MS 8000
+#define WAKE_AFTER_MS 30000
+#define WAKE_EVERY_MS 60000
 
 /*
  * The module's output, cut to what the guide reads ($PAIR062,<type>,<every>
@@ -65,7 +67,12 @@
 static const char *const quieter[] = {"PAIR062,1,0", "PAIR062,2,0", "PAIR062,5,0", "PAIR062,3,30", "PAIR062,0,2"};
 
 static i2c_master_dev_handle_t dev_w, dev_r, dev_r2;
-static gnss_state_t state = {.first_fix_ms = -1};
+static gnss_state_t state = {
+    .first_fix_ms = -1,
+    .last_sentence_ms = -1,
+    .last_position_ms = -1,
+    .last_response_ms = -1,
+};
 static portMUX_TYPE lock = portMUX_INITIALIZER_UNLOCKED;
 static volatile bool echo, paused, quiet;
 static bool noisy; /* heard a sentence the quieter output turns off */
@@ -86,6 +93,14 @@ static void publish(const gnss_state_t *s)
     portENTER_CRITICAL(&lock);
     state = *s;
     portEXIT_CRITICAL(&lock);
+}
+
+static void answered(void)
+{
+    gnss_state_t next = state;
+    next.ok = true;
+    next.last_response_ms = esp_timer_get_time() / 1000;
+    publish(&next);
 }
 
 void gnss_pause(bool on)
@@ -151,11 +166,7 @@ static int32_t waiting(void)
         complain("reading the length", err);
         return -1;
     }
-    if (!state.ok) {
-        gnss_state_t next = state;
-        next.ok = true;
-        publish(&next);
-    }
+    answered();
     return (int32_t)(n[0] | n[1] << 8 | n[2] << 16 | (uint32_t)n[3] << 24);
 }
 
@@ -173,20 +184,31 @@ static bool send_locked(const char *body)
     if (len <= 0 || len >= (int)sizeof out) return false;
 
     static const uint8_t room_ask[] = {0x04, 0x00, 0x51, 0xAA, 0x04, 0x00, 0x00, 0x00};
-    uint8_t room[4] = {0};
-    if (request(room_ask, sizeof room_ask) != ESP_OK || answer(room, sizeof room) != ESP_OK) {
-        complain("asking for room", ESP_FAIL);
-        return false;
+    for (size_t sent = 0; sent < (size_t)len;) {
+        uint8_t room[4] = {0};
+        if (request(room_ask, sizeof room_ask) != ESP_OK || answer(room, sizeof room) != ESP_OK) {
+            complain("asking for room", ESP_FAIL);
+            return false;
+        }
+        answered();
+        uint32_t available = room[0] | room[1] << 8 | room[2] << 16 | (uint32_t)room[3] << 24;
+        if (available == 0 || available == UINT32_MAX) return false;
+        /* The reported room is the remainder of a circular buffer window.
+         * Fill it before sending the rest, otherwise short tails can prevent
+         * every later command from fitting. Each piece has its own exchange. */
+        size_t part = (size_t)len - sent;
+        if (part > available) part = available;
+        uint8_t announce[8] = {0x00, 0x10, 0x53, 0xAA, (uint8_t)part, 0x00, 0x00, 0x00};
+        if (request(announce, sizeof announce) != ESP_OK) return false;
+        vTaskDelay(pdMS_TO_TICKS(STEP_MS));
+        esp_err_t err = i2c_master_transmit(dev_r2, (const uint8_t *)out + sent, part, ANSWER_MS);
+        if (err != ESP_OK) {
+            complain("sending", err);
+            return false;
+        }
+        sent += part;
     }
-    uint32_t free = room[0] | room[1] << 8 | room[2] << 16 | (uint32_t)room[3] << 24;
-    if (free < (uint32_t)len) return false;
-
-    uint8_t announce[8] = {0x00, 0x10, 0x53, 0xAA, (uint8_t)len, 0x00, 0x00, 0x00};
-    if (request(announce, sizeof announce) != ESP_OK) return false;
-    vTaskDelay(pdMS_TO_TICKS(STEP_MS));
-    esp_err_t err = i2c_master_transmit(dev_r2, (const uint8_t *)out, len, ANSWER_MS);
-    if (err != ESP_OK) complain("sending", err);
-    return err == ESP_OK;
+    return true;
 }
 
 bool gnss_send(const char *body)
@@ -223,20 +245,36 @@ static int fields(char *s, char **f, int max)
 /** ddmm.mmmm (or dddmm.mmmm) and a hemisphere, as signed degrees. */
 static double degrees(const char *v, const char *hemi)
 {
-    if (!*v) return NAN;
-    double x = atof(v);
+    if (!*v || !*hemi || hemi[1] != '\0') return NAN;
+    bool latitude = *hemi == 'N' || *hemi == 'S';
+    if (!latitude && *hemi != 'E' && *hemi != 'W') return NAN;
+    const char *p = v;
+    while (*p >= '0' && *p <= '9') p++;
+    if (p - v != (latitude ? 4 : 5)) return NAN;
+    if (*p == '.') {
+        p++;
+        if (*p < '0' || *p > '9') return NAN;
+        while (*p >= '0' && *p <= '9') p++;
+    }
+    if (*p != '\0') return NAN;
+    double x = strtod(v, NULL);
+    if (!isfinite(x)) return NAN;
     int deg = (int)(x / 100);
-    double d = deg + (x - deg * 100) / 60.0;
+    double minutes = x - deg * 100;
+    double d = deg + minutes / 60.0;
+    if (minutes >= 60 || d > (latitude ? 90 : 180)) return NAN;
     return (*hemi == 'S' || *hemi == 'W') ? -d : d;
 }
 
 static bool checksum_ok(const char *s)
 {
     const char *star = strrchr(s, '*');
-    if (!star || s[0] != '$') return false;
+    if (!star || s[0] != '$' || strlen(star + 1) != 2 || strspn(star + 1, "0123456789ABCDEFabcdef") != 2) return false;
     uint8_t c = 0;
     for (const char *p = s + 1; p < star; p++) c ^= (uint8_t)*p;
-    return strtol(star + 1, NULL, 16) == c;
+    char *end;
+    long expected = strtol(star + 1, &end, 16);
+    return end == star + 3 && expected == c;
 }
 
 /** Which version of the quieter output the module has acknowledged saving ($PAIR001,513,0); 0 for none. */
@@ -298,24 +336,38 @@ static void sentence(char *s)
     *strrchr(s, '*') = '\0';
     char *f[24];
     int n = fields(s, f, 24);
+    int64_t now = esp_timer_get_time() / 1000;
+    st->last_sentence_ms = now;
     if (strcmp(f[0], "$PAIR001") == 0) {
         /* An acknowledgement: command, then 0 for done. */
         if (n >= 3 && strcmp(f[1], "513") == 0 && f[2][0] == '0' && quieten_sent && saved_in_module() != QUIETER_VERSION) mark_saved();
+        publish(st);
+        return;
+    }
+    if (strlen(f[0]) < 6) {
+        st->bad++;
+        publish(st);
         return;
     }
     const char *type = f[0] + 3; /* after "$GN", "$GP" … */
-    int64_t now = esp_timer_get_time() / 1000;
 
     st->sentences++;
     if (strcmp(type, "GLL") == 0 || strcmp(type, "GSA") == 0 || strcmp(type, "VTG") == 0) noisy = true;
-    if (strcmp(type, "RMC") == 0 && n >= 10) {
-        st->fix = f[2][0] == 'A';
+    if (strcmp(type, "RMC") == 0) {
+        st->fix = false;
+        if (n < 10) {
+            publish(st);
+            return;
+        }
         if (strlen(f[1]) >= 6) snprintf(st->utc, sizeof st->utc, "%.2s:%.2s:%.2s", f[1], f[1] + 2, f[1] + 4);
         if (strlen(f[9]) == 6)
             snprintf(st->date, sizeof st->date, "%s%.2s-%.2s-%.2s", f[9][4] >= '8' ? "19" : "20", f[9] + 4, f[9] + 2, f[9]);
+        double lat = degrees(f[3], f[4]), lon = degrees(f[5], f[6]);
+        st->fix = strcmp(f[2], "A") == 0 && isfinite(lat) && isfinite(lon);
         if (st->fix) {
-            st->lat = degrees(f[3], f[4]);
-            st->lon = degrees(f[5], f[6]);
+            st->lat = lat;
+            st->lon = lon;
+            st->last_position_ms = now;
             st->speed_kmh = atof(f[7]) * 1.852f;
             st->course = atof(f[8]);
         }
@@ -417,37 +469,65 @@ static void quieten(void)
  * After a command it only works once the module has settled, so the reader
  * repeats it every few seconds until data flows.
  */
-static void recover(uint8_t *buf)
+static int32_t recover(uint8_t *buf)
 {
-    gnss_unstick();
+    board_bus_lock();
+    unstick();
+    int32_t got = 0;
     for (int i = 0; i < 2; i++) {
-        int32_t got = drain(buf);
+        got = drain(buf);
         if (got > 0) break;
     }
+    board_bus_unlock();
+    return got;
+}
+
+/** A sleeping transmitter needs a complete write exchange to wake it.
+ * A version query leaves navigation settings alone; only try this after a
+ * prolonged absence of data, never just because there is no satellite fix. */
+static int32_t wake_receiver(uint8_t *buf)
+{
+    board_bus_lock();
+    bool sent = send_locked("PQTMVERNO");
+    board_bus_unlock();
+    if (!sent) return -1;
+    ESP_LOGI("gnss", "sent a version query to wake the silent receiver");
+    return recover(buf);
 }
 
 static void task(void *arg)
 {
     (void)arg;
     uint8_t *buf = malloc(CHUNK);
+    if (!buf) {
+        ESP_LOGE("gnss", "cannot allocate receive buffer");
+        vTaskDelete(NULL);
+        return;
+    }
     int64_t last_data = 0, last_recovery = 0;
+    int64_t last_wake = -WAKE_EVERY_MS;
     bool quieted = false;
     /* The last restart may have cut an exchange off. */
-    recover(buf);
+    if (!paused && recover(buf) > 0) last_data = esp_timer_get_time() / 1000;
     for (;;) {
         int64_t now = esp_timer_get_time() / 1000;
         int32_t got = paused ? 0 : drain(buf);
+        if (!paused && got <= 0 && now - last_data > SILENT_MS && now - last_recovery > RECOVER_EVERY_MS) {
+            got = recover(buf);
+            last_recovery = esp_timer_get_time() / 1000;
+            if (got <= 0 && now - last_data >= WAKE_AFTER_MS && now - last_wake >= WAKE_EVERY_MS) {
+                got = wake_receiver(buf);
+                last_wake = esp_timer_get_time() / 1000;
+            }
+        }
         if (got > 0) {
-            last_data = now;
+            last_data = esp_timer_get_time() / 1000;
             /* A factory-fresh module (or one saved with older settings) talks too much: cut it down, once. */
             if ((noisy || saved_in_module() != QUIETER_VERSION) && !quieted) {
                 quieten();
                 quieted = true;
             }
             quiet = true;
-        } else if (!paused && now - last_data > SILENT_MS && now - last_recovery > RECOVER_EVERY_MS) {
-            recover(buf);
-            last_recovery = now;
         }
         bool booting = now < BOOT_MS;
         vTaskDelay(pdMS_TO_TICKS(got >= 0 ? POLL_MS : booting ? BOOT_BACK_OFF_MS : BACK_OFF_MS));
@@ -516,5 +596,8 @@ gnss_state_t gnss_state(void)
     portENTER_CRITICAL(&lock);
     gnss_state_t s = state;
     portEXIT_CRITICAL(&lock);
+    int64_t now = esp_timer_get_time() / 1000;
+    if (s.last_response_ms < 0 || now - s.last_response_ms >= GNSS_STALE_MS) s.ok = false;
+    if (!s.ok || s.last_position_ms < 0 || now - s.last_position_ms >= GNSS_STALE_MS) s.fix = false;
     return s;
 }

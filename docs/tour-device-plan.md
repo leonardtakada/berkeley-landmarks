@@ -157,7 +157,7 @@ fonts `jost_regular_20/22`, `jost_medium_18`). The buttons' tabs are the only
 Back/Next/Done: the on-screen Back (Map), Next stop and Done word (Controls)
 went. Controls moved down so the NEXT STOP tab clears the Volume row, the
 stamps moved off the host's face, and the narration screens gained a "15"
-button that goes back fifteen seconds. Stamp lettering stays 14 px.
+button that goes back fifteen seconds. Stamp lettering is 16 px and the credit italic 18. The lower button now only ever goes back or opens the menu (on Walks it returns to the cover; turning walks is swipe or the chevrons), and the Controls menu has a Map button beside Last stop.
 
 ### Getting about (2026-10-22)
 
@@ -320,6 +320,14 @@ Motion stills it.
   picked take becomes the voice's reference, and every line after is cloned
   from it (Qwen's Base model), so a voice doesn't drift between stops. Then
   loudness to −16 LUFS → 64 kbps mono MP3. A voice change is just a re-render.
+- **Locked (2026-10-22):** all twelve, each on the take closest to its brief
+  (`lock_voices.py`; references in `data/narration/voices/*.flac`).
+  `speak.py` speaks lines in a locked voice; `check_voices.py` compares each
+  line with the voices' references by speaker fingerprint. Eight of the ten
+  voices with scripts hold clearly on a line they had never spoken. The guide
+  and Julia Morgan each stay nearest themselves but sound too alike, on every
+  Morgan take: her brief needs to set her further from the guide. Most takes
+  read 10–30% quicker than their briefs; pace is set at render time.
 - **How a stop plays:** the door holds 7 s, a guest's voice starts 0.4 s after
   their screen, a change of speaker within a script (the guide's coda) is a
   0.7 s gap with the credit changing and no sound, and 1.5 s after the last

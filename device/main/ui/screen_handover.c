@@ -79,7 +79,7 @@ lv_obj_t *screen_handover(void)
     lv_label_set_long_mode(t, LV_LABEL_LONG_MODE_WRAP);
     lv_obj_set_style_text_align(t, LV_TEXT_ALIGN_CENTER, 0);
     snprintf(buf, sizeof buf, "in the voice of %s", architect_name(stop->speaker));
-    text_in(card, &jost_light_italic_15, C_SEPIA, buf);
+    text_in(card, &jost_light_italic_18, C_SEPIA, buf);
     motion_once(card, 0, 255, 500, 1500, m_opa);
     motion_once(card, 14, 0, 500, 1500, m_y);
 

@@ -268,7 +268,7 @@ static lv_obj_t *narration_screen(narration_state_t *st)
     lv_obj_set_flex_align(row, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
     lv_obj_set_style_pad_column(row, 12, 0);
     lv_obj_set_style_pad_row(row, 2, 0);
-    text_in(row, &jost_light_italic_15, C_SEPIA, n->credit);
+    text_in(row, &jost_light_italic_18, C_SEPIA, n->credit);
     st->clock = text_in(row, &jost_regular_16, C_SEPIA, "");
     show_clock(st);
 

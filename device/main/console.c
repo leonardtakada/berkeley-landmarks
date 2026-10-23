@@ -345,10 +345,14 @@ static void gnss_probe(int every_ms, int order)
 static void print_gnss(void)
 {
     gnss_state_t g = gnss_state();
+    int64_t now = esp_timer_get_time() / 1000;
     printf("OK gnss ok=%d fix=%d q=%d used=%d view=%d hdop=%.1f lat=%.6f lon=%.6f alt=%.0f utc=%s date=%s "
-           "bytes=%u sentences=%u bad=%u first_fix_ms=%lld\n",
+           "bytes=%u sentences=%u bad=%u first_fix_ms=%lld response_age_ms=%lld sentence_age_ms=%lld position_age_ms=%lld\n",
            g.ok, g.fix, g.quality, g.sats_used, g.sats_in_view, g.hdop, g.lat, g.lon, g.alt_m, g.utc, g.date,
-           (unsigned)g.bytes, (unsigned)g.sentences, (unsigned)g.bad, (long long)g.first_fix_ms);
+           (unsigned)g.bytes, (unsigned)g.sentences, (unsigned)g.bad, (long long)g.first_fix_ms,
+           (long long)(g.last_response_ms < 0 ? -1 : now - g.last_response_ms),
+           (long long)(g.last_sentence_ms < 0 ? -1 : now - g.last_sentence_ms),
+           (long long)(g.last_position_ms < 0 ? -1 : now - g.last_position_ms));
 }
 
 static void print_gnss_log(void)

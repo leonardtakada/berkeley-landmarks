@@ -10,6 +10,8 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#define GNSS_STALE_MS 5000
+
 typedef struct {
     bool ok;            /* the module answers on I2C */
     bool fix;
@@ -22,6 +24,9 @@ typedef struct {
     char date[11];      /* yyyy-mm-dd */
     uint32_t bytes, sentences, bad;
     int64_t first_fix_ms; /* since boot, −1 until there is one */
+    int64_t last_sentence_ms; /* checksum-valid sentence, −1 until received */
+    int64_t last_position_ms; /* valid RMC position, −1 until received */
+    int64_t last_response_ms; /* successful I2C answer, −1 until received */
 } gnss_state_t;
 
 /** What was kept from a fix, in flash. */
@@ -37,6 +42,7 @@ bool gnss_start(void);
 
 /** Waits (up to `timeout_ms`) for the module's first words, at its quieter output; true once heard. */
 bool gnss_wait_quiet(uint32_t timeout_ms);
+/** Snapshot; ok and fix expire when their corresponding data is stale. */
 gnss_state_t gnss_state(void);
 
 /** Stops (or restarts) polling, so the module can be probed by hand. */

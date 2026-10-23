@@ -96,9 +96,8 @@ void ui_button(button_t b)
         if (upper) ui_show(SCR_WALKS);
         break;
     case SCR_WALKS:
-        /* Off a walk the lower goes back, except here, where there's nothing behind but the cover: it turns the page. */
         if (upper) ui_show(SCR_FINDING);
-        else screen_walks_turn(1);
+        else ui_show(SCR_COVER);
         break;
     case SCR_FINDING:
         ui_show(upper ? SCR_FOLLOW : SCR_WALKS);

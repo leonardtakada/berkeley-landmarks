@@ -11,6 +11,7 @@ LV_FONT_DECLARE(jost_regular_20);
 LV_FONT_DECLARE(jost_regular_22);
 LV_FONT_DECLARE(jost_medium_18);
 LV_FONT_DECLARE(jost_light_italic_15);
+LV_FONT_DECLARE(jost_light_italic_18);
 LV_FONT_DECLARE(jost_light_25);
 LV_FONT_DECLARE(jost_light_28);
 LV_FONT_DECLARE(jost_light_32);

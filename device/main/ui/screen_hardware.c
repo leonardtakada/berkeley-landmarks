@@ -60,20 +60,20 @@ static void refresh(lv_timer_t *t)
     char a[48], b[48];
 
     gnss_state_t g = gnss_state();
-    if (!on.gnss || !g.ok) {
-        lv_label_set_text(h->gps[0], "No answer from the GPS");
-        lv_label_set_text(h->gps[1], "");
+    bool silent = g.last_sentence_ms < 0 ? now > GNSS_STALE_MS :
+                                         now - g.last_sentence_ms > GNSS_STALE_MS;
+    if (!g.ok) {
+        lv_label_set_text(h->gps[0], "GPS reconnecting");
+        lv_label_set_text(h->gps[1], "Retrying the connection");
         lv_label_set_text(h->gps[2], "");
-    } else if (g.bytes == 0 && now > 10000) {
-        /* Answering but sending nothing: its transmitter has stopped (gnss.c). */
-        lv_label_set_text(h->gps[0], "Connected, but silent");
-        lv_label_set_text(h->gps[1], "Unplug the guide for");
-        lv_label_set_text(h->gps[2], "ten minutes to restart it");
+    } else if (silent) {
+        lv_label_set_text(h->gps[0], "GPS data paused");
+        lv_label_set_text(h->gps[1], "Trying to reconnect");
+        lv_label_set_text(h->gps[2], "");
     } else if (!g.fix) {
         lv_label_set_text_fmt(h->gps[0], "Searching \xC2\xB7 %d in view", g.sats_in_view);
-        mm_ss(a, sizeof a, now);
-        lv_label_set_text_fmt(h->gps[1], "%s since switching on", a);
-        lv_label_set_text_fmt(h->gps[2], "%s", g.utc[0] ? g.utc : "no time yet");
+        lv_label_set_text(h->gps[1], "Take outside, face up");
+        lv_label_set_text(h->gps[2], "Check GPS antenna");
     } else {
         lv_label_set_text_fmt(h->gps[0], "Fix \xC2\xB7 %d of %d \xC2\xB7 HDOP %.1f", g.sats_used, g.sats_in_view, g.hdop);
         lv_label_set_text_fmt(h->gps[1], "%.5f, %.5f", g.lat, g.lon);

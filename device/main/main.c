@@ -25,11 +25,14 @@ void app_main(void)
      * touch set-up can't be allowed between a request and its answer). */
     hw_start_gnss();
     bool quiet = gnss_wait_quiet(4000);
-    if (quiet) board_bus_lock();
+    /* Keep every startup I2C transaction out of the reader's exchanges,
+     * including when it has not answered yet. Install the touch wrapper in
+     * hw_start() before releasing the bus to the GNSS task. */
+    board_bus_lock();
     bsp_display_start();
-    if (quiet) board_bus_unlock();
     bsp_display_brightness_set(70);
     hw_start();
+    board_bus_unlock();
     ESP_LOGI("main", "gnss %s before the display", quiet ? "quietened" : "not quietened");
 
     bsp_display_lock((uint32_t)-1);

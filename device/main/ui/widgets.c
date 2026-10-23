@@ -299,9 +299,9 @@ static void stamp_lettering(lv_obj_t *parent, int32_t d, int32_t radius, bool to
     lv_obj_t *a = lv_arclabel_create(parent);
     lv_obj_remove_flag(a, LV_OBJ_FLAG_CLICKABLE);
     lv_obj_set_size(a, d, d);
-    lv_obj_set_style_text_font(a, &jost_medium_14, 0);
+    lv_obj_set_style_text_font(a, &jost_medium_16, 0);
     lv_obj_set_style_text_color(a, C_VERMILION, 0);
-    lv_obj_set_style_text_letter_space(a, 3, 0);
+    lv_obj_set_style_text_letter_space(a, 2, 0);
     lv_arclabel_set_text(a, s);
     lv_arclabel_set_radius(a, radius);
     lv_arclabel_set_angle_start(a, top ? 180 : 0);

@@ -175,7 +175,7 @@ lv_obj_t *screen_walks(void)
         lv_obj_set_style_outline_opa(dots[k], 180, 0);
     }
     turn_to(scr, ui_walk, 0);
-    ui_hints(scr, 0xFAF6EC, "SET OUT", "NEXT");
+    ui_hints(scr, 0xFAF6EC, "SET OUT", "BACK");
 
     lv_obj_add_event_cb(scr, swiped, LV_EVENT_GESTURE, NULL);
     lv_obj_add_event_cb(scr, forget, LV_EVENT_DELETE, NULL);

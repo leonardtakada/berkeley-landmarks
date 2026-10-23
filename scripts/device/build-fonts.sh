@@ -31,6 +31,7 @@ font jost_regular_20  $JOST/400Regular/Jost_400Regular.ttf             20 $TEXT
 font jost_regular_22  $JOST/400Regular/Jost_400Regular.ttf             22 $TEXT
 font jost_medium_18   $JOST/500Medium/Jost_500Medium.ttf               18 $TEXT
 font jost_light_italic_15 $JOST/300Light_Italic/Jost_300Light_Italic.ttf 15 $TEXT
+font jost_light_italic_18 $JOST/300Light_Italic/Jost_300Light_Italic.ttf 18 $TEXT
 font jost_light_25    $JOST/300Light/Jost_300Light.ttf                 25 $TEXT
 font jost_light_28    $JOST/300Light/Jost_300Light.ttf                 28 $TEXT
 font jost_light_32    $JOST/300Light/Jost_300Light.ttf                 32 $TEXT

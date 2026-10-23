@@ -1,6 +1,7 @@
 #include "sound.h"
 #include <math.h>
 #include <stdint.h>
+#include "board.h"
 #include "bsp/esp-bsp.h"
 #include "esp_log.h"
 #include "freertos/FreeRTOS.h"
@@ -46,7 +47,12 @@ void sound_init(void)
 static void play(const note_t *notes, int n, int ms, int volume)
 {
     xSemaphoreTake(turn, portMAX_DELAY);
-    if (!open_speaker(volume)) {
+    /* Codec setup/volume/close use the same I2C bus as the GPS. The samples
+     * use I2S, so leave the bus free while the sound itself plays. */
+    board_bus_lock();
+    bool opened = open_speaker(volume);
+    board_bus_unlock();
+    if (!opened) {
         xSemaphoreGive(turn);
         return;
     }
@@ -67,7 +73,9 @@ static void play(const note_t *notes, int n, int ms, int volume)
         }
         esp_codec_dev_write(speaker, buf, sizeof buf);
     }
+    board_bus_lock();
     esp_codec_dev_close(speaker);
+    board_bus_unlock();
     xSemaphoreGive(turn);
 }
 
