@@ -119,8 +119,8 @@ and the walk moving on to stop 9 when it ended. The caption still loops the
 stop's opening lines, whoever is speaking.
 
 The existing `assets/tiles.bin` (JPEG, z11–z16, 6.4 MB) shows the pipeline
-works, and since 2026-10-23 the free map uses it as it is (see "On your own:
-the map"). It's baked from OSM raster tiles in the light paper style, though. For
+works (the free map used it for a day before moving to the app's iso city; see
+"On your own: the map"). It's baked from OSM raster tiles in the light paper style, though. For
 the device, re-bake from the vector `berkeley.pmtiles` in a navy/black style
 with a z17 layer, which also avoids bulk-pulling OSM tiles again.
 
@@ -232,29 +232,46 @@ jumps to a stop, `where` says the screen, walk, stop, labels and distance.
 
 ### On your own: the map (2026-10-23)
 
-Not everyone wants a walk. The cover's lower button is now *Map*: the paper
-map with you in the middle of it and every landmark in the guide round about,
-to wander to whichever you like.
+Not everyone wants a walk. The cover's lower button is now *Map*: the
+app's isometric city with you in the middle of it and every landmark in the
+guide round about, to wander to whichever you like.
 
-- **The map is the app's.** `assets/tiles.bin` (the paper style, z11–z16)
-  goes on the card as `tiles.bin` and `tiles.idx` (2,933 tiles, 5.9 MB),
-  packed by `scripts/device/pack-tiles.mjs` from `pack_guide.py`. The app's
-  tiles are progressive JPEGs, which the guide's decoder (`esp_new_jpeg`)
-  can't read, so each is saved again as baseline. `device/main/ui/mapview.c`
-  decodes them as they come into view, to RGB565 in PSRAM, and keeps the last
-  twelve (1.5 MB); the screen holds about 45 fps. The navy re-bake below is
-  still open; the paper reads well on the panel.
-- **North up, centred on you**, following you as you walk; while you're moving
-  (1.5 km/h or more) a vermilion beam shows which way. + and − on the left go
-  between z13 and z16 (scale bar at the foot). Without a fix it opens on
-  downtown (City Hall) and says "Finding you. This is downtown."
+- **The map is the app's iso city.** The guide can't draw vector tiles, so
+  `scripts/device/pack-iso.ts` paints the same scene the app's city map is
+  tiled from (`scripts/iso/scene.ts`: the terraces, streets, every building
+  and tree, the landmarks in vermilion, the plate's cut faces) with the
+  plates' painter, at four zooms (0.19, 0.38, 0.75 and 1.5 px to a metre of
+  the drawing, matching the app's z14 to z17 on a phone for size), names
+  included: the districts far out, the main streets next, every street close
+  in, in Jost Medium caps with a paper halo, joined up from OSM's block-long
+  ways so there's room to letter them and spaced about a screen apart. 2,778
+  baseline JPEGs at 4:4:4 (the vermilion edges stay clean), 37 MB, in
+  `iso.bin` with `iso.idx`, which also carries the projection and the
+  terraces' grid so the guide lifts you and the landmarks onto the terrace
+  they stand on, as the app lifts its pins. Painting takes 15 s;
+  `pack_guide.py` runs it. `device/main/ui/mapview.c` decodes the tiles as
+  they come into view and keeps the last twelve (1.5 MB); the screen holds
+  50 fps. (It first used the app's flat paper tiles; those went.)
+- **Seen from the south-west, north up to the left, centred on you**,
+  following you as you walk; while you're moving (1.5 km/h or more) a
+  vermilion beam shows which way, turned onto the drawing. + and − on the
+  left go between the zooms; it opens on the third, a few blocks either way.
+  No scale bar: an isometric drawing has none that holds in every direction,
+  and the slip gives the distance. Without a fix it opens on downtown (City
+  Hall) and says "Finding you. This is downtown."
 - **Every landmark**: all 392 in `data/landmarks.ts`, exported by
   `export-walks.ts` into `device/main/ui/landmarks_gen.c` with where each is,
   its architect and year, and, for the 77 with a story on the card, who tells
-  it. The storied ones are ringed in blue.
-- **Tap one** and the slip at the top names it with how far it is ("210 m ·
-  3 min", at 80 m a minute). The upper button (*GO*) draws a dashed vermilion
-  leg from you to it and the slip says *On the way*; *Stop* drops it.
+  it. Each dot is rimmed in paper so it stands off the drawing and its blue
+  trees; the storied ones are ringed in blue besides.
+- **Tap one**, or near one: the nearest landmark within 40 px of the tap is
+  taken, so a fingertip needn't land on a 12 px dot. The slip at the top names it with how far it is ("210 m ·
+  3 min", at 80 m a minute). The upper button (*GO*), or a tap on the slip
+  itself, draws a dashed vermilion leg from you to it and the slip says *On
+  the way*; *Stop* (or the slip again) drops it. The slip came in after the
+  touch log showed a tap on it once something was picked: it's the biggest
+  thing on the screen to aim at, and it lights blue-tint while pressed. With
+  nothing picked, or at the door, a tap on it does nothing.
 - **At the door** (25 m) the guide chimes. A storied landmark is told three
   seconds later on the narration screens, kicker *On your own*, both buttons
   back to the map (*Done*, *Map*), and the map then waits for the next pick.
@@ -271,8 +288,21 @@ picking the Berkeley Public Library from 210 m, going, the leg and beam
 following the pretend position, the chime at the door, Plachek's story from
 the card three seconds later, *Map* back to the map with nothing picked; and
 the Downtown YMCA (no story) giving "Benjamin G. McDougall · 1910" at the
-door. Not yet tried outdoors with a real fix. The walk's own Map is still the
-schematic one and could move onto the same tiles.
+door. On the iso map: a tap 24 px off the Shattuck Hotel's dot took it, a
+tap past the edge of + zoomed, the beam turned onto the drawing toward it,
+and its story played at the door; and on the guide's first real fix (indoors,
+6 satellites) the map followed it onto the hill terraces. Not yet walked
+outdoors. The walk's own Map is still the schematic one and could move onto
+the same tiles.
+
+**Touch targets (2026-10-23).** The panel is about 266 px to the inch, so a
+fingertip covers about 100 px and a 52 px button is 5 mm of glass. Targets
+now reach past what's drawn (`lv_obj_set_ext_click_area`): the rim tabs by
+18 px (68 px tall to the finger), the map's + and − (64 px now, further
+apart) by 16, the walks' chevrons by 16, the Follow map button and the
+volume buttons by 14, the narration's pause and "15" by 10. `touches` on the
+console lists the last twelve real touches: where, on what screen, what they
+landed on (its box) and whether they took, so misses can be seen.
 
 ### Motion and the companion (2026-10-21, second pass)
 

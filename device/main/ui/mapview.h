@@ -1,16 +1,20 @@
 /**
- * The paper map, from the card: the app's tiles (scripts/bake_vector.mjs),
- * packed by scripts/narration/pack_guide.py into /sdcard/guide/tiles.bin with
- * tiles.idx. 256 px JPEGs, web Mercator, zooms 11–16, decoded as they come into
- * view and the last dozen kept. North up; laid behind whatever the screen puts
- * on it. Without the tiles on the card it's plain paper.
+ * The city map, isometric, as the app shows it: Berkeley seen from the
+ * south-west and above (lib/iso.ts), painted by scripts/device/pack-iso.ts
+ * and packed by scripts/narration/pack_guide.py into /sdcard/guide/iso.bin
+ * with iso.idx. Four zooms of 256 px JPEGs, decoded as they come into view
+ * and the last dozen kept; places are lifted onto the terraces they stand
+ * on, as the app lifts its pins. Laid behind whatever the screen puts on it.
+ * Without the tiles on the card it's plain paper, with places still where
+ * they'd be.
  */
 #pragma once
 #include <stdbool.h>
 #include "lvgl.h"
 
-#define MAPVIEW_ZOOM_MIN 13
-#define MAPVIEW_ZOOM_MAX 16
+/* The zooms, far to near: 0.19, 0.38, 0.75 and 1.5 px to a metre of the drawing. */
+#define MAPVIEW_ZOOM_MIN 0
+#define MAPVIEW_ZOOM_MAX 3
 
 typedef struct mapview mapview_t;
 
@@ -20,11 +24,11 @@ mapview_t *mapview_create(lv_obj_t *parent);
 /** Centres the map on (lat, lon) at `zoom`, bringing in the tiles that show. */
 void mapview_set(mapview_t *m, double lat, double lon, int zoom);
 
-/** Where (lat, lon) falls on the screen, in px. */
+/** Where (lat, lon) falls on the screen, in px, standing on its terrace. */
 void mapview_project(const mapview_t *m, double lat, double lon, float *x, float *y);
 
-/** Metres to a pixel at the map's centre. */
-float mapview_metres_per_px(const mapview_t *m);
+/** The way a compass bearing runs across the screen, as a unit step in px. */
+void mapview_direction(float bearing, float *dx, float *dy);
 
 /** True if the card has the tiles. */
 bool mapview_has_tiles(void);

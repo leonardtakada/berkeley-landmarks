@@ -129,6 +129,7 @@ lv_obj_t *screen_follow(void)
     lv_obj_set_style_bg_opa(map, pal.chip_opa, 0);
     lv_obj_center(map_mark(map, pal.mark));
     lv_obj_add_flag(map, LV_OBJ_FLAG_CLICKABLE);
+    lv_obj_set_ext_click_area(map, 14);
     lv_obj_add_event_cb(map, ui_go, LV_EVENT_CLICKED, UI_GO(SCR_MAP));
 
     /* The host says where you're going, and who'll tell it. */

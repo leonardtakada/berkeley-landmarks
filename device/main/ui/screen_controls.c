@@ -131,6 +131,7 @@ static lv_obj_t *bar(lv_obj_t *parent, int32_t w, int32_t h)
 static lv_obj_t *volume_button(lv_obj_t *parent, int32_t x, int dir)
 {
     lv_obj_t *b = ringed(parent, x, 32, 60, 60);
+    lv_obj_set_ext_click_area(b, 14);
     bar(b, 16, 3);
     if (dir > 0) bar(b, 3, 16);
     lv_obj_add_event_cb(b, louder, LV_EVENT_CLICKED, (void *)(intptr_t)dir);

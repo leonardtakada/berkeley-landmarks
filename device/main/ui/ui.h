@@ -71,6 +71,10 @@ void ui_button(button_t b);
  */
 lv_obj_t *ui_hints(lv_obj_t *scr, uint32_t ground, const char *upper, const char *lower); /* returns the upper tab */
 
+/** Keeps the last touches of the screen, for the console's `touches`: where, on what, and whether it took. */
+void ui_watch_touches(void);
+void ui_print_touches(void);
+
 /* Moving through a walk, for the screens' own taps as well as the buttons. */
 void ui_arrive(void);         /* at the stop: its label, then its narration */
 void ui_listen(void);         /* the stop's narration */

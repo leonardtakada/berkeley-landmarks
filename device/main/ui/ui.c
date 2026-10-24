@@ -120,6 +120,7 @@ const char *ui_current_name(void)
 
 void ui_init(void)
 {
+    ui_watch_touches();
     lv_obj_t *scr = screen_cover();
     current_scr = scr;
     lv_screen_load(scr);

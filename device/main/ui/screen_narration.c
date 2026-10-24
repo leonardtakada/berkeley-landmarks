@@ -234,6 +234,7 @@ static lv_obj_t *play_button(lv_obj_t *scr, narration_state_t *st, bool dark)
     lv_color_t ink = dark ? C_BLUE : C_CREAM;
     lv_obj_t *b = disc(scr, 28, 168, 64, dark ? C_CREAM : C_BLUE);
     lv_obj_add_flag(b, LV_OBJ_FLAG_CLICKABLE);
+    lv_obj_set_ext_click_area(b, 10); /* the fingertip's reach: the "15" above shares the gap between them */
     lv_obj_set_style_shadow_width(b, 10, 0);
     lv_obj_set_style_shadow_offset_y(b, 4, 0);
     lv_obj_set_style_shadow_color(b, lv_color_hex(0x1E1810), 0);
@@ -260,7 +261,7 @@ static lv_obj_t *back_button(lv_obj_t *scr, narration_state_t *st, bool dark)
 {
     lv_obj_t *b = disc(scr, 44, 104, 56, dark ? C_CREAM : C_BLUE);
     lv_obj_add_flag(b, LV_OBJ_FLAG_CLICKABLE);
-    lv_obj_set_ext_click_area(b, 4);
+    lv_obj_set_ext_click_area(b, 10);
     lv_obj_t *c = chevron(b, false, dark ? C_BLUE : C_CREAM);
     lv_obj_align(c, LV_ALIGN_CENTER, -13, 0);
     lv_obj_t *l = text_in(b, &jost_medium_18, dark ? C_BLUE : C_CREAM, "15");

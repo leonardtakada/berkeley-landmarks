@@ -146,7 +146,7 @@ static lv_obj_t *side_button(lv_obj_t *scr, int32_t x, int dir)
     lv_obj_t *b = disc(scr, x, 209, 48, C_SLIP);
     lv_obj_set_style_bg_opa(b, 230, 0);
     lv_obj_add_flag(b, LV_OBJ_FLAG_CLICKABLE);
-    lv_obj_set_ext_click_area(b, 8);
+    lv_obj_set_ext_click_area(b, 16);
     lv_obj_center(chevron(b, dir > 0, C_BLUE));
     lv_obj_add_event_cb(b, side_clicked, LV_EVENT_CLICKED, (void *)(intptr_t)dir);
     return b;

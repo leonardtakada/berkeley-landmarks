@@ -653,6 +653,10 @@ static void run(char *cmd)
         printf("OK\n");
     } else if (strcmp(cmd, "buttons") == 0) {
         buttons_print();
+    } else if (strcmp(cmd, "touches") == 0) {
+        bsp_display_lock(LOCK_FOREVER);
+        ui_print_touches();
+        bsp_display_unlock();
     } else if (strcmp(cmd, "button") == 0 && arg) {
         /* As if a side button were pressed: upper, lower, or hold (the lower, held). */
         button_t b = strcmp(arg, "upper") == 0 ? BTN_UPPER : strcmp(arg, "lower") == 0 ? BTN_LOWER : BTN_LOWER_HELD;

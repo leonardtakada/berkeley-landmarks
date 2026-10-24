@@ -1,9 +1,11 @@
 /**
- * On your own: the paper map with you in the middle of it and every landmark
- * in the guide round about. Tap one and the slip at the top names it with how
- * far it is; the upper button goes there, drawing your way, and at its door
- * the guide tells it (the ringed ones have a story on the card) or gives its
- * architect and year. North up, following you as you walk; + and − to see
+ * On your own: the city map, isometric as in the app, with you in the middle
+ * of it and every landmark in the guide round about. Tap one (or near one: the
+ * nearest within reach is taken) and the slip at the top names it with how far
+ * it is; the upper button, or a tap on the slip, goes there (and stops),
+ * drawing your way, and at its door the guide tells it (the ringed ones have
+ * a story on the card) or gives its architect and year. Seen from the
+ * south-west, north up to the left, following you as you walk; + and − to see
  * more or less of town. Without a fix it says so and shows downtown. The
  * lower button goes back.
  */
@@ -26,12 +28,13 @@
 #define TICK_MS 1000
 #define DOOR_MS 3000 /* the door holds this long before the story */
 #define CENTRE (SCREEN_W / 2)
+#define PICK_PX 40 /* a tap takes the nearest landmark this close: a fingertip is ~100 px here */
 /* Berkeley City Hall: where the map opens without a fix. */
 #define DOWNTOWN_LAT 37.869220
 #define DOWNTOWN_LON -122.273306
 
-/* Kept between visits: how close in, and the landmark picked (−1 none). */
-static int zoom = MAPVIEW_ZOOM_MAX;
+/* Kept between visits: how close in (a few blocks either way to start), and the landmark picked (−1 none). */
+static int zoom = MAPVIEW_ZOOM_MAX - 1;
 static int picked = -1;
 static bool going, at_door;
 
@@ -40,7 +43,7 @@ typedef struct {
     mapview_t *map;
     lv_obj_t *dots; /* the landmarks, laid out afresh when the map moves */
     lv_obj_t *you, *wedge, *leg, *go;
-    lv_obj_t *kick, *name, *meta, *note, *scale, *scale_label;
+    lv_obj_t *kick, *name, *meta, *note;
     lv_timer_t *timer;
     double lat, lon; /* the map's centre */
     int laid_zoom;
@@ -97,10 +100,21 @@ static void show_slip(const position_t *p)
 
 static void refresh(bool relay);
 
-static void dot_tapped(lv_event_t *e)
+/** A tap on the map: the landmark nearest it, if one's within reach. */
+static void map_tapped(lv_event_t *e)
 {
-    int i = (int)(intptr_t)lv_event_get_user_data(e);
-    if (i == picked) return;
+    (void)e;
+    lv_point_t at;
+    lv_indev_get_point(lv_indev_active(), &at);
+    int i = -1;
+    float best = PICK_PX * PICK_PX;
+    for (int k = 0; k < landmark_count; k++) {
+        float x, y;
+        mapview_project(ex->map, lat_of(&landmarks[k]), lon_of(&landmarks[k]), &x, &y);
+        float d = (x - at.x) * (x - at.x) + (y - at.y) * (y - at.y);
+        if (d < best) best = d, i = k;
+    }
+    if (i < 0 || i == picked) return;
     picked = i;
     going = at_door = false;
     refresh(true);
@@ -116,26 +130,23 @@ static void lay_dots(void)
         float dx = x - CENTRE, dy = y - CENTRE;
         if (dx * dx + dy * dy > 236.0f * 236.0f) continue;
         bool story = l->caption != NULL, chosen = i == picked;
-        /* A story: a dot ringed in its own blue with paper between. The one picked: vermilion. */
-        int d = chosen ? 22 : story ? 12 : 11;
+        /* Each dot rimmed in paper, so it stands off the drawing (and the blue trees). A story:
+         * ringed in its own blue besides. The one picked: vermilion. */
+        int d = chosen ? 24 : story ? 16 : 12;
         lv_obj_t *dot = disc(ex->dots, (int32_t)x - d / 2, (int32_t)y - d / 2, d, chosen ? C_VERMILION : C_BLUE);
+        lv_obj_set_style_border_width(dot, story || chosen ? 3 : 2, 0);
+        lv_obj_set_style_border_color(dot, C_SLIP, 0);
         if (story || chosen) {
             lv_obj_set_style_outline_width(dot, chosen ? 3 : 2, 0);
-            lv_obj_set_style_outline_pad(dot, chosen ? 3 : 2, 0);
             lv_obj_set_style_outline_color(dot, chosen ? C_VERMILION : C_BLUE, 0);
             lv_obj_set_style_outline_opa(dot, LV_OPA_COVER, 0);
-        } else {
-            lv_obj_set_style_bg_opa(dot, 170, 0);
         }
-        lv_obj_add_flag(dot, LV_OBJ_FLAG_CLICKABLE);
-        lv_obj_set_ext_click_area(dot, chosen ? 6 : 10);
-        lv_obj_add_event_cb(dot, dot_tapped, LV_EVENT_CLICKED, (void *)(intptr_t)i);
     }
 }
 
 /* --- You ------------------------------------------------------------------------------ */
 
-/* The way you're heading: a wedge from the mark, turned to your course. */
+/* The way you're heading: a wedge from the mark, turned to your course as it runs across the drawing. */
 static void wedge_draw(lv_event_t *e)
 {
     lv_obj_t *o = lv_event_get_current_target_obj(e);
@@ -143,15 +154,16 @@ static void wedge_draw(lv_event_t *e)
     lv_area_t a;
     lv_obj_get_coords(o, &a);
     float cx = (a.x1 + a.x2 + 1) / 2.0f, cy = (a.y1 + a.y2 + 1) / 2.0f;
-    float r = (float)deg * 3.14159265f / 180.0f, c = cosf(r), s = sinf(r);
-    static const float pts[3][2] = {{-15, -40}, {15, -40}, {0, -8}};
+    static const float pts[3][2] = {{-20, 40}, {20, 40}, {0, 8}}; /* degrees off the course, px out */
     lv_draw_triangle_dsc_t t;
     lv_draw_triangle_dsc_init(&t);
     t.color = C_VERMILION;
-    t.opa = LV_OPA_60;
+    t.opa = LV_OPA_80; /* strong enough to read over the drawing's own vermilion */
     for (int i = 0; i < 3; i++) {
-        t.p[i].x = cx + pts[i][0] * c - pts[i][1] * s;
-        t.p[i].y = cy + pts[i][0] * s + pts[i][1] * c;
+        float dx, dy;
+        mapview_direction((float)deg + pts[i][0], &dx, &dy);
+        t.p[i].x = cx + dx * pts[i][1];
+        t.p[i].y = cy + dy * pts[i][1];
     }
     lv_draw_triangle(lv_event_get_layer(e), &t);
 }
@@ -169,23 +181,6 @@ static lv_obj_t *you_mark(lv_obj_t *scr)
     lv_obj_set_style_border_color(ring, C_VERMILION, 0);
     disc(you, 50, 50, 10, C_VERMILION);
     return you;
-}
-
-/* --- The scale ---------------------------------------------------------------------------- */
-
-static void show_scale(void)
-{
-    static const int steps[] = {50, 100, 200, 500, 1000, 2000};
-    float mpp = mapview_metres_per_px(ex->map);
-    int metres = steps[0];
-    for (unsigned i = 0; i < sizeof steps / sizeof steps[0]; i++) {
-        if (steps[i] / mpp <= 110) metres = steps[i];
-    }
-    int px = (int)(metres / mpp);
-    lv_obj_set_width(ex->scale, px);
-    lv_obj_set_x(ex->scale, CENTRE - px / 2);
-    if (metres < 1000) lv_label_set_text_fmt(ex->scale_label, "%d m", metres);
-    else lv_label_set_text_fmt(ex->scale_label, "%d km", metres / 1000);
 }
 
 /* --- Going, and getting there ---------------------------------------------------------------- */
@@ -212,10 +207,17 @@ static void arrive(void)
 
 void explore_go(void)
 {
-    if (!ex || !picked_landmark()) return;
+    /* Nothing picked, or already at its door (where GO isn't offered): nowhere to go. */
+    if (!ex || !picked_landmark() || at_door) return;
     going = !going;
-    at_door = false;
     refresh(true);
+}
+
+/* The slip is the biggest thing on the screen to aim at: a tap on it is the upper button. */
+static void slip_tapped(lv_event_t *e)
+{
+    (void)e;
+    explore_go();
 }
 
 static void show_go(void)
@@ -241,7 +243,6 @@ static void refresh(bool relay)
         ex->lat = lat, ex->lon = lon;
         ex->laid_zoom = zoom;
         lay_dots();
-        show_scale();
     }
 
     if (p.known) lv_obj_remove_flag(ex->you, LV_OBJ_FLAG_HIDDEN);
@@ -295,19 +296,20 @@ static void zoom_by(lv_event_t *e)
     refresh(true);
 }
 
+/* 64 px across, and taken 16 px beyond that: about 9 mm of glass, near enough a fingertip. */
 static lv_obj_t *zoom_button(lv_obj_t *scr, int32_t y, int dir)
 {
-    lv_obj_t *b = disc(scr, 22, y, 52, C_SLIP);
+    lv_obj_t *b = disc(scr, 16, y, 64, C_SLIP);
     lv_obj_set_style_border_width(b, 2, 0);
     lv_obj_set_style_border_color(b, C_BLUE, 0);
     lv_obj_add_flag(b, LV_OBJ_FLAG_CLICKABLE);
-    lv_obj_set_ext_click_area(b, 6);
-    lv_obj_t *bar = box(b, 0, 0, 18, 3);
+    lv_obj_set_ext_click_area(b, 16);
+    lv_obj_t *bar = box(b, 0, 0, 22, 4);
     lv_obj_set_style_bg_color(bar, C_BLUE, 0);
     lv_obj_set_style_bg_opa(bar, LV_OPA_COVER, 0);
     lv_obj_center(bar);
     if (dir > 0) {
-        lv_obj_t *up = box(b, 0, 0, 3, 18);
+        lv_obj_t *up = box(b, 0, 0, 4, 22);
         lv_obj_set_style_bg_color(up, C_BLUE, 0);
         lv_obj_set_style_bg_opa(up, LV_OPA_COVER, 0);
         lv_obj_center(up);
@@ -345,10 +347,15 @@ lv_obj_t *screen_explore(void)
     lv_obj_add_flag(x->leg, LV_OBJ_FLAG_HIDDEN);
 
     x->dots = box(scr, 0, 0, SCREEN_W, SCREEN_H);
+    lv_obj_add_flag(x->dots, LV_OBJ_FLAG_CLICKABLE);
+    lv_obj_add_event_cb(x->dots, map_tapped, LV_EVENT_CLICKED, NULL);
     x->you = you_mark(scr);
 
     /* The slip at the top: what's picked, and how far. */
     lv_obj_t *s = slip(scr, 103, 36, 260, LV_SIZE_CONTENT);
+    lv_obj_add_flag(s, LV_OBJ_FLAG_CLICKABLE);
+    lv_obj_set_style_bg_color(s, C_BLUE_TINT, LV_STATE_PRESSED);
+    lv_obj_add_event_cb(s, slip_tapped, LV_EVENT_CLICKED, NULL);
     lv_obj_set_style_pad_ver(s, 7, 0);
     lv_obj_set_style_pad_row(s, 1, 0);
     lv_obj_set_flex_flow(s, LV_FLEX_FLOW_COLUMN);
@@ -364,19 +371,10 @@ lv_obj_t *screen_explore(void)
     lv_obj_set_style_text_align(x->meta, LV_TEXT_ALIGN_CENTER, 0);
     lv_label_set_long_mode(x->meta, LV_LABEL_LONG_MODE_DOTS);
 
-    zoom_button(scr, 178, 1);
-    zoom_button(scr, 244, -1);
+    zoom_button(scr, 150, 1);
+    zoom_button(scr, 262, -1);
 
-    /* The scale, and a note while there's no fix. */
-    x->scale = box(scr, CENTRE, 404, 100, 3);
-    lv_obj_set_style_bg_color(x->scale, C_BLUE, 0);
-    lv_obj_set_style_bg_opa(x->scale, LV_OPA_COVER, 0);
-    x->scale_label = line_centered(scr, &jost_medium_14, C_BLUE, 380, "");
-    /* Paper behind the figure, so the street names under it don't run into it. */
-    lv_obj_set_style_bg_color(x->scale_label, C_PAPER, 0);
-    lv_obj_set_style_bg_opa(x->scale_label, LV_OPA_80, 0);
-    lv_obj_set_style_pad_hor(x->scale_label, 6, 0);
-    lv_obj_set_style_radius(x->scale_label, 4, 0);
+    /* A note while there's no fix. */
     x->note = slip(scr, 133, 296, 200, LV_SIZE_CONTENT);
     lv_obj_set_style_pad_ver(x->note, 6, 0);
     lv_obj_t *n = text_in(x->note, &jost_regular_15, C_CHARCOAL, "Finding you. This is downtown.");

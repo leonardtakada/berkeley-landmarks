@@ -1,8 +1,10 @@
 /**
  * Getting about: what the two side buttons do on each screen, the tabs that
  * say so beside them, and the moves through a walk that the buttons and the
- * screens' own taps share.
+ * screens' own taps share. And a log of the last touches, for the console.
  */
+#include <stdio.h>
+#include "bsp/esp-bsp.h"
 #include "ui.h"
 #include "theme.h"
 #include "walk.h"
@@ -183,7 +185,7 @@ static lv_obj_t *tab(lv_obj_t *scr, bool dark, button_t b, const char *s)
     lv_obj_set_style_text_letter_space(l, 2, 0);
     lv_obj_align(t, LV_ALIGN_TOP_RIGHT, TAB_RIGHT - SCREEN_W, (upper ? UPPER_CY : LOWER_CY) - TAB_H / 2);
     lv_obj_add_flag(t, LV_OBJ_FLAG_CLICKABLE);
-    lv_obj_set_ext_click_area(t, 10);
+    lv_obj_set_ext_click_area(t, 18); /* 68 px tall to the finger, about 6.5 mm */
     lv_obj_add_event_cb(t, tab_tapped, LV_EVENT_CLICKED, (void *)(intptr_t)b);
     return t;
 }
@@ -194,4 +196,58 @@ lv_obj_t *ui_hints(lv_obj_t *scr, uint32_t ground, const char *upper, const char
     lv_obj_t *t = upper ? tab(scr, dark, BTN_UPPER, upper) : NULL;
     if (lower) tab(scr, dark, BTN_LOWER, lower);
     return t;
+}
+
+/* --- The last touches, for the console (`touches`) ------------------------------- */
+
+#define TOUCHES 12
+
+static struct {
+    uint32_t at_ms;
+    int16_t x, y;
+    const char *scr;
+    bool on;         /* landed on something that takes a tap */
+    lv_area_t thing; /* that thing, as drawn */
+    bool clicked;    /* and let go on it */
+} touches[TOUCHES];
+static int touched_n;
+
+static void touched(lv_event_t *e)
+{
+    lv_obj_t *obj = lv_event_get_param(e);
+    if (lv_event_get_code(e) == LV_EVENT_CLICKED) {
+        if (touched_n) touches[(touched_n - 1) % TOUCHES].clicked = true;
+        return;
+    }
+    lv_point_t p;
+    lv_indev_get_point(lv_indev_active(), &p);
+    typeof(touches[0]) *t = &touches[touched_n++ % TOUCHES];
+    *t = (typeof(touches[0])){.at_ms = lv_tick_get(), .x = (int16_t)p.x, .y = (int16_t)p.y, .scr = ui_current_name()};
+    t->on = obj && obj != lv_screen_active();
+    if (t->on) lv_obj_get_coords(obj, &t->thing);
+}
+
+void ui_watch_touches(void)
+{
+    lv_indev_t *touch = bsp_display_get_input_dev();
+    if (!touch) return;
+    lv_indev_add_event_cb(touch, touched, LV_EVENT_PRESSED, NULL);
+    lv_indev_add_event_cb(touch, touched, LV_EVENT_CLICKED, NULL);
+}
+
+void ui_print_touches(void)
+{
+    uint32_t now = lv_tick_get();
+    printf("OK touches=%d", touched_n);
+    for (int i = LV_MAX(0, touched_n - TOUCHES); i < touched_n; i++) {
+        const typeof(touches[0]) *t = &touches[i % TOUCHES];
+        printf(" %d,%d@-%lus/%s", t->x, t->y, (unsigned long)((now - t->at_ms) / 1000), t->scr);
+        if (t->on) {
+            printf("/on[%ld,%ld-%ld,%ld]%s", (long)t->thing.x1, (long)t->thing.y1, (long)t->thing.x2, (long)t->thing.y2,
+                   t->clicked ? "" : "/slid");
+        } else {
+            printf("/nothing");
+        }
+    }
+    printf("\n");
 }

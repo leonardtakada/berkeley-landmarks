@@ -16,42 +16,84 @@
 #define CACHE 12 /* decoded tiles kept, 128 KB each in PSRAM */
 #define SHOWN 9  /* at most 3 × 3 tiles cover the 466 px screen */
 
-/* --- The tiles on the card ------------------------------------------------------ */
+/* --- The drawing, and its tiles on the card ----------------------------------------- */
 
 typedef struct {
     uint16_t z, x, y, pad;
     uint32_t off, len;
 } tile_entry_t;
 
+typedef struct {
+    float scale; /* px to a metre of the drawing */
+    uint16_t cols, rows;
+} zoom_t;
+
+/* lib/iso.ts and scripts/device/pack-iso.ts, as iso.idx gives them; these until it's read. */
+static struct {
+    double lat0, lon0, m_lat, m_lon; /* the origin, and metres to a degree */
+    double x0, y0;                   /* the drawing's top-left, metres of the drawing */
+    uint32_t zooms;
+    zoom_t zoom[MAPVIEW_ZOOM_MAX + 1];
+    float u0, v0, cell, level_m, shore; /* the terraces' grid (lib/iso-map.ts) */
+    uint16_t cols, rows;
+    int8_t *levels; /* NULL: all at sea level */
+} d = {
+    .lat0 = 37.87, .lon0 = -122.27, .m_lat = 110950, .m_lon = 87890.4,
+    .zooms = 4, .zoom = {{0.1875f}, {0.375f}, {0.75f}, {1.5f}},
+};
+
 static tile_entry_t *entries;
 static uint32_t entry_count;
 static FILE *bin;
 static bool looked; /* tried the card once it was mounted */
+
+static bool read_index(FILE *f)
+{
+    char magic[4];
+    double head[6];
+    if (fread(magic, 1, 4, f) != 4 || memcmp(magic, "ISO1", 4) != 0 || fread(head, sizeof head, 1, f) != 1) return false;
+    uint32_t zooms;
+    if (fread(&zooms, 4, 1, f) != 1 || zooms != MAPVIEW_ZOOM_MAX + 1) return false;
+    if (fread(d.zoom, sizeof(zoom_t), zooms, f) != zooms) return false;
+    float terraces[5];
+    uint16_t size[2];
+    if (fread(terraces, sizeof terraces, 1, f) != 1 || fread(size, sizeof size, 1, f) != 1) return false;
+    int8_t *levels = heap_caps_malloc((size_t)size[0] * size[1], MALLOC_CAP_SPIRAM);
+    uint32_t n = 0;
+    if (!levels || fread(levels, size[0], size[1], f) != size[1] || fread(&n, 4, 1, f) != 1) {
+        heap_caps_free(levels);
+        return false;
+    }
+    tile_entry_t *e = heap_caps_malloc(n * sizeof(tile_entry_t), MALLOC_CAP_SPIRAM);
+    if (!e || fread(e, sizeof(tile_entry_t), n, f) != n) {
+        heap_caps_free(levels);
+        heap_caps_free(e);
+        return false;
+    }
+    d.lat0 = head[0], d.lon0 = head[1], d.m_lat = head[2], d.m_lon = head[3], d.x0 = head[4], d.y0 = head[5];
+    d.zooms = zooms;
+    d.u0 = terraces[0], d.v0 = terraces[1], d.cell = terraces[2], d.level_m = terraces[3], d.shore = terraces[4];
+    d.cols = size[0], d.rows = size[1];
+    d.levels = levels;
+    entries = e;
+    entry_count = n;
+    return true;
+}
 
 static bool open_tiles(void)
 {
     if (entries) return true;
     if (looked || !card_state().mounted) return false;
     looked = true;
-    FILE *f = fopen(PLAYER_DIR "/tiles.idx", "rb");
-    char magic[4];
-    uint32_t n = 0;
-    if (!f || fread(magic, 1, 4, f) != 4 || memcmp(magic, "TIDX", 4) != 0 || fread(&n, 4, 1, f) != 1) {
-        if (f) fclose(f);
-        ESP_LOGW(TAG, "no tiles on the card");
+    FILE *f = fopen(PLAYER_DIR "/iso.idx", "rb");
+    bool ok = f && read_index(f);
+    if (f) fclose(f);
+    if (!ok) {
+        ESP_LOGW(TAG, "no map on the card");
         return false;
     }
-    entries = heap_caps_malloc(n * sizeof(tile_entry_t), MALLOC_CAP_SPIRAM);
-    if (!entries || fread(entries, sizeof(tile_entry_t), n, f) != n) {
-        heap_caps_free(entries);
-        entries = NULL;
-        fclose(f);
-        return false;
-    }
-    fclose(f);
-    entry_count = n;
-    bin = fopen(PLAYER_DIR "/tiles.bin", "rb");
-    ESP_LOGI(TAG, "%lu tiles on the card", (unsigned long)n);
+    bin = fopen(PLAYER_DIR "/iso.bin", "rb");
+    ESP_LOGI(TAG, "%lu tiles on the card", (unsigned long)entry_count);
     return bin != NULL;
 }
 
@@ -163,18 +205,29 @@ struct mapview {
     lv_obj_t *layer;
     lv_obj_t *images[SHOWN];
     int zoom;
-    double cx, cy; /* the centre, in world px at the zoom */
+    double cx, cy; /* the centre, in px of the zoom's tiles */
 };
 
-static double world_x(double lon, int z)
+#define COS30 0.86602540378
+
+/** How high the terrace under (u, v) stands, metres of the drawing; the Bay and the shore at 0. */
+static double terrace(double u, double v)
 {
-    return (lon + 180.0) / 360.0 * TILE * (double)(1 << z);
+    if (!d.levels) return 0;
+    long c = lround((u - d.u0) / d.cell), r = lround((v - d.v0) / d.cell);
+    if (c < 0 || r < 0 || c >= d.cols || r >= d.rows) return 0;
+    int level = d.levels[r * d.cols + c];
+    double z = level < 0 ? d.shore : level * d.level_m;
+    return z > 0 ? z : 0;
 }
 
-static double world_y(double lat, int z)
+/** (lat, lon), `above` metres over its terrace, in px of the zoom's tiles. */
+static void on_drawing(double lat, double lon, double above, int zoom, double *px, double *py)
 {
-    double r = lat * M_PI / 180.0;
-    return (1.0 - log(tan(r) + 1.0 / cos(r)) / M_PI) / 2.0 * TILE * (double)(1 << z);
+    double u = (lon - d.lon0) * d.m_lon, v = (lat - d.lat0) * d.m_lat;
+    double x = (u - v) * COS30, y = (u + v) * 0.5 + terrace(u, v) + above;
+    *px = (x - d.x0) * d.zoom[zoom].scale;
+    *py = (d.y0 - y) * d.zoom[zoom].scale;
 }
 
 static void freed(lv_event_t *e)
@@ -199,17 +252,18 @@ mapview_t *mapview_create(lv_obj_t *parent)
 
 void mapview_set(mapview_t *m, double lat, double lon, int zoom)
 {
-    m->zoom = zoom;
-    m->cx = world_x(lon, zoom), m->cy = world_y(lat, zoom);
+    open_tiles(); /* for the terraces */
+    m->zoom = LV_CLAMP(0, zoom, (int)d.zooms - 1);
+    on_drawing(lat, lon, 0, m->zoom, &m->cx, &m->cy);
     int tx0 = (int)floor((m->cx - SCREEN_W / 2.0) / TILE), ty0 = (int)floor((m->cy - SCREEN_H / 2.0) / TILE);
     int k = 0;
     for (int ty = ty0; ty <= ty0 + 2; ty++) {
         for (int tx = tx0; tx <= tx0 + 2; tx++) {
             int sx = (int)lround(tx * TILE - m->cx + SCREEN_W / 2.0), sy = (int)lround(ty * TILE - m->cy + SCREEN_H / 2.0);
-            if (sx >= SCREEN_W || sy >= SCREEN_H || sx + TILE <= 0 || sy + TILE <= 0) continue;
-            const lv_image_dsc_t *d = tile(zoom, tx, ty);
-            if (!d || k >= SHOWN) continue;
-            lv_image_set_src(m->images[k], d);
+            if (sx >= SCREEN_W || sy >= SCREEN_H || sx + TILE <= 0 || sy + TILE <= 0 || tx < 0 || ty < 0) continue;
+            const lv_image_dsc_t *t = tile(m->zoom, tx, ty);
+            if (!t || k >= SHOWN) continue;
+            lv_image_set_src(m->images[k], t);
             lv_obj_set_pos(m->images[k], sx, sy);
             lv_obj_remove_flag(m->images[k], LV_OBJ_FLAG_HIDDEN);
             k++;
@@ -220,12 +274,16 @@ void mapview_set(mapview_t *m, double lat, double lon, int zoom)
 
 void mapview_project(const mapview_t *m, double lat, double lon, float *x, float *y)
 {
-    *x = (float)(world_x(lon, m->zoom) - m->cx + SCREEN_W / 2.0);
-    *y = (float)(world_y(lat, m->zoom) - m->cy + SCREEN_H / 2.0);
+    double px, py;
+    on_drawing(lat, lon, 1, m->zoom, &px, &py);
+    *x = (float)(px - m->cx + SCREEN_W / 2.0);
+    *y = (float)(py - m->cy + SCREEN_H / 2.0);
 }
 
-float mapview_metres_per_px(const mapview_t *m)
+void mapview_direction(float bearing, float *dx, float *dy)
 {
-    double lat = atan(sinh(M_PI * (1.0 - 2.0 * m->cy / (TILE * (double)(1 << m->zoom)))));
-    return (float)(156543.03392 * cos(lat) / (double)(1 << m->zoom));
+    double b = bearing * M_PI / 180.0, u = sin(b), v = cos(b);
+    double x = (u - v) * COS30, y = (u + v) * 0.5, n = hypot(x, y);
+    *dx = (float)(x / n);
+    *dy = (float)(-y / n);
 }
