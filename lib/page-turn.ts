@@ -19,9 +19,10 @@ import { PAGE_TURN_MS } from "@/constants/book";
  * - Section pages (cover ↔ registry ↔ tours ↔ appendix) are hinged at the
  *   LEFT spine. Forward, the current leaf lifts away and reveals the next;
  *   back, the previous leaf swings down over the current one.
- * - Entry pages (a landmark, a tour) are leaves laid over the section,
- *   hinged at the RIGHT. They land sweeping right-to-left; swiping back from
- *   the left edge lifts them by the free edge under your finger.
+ * - Entry pages (a landmark, a tour) are leaves laid over the section, and
+ *   they hinge at the LEFT spine too: every turn in the book happens on the
+ *   same side. They land sweeping left-to-right; swiping back lifts the leaf
+ *   about its spine, under your finger.
  */
 export const PERSPECTIVE = 1500;
 
@@ -43,7 +44,7 @@ export function PAGE_EASING(t: number): number {
 }
 
 // ---------------------------------------------------------------------------
-// Stack: entry leaves, hinged at the right edge.
+// Stack: entry leaves, hinged at the left edge like the section leaves.
 // ---------------------------------------------------------------------------
 
 type TransitionSpecs = NonNullable<StackNavigationOptions["transitionSpec"]>;
@@ -59,10 +60,11 @@ export function forPageTurn({
 }: StackCardInterpolationProps): StackCardInterpolatedStyle {
   const w = screen.width;
 
-  // This leaf: lies flat once opened; hinged on the right, the left edge rises.
+  // This leaf: lies flat once opened; hinged on the left, the right edge
+  // rises — same hinge and sign as the section leaves (book-pages.tsx).
   const rotateY = current.progress.interpolate({
     inputRange: [0, 1],
-    outputRange: ["90deg", "0deg"],
+    outputRange: ["-90deg", "0deg"],
     extrapolate: "clamp",
   });
 
@@ -70,9 +72,9 @@ export function forPageTurn({
     cardStyle: {
       transform: [
         { perspective: PERSPECTIVE },
-        { translateX: w / 2 },
-        { rotateY },
         { translateX: -w / 2 },
+        { rotateY },
+        { translateX: w / 2 },
       ],
     },
     // No shade on the page beneath, and no shadow at the edge: flat paper.
