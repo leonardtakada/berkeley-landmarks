@@ -193,6 +193,10 @@ It still has no streets: that needs the baked tiles and the SD card.
 
 ### Getting about (2026-10-22)
 
+(Much of this was replaced on 2026-10-24: see "Choose, walk, story" below.
+The hold to end, the simulated distance, and the arrival, handover, finding
+and resting screens are gone.)
+
 Walking a walk the first time, it wasn't clear how to get from one stop to
 the next, or out of the walk. The two side buttons now carry it, and each
 screen says what they do on two small tabs inside the rim beside them
@@ -303,6 +307,132 @@ apart) by 16, the walks' chevrons by 16, the Follow map button and the
 volume buttons by 14, the narration's pause and "15" by 10. `touches` on the
 console lists the last twelve real touches: where, on what screen, what they
 landed on (its box) and whether they took, so misses can be seen.
+
+### Choose, walk, story (2026-10-24)
+
+A review found the guide's biggest problem was predictability: too many
+controls that changed meaning, hidden taps, and screens that moved on by
+themselves. It's now three screens in a loop, Choose → Walk → Story, with
+the menu and the map coming over whichever you're on:
+
+- **The buttons say one thing each, and each action has one button.** The
+  upper does the screen's main thing, named on its tab: *Walks* on the
+  cover, *Start* on Choose, *Listen* on the walk, *Pause* and *Resume*
+  during a story, then *Next stop* (*First stop* after the introduction,
+  *Finish* after the last, *Done* on your own) once it's told. The lower is
+  the menu on a walk and *Back* everywhere else (on the cover it does
+  nothing). The hold that ended the walk is gone: the lower counts however
+  long it's held. The upper still counts only short, as the power manager
+  owns a long press. The tabs are the touch buttons for those actions too
+  (40 px tall, 18 px type, taking a tap 14 px beyond). Nothing else on the
+  screen repeats them: the Listen pill, the story's play disc and Next stop
+  pill, Choose's Start pill, the cover's Walks pill and End walk's two pills
+  all went after a first look on the guide showed them doubled.
+- **The tabs' bands are kept clear.** The tabs sit level with the buttons,
+  in bands 40 px tall about y 123 and y 343 (`TAB_H`, `UPPER_CY` and
+  `LOWER_CY` in `ui.h`). What a screen puts at those heights ends left of
+  `TAB_CLEAR_X`, so screens centre their content between the bands, above
+  them, or below. The walk screen has the stop above, then the name,
+  distance and way between the bands, and Map below. The story's slip is
+  236 px wide, left of the lower tab, with the caption cut at three lines
+  so it stays clear of "15". The menu's rows are all centred between the
+  bands.
+- **Nothing moves on by itself.** A story stays when it's told: its tab
+  says what's next, and back 15 seconds plays its end again. Arrival
+  doesn't start the story: the walk screen chimes and says you're there, and
+  *Listen* plays it.
+- **No hidden taps.** Tapping the distance no longer says you've arrived,
+  the walks' page no longer sets out when tapped, and the pull-down handle is
+  gone. Besides the tabs, the screens have labelled buttons only for what the
+  side buttons don't do: *Map* on the walk and on the cover, back 15
+  seconds, Choose's arrows, the maps' + and −, and the menu's *Last stop*,
+  *Next stop*, *Map* and *End walk*. The menu's GPS line is a button (with a
+  chevron) to the hardware check.
+- **Navigation is real.** The walk screen is driven by the fix (or a
+  pretend position at the desk), with no timer. `export-walks.ts` now gives
+  each stop its coordinates and where the walk's route passes it (the app's
+  `stopIndices`), and each walk its route. The distance is measured along
+  the route while you're within 50 m of it, and in a straight line off it.
+  The way points 30 m ahead along the route, so it bends with the streets.
+  It is shown as a turn ("Straight on", "Bear left", "Turn right", "Turn
+  around") with the rim pointer, only while you're walking (2.5 km/h; the
+  guide has no compass). Standing, it says "walk on to see the way".
+  Arrival follows `lib/arrival.ts`: within 40 m of the building or of where
+  the walk passes it, on a fix good to 50 m (HDOP × 5 m). Then it chimes,
+  collects the label (any stop you stand at, as the app does), and *Listen*
+  turns vermilion; once there it stays there until you move on. Without a
+  fix it says "Finding you".
+- **The arrival and the handover are folded into the story.** The story
+  starts as soon as it opens: the speaker's portrait fills the screen, and
+  the stop's stamp is pressed onto it if you earned the label there. The
+  11.5 s of door and handover before a narration are gone. The walk's
+  introduction is a story too, before stop 1. The walk's end (*Walked*)
+  keeps its stamp and outro.
+- **You keep your place.** The menu and the map come over the walk or a
+  story, a story plays on under both, and *Back* returns to exactly where
+  you were. A map opened from the menu goes back past the menu.
+- **Directions have the room.** The walk screen gives the next stop's name
+  (32 px), the distance (58 px) with the host's cameo riding beside it, the
+  way in words (20 px), and two large buttons: *Listen* (56 px tall) and
+  *Map*. The top of the circle is left to the pointer. Stories keep the
+  full-screen portrait.
+- **The walk's map is the iso city.** `screen_map.c` now uses `mapview.c`,
+  as the free map does. It is centred on you, or on the next stop without a
+  fix, with the route in vermilion, the stops numbered (collected in blue,
+  the next in vermilion), + and −, and the slip giving the next stop and how
+  far.
+- **Choose: where it is, and where to begin.** Choosing a walk used to
+  show only its label scene, so you could pick one that starts across town
+  with no way to begin part way. Now each walk is its route on the iso map,
+  stops numbered, with its name on a slip at the top. It is framed on the
+  stop to begin at and on you, if you're within 1.5 km (else on the next
+  stop), at up to the walking zoom. With a fix, the walks come nearest
+  first, by whichever of their stops is nearest, and each opens on that stop
+  as where to begin. The slip across the middle reads "Begin at stop 3 of
+  10 · Golden Sheaf Bakery · 130 m from you · the nearest", and its ‹ ›
+  choose any other stop, the map following. The arrows at either side (or a
+  swipe) turn to the next walk. A walk begun part way goes on to its end,
+  then round to the stops it skipped. Begun at stop 3 of 10, it runs 3 … 10,
+  1, 2, and *Finish* comes after stop 2 (`walk_begin(first)`, `walk_next()`,
+  `walk_at_last()`). The map's districts are named at its furthest zoom
+  only (as the app's style has them), so closer in they don't lie over a
+  route.
+
+For the desk: `here <lat> <lon>`, then `here walk` makes the pretend
+position walk the route (or to the free map's pick) at 1.4 m/s; `here stand`
+stops it. `walk n` sets out on walk n, `stop n` makes for stop n, and
+`where` prints the walk's state: here, located, sure, moving, on route,
+metres, way, turn. Checked on the guide with a pretend position:
+
+- Walk 01 came first from downtown, and Start played the introduction.
+  Pause and Resume worked, and the menu and the map opened over it while it
+  played on (28 s, then 35 s).
+- When the introduction ended it stayed, offering *First stop*.
+- Walking itself, the walk screen counted down 129 m to City Hall. It
+  chimed at 40 m and collected the label.
+- *Listen* opened the story at once, with the stamp pressed on.
+- Told, it offered *Next stop*. Stop 2's leg followed the route ("route=1",
+  the way bending to 53°).
+- End walk asked, then ended on Walked with the outro.
+- A free-map story paused on the upper button and went *Back* to the map on
+  the lower.
+
+Checked again after the second pass:
+
+- Choose opened Walk 01 on its nearest stop, 3, 130 m off. ‹ › moved to
+  stop 4, the map following, and the arrow turned to Walk 07 on its nearest
+  stop, 8.
+- *Start* played the introduction, and *First stop* led to stop 3.
+- From stop 10, *Next stop* went round to stop 1.
+- At stop 2 the menu offered *Finish*, which ended the walk on Walked.
+
+Every screen was snapped for its bands.
+
+Not yet walked outdoors on a real fix.
+
+The card loader now gives `stat` time to read a big file back (the map's
+37 MB takes most of a minute). `snap.py` takes a picture line whose base64
+begins "OK" as part of the picture, and skips an earlier snapshot's tail.
 
 ### Motion and the companion (2026-10-21, second pass)
 

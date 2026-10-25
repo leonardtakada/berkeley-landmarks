@@ -4,18 +4,15 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+/* Choose (Walks) → Walk (Follow) → Story, stop by stop; the menu (Controls) and the map come over
+ * whichever of those you're on and go back to exactly it. */
 typedef enum {
     SCR_COVER,
     SCR_WALKS,
-    SCR_FINDING,
     SCR_FOLLOW,
     SCR_MAP,
     SCR_CONTROLS,
-    SCR_ARRIVED,
-    SCR_LISTENING,
-    SCR_GUIDESTOP,
-    SCR_HANDOVER,
-    SCR_RESTING,
+    SCR_STORY,
     SCR_WALKED,
     SCR_HARDWARE,
     SCR_ENDWALK,
@@ -56,48 +53,54 @@ int ui_volume(void);
 extern int ui_walk;
 
 /**
- * The two side buttons (nav.c). Through a walk the upper goes on (I'm here,
- * listen, next stop) and the lower opens the controls; held, the lower ends
- * the walk, asking first. Off a walk the upper goes forward and the lower back
- * (on the walks, it turns to the next).
+ * The two side buttons (nav.c). The upper does the screen's one main thing,
+ * named on its tab: Walks, Start, Listen, Pause and Resume, Next stop, Go.
+ * The lower is always the menu on a walk and Back anywhere else.
  */
-typedef enum { BTN_UPPER, BTN_LOWER, BTN_LOWER_HELD } button_t;
+typedef enum { BTN_UPPER, BTN_LOWER } button_t;
 void ui_button(button_t b);
 
 /**
- * What the side buttons do on this screen, on two small tabs beside them;
- * tapping a tab presses its button. Either may be NULL. `ground` is the
+ * What the side buttons do on this screen, on two tabs beside them; tapping a
+ * tab presses its button, so each tab is the one button for its action and
+ * nothing else on the screen repeats it. Either may be NULL. `ground` is the
  * screen's colour, for the tabs' inks.
+ *
+ * The tabs sit inside the rim level with the buttons, the upper at about two
+ * o'clock, the lower at four, each in a band TAB_H tall about its centre.
+ * What a screen puts at those heights keeps its right edge at TAB_CLEAR_X or
+ * left of it (a tab of one short word starts about 12 px right of that; the
+ * two-word ones, NEXT STOP and FIRST STOP, reach further in).
  */
+#define TAB_H 40
+#define UPPER_CY 123
+#define LOWER_CY 343
+#define TAB_CLEAR_X 286
 lv_obj_t *ui_hints(lv_obj_t *scr, uint32_t ground, const char *upper, const char *lower); /* returns the upper tab */
 
 /** Keeps the last touches of the screen, for the console's `touches`: where, on what, and whether it took. */
 void ui_watch_touches(void);
 void ui_print_touches(void);
 
-/* Moving through a walk, for the screens' own taps as well as the buttons. */
-void ui_arrive(void);         /* at the stop: its label, then its narration */
-void ui_listen(void);         /* the stop's narration */
-void ui_next_stop(void);      /* on to the next stop, or the walk's end after the last */
+/* Moving through a walk, for the screens' own buttons as well as the side ones. */
+void ui_start_walk(int first); /* the walk chosen (ui_walk), from stop `first`: its introduction, then that stop */
+void ui_listen(void);         /* the stop's story */
+void ui_next_stop(void);      /* on to the next stop (the first, after the introduction), or the walk's end */
 void ui_last_stop(void);      /* back to the stop before */
-void ui_open_controls(void);  /* the shade comes down over this screen */
-void ui_close_controls(void); /* and goes back up */
+void ui_open_controls(void);  /* the menu comes down over this screen */
+void ui_close_controls(void); /* and goes back up, to exactly where you were */
+void ui_open_map(void);       /* the walk's map, over this screen (or over what the menu came down on) */
+void ui_close_map(void);      /* and back to exactly where you were */
 void ui_ask_end(void);        /* "End the walk?" */
 void ui_keep_walking(void);   /* no: back where you were */
 
 /* Each screen builds itself and returns its screen object. */
 lv_obj_t *screen_cover(void);
 lv_obj_t *screen_walks(void);
-void screen_walks_turn(int dir); /* the next walk (1) or the one before (-1) */
-lv_obj_t *screen_finding(void);
 lv_obj_t *screen_follow(void);
 lv_obj_t *screen_map(void);
 lv_obj_t *screen_controls(void);
-lv_obj_t *screen_arrived(void);
-lv_obj_t *screen_listening(void);
-lv_obj_t *screen_guidestop(void);
-lv_obj_t *screen_handover(void);
-lv_obj_t *screen_resting(void);
+lv_obj_t *screen_story(void);
 lv_obj_t *screen_walked(void);
 lv_obj_t *screen_hardware(void);
 lv_obj_t *screen_endwalk(void);
@@ -105,3 +108,9 @@ lv_obj_t *screen_explore(void);
 
 /** The free map's upper button: go to the landmark picked, or stop going. */
 void explore_go(void);
+
+/** The story's upper button: pause, resume, or once it's told, go on. */
+void story_upper(void);
+
+/** The walks' upper button: sets out on the walk showing, from the stop chosen. */
+void walks_start(void);

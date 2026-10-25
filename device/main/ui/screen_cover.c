@@ -1,7 +1,9 @@
 /**
  * The cover (design canvas, "Main"): the board, the Campanile before a rising
- * sun, the title in Berkeley Post, a ring of lettering, and BEGIN, breathing
- * until it's pressed.
+ * sun, the title in Berkeley Post, a ring of lettering, and the two ways in:
+ * WALKS on the upper button's tab, and the MAP (breathing until it's
+ * pressed), to wander on your own. The lower button has nothing to go back
+ * to here.
  *
  * The canvas turns the ring once in 80 s. Here it holds still: turning it
  * redraws the whole screen at every step, which the S3 manages only about ten
@@ -35,7 +37,7 @@ static lv_obj_t *ring_text(lv_obj_t *parent, const lv_font_t *font, lv_color_t c
     return a;
 }
 
-static lv_obj_t *pill(lv_obj_t *parent, int32_t x, int32_t y, int32_t w, int32_t h, lv_opa_t opa)
+static lv_obj_t *cloud(lv_obj_t *parent, int32_t x, int32_t y, int32_t w, int32_t h, lv_opa_t opa)
 {
     lv_obj_t *o = box(parent, x, y, w, h);
     lv_obj_set_style_radius(o, h / 2, 0);
@@ -51,10 +53,32 @@ static void print_in(lv_obj_t *o, uint32_t ms, uint32_t delay)
     motion_once(o, 14, 0, ms, delay, m_y);
 }
 
-static void begin_clicked(lv_event_t *e)
+static void map_clicked(lv_event_t *e)
 {
     LV_UNUSED(e);
-    ui_show(SCR_WALKS);
+    ui_show(SCR_EXPLORE);
+}
+
+/** A way in, lettered as BEGIN was: filled cream, or ringed in it. */
+static lv_obj_t *way_in(lv_obj_t *scr, int32_t x, int32_t w, bool filled, const char *s, lv_event_cb_t clicked)
+{
+    lv_obj_t *b = box(scr, x, 342, w, 56);
+    lv_obj_add_flag(b, LV_OBJ_FLAG_CLICKABLE);
+    lv_obj_set_ext_click_area(b, 10);
+    lv_obj_set_style_radius(b, 28, 0);
+    lv_obj_set_style_bg_color(b, C_CREAM, 0);
+    lv_obj_set_style_bg_opa(b, filled ? LV_OPA_COVER : LV_OPA_TRANSP, 0);
+    lv_obj_set_style_border_width(b, filled ? 0 : 2, 0);
+    lv_obj_set_style_border_color(b, C_CREAM, 0);
+    lv_obj_set_style_outline_color(b, C_CREAM, 0);
+    lv_obj_t *label = lv_label_create(b);
+    lv_obj_set_style_text_font(label, &jost_semibold_16, 0);
+    lv_obj_set_style_text_color(label, filled ? C_BLUE : C_CREAM, 0);
+    lv_obj_set_style_text_letter_space(label, 4, 0);
+    lv_label_set_text_static(label, s);
+    lv_obj_center(label);
+    lv_obj_add_event_cb(b, clicked, LV_EVENT_CLICKED, NULL);
+    return b;
 }
 
 lv_obj_t *screen_cover(void)
@@ -68,9 +92,9 @@ lv_obj_t *screen_cover(void)
     motion_once(sun_box, 70, 0, 2200, 200, m_y);
     motion_once(sun_box, 0, 255, 2200, 200, m_opa);
 
-    lv_obj_t *cloud_a = pill(scr, 92, 118, 74, 18, 217);
+    lv_obj_t *cloud_a = cloud(scr, 92, 118, 74, 18, 217);
     motion_loop(cloud_a, KF({0, -26}, {500, 26}, {1000, -26}), 32000, 0, m_x);
-    lv_obj_t *cloud_b = pill(scr, 296, 96, 56, 14, 178);
+    lv_obj_t *cloud_b = cloud(scr, 296, 96, 56, 14, 178);
     /* Seven seconds into its swing already, as the canvas staggers it. */
     motion_loop(cloud_b, KF({0, -12}, {333, 26}, {833, -26}, {1000, -12}), 42000, 0, m_x);
 
@@ -101,22 +125,10 @@ lv_obj_t *screen_cover(void)
         print_in(l, 700, 700 + i * 200);
     }
 
-    lv_obj_t *begin = box(scr, 149, 344, 168, 56);
-    lv_obj_add_flag(begin, LV_OBJ_FLAG_CLICKABLE);
-    lv_obj_set_style_radius(begin, 28, 0);
-    lv_obj_set_style_bg_color(begin, C_CREAM, 0);
-    lv_obj_set_style_bg_opa(begin, LV_OPA_COVER, 0);
-    lv_obj_set_style_outline_color(begin, C_CREAM, 0);
-    lv_obj_t *label = lv_label_create(begin);
-    lv_obj_set_style_text_font(label, &jost_semibold_16, 0);
-    lv_obj_set_style_text_color(label, C_BLUE, 0);
-    lv_obj_set_style_text_letter_space(label, 4, 0);
-    lv_label_set_text_static(label, "BEGIN");
-    lv_obj_center(label);
-    motion_loop(begin, KF({0, 0}, {600, 1000}, {1000, 0}), 2800, 2000, m_outline);
-    print_in(begin, 600, 1300);
-    lv_obj_add_event_cb(begin, begin_clicked, LV_EVENT_CLICKED, NULL);
+    lv_obj_t *map = way_in(scr, 157, 152, false, "MAP", map_clicked);
+    motion_loop(map, KF({0, 0}, {600, 1000}, {1000, 0}), 2800, 2000, m_outline);
+    print_in(map, 600, 1300);
 
-    ui_hints(scr, 0x0A2C8D, "WALKS", "MAP");
+    ui_hints(scr, 0x0A2C8D, "WALKS", NULL);
     return scr;
 }

@@ -144,7 +144,8 @@ function labels(zoom: number, toPx: (u: number, v: number, z: number) => Pt, zAt
   const out: Label[] = [];
   const s = ZOOMS[zoom];
 
-  if (zoom <= 1) {
+  // The districts only far out, as the app's style has them (gone by z14.2): closer in they'd lie over a walk's route.
+  if (zoom === 0) {
     const districts = new Map<string, Pt[]>();
     for (const l of landmarks) {
       const d = l.neighborhood?.trim();

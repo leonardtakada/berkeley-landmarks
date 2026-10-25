@@ -68,8 +68,12 @@ def command(s, line, timeout=10.0):
         text = read_line(s, deadline)
         if text.startswith("SNAP ") and size is None:
             size = tuple(int(n) for n in text.split()[1:3])
-        elif size and not text.startswith(DONE) and is_base64(text):
+        elif size and not text.startswith("SNAP-") and is_base64(text):
+            # A line of the picture, even one whose base64 happens to begin "OK" or "ERR".
             picture.append(text)
+        elif text.startswith(("SNAP-END", "SNAP-ERR")) and size is None and line == "snap":
+            # The tail of an earlier snapshot that was given up on: ours is still to come.
+            continue
         elif text.startswith(DONE):
             return text, size, picture
         else:

@@ -1,9 +1,9 @@
 /**
- * The controls, pulled down like a shade over the walk (the handle on
- * Follow, or the lower button anywhere on a walk): how the guide is finding
- * you, the volume, the last and next stops, ending the walk, and Done to put
- * the shade back up over whatever it came down on. The status line reports
- * the live GPS connection and battery; walk navigation remains simulated.
+ * The menu, pulled down like a shade over the walk (the lower button, from
+ * the walk or a story): how the guide is finding you (a button to the
+ * hardware check), the volume, the last and next stops, the walk's map, and
+ * ending the walk. The lower button puts the shade back up over exactly what
+ * it came down on; a story plays on under it.
  */
 #include "ui.h"
 #include "audio/player.h"
@@ -75,16 +75,22 @@ int ui_volume(void)
     return volume;
 }
 
-static void close_shade(lv_event_t *e)
-{
-    LV_UNUSED(e);
-    ui_close_controls();
-}
-
 static void last_stop(lv_event_t *e)
 {
     LV_UNUSED(e);
     ui_last_stop();
+}
+
+static void next_stop(lv_event_t *e)
+{
+    LV_UNUSED(e);
+    ui_next_stop();
+}
+
+static void open_map(lv_event_t *e)
+{
+    LV_UNUSED(e);
+    ui_open_map();
 }
 
 static void end_walk(lv_event_t *e)
@@ -130,7 +136,7 @@ static lv_obj_t *bar(lv_obj_t *parent, int32_t w, int32_t h)
 
 static lv_obj_t *volume_button(lv_obj_t *parent, int32_t x, int dir)
 {
-    lv_obj_t *b = ringed(parent, x, 32, 60, 60);
+    lv_obj_t *b = ringed(parent, x, 30, 60, 60);
     lv_obj_set_ext_click_area(b, 14);
     bar(b, 16, 3);
     if (dir > 0) bar(b, 3, 16);
@@ -146,7 +152,10 @@ lv_obj_t *screen_controls(void)
     lv_memzero(ticks, sizeof ticks);
     lv_obj_add_event_cb(scr, forget, LV_EVENT_DELETE, NULL);
 
-    lv_obj_t *fix = box(scr, 0, 58, SCREEN_W, 24);
+    /* How it's finding you, as a button to the hardware check. */
+    lv_obj_t *fix = ringed(scr, 0, 44, LV_SIZE_CONTENT, 44);
+    lv_obj_align(fix, LV_ALIGN_TOP_MID, 0, 44);
+    lv_obj_set_style_pad_hor(fix, 18, 0);
     lv_obj_set_flex_flow(fix, LV_FLEX_FLOW_ROW);
     lv_obj_set_flex_align(fix, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
     lv_obj_set_style_pad_column(fix, 8, 0);
@@ -154,13 +163,12 @@ lv_obj_t *screen_controls(void)
     motion_loop(live, KF({0, 255}, {500, 115}, {1000, 255}), 1600, 0, m_bg_opa);
     c->gps = text_in(fix, &jost_regular_18, C_CREAM, "");
     c->battery = text_in(fix, &jost_regular_18, C_BLUE_TINT, "");
-    /* The status line opens the hardware check. */
-    lv_obj_add_flag(fix, LV_OBJ_FLAG_CLICKABLE);
+    chevron(fix, true, C_CREAM);
     lv_obj_set_ext_click_area(fix, 8);
     lv_obj_add_event_cb(fix, ui_go, LV_EVENT_CLICKED, UI_GO(SCR_HARDWARE));
     row_in(fix, 0);
 
-    lv_obj_t *vol = box(scr, 0, 146, SCREEN_W, 100);
+    lv_obj_t *vol = box(scr, 0, 98, SCREEN_W, 100);
     lv_obj_t *k = kicker(vol, C_BLUE_TINT, 4, "VOLUME");
     lv_obj_set_style_text_letter_space(k, 4, 0);
     volume_button(vol, 72, -1);
@@ -176,12 +184,14 @@ lv_obj_t *screen_controls(void)
     volume_button(vol, 334, 1);
     row_in(vol, 1);
 
-    lv_obj_t *stops = box(scr, 103, 256, 260, 56);
+    /* The stops either side. */
+    lv_obj_t *stops = box(scr, 103, 198, 260, 56);
     lv_obj_set_flex_flow(stops, LV_FLEX_FLOW_ROW);
     lv_obj_set_flex_align(stops, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+    lv_obj_set_style_pad_column(stops, 10, 0);
     lv_obj_t *last = ringed(stops, 0, 0, 125, 56);
     lv_obj_center(text_in(last, &jost_medium_18, C_CREAM, "Last stop"));
-    if (walk_at() > 0) {
+    if (!walk_at_first() && !walk_in_intro()) {
         lv_obj_add_event_cb(last, last_stop, LV_EVENT_CLICKED, NULL);
     } else {
         /* There's no stop before the first. */
@@ -189,36 +199,36 @@ lv_obj_t *screen_controls(void)
         lv_obj_set_style_opa(lv_obj_get_child(last, 0), 90, 0);
         lv_obj_set_style_border_opa(last, 50, 0);
     }
-    lv_obj_set_style_pad_column(stops, 10, 0);
-    lv_obj_t *map = ringed(stops, 0, 0, 125, 56);
-    lv_obj_t *mm = map_mark(map, C_CREAM);
-    lv_obj_align(mm, LV_ALIGN_LEFT_MID, 16, 0);
-    lv_obj_t *ml = text_in(map, &jost_medium_18, C_CREAM, "Map");
-    lv_obj_align(ml, LV_ALIGN_RIGHT_MID, -18, 0);
-    lv_obj_add_event_cb(map, ui_go, LV_EVENT_CLICKED, UI_GO(SCR_MAP));
+    lv_obj_t *next = ringed(stops, 0, 0, 125, 56);
+    lv_obj_center(text_in(next, &jost_medium_18, C_CREAM, walk_in_intro() ? "First stop" : walk_at_last() ? "Finish" : "Next stop"));
+    lv_obj_add_event_cb(next, next_stop, LV_EVENT_CLICKED, NULL);
     row_in(stops, 2);
 
-    lv_obj_t *end = box(scr, 123, 328, 180, 56);
+    /* The map, and the way out; above the lower button's tab. */
+    lv_obj_t *more = box(scr, 103, 264, 260, 56);
+    lv_obj_set_flex_flow(more, LV_FLEX_FLOW_ROW);
+    lv_obj_set_flex_align(more, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+    lv_obj_set_style_pad_column(more, 10, 0);
+    lv_obj_t *map = ringed(more, 0, 0, 125, 56);
+    lv_obj_set_flex_flow(map, LV_FLEX_FLOW_ROW);
+    lv_obj_set_flex_align(map, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+    lv_obj_set_style_pad_column(map, 8, 0);
+    map_mark(map, C_CREAM);
+    text_in(map, &jost_medium_18, C_CREAM, "Map");
+    lv_obj_add_event_cb(map, open_map, LV_EVENT_CLICKED, NULL);
+    lv_obj_t *end = box(more, 0, 0, 125, 56);
     lv_obj_add_flag(end, LV_OBJ_FLAG_CLICKABLE);
+    lv_obj_set_ext_click_area(end, 8);
     lv_obj_set_style_radius(end, 28, 0);
     lv_obj_set_style_bg_color(end, C_CREAM, 0);
     lv_obj_set_style_bg_opa(end, LV_OPA_COVER, 0);
     lv_obj_center(text_in(end, &jost_medium_18, C_BLUE, "End walk"));
     lv_obj_add_event_cb(end, end_walk, LV_EVENT_CLICKED, NULL);
-    row_in(end, 3);
-
-    lv_obj_t *done = box(scr, 173, 392, 120, 40);
-    lv_obj_add_flag(done, LV_OBJ_FLAG_CLICKABLE);
-    lv_obj_add_event_cb(done, close_shade, LV_EVENT_CLICKED, NULL);
-    lv_obj_t *grip = box(done, 30, 6, 40, 5);
-    lv_obj_set_style_radius(grip, 3, 0);
-    lv_obj_set_style_bg_color(grip, C_CREAM, 0);
-    lv_obj_set_style_bg_opa(grip, 102, 0);
-    motion_loop(grip, KF({0, 0}, {500, -4}, {1000, 0}), 2400, 0, m_y);
+    row_in(more, 3);
 
     c->timer = lv_timer_create(refresh_status, 500, c);
     refresh_status(c->timer);
     lv_obj_add_event_cb(scr, stop_status, LV_EVENT_DELETE, c);
-    ui_hints(scr, 0x0A2C8D, walk_at_last() ? "FINISH" : "NEXT STOP", "DONE");
+    ui_hints(scr, 0x0A2C8D, NULL, "BACK");
     return scr;
 }

@@ -250,11 +250,9 @@ mapview_t *mapview_create(lv_obj_t *parent)
     return m;
 }
 
-void mapview_set(mapview_t *m, double lat, double lon, int zoom)
+/** Brings in the tiles around the centre. */
+static void lay_tiles(mapview_t *m)
 {
-    open_tiles(); /* for the terraces */
-    m->zoom = LV_CLAMP(0, zoom, (int)d.zooms - 1);
-    on_drawing(lat, lon, 0, m->zoom, &m->cx, &m->cy);
     int tx0 = (int)floor((m->cx - SCREEN_W / 2.0) / TILE), ty0 = (int)floor((m->cy - SCREEN_H / 2.0) / TILE);
     int k = 0;
     for (int ty = ty0; ty <= ty0 + 2; ty++) {
@@ -270,6 +268,36 @@ void mapview_set(mapview_t *m, double lat, double lon, int zoom)
         }
     }
     for (; k < SHOWN; k++) lv_obj_add_flag(m->images[k], LV_OBJ_FLAG_HIDDEN);
+}
+
+void mapview_set(mapview_t *m, double lat, double lon, int zoom)
+{
+    open_tiles(); /* for the terraces */
+    m->zoom = LV_CLAMP(0, zoom, (int)d.zooms - 1);
+    on_drawing(lat, lon, 0, m->zoom, &m->cx, &m->cy);
+    lay_tiles(m);
+}
+
+void mapview_fit(mapview_t *m, const int32_t *e6, int n, const lv_area_t *box, int max_zoom)
+{
+    open_tiles();
+    int32_t w = lv_area_get_width(box), h = lv_area_get_height(box);
+    for (int z = LV_MIN(max_zoom, (int)d.zooms - 1); z >= 0; z--) {
+        double x0 = 1e18, y0 = 1e18, x1 = -1e18, y1 = -1e18;
+        for (int i = 0; i < n; i++) {
+            double px, py;
+            on_drawing(e6[i * 2] / 1e6, e6[i * 2 + 1] / 1e6, 1, z, &px, &py);
+            x0 = fmin(x0, px), y0 = fmin(y0, py), x1 = fmax(x1, px), y1 = fmax(y1, py);
+        }
+        if ((x1 - x0 <= w && y1 - y0 <= h) || z == 0) {
+            /* The points' middle at the box's. */
+            m->zoom = z;
+            m->cx = (x0 + x1) / 2 - ((box->x1 + box->x2) / 2.0 - SCREEN_W / 2.0);
+            m->cy = (y0 + y1) / 2 - ((box->y1 + box->y2) / 2.0 - SCREEN_H / 2.0);
+            lay_tiles(m);
+            return;
+        }
+    }
 }
 
 void mapview_project(const mapview_t *m, double lat, double lon, float *x, float *y)

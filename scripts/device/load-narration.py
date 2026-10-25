@@ -51,7 +51,8 @@ def send(s, path):
     data = path.read_bytes()
     crc = f"{zlib.crc32(data):08x}"
     s.write(f"stat {path.name}\n".encode())
-    have = reply(s, 30)
+    # The guide reads the whole file back to check it: the map's 37 MB takes most of a minute.
+    have = reply(s, 30 + len(data) / 400_000)
     if have == f"OK {len(data)} {crc}":
         return 0
     if have.startswith("ERR") and have != "ERR none":

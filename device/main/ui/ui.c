@@ -13,15 +13,10 @@ static const struct {
 } screens[SCR_COUNT] = {
     [SCR_COVER] = {"cover", screen_cover},
     [SCR_WALKS] = {"walks", screen_walks},
-    [SCR_FINDING] = {"finding", screen_finding},
     [SCR_FOLLOW] = {"follow", screen_follow},
     [SCR_MAP] = {"map", screen_map},
     [SCR_CONTROLS] = {"controls", screen_controls},
-    [SCR_ARRIVED] = {"arrived", screen_arrived},
-    [SCR_LISTENING] = {"listening", screen_listening},
-    [SCR_GUIDESTOP] = {"guide", screen_guidestop},
-    [SCR_HANDOVER] = {"handover", screen_handover},
-    [SCR_RESTING] = {"resting", screen_resting},
+    [SCR_STORY] = {"story", screen_story},
     [SCR_WALKED] = {"walked", screen_walked},
     [SCR_HARDWARE] = {"hw", screen_hardware},
     [SCR_ENDWALK] = {"end", screen_endwalk},
@@ -42,8 +37,9 @@ void ui_show_anim(screen_id_t id, lv_screen_load_anim_t anim, uint32_t ms)
 {
     if (id >= SCR_COUNT) return;
     current = id;
-    /* The narration plays on under the controls (and what opens from them); shown anything else, it stops. */
-    if (id != SCR_LISTENING && id != SCR_GUIDESTOP && id != SCR_CONTROLS && id != SCR_HARDWARE && id != SCR_ENDWALK) {
+    /* A story plays on under the menu and the map (and what opens from them), and the walk's end under
+     * its stamp; shown anything else, it stops. */
+    if (id != SCR_STORY && id != SCR_CONTROLS && id != SCR_MAP && id != SCR_HARDWARE && id != SCR_ENDWALK && id != SCR_WALKED) {
         player_stop();
     }
     lv_obj_t *scr = screens[id].build();

@@ -191,7 +191,7 @@ static void tell(void)
     if (!l) return;
     walk_free(l);
     picked = -1; /* told: back on the map, the next one is yours to pick */
-    ui_show(walk_narration_screen());
+    ui_show(SCR_STORY);
 }
 
 static void arrive(void)
@@ -283,8 +283,8 @@ static void tick(lv_timer_t *t)
 {
     (void)t;
     const landmark_t *l = picked_landmark();
-    /* At the desk, a pretend position walks there; outdoors, your feet do. */
-    if (going && l) position_walk_toward(lat_of(l), lon_of(l), WALK_MPS * TICK_MS / 1000.0);
+    /* At the desk, a pretend position can walk there itself ("here walk"); outdoors, your feet do. */
+    if (going && l && position_walks_itself()) position_walk_toward(lat_of(l), lon_of(l), WALK_MPS * TICK_MS / 1000.0);
     refresh(false);
 }
 
@@ -294,28 +294,6 @@ static void zoom_by(lv_event_t *e)
     if (z == zoom) return;
     zoom = z;
     refresh(true);
-}
-
-/* 64 px across, and taken 16 px beyond that: about 9 mm of glass, near enough a fingertip. */
-static lv_obj_t *zoom_button(lv_obj_t *scr, int32_t y, int dir)
-{
-    lv_obj_t *b = disc(scr, 16, y, 64, C_SLIP);
-    lv_obj_set_style_border_width(b, 2, 0);
-    lv_obj_set_style_border_color(b, C_BLUE, 0);
-    lv_obj_add_flag(b, LV_OBJ_FLAG_CLICKABLE);
-    lv_obj_set_ext_click_area(b, 16);
-    lv_obj_t *bar = box(b, 0, 0, 22, 4);
-    lv_obj_set_style_bg_color(bar, C_BLUE, 0);
-    lv_obj_set_style_bg_opa(bar, LV_OPA_COVER, 0);
-    lv_obj_center(bar);
-    if (dir > 0) {
-        lv_obj_t *up = box(b, 0, 0, 4, 22);
-        lv_obj_set_style_bg_color(up, C_BLUE, 0);
-        lv_obj_set_style_bg_opa(up, LV_OPA_COVER, 0);
-        lv_obj_center(up);
-    }
-    lv_obj_add_event_cb(b, zoom_by, LV_EVENT_CLICKED, (void *)(intptr_t)dir);
-    return b;
 }
 
 static void gone(lv_event_t *e)
@@ -352,27 +330,27 @@ lv_obj_t *screen_explore(void)
     x->you = you_mark(scr);
 
     /* The slip at the top: what's picked, and how far. */
-    lv_obj_t *s = slip(scr, 103, 36, 260, LV_SIZE_CONTENT);
+    lv_obj_t *s = slip(scr, 125, 28, 216, LV_SIZE_CONTENT); /* above the upper tab, inside the circle */
     lv_obj_add_flag(s, LV_OBJ_FLAG_CLICKABLE);
     lv_obj_set_style_bg_color(s, C_BLUE_TINT, LV_STATE_PRESSED);
     lv_obj_add_event_cb(s, slip_tapped, LV_EVENT_CLICKED, NULL);
-    lv_obj_set_style_pad_ver(s, 7, 0);
+    lv_obj_set_style_pad_ver(s, 5, 0);
     lv_obj_set_style_pad_row(s, 1, 0);
     lv_obj_set_flex_flow(s, LV_FLEX_FLOW_COLUMN);
     lv_obj_set_flex_align(s, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
     x->kick = text_in(s, &jost_medium_14, C_BLUE, "");
     lv_obj_set_style_text_letter_space(x->kick, 3, 0);
     x->name = text_in(s, &jost_regular_18, C_CHARCOAL, "");
-    lv_obj_set_width(x->name, 236);
+    lv_obj_set_width(x->name, 196);
     lv_obj_set_style_text_align(x->name, LV_TEXT_ALIGN_CENTER, 0);
     lv_label_set_long_mode(x->name, LV_LABEL_LONG_MODE_DOTS);
     x->meta = text_in(s, &jost_regular_15, C_SEPIA, "");
-    lv_obj_set_width(x->meta, 236);
+    lv_obj_set_width(x->meta, 196);
     lv_obj_set_style_text_align(x->meta, LV_TEXT_ALIGN_CENTER, 0);
     lv_label_set_long_mode(x->meta, LV_LABEL_LONG_MODE_DOTS);
 
-    zoom_button(scr, 150, 1);
-    zoom_button(scr, 262, -1);
+    zoom_button(scr, 150, 1, zoom_by);
+    zoom_button(scr, 262, -1, zoom_by);
 
     /* A note while there's no fix. */
     x->note = slip(scr, 133, 296, 200, LV_SIZE_CONTENT);

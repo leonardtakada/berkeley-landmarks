@@ -1,45 +1,19 @@
 /**
- * The two stamped moments: at the door of a stop (its label collected), and
- * the walk done or ended. The host fills the screen, glad; the slip says
- * where you are; the stamp presses onto its corner with an ink ring, then
- * rocks a little. At the door, the stop's narration follows by itself.
+ * The walk done or ended: the host fills the screen, glad; the slip says how
+ * many labels you collected; the walk's stamp presses onto its corner with an
+ * ink ring, then rocks a little, and the guide reads the walk's end. (A
+ * stop's own stamp is pressed on its story.)
  */
 #include "ui.h"
 #include <stdio.h>
 #include <string.h>
 #include "audio/player.h"
-#include "audio/sound.h"
 #include "gnss/gnss.h"
 #include "motion.h"
 #include "portrait.h"
 #include "theme.h"
 #include "walk.h"
 #include "widgets.h"
-
-#define PRESS_MS 500
-
-/* How long the door holds before the narration starts on its own. */
-#define AT_THE_DOOR_MS 7000
-
-/** Presses the stamp (`d` across) at (cx, cy) in after `delay`: down from half as big again and a turn, an ink ring spreading. */
-static void press(lv_obj_t *parent, lv_obj_t *s, int32_t cx, int32_t cy, int32_t d, int32_t tilt10, uint32_t delay)
-{
-    lv_obj_t *ink = box(parent, cx - d * 7 / 10, cy - d * 7 / 10, d * 14 / 10, d * 14 / 10);
-    lv_obj_t *ring = box(ink, 0, 0, d, d);
-    lv_obj_set_style_radius(ring, LV_RADIUS_CIRCLE, 0);
-    lv_obj_set_style_border_width(ring, 3, 0);
-    lv_obj_set_style_border_color(ring, C_VERMILION, 0);
-    lv_obj_set_style_opa(ring, LV_OPA_TRANSP, 0);
-    motion_once(ring, d * 9 / 10, d * 135 / 100, 1100, delay + PRESS_MS - 100, m_size);
-    motion_once(ring, 140, 0, 1100, delay + PRESS_MS - 100, m_opa);
-    lv_obj_move_foreground(s);
-
-    /* After it lands, it rocks four degrees and back, slowly. */
-    motion_loop(s, KF({0, (int16_t)tilt10}, {500, (int16_t)(tilt10 + 40)}, {1000, (int16_t)tilt10}), 9000, delay + PRESS_MS + 1000, m_turn);
-    motion_once(s, tilt10 - 140, tilt10, PRESS_MS, delay, m_turn);
-    motion_once(s, 397, 256, PRESS_MS, delay, m_zoom);
-    motion_once(s, 0, 255, PRESS_MS * 7 / 10, delay, m_opa);
-}
 
 /** The slip held up in front, its lines set left, its foot at `bottom`. */
 static lv_obj_t *card(lv_obj_t *scr, int32_t x, int32_t bottom, int32_t w)
@@ -94,40 +68,6 @@ static void stamp_day(char *buf, size_t len)
     }
 }
 
-lv_obj_t *screen_arrived(void)
-{
-    const walk_t *w = walk_now();
-    int at = walk_at();
-    walk_collect();
-    /* The door's chime, at the controls' volume (silent at 0). */
-    if (ui_volume() > 0) sound_chime_async(player_codec_volume(ui_volume()));
-
-    lv_obj_t *scr = ui_screen(lv_color_hex(walk_ground(walk_host())));
-    uint32_t ground = glad(scr);
-    lv_obj_add_event_cb(scr, ui_go, LV_EVENT_CLICKED, UI_GO(walk_narration_screen()));
-    ui_after(scr, AT_THE_DOOR_MS, ui_listen);
-
-    if (walk_host()) say_once(scr, 22, 146, 124, walk_host_speaks() ? "Here we are. Mine." : "Here we are.", 1600);
-
-    char buf[48];
-    lv_obj_t *c = card(scr, 52, 426, 278);
-    kicker_in(c, "AT THE DOOR");
-    title_in(c, 240, walk_stop()->name);
-    snprintf(buf, sizeof buf, "Label collected \xC2\xB7 %d of %d", walk_collected_count(), w->stop_count);
-    text_in(c, &jost_regular_18, C_SEPIA, buf);
-
-    /* Between the buttons' tabs, on the slip's corner. */
-    char top[12], mid[4], day[16];
-    snprintf(top, sizeof top, "WALK %02d", ui_walk + 1);
-    snprintf(mid, sizeof mid, "%02d", at + 1);
-    stamp_day(day, sizeof day);
-    lv_obj_t *s = stamp(scr, 388, 232, 116, top, mid, &jost_light_54, day, true, -80);
-    press(scr, s, 388, 232, 116, -80, 1000);
-
-    ui_hints(scr, ground, "LISTEN", "MENU");
-    return scr;
-}
-
 /* The walk's end, read by the guide once the stamp and its bells have settled. */
 static void play_outro(void)
 {
@@ -150,29 +90,20 @@ lv_obj_t *screen_walked(void)
 
     char top[12], buf[48];
     snprintf(top, sizeof top, "WALK %02d", ui_walk + 1);
-    lv_obj_t *c = card(scr, 58, 426, 314);
-    lv_obj_add_flag(c, LV_OBJ_FLAG_CLICKABLE);
-    lv_obj_add_event_cb(c, ui_go, LV_EVENT_CLICKED, UI_GO(SCR_WALKS));
+    lv_obj_t *c = card(scr, 62, 426, 236);
     kicker_in(c, top);
-    title_in(c, 270, w->name);
+    title_in(c, 200, w->name);
     if (all) snprintf(buf, sizeof buf, "All %d labels collected", n);
     else snprintf(buf, sizeof buf, "%d of %d labels collected", got, n);
     text_in(c, &jost_regular_18, C_SEPIA, buf);
-    lv_obj_t *cta = box(c, 0, 0, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
-    lv_obj_set_flex_flow(cta, LV_FLEX_FLOW_ROW);
-    lv_obj_set_flex_align(cta, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
-    lv_obj_set_style_pad_column(cta, 6, 0);
-    lv_obj_set_style_margin_top(cta, 4, 0);
-    text_in(cta, &jost_medium_16, C_BLUE, "Choose another walk");
-    arrow_right(cta, C_BLUE);
 
     char mid[12], day[16];
     if (all) snprintf(mid, sizeof mid, "WALKED");
     else snprintf(mid, sizeof mid, "%d OF %d", got, n);
     stamp_day(day, sizeof day);
-    lv_obj_t *s = stamp(scr, 388, 276, 128, top, mid, &jost_semibold_24, day, false, -120);
-    press(scr, s, 388, 276, 128, -120, 1100);
+    lv_obj_t *s = stamp(scr, 384, 226, 118, top, mid, &jost_semibold_24, day, false, -120);
+    stamp_press(scr, s, 384, 226, 118, -120, 1100);
 
-    ui_hints(scr, ground, "WALKS", NULL);
+    ui_hints(scr, ground, "WALKS", "BACK");
     return scr;
 }

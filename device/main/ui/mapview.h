@@ -24,6 +24,13 @@ mapview_t *mapview_create(lv_obj_t *parent);
 /** Centres the map on (lat, lon) at `zoom`, bringing in the tiles that show. */
 void mapview_set(mapview_t *m, double lat, double lon, int zoom);
 
+/**
+ * Frames the `n` points (lat, lon pairs in millionths of a degree) in `box`:
+ * the nearest zoom up to `max_zoom` that holds them all (or the furthest, if
+ * none does), their middle at the box's.
+ */
+void mapview_fit(mapview_t *m, const int32_t *e6, int n, const lv_area_t *box, int max_zoom);
+
 /** Where (lat, lon) falls on the screen, in px, standing on its terrace. */
 void mapview_project(const mapview_t *m, double lat, double lon, float *x, float *y);
 

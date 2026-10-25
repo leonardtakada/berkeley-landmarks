@@ -61,6 +61,9 @@ void rim_progress_set(lv_obj_t *bar, int32_t len10);
 lv_obj_t *stamp(lv_obj_t *parent, int32_t cx, int32_t cy, int32_t d, const char *top, const char *middle,
                 const lv_font_t *middle_font, const char *bottom, bool inner, int32_t tilt10);
 
+/** Presses stamp `s` (`d` across, centred at (cx, cy)) in after `delay`: down from half as big again and a turn, an ink ring spreading, then rocking slowly. */
+void stamp_press(lv_obj_t *parent, lv_obj_t *s, int32_t cx, int32_t cy, int32_t d, int32_t tilt10, uint32_t delay);
+
 /**
  * The way to the next stop: an arrowhead riding just inside the rim, pointing
  * out along the bearing, with a cut-paper shadow under it.
@@ -81,3 +84,15 @@ lv_obj_t *arrow_right(lv_obj_t *parent, lv_color_t color);
 
 /** The folded-map mark. */
 lv_obj_t *map_mark(lv_obj_t *parent, lv_color_t color);
+
+/**
+ * A labelled button: a pill `w` × `h` at (x, y) with its word, filled in `fill`
+ * with lettering in `ink`, or (not `filled`) ringed in `ink` on a slip. Taken
+ * a fingertip beyond what's drawn. Its word is its only child, so a glyph
+ * added to it and moved to index 0 goes before the word.
+ */
+lv_obj_t *pill(lv_obj_t *parent, int32_t x, int32_t y, int32_t w, int32_t h, bool filled, lv_color_t fill, lv_color_t ink,
+               const char *s, lv_event_cb_t clicked);
+
+/** A map's + (dir 1) or − (−1), on the left at `y`; `clicked` gets dir as its user data. */
+lv_obj_t *zoom_button(lv_obj_t *scr, int32_t y, int dir, lv_event_cb_t clicked);

@@ -388,3 +388,71 @@ lv_obj_t *map_mark(lv_obj_t *parent, lv_color_t color)
     polyline(o, fold2, 2, 2, color);
     return o;
 }
+
+lv_obj_t *pill(lv_obj_t *parent, int32_t x, int32_t y, int32_t w, int32_t h, bool filled, lv_color_t fill, lv_color_t ink,
+               const char *s, lv_event_cb_t clicked)
+{
+    lv_obj_t *o = box(parent, x, y, w, h);
+    lv_obj_set_style_radius(o, h / 2, 0);
+    lv_obj_set_style_bg_color(o, filled ? fill : C_SLIP, 0);
+    lv_obj_set_style_bg_opa(o, LV_OPA_COVER, 0);
+    if (!filled) {
+        lv_obj_set_style_border_width(o, 2, 0);
+        lv_obj_set_style_border_color(o, ink, 0);
+    }
+    /* Pressed, it darkens a shade, so the finger sees it took. */
+    lv_obj_set_style_bg_color(o, lv_color_mix(lv_color_black(), filled ? fill : C_SLIP, 40), LV_STATE_PRESSED);
+    lv_obj_set_flex_flow(o, LV_FLEX_FLOW_ROW);
+    lv_obj_set_flex_align(o, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+    lv_obj_set_style_pad_column(o, 10, 0);
+    lv_obj_t *l = text_in(o, h >= 52 ? &jost_regular_22 : &jost_medium_18, ink, s);
+    lv_obj_set_style_text_letter_space(l, 1, 0);
+    lv_obj_add_flag(o, LV_OBJ_FLAG_CLICKABLE);
+    lv_obj_set_ext_click_area(o, 10);
+    if (clicked) lv_obj_add_event_cb(o, clicked, LV_EVENT_CLICKED, NULL);
+    return o;
+}
+
+#define STAMP_PRESS_MS 500
+
+/** Presses the stamp (`d` across) at (cx, cy) in after `delay`: down from half as big again and a turn, an ink ring spreading. */
+void stamp_press(lv_obj_t *parent, lv_obj_t *s, int32_t cx, int32_t cy, int32_t d, int32_t tilt10, uint32_t delay)
+{
+    lv_obj_t *ink = box(parent, cx - d * 7 / 10, cy - d * 7 / 10, d * 14 / 10, d * 14 / 10);
+    lv_obj_t *ring = box(ink, 0, 0, d, d);
+    lv_obj_set_style_radius(ring, LV_RADIUS_CIRCLE, 0);
+    lv_obj_set_style_border_width(ring, 3, 0);
+    lv_obj_set_style_border_color(ring, C_VERMILION, 0);
+    lv_obj_set_style_opa(ring, LV_OPA_TRANSP, 0);
+    motion_once(ring, d * 9 / 10, d * 135 / 100, 1100, delay + STAMP_PRESS_MS - 100, m_size);
+    motion_once(ring, 140, 0, 1100, delay + STAMP_PRESS_MS - 100, m_opa);
+    lv_obj_move_foreground(s);
+
+    /* After it lands, it rocks four degrees and back, slowly. */
+    motion_loop(s, KF({0, (int16_t)tilt10}, {500, (int16_t)(tilt10 + 40)}, {1000, (int16_t)tilt10}), 9000, delay + STAMP_PRESS_MS + 1000, m_turn);
+    motion_once(s, tilt10 - 140, tilt10, STAMP_PRESS_MS, delay, m_turn);
+    motion_once(s, 397, 256, STAMP_PRESS_MS, delay, m_zoom);
+    motion_once(s, 0, 255, STAMP_PRESS_MS * 7 / 10, delay, m_opa);
+}
+
+/* 64 px across, and taken 16 px beyond that: about 9 mm of glass, near enough a fingertip. */
+lv_obj_t *zoom_button(lv_obj_t *scr, int32_t y, int dir, lv_event_cb_t clicked)
+{
+    lv_obj_t *b = disc(scr, 16, y, 64, C_SLIP);
+    lv_obj_set_style_border_width(b, 2, 0);
+    lv_obj_set_style_border_color(b, C_BLUE, 0);
+    lv_obj_add_flag(b, LV_OBJ_FLAG_CLICKABLE);
+    lv_obj_set_ext_click_area(b, 16);
+    lv_obj_t *bar = box(b, 0, 0, 22, 4);
+    lv_obj_set_style_bg_color(bar, C_BLUE, 0);
+    lv_obj_set_style_bg_opa(bar, LV_OPA_COVER, 0);
+    lv_obj_center(bar);
+    if (dir > 0) {
+        lv_obj_t *up = box(b, 0, 0, 4, 22);
+        lv_obj_set_style_bg_color(up, C_BLUE, 0);
+        lv_obj_set_style_bg_opa(up, LV_OPA_COVER, 0);
+        lv_obj_center(up);
+    }
+    lv_obj_add_event_cb(b, clicked, LV_EVENT_CLICKED, (void *)(intptr_t)dir);
+    return b;
+}

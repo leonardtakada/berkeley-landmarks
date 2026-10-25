@@ -10,11 +10,11 @@
 
 typedef struct {
     const char *name;
-    const char *speaker; /* who narrates it: an architect's key, or NULL for the guide */
-    const char *caption; /* the narration's opening lines */
-    int16_t metres;      /* from the stop before, as the crow flies (0 for the first) */
-    int16_t bearing;     /* from the stop before, degrees clockwise from north */
-    int16_t lm;          /* its landmark (lm-N): its narration on the card is lm<N>.caf */
+    const char *speaker;     /* who narrates it: an architect's key, or NULL for the guide */
+    const char *caption;     /* the narration's opening lines */
+    int32_t lat_e6, lon_e6;  /* the building, millionths of a degree */
+    int16_t passing;         /* where the route passes it: an index into the walk's route (−1: no route) */
+    int16_t lm;              /* its landmark (lm-N): its narration on the card is lm<N>.caf */
 } stop_t;
 
 typedef struct {
@@ -24,6 +24,8 @@ typedef struct {
     const char *host; /* the architect who walks it with you (`lead ?? cast[0]`), or NULL */
     const stop_t *stops;
     int stop_count;
+    const int32_t *route; /* the way a walker takes (the app's routeCoordinates): lat, lon pairs in e6 */
+    int route_len;        /* points */
 } walk_t;
 
 typedef struct {

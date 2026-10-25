@@ -1,14 +1,18 @@
 #include "position.h"
 #include <math.h>
+#include "esp_timer.h"
 #include "gnss/gnss.h"
 
 #define EARTH_M 6371000.0
-#define MOVING_KMH 1.5 /* below a slow walk, the course is noise */
+#define MOVING_KMH 2.5 /* below a slow walk the course is noise (standing indoors, the fix wanders at 1–2 km/h) */
+#define UERE_M 5.0f    /* a typical error for each unit of HDOP */
+#define PRETEND_M 3.0f
 
 static bool pretending;
 static double pretend_lat, pretend_lon;
 static float pretend_course;
-static bool pretend_moving;
+static int64_t pretend_walked_ms = -1000000; /* when it last walked: moving while that's recent */
+static bool walks_itself;
 
 static double rad(double d)
 {
@@ -32,12 +36,13 @@ position_t position_now(void)
 {
     if (pretending) {
         position_t p = {.known = true, .pretend = true, .lat = pretend_lat, .lon = pretend_lon,
-                        .course = pretend_course, .moving = pretend_moving};
-        pretend_moving = false; /* until it walks again */
+                        .course = pretend_course, .accuracy = PRETEND_M};
+        p.moving = esp_timer_get_time() / 1000 - pretend_walked_ms < 2000;
         return p;
     }
     gnss_state_t g = gnss_state();
-    position_t p = {.known = g.fix, .lat = g.lat, .lon = g.lon, .course = g.course};
+    position_t p = {.known = g.fix, .lat = g.lat, .lon = g.lon, .course = g.course,
+                    .accuracy = g.hdop > 0 ? g.hdop * UERE_M : 99};
     p.moving = g.fix && g.speed_kmh >= MOVING_KMH;
     return p;
 }
@@ -46,12 +51,23 @@ void position_pretend(double lat, double lon)
 {
     pretending = true;
     pretend_lat = lat, pretend_lon = lon;
-    pretend_moving = false;
+    pretend_walked_ms = -1000000;
 }
 
 void position_pretend_off(void)
 {
     pretending = false;
+    walks_itself = false;
+}
+
+void position_pretend_walking(bool on)
+{
+    walks_itself = on && pretending;
+}
+
+bool position_walks_itself(void)
+{
+    return pretending && walks_itself;
 }
 
 void position_walk_toward(double lat, double lon, double metres)
@@ -63,5 +79,5 @@ void position_walk_toward(double lat, double lon, double metres)
     pretend_course = (float)position_bearing(pretend_lat, pretend_lon, lat, lon);
     pretend_lat += (lat - pretend_lat) * f;
     pretend_lon += (lon - pretend_lon) * f;
-    pretend_moving = true;
+    pretend_walked_ms = esp_timer_get_time() / 1000;
 }

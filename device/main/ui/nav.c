@@ -1,7 +1,8 @@
 /**
  * Getting about: what the two side buttons do on each screen, the tabs that
- * say so beside them, and the moves through a walk that the buttons and the
- * screens' own taps share. And a log of the last touches, for the console.
+ * say so beside them, and the moves through a walk that the side buttons and
+ * the screens' own buttons share. And a log of the last touches, for the
+ * console.
  */
 #include <stdio.h>
 #include "bsp/esp-bsp.h"
@@ -10,41 +11,20 @@
 #include "walk.h"
 #include "widgets.h"
 
-/* The tabs sit inside the rim, level with the buttons: the upper at about two o'clock, the lower at four. */
-#define TAB_H 32
 #define TAB_RIGHT 404
-#define UPPER_CY 123
-#define LOWER_CY 343
 
-/* Where the controls and "End the walk?" go back to. */
-static screen_id_t controls_over = SCR_FOLLOW, asked_over = SCR_FOLLOW;
+/* What the menu and the map came over, to go back to exactly; and where "End the walk?" goes back to. */
+static screen_id_t under = SCR_FOLLOW, asked_over = SCR_FOLLOW;
 
-static bool walking(screen_id_t s)
+void ui_start_walk(int first)
 {
-    switch (s) {
-    case SCR_FOLLOW:
-    case SCR_MAP:
-    case SCR_CONTROLS:
-    case SCR_ARRIVED:
-    case SCR_LISTENING:
-    case SCR_GUIDESTOP:
-    case SCR_HANDOVER:
-    case SCR_RESTING:
-    case SCR_HARDWARE:
-        return true;
-    default:
-        return false;
-    }
-}
-
-void ui_arrive(void)
-{
-    ui_show(SCR_ARRIVED);
+    walk_begin(first);
+    ui_show(walk_in_intro() ? SCR_STORY : SCR_FOLLOW);
 }
 
 void ui_listen(void)
 {
-    ui_show(walk_narration_screen());
+    ui_show(SCR_STORY);
 }
 
 void ui_next_stop(void)
@@ -53,29 +33,46 @@ void ui_next_stop(void)
         ui_show(SCR_EXPLORE); /* on your own: told, back to the map */
         return;
     }
-    if (walk_at_last()) {
+    if (walk_in_intro()) {
+        walk_to(walk_started_at());
+    } else if (walk_at_last()) {
         ui_show(SCR_WALKED);
         return;
+    } else {
+        walk_to(walk_next());
     }
-    walk_to(walk_at() + 1);
     ui_show(SCR_FOLLOW);
 }
 
 void ui_last_stop(void)
 {
-    walk_to(walk_at() - 1);
+    if (!walk_at_first()) walk_to(walk_before());
     ui_show(SCR_FOLLOW);
 }
 
 void ui_open_controls(void)
 {
-    if (ui_current() != SCR_CONTROLS && ui_current() != SCR_HARDWARE) controls_over = ui_current();
+    screen_id_t s = ui_current();
+    if (s != SCR_CONTROLS && s != SCR_HARDWARE && s != SCR_MAP) under = s;
     ui_show_anim(SCR_CONTROLS, LV_SCREEN_LOAD_ANIM_OVER_BOTTOM, 320);
 }
 
 void ui_close_controls(void)
 {
-    ui_show_anim(controls_over, LV_SCREEN_LOAD_ANIM_OUT_TOP, 320);
+    ui_show_anim(under, LV_SCREEN_LOAD_ANIM_OUT_TOP, 320);
+}
+
+void ui_open_map(void)
+{
+    /* From the menu, the map goes back past it, to what the menu came down on. */
+    screen_id_t s = ui_current();
+    if (s != SCR_CONTROLS && s != SCR_HARDWARE && s != SCR_MAP) under = s;
+    ui_show(SCR_MAP);
+}
+
+void ui_close_map(void)
+{
+    ui_show(under);
 }
 
 void ui_ask_end(void)
@@ -91,64 +88,43 @@ void ui_keep_walking(void)
 
 void ui_button(button_t b)
 {
-    screen_id_t s = ui_current();
-    if (b == BTN_LOWER_HELD) {
-        if (walking(s) && !walk_is_free()) ui_ask_end();
-        return;
-    }
     bool upper = b == BTN_UPPER;
-    switch (s) {
+    switch (ui_current()) {
     case SCR_COVER:
-        ui_show(upper ? SCR_WALKS : SCR_EXPLORE);
-        break;
-    case SCR_EXPLORE:
-        if (upper) explore_go();
-        else ui_show(SCR_COVER);
+        if (upper) ui_show(SCR_WALKS);
         break;
     case SCR_WALKS:
-        if (upper) ui_show(SCR_FINDING);
+        if (upper) walks_start();
         else ui_show(SCR_COVER);
         break;
-    case SCR_FINDING:
-        ui_show(upper ? SCR_FOLLOW : SCR_WALKS);
-        break;
     case SCR_FOLLOW:
-        if (upper) ui_arrive();
-        else ui_open_controls();
-        break;
-    case SCR_MAP:
-        if (!upper) ui_show(SCR_FOLLOW);
-        break;
-    case SCR_CONTROLS:
-        if (upper) ui_next_stop();
-        else ui_close_controls();
-        break;
-    case SCR_HARDWARE:
-        if (!upper) ui_show(SCR_CONTROLS);
-        break;
-    case SCR_ARRIVED:
         if (upper) ui_listen();
         else ui_open_controls();
         break;
-    case SCR_HANDOVER:
-        if (upper) ui_show(SCR_LISTENING);
+    case SCR_STORY:
+        if (upper) story_upper();
+        else if (walk_is_free()) ui_show(SCR_EXPLORE); /* on your own, the lower is Back, to the map */
         else ui_open_controls();
         break;
-    case SCR_LISTENING:
-    case SCR_GUIDESTOP:
-        if (walk_is_free()) ui_show(SCR_EXPLORE); /* on your own: either button, back to the map */
-        else if (upper) ui_next_stop();
-        else ui_open_controls();
+    case SCR_MAP:
+        if (!upper) ui_close_map();
         break;
-    case SCR_RESTING:
-        ui_show(SCR_FOLLOW);
+    case SCR_CONTROLS:
+        if (!upper) ui_close_controls();
+        break;
+    case SCR_HARDWARE:
+        if (!upper) ui_show(SCR_CONTROLS);
         break;
     case SCR_ENDWALK:
         if (upper) ui_show(SCR_WALKED);
         else ui_keep_walking();
         break;
     case SCR_WALKED:
-        if (upper) ui_show(SCR_WALKS);
+        ui_show(upper ? SCR_WALKS : SCR_COVER);
+        break;
+    case SCR_EXPLORE:
+        if (upper) explore_go();
+        else ui_show(SCR_COVER);
         break;
     default:
         break;
@@ -166,7 +142,7 @@ static lv_obj_t *tab(lv_obj_t *scr, bool dark, button_t b, const char *s)
     bool upper = b == BTN_UPPER;
     lv_obj_t *t = box(scr, 0, 0, LV_SIZE_CONTENT, TAB_H);
     lv_obj_set_style_radius(t, TAB_H / 2, 0);
-    lv_obj_set_style_pad_hor(t, 12, 0);
+    lv_obj_set_style_pad_hor(t, 16, 0);
     lv_obj_set_flex_flow(t, LV_FLEX_FLOW_ROW);
     lv_obj_set_flex_align(t, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
     lv_color_t ink;
@@ -181,11 +157,14 @@ static lv_obj_t *tab(lv_obj_t *scr, bool dark, button_t b, const char *s)
         lv_obj_set_style_border_color(t, dark ? C_CREAM : C_BLUE, 0);
         ink = dark ? C_CREAM : C_BLUE;
     }
-    lv_obj_t *l = text_in(t, &jost_medium_16, ink, s);
+    lv_obj_t *l = text_in(t, &jost_medium_18, ink, s);
     lv_obj_set_style_text_letter_space(l, 2, 0);
     lv_obj_align(t, LV_ALIGN_TOP_RIGHT, TAB_RIGHT - SCREEN_W, (upper ? UPPER_CY : LOWER_CY) - TAB_H / 2);
     lv_obj_add_flag(t, LV_OBJ_FLAG_CLICKABLE);
-    lv_obj_set_ext_click_area(t, 18); /* 68 px tall to the finger, about 6.5 mm */
+    lv_obj_set_ext_click_area(t, 14); /* 68 px tall to the finger, about 6.5 mm */
+    /* Pressed, it darkens a shade, so the finger sees it took. */
+    lv_obj_set_style_bg_opa(t, LV_OPA_COVER, LV_STATE_PRESSED);
+    lv_obj_set_style_bg_color(t, upper ? lv_color_mix(lv_color_black(), dark ? C_CREAM : C_BLUE, 50) : C_BLUE_TINT, LV_STATE_PRESSED);
     lv_obj_add_event_cb(t, tab_tapped, LV_EVENT_CLICKED, (void *)(intptr_t)b);
     return t;
 }

@@ -534,9 +534,10 @@ static void run(char *cmd)
             printf("ERR walks are 1-12\n");
             return;
         }
+        /* Sets out on walk n, as Start would. */
         bsp_display_lock(LOCK_FOREVER);
         ui_walk = n - 1;
-        ui_show(SCR_WALKS);
+        ui_start_walk(0);
         bsp_display_unlock();
         printf("OK\n");
     } else if (strcmp(cmd, "stats") == 0) {
@@ -592,12 +593,16 @@ static void run(char *cmd)
             print_card();
         }
     } else if (strcmp(cmd, "here") == 0) {
-        /* here <lat> <lon>: pretend you're there (the free map then walks you where you go); here off: the sky. */
+        /* here <lat> <lon>: pretend you're there; here walk / here stand: it walks itself along the
+         * walk's route (or to the free map's pick) at walking pace, or stands; here off: the sky. */
         double lat, lon;
         if (arg && strcmp(arg, "off") == 0) position_pretend_off();
+        else if (arg && strcmp(arg, "walk") == 0) position_pretend_walking(true);
+        else if (arg && strcmp(arg, "stand") == 0) position_pretend_walking(false);
         else if (arg && sscanf(arg, "%lf %lf", &lat, &lon) == 2) position_pretend(lat, lon);
         position_t p = position_now();
-        printf("OK here known=%d pretend=%d lat=%.6f lon=%.6f\n", p.known, p.pretend, p.lat, p.lon);
+        printf("OK here known=%d pretend=%d walking=%d lat=%.6f lon=%.6f\n", p.known, p.pretend, position_walks_itself(),
+               p.lat, p.lon);
     } else if (strcmp(cmd, "stat") == 0) {
         stat_file(arg);
     } else if (strcmp(cmd, "put") == 0) {
@@ -658,12 +663,12 @@ static void run(char *cmd)
         ui_print_touches();
         bsp_display_unlock();
     } else if (strcmp(cmd, "button") == 0 && arg) {
-        /* As if a side button were pressed: upper, lower, or hold (the lower, held). */
-        button_t b = strcmp(arg, "upper") == 0 ? BTN_UPPER : strcmp(arg, "lower") == 0 ? BTN_LOWER : BTN_LOWER_HELD;
-        if (b == BTN_LOWER_HELD && strcmp(arg, "hold") != 0) {
-            printf("ERR button upper|lower|hold\n");
+        /* As if a side button were pressed: upper or lower. */
+        if (strcmp(arg, "upper") != 0 && strcmp(arg, "lower") != 0) {
+            printf("ERR button upper|lower\n");
             return;
         }
+        button_t b = strcmp(arg, "upper") == 0 ? BTN_UPPER : BTN_LOWER;
         bsp_display_lock(LOCK_FOREVER);
         ui_button(b);
         bsp_display_unlock();
@@ -676,8 +681,10 @@ static void run(char *cmd)
         printf("OK\n");
     } else if (strcmp(cmd, "where") == 0) {
         bsp_display_lock(LOCK_FOREVER);
-        printf("OK %s walk=%d stop=%d collected=%d left=%dm\n", ui_current_name(), ui_walk + 1, walk_at() + 1,
-               walk_collected_count(), walk_metres_left());
+        walk_nav_t n = walk_nav();
+        printf("OK %s walk=%d stop=%d%s collected=%d here=%d located=%d sure=%d moving=%d route=%d left=%dm way=%.0f turn=%.0f\n",
+               ui_current_name(), ui_walk + 1, walk_at() + 1, walk_in_intro() ? " (intro)" : "", walk_collected_count(),
+               n.here, n.located, n.sure, n.moving, n.on_route, n.metres, n.way, n.turn);
         bsp_display_unlock();
     } else if (cmd[0]) {
         printf("ERR unknown: %s\n", cmd);

@@ -16,18 +16,17 @@
 #define BOOT_GPIO GPIO_NUM_0
 
 /*
- * Held this long, the lower button ends the walk (it asks first). The upper
- * isn't given a hold: held for a few seconds, the power manager switches the
- * board off, so a long press of it means nothing here and only a short one counts.
+ * Neither button has a second meaning when held. The lower counts however long
+ * it's held, so it's always the menu or Back. The upper counts only short: held
+ * for a few seconds, the power manager switches the board off.
  */
-#define HOLD_MS 1000
 #define SHORT_MS 1000
 
 static const char *TAG = "buttons";
 static i2c_master_dev_handle_t expander;
 
 typedef struct {
-    bool down, held;
+    bool down;
     int64_t since_ms;
 } key_state_t;
 
@@ -56,7 +55,7 @@ bool buttons_init(void)
 
 static void press(button_t b)
 {
-    static const char *names[] = {"upper", "lower", "lower held"};
+    static const char *names[] = {"upper", "lower"};
     ESP_LOGI(TAG, "%s", names[b]);
     logged[logged_n % LOGGED].b = b;
     logged[logged_n % LOGGED].at_ms = esp_timer_get_time() / 1000;
@@ -67,19 +66,12 @@ static void press(button_t b)
     bsp_display_unlock();
 }
 
-/** Follows one key; returns what it did, if anything (-1 for nothing). */
-static int follow(key_state_t *k, bool down, int64_t now, bool can_hold)
+/** Follows one key; returns its press when it's let go, if it counts (-1 for nothing). */
+static int follow(key_state_t *k, bool down, int64_t now, button_t b)
 {
     int did = -1;
-    if (down && !k->down) {
-        k->since_ms = now;
-        k->held = false;
-    } else if (down && can_hold && !k->held && now - k->since_ms >= HOLD_MS) {
-        k->held = true;
-        did = BTN_LOWER_HELD;
-    } else if (!down && k->down && !k->held && now - k->since_ms < SHORT_MS) {
-        did = can_hold ? BTN_LOWER : BTN_UPPER;
-    }
+    if (down && !k->down) k->since_ms = now;
+    else if (!down && k->down && (b == BTN_LOWER || now - k->since_ms < SHORT_MS)) did = b;
     k->down = down;
     return did;
 }
@@ -99,15 +91,15 @@ void buttons_poll(void)
     bool boot = gpio_get_level(BOOT_GPIO) == 0;
     raw_pwr = pwr, raw_boot = boot;
 
-    int a = follow(&upper, pwr, now, false);
-    int b = follow(&lower, boot, now, true);
+    int a = follow(&upper, pwr, now, BTN_UPPER);
+    int b = follow(&lower, boot, now, BTN_LOWER);
     if (a >= 0) press((button_t)a);
     if (b >= 0) press((button_t)b);
 }
 
 void buttons_print(void)
 {
-    static const char *names[] = {"upper", "lower", "lower-held"};
+    static const char *names[] = {"upper", "lower"};
     int64_t now = esp_timer_get_time() / 1000;
     printf("OK upper=%s lower=%s presses=%d", raw_pwr ? "down" : "up", raw_boot ? "down" : "up", logged_n);
     for (int i = LV_MAX(0, logged_n - LOGGED); i < logged_n; i++) {
