@@ -2,7 +2,7 @@ import type { Landmark } from "../data/landmarks";
 import { ARCHITECTS, architectsIn, type ArchitectKey } from "./architects";
 
 /**
- * The Registry's index: a query read the way a reader would put it —
+ * The Catalogue's index: a query read the way a reader would put it —
  * "every Maybeck within walking distance", "Queen Anne in Elmwood",
  * "1920s downtown" — into the terms of the index (architect, style,
  * district, era), whether it's to be near where they're standing, and any

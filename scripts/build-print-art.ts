@@ -4,7 +4,7 @@
 //   labels — a geometric label (square, arch, triangle, tall panel, circle,
 //   gable) holding a landscape cut from two inks and their tints, with the
 //   paper left showing.
-// - The Registry frieze: a street of Berkeley buildings in line, knocked out
+// - The Catalogue frieze: a street of Berkeley buildings in line, knocked out
 //   of a solid blue band, after the line-drawn friezes on the book's cover.
 //
 // Composed here from a few flat shapes; every path coordinate then gets the
@@ -381,7 +381,7 @@ const SCENES: Record<string, Scene> = {
   },
 };
 
-// ── The Registry frieze (viewBox 400 × 140) ───────────────────────────────
+// ── The Catalogue frieze (viewBox 400 × 140) ───────────────────────────────
 // A street of the city's buildings drawn in cream line on the blue: Maybeck's
 // church, a Queen Anne, the Campanile, City Hall under the sun, the Art Deco
 // library, a storybook cottage, a bungalow under its tree.
@@ -468,7 +468,7 @@ fs.writeFileSync(
     `export const WALK_LABEL_SVG: Record<string, string> = {\n` +
     baked.map(([k, , v]) => `  ${JSON.stringify(k)}: ${JSON.stringify(v)},`).join("\n") +
     `\n};\n\n` +
-    `export const REGISTRY_FRIEZE_SVG = ${JSON.stringify(friezeSvg)};\n`,
+    `export const CATALOGUE_FRIEZE_SVG = ${JSON.stringify(friezeSvg)};\n`,
 );
 console.log(`wrote ${OUT} (${baked.length} labels, the frieze)`);
 

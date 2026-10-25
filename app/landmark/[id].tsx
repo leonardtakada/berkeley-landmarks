@@ -66,7 +66,7 @@ function photoUri(url: string) {
 }
 
 /**
- * An entry in the registry, printed as a page of the guide: running head,
+ * An entry in the catalogue, printed as a page of the guide: running head,
  * the photograph as a one-ink plate (or, wanting one, a plate drawn after
  * the building's style), the particulars, the architect (drawn,
  * where the book has a drawing of them), the history, and what's nearby.
@@ -204,7 +204,7 @@ export default function LandmarkEntryScreen() {
   if (!landmark) {
     return (
       <EntryPage>
-        <RunningHead back="The Registry" />
+        <RunningHead back="The Catalogue" />
         <View style={styles.missing}>
           <Annotation>This landmark isn&apos;t in the guide.</Annotation>
         </View>
@@ -227,7 +227,7 @@ export default function LandmarkEntryScreen() {
       ["Built", landmark.yearBuilt],
       ["Style", landmark.style],
       ["District", landmark.neighborhood],
-      ["Registry", number ? `No. ${number}` : ""],
+      ["Catalogue", number ? `No. ${number}` : ""],
       ["Designation", landmark.designationType !== "Landmark" ? landmark.designationType ?? "" : ""],
       ["National Register", landmark.nationalRegister ? "Listed ※" : ""],
     ] as [string, string][]
@@ -236,7 +236,7 @@ export default function LandmarkEntryScreen() {
   return (
     <EntryPage>
       <RunningHead
-        back="The Registry"
+        back="The Catalogue"
         folio={number ? `No. ${number}` : undefined}
         corner={{ on: !!copy.corners[landmark.id], onToggle: () => mark("corners", landmark.id, !copy.corners[landmark.id]) }}
       />
@@ -328,12 +328,12 @@ export default function LandmarkEntryScreen() {
               <Text style={styles.architectNote}>{ARCHITECTS[architect].note}</Text>
               <Pressable
                 onPress={() =>
-                  router.navigate({ pathname: "/registry", params: { q: ARCHITECTS[architect].surname } })
+                  router.navigate({ pathname: "/catalogue", params: { q: ARCHITECTS[architect].surname } })
                 }
                 hitSlop={8}
                 style={({ pressed }) => [styles.linkRow, pressed && { opacity: 0.5 }]}
               >
-                <Text style={styles.link}>{worksBy(architect).length - 1} more in the registry</Text>
+                <Text style={styles.link}>{worksBy(architect).length - 1} more in the catalogue</Text>
                 <Arrow length={18} />
               </Pressable>
               <Pressable
@@ -377,7 +377,7 @@ export default function LandmarkEntryScreen() {
 
         {/* Nearby */}
         <View style={styles.block}>
-          <Text style={[TYPE.label, styles.subhead]}>Nearby in the registry</Text>
+          <Text style={[TYPE.label, styles.subhead]}>Nearby in the catalogue</Text>
           <Rule color={INK.charcoal} weight={1} />
           {nearby.map(({ l, miles }, i) => (
             <Pressable

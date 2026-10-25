@@ -17,7 +17,7 @@ type LatLng = { latitude: number; longitude: number };
 export const ARRIVAL_RADIUS_M = 40;
 /** A fix vaguer than this can't say the reader is at a stop. */
 export const STOP_FIX_M = 50;
-/** Within this of a building in the registry (or of a historic district's middle), the reader is there. */
+/** Within this of a building in the catalogue (or of a historic district's middle), the reader is there. */
 export const VISIT_RADIUS_M = { building: 60, district: 300 } as const;
 /** A fix vaguer than this can't say the reader is at a place. */
 export const VISIT_FIX_M = 100;
@@ -50,7 +50,7 @@ export function isAtStop(fix: Fix, stop: LatLng, passing?: LatLng | null): boole
 }
 
 /**
- * Where a fix puts the reader relative to a place in the registry: there
+ * Where a fix puts the reader relative to a place in the catalogue: there
  * (allowing for the fix's own uncertainty), not there, or too unsure to say.
  */
 export function placeCheck(

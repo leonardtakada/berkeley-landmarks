@@ -14,7 +14,7 @@ import { PAPER } from "@/constants/book";
 const TRIGGERS: ScreenTrigger[] = [
   { type: "internal", name: "index", href: "/" },
   { type: "internal", name: "tours", href: "/tours" },
-  { type: "internal", name: "registry", href: "/registry" },
+  { type: "internal", name: "catalogue", href: "/catalogue" },
   { type: "internal", name: "profile", href: "/profile" },
 ];
 

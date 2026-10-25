@@ -36,7 +36,7 @@ describe("architect matching", () => {
     expect(architectOf({ architect: "Howard Moise" })).toBeNull();
   });
 
-  it("counts each architect's entries in the registry", () => {
+  it("counts each architect's entries in the catalogue", () => {
     expect(worksBy("maybeck").length).toBeGreaterThan(10);
     expect(worksBy("howard").length).toBeGreaterThan(10);
   });

@@ -55,7 +55,7 @@ type Section = { name: string; label: string; rest: number };
 export const SECTIONS: Section[] = [
   // Each ribbon hangs long enough to show its whole label.
   { name: "tours", label: "Tours", rest: 100 },
-  { name: "registry", label: "Landmarks", rest: 128 },
+  { name: "catalogue", label: "Landmarks", rest: 128 },
   { name: "profile", label: "Appendix", rest: 116 },
 ];
 

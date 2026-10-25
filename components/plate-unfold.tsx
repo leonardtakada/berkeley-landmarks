@@ -13,7 +13,7 @@ import Animated, {
 } from "react-native-reanimated";
 import { SvgXml } from "react-native-svg";
 
-import { REGISTRY_FRIEZE_SVG } from "@/components/print-art.generated";
+import { CATALOGUE_FRIEZE_SVG } from "@/components/print-art.generated";
 import { plateOut, type PlateRect } from "@/lib/map-plate";
 
 /** The plate rising off the page to where it's unfolded. */
@@ -333,7 +333,7 @@ export function PlateUnfold({
       ))}
       <Animated.View pointerEvents="none" style={[styles.plate, { top: g.k * g.s, width: g.W, height: g.s }, plateLift]}>
         <Animated.View style={[StyleSheet.absoluteFill, plateTurn]}>
-          <SvgXml xml={REGISTRY_FRIEZE_SVG} width="100%" height="100%" preserveAspectRatio="none" />
+          <SvgXml xml={CATALOGUE_FRIEZE_SVG} width="100%" height="100%" preserveAspectRatio="none" />
           <Animated.View style={[StyleSheet.absoluteFill, styles.plateShade, plateShade]} />
         </Animated.View>
       </Animated.View>

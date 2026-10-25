@@ -2,7 +2,7 @@
  * The isometric scene of Berkeley, as flat printed pieces in the order
  * they're laid down (back to front): the Bay, the land as stacked paper
  * terraces (one sheet per contour), the streets, trees, and every building
- * extruded from its OpenStreetMap footprint — the registry's landmarks in
+ * extruded from its OpenStreetMap footprint — the catalogue's landmarks in
  * vermilion. Geometry stays in local metres (u east, v north, z up); the
  * renderers (walk plates, the city map) project it with lib/iso.ts.
  *
@@ -235,7 +235,7 @@ export async function buildings(): Promise<Building[]> {
       base: levelZ(Math.max(0, levelAt(t, c[0], c[1]))),
     });
   }
-  // The registry's landmarks: the building each one stands in.
+  // The catalogue's landmarks: the building each one stands in.
   const grid = new Map<string, Building[]>();
   const key = (u: number, v: number) => `${Math.floor(u / 100)},${Math.floor(v / 100)}`;
   for (const b of out) grid.set(key(b.c[0], b.c[1]), [...(grid.get(key(b.c[0], b.c[1])) ?? []), b]);

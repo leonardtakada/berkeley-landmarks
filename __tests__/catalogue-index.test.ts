@@ -2,12 +2,12 @@ import { describe, expect, it } from "vitest";
 
 import { landmarks } from "../data/landmarks";
 import { worksBy } from "../lib/architects";
-import { answers, parseQuery, stylesOf, vocabulary, walkMinutes, without, yearOf } from "../lib/registry-index";
+import { answers, parseQuery, stylesOf, vocabulary, walkMinutes, without, yearOf } from "../lib/catalogue-index";
 
 const v = vocabulary(landmarks);
 const find = (q: string) => landmarks.filter((l) => answers(l, parseQuery(q, v)));
 
-describe("the registry's index", () => {
+describe("the catalogue's index", () => {
   it("reads an architect and 'within walking distance'", () => {
     const q = parseQuery("every Maybeck within walking distance of where I'm standing", v);
     expect(q.terms.map((t) => [t.facet, t.value])).toEqual([["architect", "maybeck"]]);

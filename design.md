@@ -24,7 +24,7 @@ Auto Indicator LLC — in the Appendix only, never on the cover.
 - **Type**: Jost (a Futura revival — the face of the Showa Modern book).
   Hairline for big numerals, medium tracked capitals for kickers and labels,
   regular for text. The four big titles — BERKELEY TOURS, THE TOURS, THE
-  REGISTRY, THE ARCHITECTS — are set in **Berkeley Post**, the guide's own
+  CATALOGUE, THE ARCHITECTS — are set in **Berkeley Post**, the guide's own
   display face: heavy cut-paper capitals after a Showa poster's POST
   lettering, built by `python3 scripts/build-title-font.py`
   (→ `assets/fonts/BerkeleyPost.otf`; needs fontTools and skia-pathops).
@@ -54,7 +54,7 @@ Auto Indicator LLC — in the Appendix only, never on the cover.
   tooth, type edges), 0.2° nearly a fifth. So a leaf within 0.2° of flat is
   laid flat at once (no transform at all, not `rotateY(0)`), and the book's
   own card, which never turns, carries no perspective matrix (`forResting`)
-  (`components/book-pages.tsx`). Part One The Tours, Part Two The Registry,
+  (`components/book-pages.tsx`). Part One The Tours, Part Two The Catalogue,
   Appendix. The book begins at the head-band: the strip above it (the status
   bar) is not the book, and stays put in the open page's stock — paper, or
   the board on the cover — while the leaves turn in a clipped frame below.
@@ -68,7 +68,7 @@ Auto Indicator LLC — in the Appendix only, never on the cover.
 - **Entries**: leaves laid over the book, hinged at the right
   (`lib/page-turn.ts`); swipe back from the left edge. A tiny haptic tick
   as a leaf turns over (the ribbons tick too). No shade or edge shadow.
-- **The Registry's index** (`lib/registry-index.ts`): Find reads a query
+- **The Catalogue's index** (`lib/catalogue-index.ts`): Find reads a query
   the way a reader puts it — "every Maybeck within walking distance",
   "Queen Anne in Elmwood", "1920s downtown" — into terms of the index
   (architect, style, district, era), shown as slips that can be taken out;
@@ -77,7 +77,7 @@ Auto Indicator LLC — in the Appendix only, never on the cover.
   as plain words. "Near me" (Where, or said in the query) keeps what's
   within a quarter hour's walk, nearest first, in bands of five minutes.
   Order by name, year, architect, style or district; tapping a heading
-  narrows the index to it. `__tests__/registry-index.test.ts`.
+  narrows the index to it. `__tests__/catalogue-index.test.ts`.
 - **Map** (`app/map.tsx`): the isometric city (below), drawn by MapLibre;
   its chrome is flat slips, with a north point (north is up and to the
   left). The camera follows the reader: a landmark flies in above its sheet;
@@ -150,7 +150,7 @@ one sheet per 25 m terrace (USGS 3DEP elevation via the AWS terrain tiles,
 ruled waves; streets paper on a pale blue ground; every OpenStreetMap
 building raised from its outline (houses under gables, heights from tags or
 guessed from kind and size), flat-shaded in two tones lit from the west;
-the registry's landmarks in vermilion; lollipop trees in the parks and
+the catalogue's landmarks in vermilion; lollipop trees in the parks and
 groves. The pieces are laid back to front (`scripts/iso/scene.ts`).
 - **Walk plates**: `npx tsx scripts/iso/plates.ts [walk…]` bakes each walk's
   block to `assets/plates/<walk>.png` and writes
@@ -186,8 +186,8 @@ slight seeded wobble so edges read as cut. The drawing kit is
   Claremont lit at night, Rose Walk up the hill. On the Tours contents
   (alternating sides down the page, the guide's portrait tucked against
   the label) and each walk's opener.
-- **Registry frieze**: a street of Berkeley buildings in cream line knocked
-  out of a blue band, under the Registry's opener. It's the city map,
+- **Catalogue frieze**: a street of Berkeley buildings in cream line knocked
+  out of a blue band, under the Catalogue's opener. It's the city map,
   folded — its cover — and "Unfold the city map" sits under it. Pressed
   (`components/plate-unfold.tsx`, `lib/map-plate.ts`), it lifts off the page
   to the strip of the screen it's nearest, growing to the screen's width;
@@ -207,7 +207,7 @@ slight seeded wobble so edges read as cut. The drawing kit is
   the map as any other way in does.
 - Both are baked by `npx tsx scripts/build-print-art.ts`
   (→ `components/print-art.generated.ts`; `--preview <png>` for a sheet).
-- **Index letters**: each letter of the Registry cut out of a block of ink,
+- **Index letters**: each letter of the Catalogue cut out of a block of ink,
   the shapes running circle, square, arch, gable.
 - **Drawn plates** (`lib/building-plate.ts`): a landmark without a
   photograph gets a plate drawn at run time — a building of its style and
@@ -384,7 +384,7 @@ Stamps are earned on the spot (`lib/arrival.ts`):
   unread re-arms after thirty days. Twenty at most (iOS's region limit);
   half a year on, the entry asks "still watching?". Always-location and
   notices are asked for only at the tap; refused, the watch is kept as a
-  bookmark. A vermilion eye on the entry, ring in the Registry, pin on the
+  bookmark. A vermilion eye on the entry, ring in the Catalogue, pin on the
   map, and a list on the Stamps page.
   Built to survive the OS's habits: the task is defined when the module is
   first read (a fence wakes the app headless, before any screen); fences are
@@ -394,7 +394,7 @@ Stamps are earned on the spot (`lib/arrival.ts`):
   repeat replaces rather than stacks.
 - **Stamps** (`app/stamps.tsx`, from the Appendix): the walks as a passport
   page — each walked walk's label with its ring stamp — then places visited,
-  day by day, places watched, and pages turned down. The Registry marks
+  day by day, places watched, and pages turned down. The Catalogue marks
   visited entries with a tick and turned-down ones with a corner.
 Quiet is a feature: no badges, nothing asks the reader back, and the only
 notice is one the reader asked for by watching a place. Location is asked
@@ -403,7 +403,7 @@ place.
 
 ## Colophon
 The Appendix's colophon credits the typefaces (Jost, Berkeley Post, Noto
-Sans on the maps), the inks and stock, the sources of the registry, the maps
+Sans on the maps), the inks and stock, the sources of the catalogue, the maps
 (OpenStreetMap) and the lives, and every Commons photographer by name
 (`lib/credits.ts`, from the bundled credits). "About this guide"
 (`app/about.tsx`) says how each part was gathered.
@@ -419,7 +419,7 @@ Reduce Motion swaps turns for dissolves and skips the rest.
 The art moves the way a paper toy does: pieces slide, fold and swap; nothing
 wobbles or morphs into something else.
 - **The page's scroll is the clock** (`components/scroll-clock.tsx`): every
-  scrolling page (the Tours, a walk, an entry, the Registry, the Appendix)
+  scrolling page (the Tours, a walk, an entry, the Catalogue, the Appendix)
   provides its offset, and the art on it follows.
 - **Architects**: every so far down (or up) the page, each on-screen portrait
   plays the next gesture in its own loop — a blink or a double blink, a

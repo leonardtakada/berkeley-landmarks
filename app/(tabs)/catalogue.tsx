@@ -16,7 +16,7 @@ import Svg, { Path, SvgXml } from "react-native-svg";
 import { ArchitectPortrait } from "@/components/architect-portrait";
 import { ChapterOpener, Folio, Leader, SectionPage } from "@/components/book-page";
 import { CheckStamp } from "@/components/copy-marks";
-import { REGISTRY_FRIEZE_SVG } from "@/components/print-art.generated";
+import { CATALOGUE_FRIEZE_SVG } from "@/components/print-art.generated";
 import { Annotation, Arrow, Rule } from "@/components/print";
 import { ScrollClock, useScrollClockHandler } from "@/components/scroll-clock";
 import { FONT, INK, MARGIN, PAPER, TYPE } from "@/constants/book";
@@ -35,7 +35,7 @@ import {
   walkMinutes,
   without,
   type Facet,
-} from "@/lib/registry-index";
+} from "@/lib/catalogue-index";
 
 const VOCABULARY = vocabulary(landmarks);
 
@@ -130,13 +130,13 @@ function nearBand(metres: number): string {
 }
 
 /**
- * Part Two — the Registry: every designated landmark, set as the index of
+ * Part Two — the Catalogue: every designated landmark, set as the index of
  * the book. Letter (or decade, architect, style, district) headings; each
- * entry runs on dotted leaders to its registry number. The Find line reads
+ * entry runs on dotted leaders to its catalogue number. The Find line reads
  * a query as the index's terms — "every Maybeck within walking distance",
  * "Queen Anne in Elmwood" — and a heading narrows the index to itself.
  */
-export default function RegistryScreen() {
+export default function CatalogueScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const clock = useScrollClockHandler();
@@ -195,7 +195,7 @@ export default function RegistryScreen() {
     if (!near && parseQuery(text, VOCABULARY).near) void locate();
   };
 
-  // Another page can open the registry at an architect's works.
+  // Another page can open the catalogue at an architect's works.
   const [openedAt, setOpenedAt] = useState<string | undefined>(undefined);
   if (params.q !== openedAt) {
     setOpenedAt(params.q);
@@ -289,7 +289,7 @@ export default function RegistryScreen() {
           <View>
             <ChapterOpener
               kicker="Part Two"
-              title="The Registry"
+              title="The Catalogue"
               note="Every designated landmark in the city, set out as an index."
             />
             <View style={styles.frieze}>
@@ -301,7 +301,7 @@ export default function RegistryScreen() {
               >
                 <Animated.View style={plateAway}>
                   <View ref={plateRef} style={styles.friezeArt}>
-                    <SvgXml xml={REGISTRY_FRIEZE_SVG} width="100%" height="100%" />
+                    <SvgXml xml={CATALOGUE_FRIEZE_SVG} width="100%" height="100%" />
                   </View>
                 </Animated.View>
               </Pressable>
@@ -432,13 +432,13 @@ export default function RegistryScreen() {
             <View style={styles.empty}>
               <Annotation>
                 {near
-                  ? "Nothing in the registry is within a quarter hour's walk of where you are."
-                  : "Nothing in the registry answers to that."}
+                  ? "Nothing in the catalogue is within a quarter hour's walk of where you are."
+                  : "Nothing in the catalogue answers to that."}
               </Annotation>
             </View>
           )
         }
-        ListFooterComponent={total ? <Folio>The Registry · Berkeley</Folio> : null}
+        ListFooterComponent={total ? <Folio>The Catalogue · Berkeley</Folio> : null}
       />
       </ScrollClock>
     </SectionPage>

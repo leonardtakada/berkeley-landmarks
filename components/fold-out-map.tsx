@@ -197,7 +197,7 @@ export function FoldOutMap({
       <Animated.View style={[styles.foot, footStyle]}>
         <View style={styles.legend}>
           <View style={[styles.legendSwatch, plate && { backgroundColor: INK.vermilionTint }]} />
-          <Text style={TYPE.label}>{plate ? "Registry landmarks" : "Other registry buildings"}</Text>
+          <Text style={TYPE.label}>{plate ? "Catalogue landmarks" : "Other catalogue buildings"}</Text>
         </View>
         <Pressable onPress={onOpenFullMap} hitSlop={10} style={styles.fullLink}>
           <Text style={styles.link}>The large map</Text>
@@ -325,7 +325,7 @@ function RouteDrawing({
     });
     // Degrees of latitude per mile ≈ 1/69; pixels per quarter mile:
     const quarterMile = (0.25 / 69) * scale;
-    // Every other registry building inside the frame, as a small plan mark.
+    // Every other catalogue building inside the frame, as a small plan mark.
     const onRoute = new Set(stops.map((st) => st.id));
     const others = landmarks
       .filter((l) => !onRoute.has(l.id))
@@ -417,7 +417,7 @@ function RouteDrawing({
       {/* The street plan. */}
       <Path d={geo.plan.minor} stroke={INK.charcoal} strokeOpacity={0.4} strokeWidth={1.1} fill="none" strokeLinejoin="round" />
       <Path d={geo.plan.major} stroke={INK.charcoal} strokeOpacity={0.7} strokeWidth={2.4} fill="none" strokeLinejoin="round" />
-      {/* Other buildings in the registry: small blocks of blue tint. */}
+      {/* Other buildings in the catalogue: small blocks of blue tint. */}
       {geo.others.map((o) => (
         <Path
           key={o.id}

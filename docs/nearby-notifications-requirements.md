@@ -1,6 +1,6 @@
 # Nearby Notices — "Watch this place"
 
-**Feature: user-chosen geofenced notifications for Registry landmarks**
+**Feature: user-chosen geofenced notifications for Catalogue landmarks**
 
 ## Goal
 
@@ -17,8 +17,8 @@ the reader asked to watch it.
 
 ### Core behavior
 
-1. **Watch toggle** on every Registry entry (`app/landmark/[id].tsx`) and as
-   a slip in the Registry index. Copy: **"Watch this place"**; watching
+1. **Watch toggle** on every Catalogue entry (`app/landmark/[id].tsx`) and as
+   a slip in the Catalogue index. Copy: **"Watch this place"**; watching
    state shown as a small vermilion mark on the entry, the index row, and
    the map marker.
 2. Watching registers an **OS geofence** (CLCircularRegion on iOS /

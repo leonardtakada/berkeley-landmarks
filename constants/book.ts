@@ -87,7 +87,7 @@ export const PAGE_TURN_MS = 500;
 export const PAGE_TURN_DELAY_MS = 50;
 
 export const TYPE = StyleSheet.create({
-  /** Tracked capitals above a title: "CHAPTER 01 — THE REGISTRY". */
+  /** Tracked capitals above a title: "CHAPTER 01 — THE CATALOGUE". */
   kicker: {
     fontFamily: FONT.medium,
     fontSize: 11,
@@ -103,7 +103,7 @@ export const TYPE = StyleSheet.create({
     textTransform: "uppercase",
     color: INK.sepia,
   },
-  /** Section title, in the cut-paper display face: "THE REGISTRY". */
+  /** Section title, in the cut-paper display face: "THE CATALOGUE". */
   display: {
     fontFamily: FONT.display,
     fontSize: 34,
@@ -142,7 +142,7 @@ export const TYPE = StyleSheet.create({
     letterSpacing: 0.3,
     color: INK.sepia,
   },
-  /** Big numerals: chapter numbers, registry numbers. */
+  /** Big numerals: chapter numbers, catalogue numbers. */
   numeral: {
     fontFamily: FONT.hairline,
     fontSize: 56,

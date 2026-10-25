@@ -81,11 +81,11 @@ export default function AppendixScreen() {
                 <Text style={styles.sitterYears}>{ARCHITECTS[k].years}</Text>
               </Pressable>
               <Pressable
-                onPress={() => router.navigate({ pathname: "/registry", params: { q: ARCHITECTS[k].surname } })}
+                onPress={() => router.navigate({ pathname: "/catalogue", params: { q: ARCHITECTS[k].surname } })}
                 hitSlop={{ top: 4, bottom: 4 }}
                 style={({ pressed }) => [styles.worksRow, pressed && { opacity: 0.6 }]}
                 accessibilityRole="button"
-                accessibilityLabel={`${worksBy(k).length} entries in the registry`}
+                accessibilityLabel={`${worksBy(k).length} entries in the catalogue`}
               >
                 <Text style={styles.link}>{worksBy(k).length} entries</Text>
                 <Arrow length={16} />
@@ -241,7 +241,7 @@ export default function AppendixScreen() {
             inks, their tints and charcoal, every edge cut with a slight wobble.
           </Text>
           <Text style={styles.colophonBody}>
-            Registry particulars after the Berkeley Architectural Heritage Association and the City of Berkeley
+            Catalogue particulars after the Berkeley Architectural Heritage Association and the City of Berkeley
             Landmarks Preservation Commission. Maps and walks drawn from OpenStreetMap, © OpenStreetMap contributors,
             under the Open Database License; the lie of the land from the U.S. Geological Survey&apos;s 3D Elevation
             Program. The architects&apos; lives from their Wikipedia articles and the sources

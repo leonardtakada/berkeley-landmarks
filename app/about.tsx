@@ -22,7 +22,7 @@ export default function AboutScreen() {
 
   const sections: [string, string][] = [
     [
-      "The registry",
+      "The catalogue",
       `${landmarks.length} entries: the city's designated landmarks (${count("Landmark")}), structures of merit (${count(
         "Structure of Merit",
       )}) and historic districts (${count("Historic District")}), with their particulars — architect, date, style, district — after the Berkeley Architectural Heritage Association and the City of Berkeley Landmarks Preservation Commission. Each is placed on its own building: the building's outline in OpenStreetMap, checked against its address.`,
@@ -33,7 +33,7 @@ export default function AboutScreen() {
     ],
     [
       "The maps",
-      "The city is drawn as a paper diorama, seen from the south-west: every building raised from its outline in OpenStreetMap, the land stepped in terraces of twenty-five metres from the U.S. Geological Survey's elevations, the registry's landmarks in vermilion. The large map and each walk's fold-out map are printed into the guide, with every photograph, so all of it works with no signal — in the hills, on a plane, from abroad. On the fold-outs, the stops' buildings are drawn larger than life, as a pictorial map draws its sights.",
+      "The city is drawn as a paper diorama, seen from the south-west: every building raised from its outline in OpenStreetMap, the land stepped in terraces of twenty-five metres from the U.S. Geological Survey's elevations, the catalogue's landmarks in vermilion. The large map and each walk's fold-out map are printed into the guide, with every photograph, so all of it works with no signal — in the hills, on a plane, from abroad. On the fold-outs, the stops' buildings are drawn larger than life, as a pictorial map draws its sights.",
     ],
     [
       "The photographs",

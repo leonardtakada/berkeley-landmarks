@@ -257,7 +257,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
   },
   // No letterSpacing: iOS reuses text fields, and the spacing would stay
-  // with the field to spread out the next one's type (the Registry's Find).
+  // with the field to spread out the next one's type (the Catalogue's Find).
   codeInput: {
     fontFamily: FONT.light,
     fontSize: 34,

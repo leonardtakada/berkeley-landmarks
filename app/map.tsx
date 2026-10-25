@@ -62,7 +62,7 @@ const ALL_CATEGORIES: LandmarkCategory[] = [
 const INK_RED = INK.vermilion;
 /**
  * Where the city map opens: on downtown and the campus's west edge, where
- * the registry's landmarks gather, close enough to see the buildings and
+ * the catalogue's landmarks gather, close enough to see the buildings and
  * single landmarks rather than the whole city in clusters.
  */
 const OPENING = { latitude: 37.8712, longitude: -122.2662, latitudeDelta: 0.012, longitudeDelta: 0.012 };
@@ -579,7 +579,7 @@ export default function MapScreen() {
         />
       )}
 
-      {/* The entry, torn from the registry and laid on the map. */}
+      {/* The entry, torn from the catalogue and laid on the map. */}
       {selectedLandmark && (
         <View style={[styles.bottomSheet, { paddingBottom: Math.max(insets.bottom, 16) + 12 }]}>
           <PaperGrain opacity={0.8} />

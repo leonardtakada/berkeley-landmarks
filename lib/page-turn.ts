@@ -16,7 +16,7 @@ import { PAGE_TURN_MS } from "@/constants/book";
  * the way paper rises off a book: flat at 0°, edge-on at 90°. Perspective is
  * strong enough that the lifting edge visibly grows as it comes up.
  *
- * - Section pages (cover ↔ registry ↔ tours ↔ appendix) are hinged at the
+ * - Section pages (cover ↔ catalogue ↔ tours ↔ appendix) are hinged at the
  *   LEFT spine. Forward, the current leaf lifts away and reveals the next;
  *   back, the previous leaf swings down over the current one.
  * - Entry pages (a landmark, a tour) are leaves laid over the section, and

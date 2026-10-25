@@ -31,7 +31,7 @@ const FLAT = 0.002;
 /**
  * The section pages of the book, bound at the left spine.
  *
- * Turning forward (cover → tours → registry → appendix) lifts the current
+ * Turning forward (cover → tours → catalogue → appendix) lifts the current
  * leaf off by its free edge and swings it over the spine, revealing the next
  * page underneath; turning back brings the previous leaf down over the
  * current one. Both pages are live during the ~500ms turn. The leaf is flat

@@ -7,7 +7,7 @@
  *   ground   the Bay and the terraces of land              (z11+)
  *   waves    the Bay's ruled waves                         (z14+)
  *   major    main streets; minor, the rest                 (z11+ / z13+)
- *   lm       the registry's landmarks alone, for far out   (z11–13)
+ *   lm       the catalogue's landmarks alone, for far out   (z11–13)
  *   solids   every building and tree, back to front        (z14+)
  *   names    street names, along the streets               (z15+)
  *   places   the districts                                 (z11–15)
