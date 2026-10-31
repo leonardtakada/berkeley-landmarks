@@ -2,22 +2,24 @@
  * The walk: where you're going and how to get there, as large as the circle
  * allows. The next stop's name, the distance (along the route while you're on
  * it), and the way in words, with a pointer inside the rim turned to it, all
- * from where the GNSS puts you; the host rides along small at the top. The
+ * from where the GNSS puts you; the host rides along at the foot of the
+ * circle, head and shoulders, bobbing. The
  * way can only be given as a turn while you're walking (the guide has no
  * compass), so standing, it asks you to set off. At the stop (lib/arrival.ts:
  * within 40 m, on a fix good to 50 m) the guide chimes, collects the label
  * and says you're here; nothing moves on by itself.
  *
  * Listen (the upper button, or its tab) plays the stop's story, there or not;
- * Map shows the walk's map; the lower button is the menu. Everything is
- * centred, kept out of the two bands at the tabs' heights: which stop above,
- * then the stop, the distance and the way between the tabs, and Map below.
+ * Map (low on the left, across from the menu's tab) shows the walk's map; the
+ * lower button is the menu.
  */
 #include "ui.h"
 #include <math.h>
 #include <stdio.h>
 #include "audio/player.h"
 #include "audio/sound.h"
+#include "motion.h"
+#include "art.h"
 #include "theme.h"
 #include "walk.h"
 #include "widgets.h"
@@ -27,7 +29,9 @@
 #define CENTRE_X (SCREEN_W / 2)
 #define TICK_MS 1000
 #define WALK_MPS 1.4 /* how fast a pretend position walks itself ("here walk") */
-#define CAMEO_PX 64
+/* The host's face, low in the circle: the bust's shoulders run off its foot. */
+#define BUST_FACE_Y 348
+#define BADGE_PX 168
 
 typedef struct {
     lv_obj_t *kick, *metres, *words, *pointer, *listen; /* listen: the upper button's tab */
@@ -36,9 +40,6 @@ typedef struct {
     lv_timer_t *timer;
 } follow_t;
 
-/* Between the tabs' bands: the stop's name, the distance and the way. */
-#define MID_Y (UPPER_CY + TAB_H / 2 + 4)
-#define MID_H (LOWER_CY - TAB_H / 2 - MID_Y - 2)
 
 /** At the stop, the Listen tab goes vermilion (not on a vermilion ground, where it would vanish). */
 static void mark_listen(follow_t *f)
@@ -132,48 +133,52 @@ lv_obj_t *screen_follow(void)
         if (i != at && !got) lv_obj_set_style_arc_opa(seg, pal.ahead_opa, 0);
     }
 
-    /* Which stop, above the tabs (the pointer rides above it when the way is straight on). */
-    lv_color_t ink = pal.dark ? C_CREAM : C_CHARCOAL, soft = pal.dark ? C_BLUE_TINT : C_SEPIA;
-    f->kick = line_centered(scr, &jost_medium_16, pal.kick, 82, "");
-    lv_obj_set_style_text_letter_space(f->kick, 3, 0);
-
-    /* Where to, how far, which way: between the tabs, where the circle is widest. */
-    lv_obj_t *col = box(scr, 43, MID_Y, 380, MID_H);
-    lv_obj_set_flex_flow(col, LV_FLEX_FLOW_COLUMN);
-    lv_obj_set_flex_align(col, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
-    lv_obj_set_style_pad_row(col, 2, 0);
-    lv_obj_t *name = text_in(col, &jost_light_28, ink, walk_stop()->name);
-    lv_obj_set_width(name, 350);
-    lv_obj_set_style_text_align(name, LV_TEXT_ALIGN_CENTER, 0);
-    lv_obj_set_style_max_height(name, 2 * jost_light_28.line_height, 0);
-    lv_label_set_long_mode(name, LV_LABEL_LONG_MODE_DOTS);
-    /* The distance, with the host riding along small beside it. */
-    lv_obj_t *row = box(col, 0, 0, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
-    lv_obj_set_flex_flow(row, LV_FLEX_FLOW_ROW);
-    lv_obj_set_flex_align(row, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
-    lv_obj_set_style_pad_column(row, 14, 0);
-    const lv_image_dsc_t *face = walk->host ? cameo_of(walk->host) : NULL;
-    if (face) {
-        lv_obj_t *cameo = box(row, 0, 0, CAMEO_PX, CAMEO_PX);
-        lv_obj_set_style_radius(cameo, LV_RADIUS_CIRCLE, 0);
-        lv_obj_set_style_clip_corner(cameo, true, 0);
-        lv_obj_set_style_outline_width(cameo, 3, 0);
-        lv_obj_set_style_outline_color(cameo, C_CREAM, 0);
-        lv_obj_set_style_outline_opa(cameo, LV_OPA_COVER, 0);
-        lv_obj_t *img = lv_image_create(cameo);
-        lv_image_set_src(img, face);
-        lv_image_set_scale(img, CAMEO_PX * 256 / ART_CAMEO_PX);
+    /* The host rides along at the foot of the circle, under the way, bobbing as you walk. */
+    const lv_image_dsc_t *bust = walk->host ? bust_of(walk->host) : NULL;
+    if (bust) {
+        lv_obj_t *b = lv_image_create(scr);
+        lv_image_set_src(b, bust);
+        lv_obj_set_pos(b, CENTRE_X - ART_BUST_FACE_X, BUST_FACE_Y - ART_BUST_FACE_Y);
+        motion_loop(b, KF({0, 0}, {500, -4}, {1000, 0}), 1300, 0, m_y);
+    } else {
+        /* A walk whose host isn't drawn has its label instead: its scene, round, as the app's labels are. */
+        lv_obj_t *badge = box(scr, CENTRE_X - BADGE_PX / 2, BUST_FACE_Y - BADGE_PX / 2 + 10, BADGE_PX, BADGE_PX);
+        lv_obj_set_style_radius(badge, LV_RADIUS_CIRCLE, 0);
+        lv_obj_set_style_clip_corner(badge, true, 0);
+        lv_obj_set_style_border_width(badge, 3, 0);
+        lv_obj_set_style_border_color(badge, C_BLUE, 0);
+        lv_obj_set_style_border_post(badge, true, 0);
+        lv_obj_t *img = lv_image_create(badge);
+        lv_image_set_src(img, art_scenes[ui_walk].base);
+        lv_image_set_scale(img, BADGE_PX * 256 / SCREEN_W);
         lv_obj_center(img);
     }
-    f->metres = text_in(row, &jost_light_58, ink, "");
+
+    /* Which stop, where to, how far, which way: down the middle, above the host. The top is
+     * left to the pointer, which rides there when the way is straight on. */
+    lv_color_t ink = pal.dark ? C_CREAM : C_CHARCOAL, soft = pal.dark ? C_BLUE_TINT : C_SEPIA;
+    /* On vermilion (Maybeck's ground) sepia sinks into it: the way goes cream, as the kicker does. */
+    if (lv_color_eq(pal.ground, C_VERMILION)) soft = C_CREAM;
+    lv_obj_t *col = box(scr, 33, 118, 400, 156); /* the name just clear of the upper tab */
+    lv_obj_set_flex_flow(col, LV_FLEX_FLOW_COLUMN);
+    lv_obj_set_flex_align(col, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+    lv_obj_set_style_pad_row(col, 0, 0);
+    f->kick = text_in(col, &jost_medium_16, pal.kick, "");
+    lv_obj_set_style_text_letter_space(f->kick, 2, 0);
+    lv_obj_set_style_margin_bottom(f->kick, 4, 0);
+    lv_obj_t *name = text_in(col, &jost_light_28, ink, walk_stop()->name);
+    lv_obj_set_size(name, 340, jost_light_28.line_height);
+    lv_obj_set_style_text_align(name, LV_TEXT_ALIGN_CENTER, 0);
+    lv_label_set_long_mode(name, LV_LABEL_LONG_MODE_DOTS);
+    f->metres = text_in(col, &jost_light_58, ink, "");
     lv_obj_set_style_text_letter_space(f->metres, -1, 0);
     f->words = text_in(col, &jost_regular_20, soft, "");
 
     f->pointer = rim_pointer(scr, pal.accent, pal.shadow);
     lv_obj_add_flag(f->pointer, LV_OBJ_FLAG_HIDDEN);
 
-    /* The map, below the tabs: the one thing here the side buttons don't do. */
-    lv_obj_t *map = pill(scr, CENTRE_X - 70, LOWER_CY + TAB_H / 2 + 8, 140, 48, false, C_BLUE, C_BLUE, "Map", open_map);
+    /* The map, low on the left across from the menu's tab: the one thing here the side buttons don't do. */
+    lv_obj_t *map = pill(scr, 44, LOWER_CY - 22, 104, 44, false, C_BLUE, C_BLUE, "Map", open_map);
     lv_obj_move_to_index(map_mark(map, C_BLUE), 0);
 
     f->listen = ui_hints(scr, walk_ground(walk_host()), "LISTEN", "MENU");

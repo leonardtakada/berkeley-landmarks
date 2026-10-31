@@ -75,6 +75,11 @@ void ui_close_map(void)
     ui_show(under);
 }
 
+screen_id_t ui_map_over(void)
+{
+    return under;
+}
+
 void ui_ask_end(void)
 {
     asked_over = ui_current();
@@ -142,7 +147,7 @@ static lv_obj_t *tab(lv_obj_t *scr, bool dark, button_t b, const char *s)
     bool upper = b == BTN_UPPER;
     lv_obj_t *t = box(scr, 0, 0, LV_SIZE_CONTENT, TAB_H);
     lv_obj_set_style_radius(t, TAB_H / 2, 0);
-    lv_obj_set_style_pad_hor(t, 16, 0);
+    lv_obj_set_style_pad_hor(t, 14, 0);
     lv_obj_set_flex_flow(t, LV_FLEX_FLOW_ROW);
     lv_obj_set_flex_align(t, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
     lv_color_t ink;
@@ -157,11 +162,11 @@ static lv_obj_t *tab(lv_obj_t *scr, bool dark, button_t b, const char *s)
         lv_obj_set_style_border_color(t, dark ? C_CREAM : C_BLUE, 0);
         ink = dark ? C_CREAM : C_BLUE;
     }
-    lv_obj_t *l = text_in(t, &jost_medium_18, ink, s);
+    lv_obj_t *l = text_in(t, &jost_medium_16, ink, s);
     lv_obj_set_style_text_letter_space(l, 2, 0);
     lv_obj_align(t, LV_ALIGN_TOP_RIGHT, TAB_RIGHT - SCREEN_W, (upper ? UPPER_CY : LOWER_CY) - TAB_H / 2);
     lv_obj_add_flag(t, LV_OBJ_FLAG_CLICKABLE);
-    lv_obj_set_ext_click_area(t, 14); /* 68 px tall to the finger, about 6.5 mm */
+    lv_obj_set_ext_click_area(t, 17); /* 68 px tall to the finger, about 6.5 mm */
     /* Pressed, it darkens a shade, so the finger sees it took. */
     lv_obj_set_style_bg_opa(t, LV_OPA_COVER, LV_STATE_PRESSED);
     lv_obj_set_style_bg_color(t, upper ? lv_color_mix(lv_color_black(), dark ? C_CREAM : C_BLUE, 50) : C_BLUE_TINT, LV_STATE_PRESSED);

@@ -7,7 +7,9 @@
  * it centres on the stop you're making for. + and − on the left.
  *
  * It comes over whatever you were on, a story playing on under it, and the
- * lower button goes back to exactly that.
+ * lower button goes back to exactly that. Opened from Walks, it shows the walk
+ * being chosen instead: the stop it would begin at in vermilion, framed with
+ * you if you're near, and how far it is.
  */
 #include "ui.h"
 #include <math.h>
@@ -23,11 +25,14 @@
 #define TICK_MS 1000
 #define WALK_MPS 1.4
 #define METRES_PER_MIN 80
+#define NEAR_M 1500 /* a walk not yet begun is framed with you if you're this near where it would begin */
 
 /* Kept between visits: how close in. */
 static int zoom = MAPVIEW_ZOOM_MAX - 1;
 
 typedef struct {
+    bool preview; /* a walk being chosen, not the one under way */
+    int marked;   /* the stop in vermilion: the one you're making for, or would begin at */
     mapview_t *map;
     lv_obj_t *route, *stops, *you, *kick, *name, *meta;
     lv_point_precise_t *pts;
@@ -49,13 +54,13 @@ static void lay(walkmap_t *m)
     lv_line_set_points_mutable(m->route, m->pts, w->route_len);
 
     lv_obj_clean(m->stops);
-    int at = walk_at();
+    int at = m->marked;
     /* The one you're making for last, so it's on top. */
     for (int i = 0; i < w->stop_count; i++) {
         int k = i < at ? i : i == w->stop_count - 1 ? at : i + 1;
         float x, y;
         mapview_project(m->map, w->stops[k].lat_e6 / 1e6, w->stops[k].lon_e6 / 1e6, &x, &y);
-        bool now = k == at, got = walk_collected(k);
+        bool now = k == at, got = !m->preview && walk_collected(k);
         int d = now ? 34 : 26;
         lv_obj_t *dot = stop_dot(m->stops, d, k + 1, now ? C_VERMILION : got ? C_BLUE : C_SLIP, now || got ? C_CREAM : C_BLUE);
         lv_obj_set_pos(dot, (int32_t)x - d / 2, (int32_t)y - d / 2);
@@ -64,8 +69,43 @@ static void lay(walkmap_t *m)
     }
 }
 
+/** A walk being chosen: framed on the stop it would begin at and you, if you're near; then as zoomed. */
+static void preview(walkmap_t *m, bool fit)
+{
+    const stop_t *s = &walk_now()->stops[m->marked];
+    position_t p = position_now();
+    int metres = p.known ? (int)position_metres(p.lat, p.lon, s->lat_e6 / 1e6, s->lon_e6 / 1e6) : -1;
+    bool you_in = metres >= 0 && metres <= NEAR_M;
+    if (fit) {
+        int32_t pts[] = {s->lat_e6, s->lon_e6, you_in ? (int32_t)(p.lat * 1e6) : s->lat_e6, you_in ? (int32_t)(p.lon * 1e6) : s->lon_e6};
+        lv_area_t box = {90, 120, 376, 330};
+        mapview_fit(m->map, pts, 2, &box, MAPVIEW_ZOOM_MAX - 1);
+        zoom = mapview_zoom(m->map);
+    } else {
+        mapview_set(m->map, s->lat_e6 / 1e6, s->lon_e6 / 1e6, zoom);
+    }
+    m->laid_zoom = zoom;
+    lay(m);
+    if (p.known) {
+        float x, y;
+        mapview_project(m->map, p.lat, p.lon, &x, &y);
+        lv_obj_set_pos(m->you, (int32_t)x - 55, (int32_t)y - 55);
+        lv_obj_remove_flag(m->you, LV_OBJ_FLAG_HIDDEN);
+    } else {
+        lv_obj_add_flag(m->you, LV_OBJ_FLAG_HIDDEN);
+    }
+    lv_label_set_text_fmt(m->kick, "BEGIN AT STOP %d", m->marked + 1);
+    if (metres < 0) lv_label_set_text(m->meta, "Finding you");
+    else if (metres < 1000) lv_label_set_text_fmt(m->meta, "%d m from you", metres);
+    else lv_label_set_text_fmt(m->meta, "%d.%d km from you", metres / 1000, metres % 1000 / 100);
+}
+
 static void refresh(walkmap_t *m, bool relay)
 {
+    if (m->preview) {
+        if (relay) preview(m, false);
+        return;
+    }
     walk_nav_t n = walk_nav();
     position_t p = position_now();
     const stop_t *s = walk_stop();
@@ -89,6 +129,7 @@ static void refresh(walkmap_t *m, bool relay)
 static void tick(lv_timer_t *t)
 {
     walkmap_t *m = lv_timer_get_user_data(t);
+    if (m->preview) return;
     walk_pretend_step(WALK_MPS * TICK_MS / 1000.0);
     refresh(m, false);
 }
@@ -131,6 +172,8 @@ lv_obj_t *screen_map(void)
     lv_memzero(m, sizeof(*m));
     m->pts = lv_malloc(sizeof(lv_point_precise_t) * LV_MAX(1, w->route_len));
     m->laid_zoom = -1;
+    m->preview = ui_map_over() == SCR_WALKS;
+    m->marked = m->preview ? walks_begin_stop() : walk_at();
     wm = m;
     lv_obj_t *scr = ui_screen(C_PAPER);
     m->map = mapview_create(scr);
@@ -151,7 +194,7 @@ lv_obj_t *screen_map(void)
     lv_obj_set_flex_align(s, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
     m->kick = text_in(s, &jost_medium_14, C_BLUE, "");
     lv_obj_set_style_text_letter_space(m->kick, 3, 0);
-    m->name = text_in(s, &jost_regular_18, C_CHARCOAL, walk_stop()->name);
+    m->name = text_in(s, &jost_regular_18, C_CHARCOAL, w->stops[m->marked].name);
     lv_obj_set_width(m->name, 196);
     lv_obj_set_style_text_align(m->name, LV_TEXT_ALIGN_CENTER, 0);
     lv_label_set_long_mode(m->name, LV_LABEL_LONG_MODE_DOTS);
@@ -160,7 +203,8 @@ lv_obj_t *screen_map(void)
     zoom_button(scr, 150, 1, zoom_by);
     zoom_button(scr, 262, -1, zoom_by);
 
-    refresh(m, true);
+    if (m->preview) preview(m, true);
+    else refresh(m, true);
     m->timer = lv_timer_create(tick, TICK_MS, m);
     lv_obj_add_event_cb(scr, gone, LV_EVENT_DELETE, m);
 

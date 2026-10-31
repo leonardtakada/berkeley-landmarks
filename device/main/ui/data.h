@@ -43,8 +43,11 @@ const char *architect_name(const char *key);
 /** An architect's portrait, if it's baked into the firmware yet; NULL otherwise. */
 const art_portrait_t *portrait_of(const char *key);
 
-/** Their face in a circle, for stepping aside at a handover; NULL if not baked. */
+/** Their face in a circle; NULL if not baked. */
 const lv_image_dsc_t *cameo_of(const char *key);
+
+/** Their whole drawing, smaller (ART_BUST_W × ART_BUST_H), for riding along on the walk screen; NULL if not baked. */
+const lv_image_dsc_t *bust_of(const char *key);
 
 /** What the host says about a walk's size: "Ten stops, about a mile." */
 void walk_size_line(const walk_t *w, char *buf, size_t len);

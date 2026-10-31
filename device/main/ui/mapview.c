@@ -300,6 +300,11 @@ void mapview_fit(mapview_t *m, const int32_t *e6, int n, const lv_area_t *box, i
     }
 }
 
+int mapview_zoom(const mapview_t *m)
+{
+    return m->zoom;
+}
+
 void mapview_project(const mapview_t *m, double lat, double lon, float *x, float *y)
 {
     double px, py;

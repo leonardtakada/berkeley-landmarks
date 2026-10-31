@@ -12,16 +12,16 @@ const char *architect_name(const char *key)
     return key;
 }
 
-/* The portraits baked so far (scripts/device/build-art.mjs, PORTRAITS), and their cameos. */
+/* The portraits baked so far (scripts/device/build-art.mjs, PORTRAITS), their cameos and busts. */
 static const struct {
     const char *key;
     const art_portrait_t *art;
-    const lv_image_dsc_t *cameo;
+    const lv_image_dsc_t *cameo, *bust;
 } baked[] = {
-    {"ratcliff", &art_portrait_ratcliff, &art_cameo_ratcliff},
-    {"plachek", &art_portrait_plachek, &art_cameo_plachek},
-    {"maybeck", &art_portrait_maybeck, &art_cameo_maybeck},
-    {"morgan", &art_portrait_morgan, &art_cameo_morgan},
+    {"ratcliff", &art_portrait_ratcliff, &art_cameo_ratcliff, &art_bust_ratcliff},
+    {"plachek", &art_portrait_plachek, &art_cameo_plachek, &art_bust_plachek},
+    {"maybeck", &art_portrait_maybeck, &art_cameo_maybeck, &art_bust_maybeck},
+    {"morgan", &art_portrait_morgan, &art_cameo_morgan, &art_bust_morgan},
 };
 
 static int baked_index(const char *key)
@@ -54,4 +54,10 @@ void walk_size_line(const walk_t *w, char *buf, size_t len)
     else snprintf(miles, sizeof miles, "%.*s miles", (int)strcspn(w->distance, " "), w->distance);
     if (n >= 6 && n <= 15) snprintf(buf, len, "%s stops, %s.", words[n - 6], miles);
     else snprintf(buf, len, "%d stops, %s.", n, miles);
+}
+
+const lv_image_dsc_t *bust_of(const char *key)
+{
+    int i = baked_index(key);
+    return i < 0 ? NULL : baked[i].bust;
 }

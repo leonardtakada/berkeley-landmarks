@@ -10,6 +10,7 @@ set(ART_FILES
   art/pt_ratcliff_mouth.bin
   art/pt_ratcliff_smile.bin
   art/cameo_ratcliff.bin
+  art/bust_ratcliff.bin
   art/pt_plachek_body.bin
   art/pt_plachek_head.bin
   art/pt_plachek_eye.bin
@@ -17,6 +18,7 @@ set(ART_FILES
   art/pt_plachek_mouth.bin
   art/pt_plachek_smile.bin
   art/cameo_plachek.bin
+  art/bust_plachek.bin
   art/pt_maybeck_body.bin
   art/pt_maybeck_head.bin
   art/pt_maybeck_eye.bin
@@ -24,12 +26,14 @@ set(ART_FILES
   art/pt_maybeck_mouth.bin
   art/pt_maybeck_smile.bin
   art/cameo_maybeck.bin
+  art/bust_maybeck.bin
   art/pt_morgan_body.bin
   art/pt_morgan_head.bin
   art/pt_morgan_eye.bin
   art/pt_morgan_mouth.bin
   art/pt_morgan_smile.bin
   art/cameo_morgan.bin
+  art/bust_morgan.bin
   art/scene_0_base.bin
   art/scene_0_sky0.bin
   art/scene_0_sky0_front.bin

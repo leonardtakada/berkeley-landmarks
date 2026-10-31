@@ -15,27 +15,18 @@
 #include "walk.h"
 #include "widgets.h"
 
-/** The slip held up in front, its lines set left, its foot at `bottom`. */
-static lv_obj_t *card(lv_obj_t *scr, int32_t x, int32_t bottom, int32_t w)
+/** A slim slip below the face and the lower tab, `w` wide, its lines centred, its foot at `bottom`. */
+static lv_obj_t *card(lv_obj_t *scr, int32_t bottom, int32_t w)
 {
     lv_obj_t *c = slip(scr, 0, 0, w, LV_SIZE_CONTENT);
-    lv_obj_align(c, LV_ALIGN_BOTTOM_LEFT, x, bottom - SCREEN_H);
+    lv_obj_align(c, LV_ALIGN_BOTTOM_MID, 0, bottom - SCREEN_H);
     lv_obj_set_flex_flow(c, LV_FLEX_FLOW_COLUMN);
-    lv_obj_set_flex_align(c, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
-    lv_obj_set_style_pad_left(c, 20, 0);
-    lv_obj_set_style_pad_right(c, 16, 0);
-    lv_obj_set_style_pad_ver(c, 13, 0);
-    lv_obj_set_style_pad_row(c, 2, 0);
+    lv_obj_set_flex_align(c, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+    lv_obj_set_style_pad_ver(c, 8, 0);
+    lv_obj_set_style_pad_row(c, 0, 0);
     motion_once(c, 0, 255, 500, 500, m_opa);
     motion_once(c, 14, 0, 500, 500, m_y);
     return c;
-}
-
-static lv_obj_t *kicker_in(lv_obj_t *parent, const char *s)
-{
-    lv_obj_t *k = text_in(parent, &jost_medium_16, C_BLUE, s);
-    lv_obj_set_style_text_letter_space(k, 3, 0);
-    return k;
 }
 
 static lv_obj_t *title_in(lv_obj_t *parent, int32_t w, const char *s)
@@ -90,9 +81,11 @@ lv_obj_t *screen_walked(void)
 
     char top[12], buf[48];
     snprintf(top, sizeof top, "WALK %02d", ui_walk + 1);
-    lv_obj_t *c = card(scr, 62, 426, 236);
-    kicker_in(c, top);
-    title_in(c, 200, w->name);
+    lv_obj_t *c = card(scr, 432, 236);
+    lv_obj_t *t = title_in(c, 208, w->name);
+    lv_obj_set_height(t, jost_light_25.line_height);
+    lv_label_set_long_mode(t, LV_LABEL_LONG_MODE_DOTS);
+    lv_obj_set_style_text_align(t, LV_TEXT_ALIGN_CENTER, 0);
     if (all) snprintf(buf, sizeof buf, "All %d labels collected", n);
     else snprintf(buf, sizeof buf, "%d of %d labels collected", got, n);
     text_in(c, &jost_regular_18, C_SEPIA, buf);

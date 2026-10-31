@@ -8,7 +8,8 @@
  * redrawing the screen (docs/tour-device-plan.md, "Motion and the companion"):
  *
  *   portraits  body · head · eye · brow · mouth · smile, filling the screen
- *              on the portrait's own ground colour
+ *              on the portrait's own ground colour; a cameo (the face in a
+ *              circle) and a bust (the whole drawing, smaller, on nothing)
  *   scenes     the walk's label scene, full-bleed in the 466 px circle, with
  *              its sky (sun or moon) and clouds as separate layers
  *
@@ -150,6 +151,9 @@ const PORTRAIT_SCALE = 2.8; // px per unit
 const FACE_Y = 208; // where the face's centre sits on screen
 const FIT = { morgan: { scale: 1.25, faceY: 108 }, maybeck: { faceY: 92 } };
 const CAMEO_PX = 88;
+/* The bust that rides along under the way on the walk screen: the whole drawing at this
+ * scale, on a transparent box this size, the face's centre at the same point in every one. */
+const BUST = { scale: 1.15, w: 240, h: 280, faceX: 120, faceY: 132 };
 // Every host can hand over, so each has a cameo: the face's centre and the circle's radius, in units.
 const CAMEO_FACE = { morgan: { cy: 108, r: 38 } };
 
@@ -172,6 +176,13 @@ async function portrait(key) {
     const { cy, r } = CAMEO_FACE[key] || { cy: 114, r: 48 };
     const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${100 - r} ${cy - r} ${2 * r} ${2 * r}" width="${c}" height="${c}"><defs><clipPath id="r"><circle cx="100" cy="${cy}" r="${r}"/></clipPath></defs><g clip-path="url(#r)"><rect x="0" y="0" width="200" height="240" fill="${ground}"/>${parts.body.join("")}${parts.head.join("")}${parts.eye.join("")}${parts.brow.join("")}${parts.mouth.join("")}</g></svg>`;
     writeImage(`cameo_${key}`, await render(svg), true);
+  }
+  {
+    const kb = BUST.scale * (fit.scale || 1);
+    const bx = BUST.faceX - 100 * kb, by = BUST.faceY - (fit.faceY || 114) * kb;
+    const all = [...parts.body, ...parts.head, ...parts.eye, ...parts.brow, ...parts.mouth];
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${BUST.w} ${BUST.h}" width="${BUST.w}" height="${BUST.h}"><g transform="translate(${bx} ${by}) scale(${kb})">${all.join("")}</g></svg>`;
+    writeImage(`bust_${key}`, await render(svg), true);
   }
   decls.push(`const art_portrait_t art_portrait_${key} = { ${Math.round(200 * k)}, 0x${ground.slice(1)}, ${field(L.body)}, ${field(L.head)}, ${field(L.eye)}, ${field(L.brow)}, ${field(L.mouth)}, ${field(L.smile)} };`);
 }
@@ -354,6 +365,11 @@ const h = [
   "",
   ...PORTRAITS.map((k) => `extern const art_portrait_t art_portrait_${k};`),
   `#define ART_CAMEO_PX ${CAMEO_PX}`,
+  "/** A host's bust: this big, its face's centre at (FACE_X, FACE_Y) in it. */",
+  `#define ART_BUST_W ${BUST.w}`,
+  `#define ART_BUST_H ${BUST.h}`,
+  `#define ART_BUST_FACE_X ${BUST.faceX}`,
+  `#define ART_BUST_FACE_Y ${BUST.faceY}`,
   `extern const art_scene_t art_scenes[${scenes.length}];`,
   "",
 ];

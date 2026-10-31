@@ -23,7 +23,7 @@
 /**
  * The marks laid over a portrait's ground. On the dark grounds (blue,
  * charcoal) they go cream, as lettering does on the cover board; on vermilion
- * the accent goes cream so the stop now still shows.
+ * the accent and the tracked capitals go cream, blue sinking into it.
  */
 typedef struct {
     lv_color_t ground;
@@ -45,6 +45,7 @@ static inline palette_t palette_for(uint32_t ground)
     palette_t p = {.ground = lv_color_hex(ground), .dark = dark};
     p.kick = p.mark = dark ? C_CREAM : C_BLUE;
     p.accent = ground == 0xE4592B ? C_CREAM : C_VERMILION;
+    if (ground == 0xE4592B) p.kick = C_CREAM;
     if (dark) {
         p.ahead = C_CREAM, p.ahead_opa = 72;
         p.shadow = lv_color_mix(lv_color_black(), p.ground, 100);

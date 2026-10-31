@@ -324,7 +324,7 @@ the menu and the map coming over whichever you're on:
   nothing). The hold that ended the walk is gone: the lower counts however
   long it's held. The upper still counts only short, as the power manager
   owns a long press. The tabs are the touch buttons for those actions too
-  (40 px tall, 18 px type, taking a tap 14 px beyond). Nothing else on the
+  (34 px tall, 16 px type, taking a tap 17 px beyond). Nothing else on the
   screen repeats them: the Listen pill, the story's play disc and Next stop
   pill, Choose's Start pill, the cover's Walks pill and End walk's two pills
   all went after a first look on the guide showed them doubled.
@@ -383,20 +383,38 @@ the menu and the map coming over whichever you're on:
   far.
 - **Choose: where it is, and where to begin.** Choosing a walk used to
   show only its label scene, so you could pick one that starts across town
-  with no way to begin part way. Now each walk is its route on the iso map,
-  stops numbered, with its name on a slip at the top. It is framed on the
-  stop to begin at and on you, if you're within 1.5 km (else on the next
-  stop), at up to the walking zoom. With a fix, the walks come nearest
-  first, by whichever of their stops is nearest, and each opens on that stop
-  as where to begin. The slip across the middle reads "Begin at stop 3 of
-  10 · Golden Sheaf Bakery · 130 m from you · the nearest", and its ‹ ›
-  choose any other stop, the map following. The arrows at either side (or a
-  swipe) turn to the next walk. A walk begun part way goes on to its end,
-  then round to the stops it skipped. Begun at stop 3 of 10, it runs 3 … 10,
-  1, 2, and *Finish* comes after stop 2 (`walk_begin(first)`, `walk_next()`,
-  `walk_at_last()`). The map's districts are named at its furthest zoom
-  only (as the app's style has them), so closer in they don't lie over a
-  route.
+  with no way to begin part way. Each walk still fills the circle with its
+  label scene, its slip over the foot of it. With a fix, the walks come
+  nearest first, by whichever of their stops is nearest, and each opens on
+  that stop as where to begin. The slip reads "Walk 01 · 10 stops · 1.0 mi /
+  Downtown Berkeley / Begin at stop 3 / Golden Sheaf Bakery / 130 m from
+  you", and its ‹ › choose any other stop. *Map*, at the top, opens the
+  walk's route on the iso map with that stop in vermilion, framed with you if
+  you're within 1.5 km; Back returns to Choose just as it was. The arrows at
+  either side (or a swipe) turn to the next walk. A walk begun part way goes
+  on to its end, then round to the stops it skipped. Begun at stop 3 of 10,
+  it runs 3 … 10, 1, 2, and *Finish* comes after stop 2 (`walk_begin(first)`,
+  `walk_next()`, `walk_at_last()`). The map's districts are named at its
+  furthest zoom only (as the app's style has them), so closer in they don't
+  lie over a route. (For a day Choose showed the route map in place of the
+  scene: the illustrations were missed.)
+- **The illustrations, and the faces, kept.** After the first pass the
+  pictures had gone and the slips covered the architects' faces, so:
+  - **Walk screen:** the host rides along at the foot of the circle as a
+    bust (`build-art.mjs` bakes one for each: the whole drawing at 1.15 px a
+    unit, 240 × 280, face at 120, 132). The bust bobs a little, and the stop,
+    the distance and the way sit above it. A walk with no host drawn has its
+    label scene there instead, round as the app's labels are.
+  - **Map:** low on the left, across from the menu's tab.
+  - **Story:** the portrait fills the screen with its face clear. A slim slip
+    below the face holds the stop's name and who's speaking. The clock sits
+    under "15". The looping caption went: it only ever repeated the opening
+    lines, and it covered the face.
+  - **Walked:** the face is clear too, with a slim slip of the walk's name and
+    labels.
+  - **Vermilion grounds:** on Maybeck's ground, the tracked capitals and the
+    way go cream (`palette_for`).
+  - **The big distance font** gained "." and "k", for "2.3 km".
 
 For the desk: `here <lat> <lon>`, then `here walk` makes the pretend
 position walk the route (or to the free map's pick) at 1.4 m/s; `here stand`

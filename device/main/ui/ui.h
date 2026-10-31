@@ -72,10 +72,10 @@ void ui_button(button_t b);
  * left of it (a tab of one short word starts about 12 px right of that; the
  * two-word ones, NEXT STOP and FIRST STOP, reach further in).
  */
-#define TAB_H 40
+#define TAB_H 34
 #define UPPER_CY 123
 #define LOWER_CY 343
-#define TAB_CLEAR_X 286
+#define TAB_CLEAR_X 296
 lv_obj_t *ui_hints(lv_obj_t *scr, uint32_t ground, const char *upper, const char *lower); /* returns the upper tab */
 
 /** Keeps the last touches of the screen, for the console's `touches`: where, on what, and whether it took. */
@@ -91,6 +91,7 @@ void ui_open_controls(void);  /* the menu comes down over this screen */
 void ui_close_controls(void); /* and goes back up, to exactly where you were */
 void ui_open_map(void);       /* the walk's map, over this screen (or over what the menu came down on) */
 void ui_close_map(void);      /* and back to exactly where you were */
+screen_id_t ui_map_over(void); /* what the map came over (Walks: it's showing a walk not yet begun) */
 void ui_ask_end(void);        /* "End the walk?" */
 void ui_keep_walking(void);   /* no: back where you were */
 
@@ -112,5 +113,6 @@ void explore_go(void);
 /** The story's upper button: pause, resume, or once it's told, go on. */
 void story_upper(void);
 
-/** The walks' upper button: sets out on the walk showing, from the stop chosen. */
+/** The walks' upper button: sets out on the walk showing, from the stop chosen; and that stop. */
 void walks_start(void);
+int walks_begin_stop(void);

@@ -2,11 +2,11 @@
  * A story: a stop's, the walk's introduction, or a landmark's on your own.
  * It starts at once. Its architect fills the screen, talking, when they're
  * drawn; otherwise the host listens while the guide (or an architect not yet
- * drawn) reads it. The stop's name and the caption sit on a slip, the caption
- * lighting word by word for noisy streets; progress runs round the rim; back
- * 15 seconds on the left. A stop whose label you earned
- * standing at it has its stamp pressed on as the story opens (the arrival and
- * the handover that used to come first are folded in here).
+ * drawn) reads it, the face clear: the stop's name and who's speaking sit on
+ * a slim slip below it, progress runs round the rim, and back 15 seconds is
+ * on the left. A stop whose label you earned standing at it has its stamp
+ * pressed on as the story opens (the arrival and the handover that used to
+ * come first are folded in here).
  *
  * The upper button is Pause and Resume, its tab saying which (tapping the tab
  * is the same). When the story is told nothing moves on by itself: the tab
@@ -19,8 +19,8 @@
  * changes (the guide's coda after an architect) the credit changes and the
  * architect stops talking and listens. It plays on under the controls. A card
  * without the stop falls back to a simulation: a running clock, the ring
- * filling. Either way the opening lines loop as the caption, and it picks up
- * where it was if the screen is left and come back to.
+ * filling. Either way it picks up where it was if the screen is left and come
+ * back to.
  */
 #include "ui.h"
 #include <stdio.h>
@@ -38,7 +38,7 @@ typedef struct {
     mood_t speaking, waiting;   /* their mood while it plays, and paused */
     char kicker[24];
     const char *title; /* or NULL */
-    const char *caption;
+    const char *caption; /* the opening lines, for the simulation's length */
     char credit[48];
     int32_t total_s; /* how long the stop runs */
     const char *who; /* whose portrait is on screen (an architect's key), or NULL */
@@ -47,10 +47,9 @@ typedef struct {
     const player_part_t *real; /* its length and speakers, if the card has it; NULL: simulated */
 } narration_t;
 
-/* The slip, centred left of the tabs, clear of the lower one, its foot near the rim. */
-#define CARD_X 62
+/* The slip, below the face and the lower tab, its foot near the rim. */
 #define CARD_W 236
-#define CARD_BOTTOM 424
+#define CARD_BOTTOM 432
 
 /* Without the card's narration, a stop runs about as long as a short narration would. */
 static int32_t simulated_s(const char *caption)
@@ -58,57 +57,18 @@ static int32_t simulated_s(const char *caption)
     return 40 + (int32_t)strlen(caption) / 4;
 }
 
-/* The caption goes round in this many ms: each word lights in turn, all stay
- * lit until LIT_UNTIL of the way, then the line clears for the next. */
-#define CAPTION_MS 8000
-#define LIT_UNTIL 860 /* per mille */
 #define TICK_MS 100
-#define MAX_WORDS 32
 
 typedef struct {
     narration_t n_; /* the story's, built for this screen */
     const narration_t *n;
-    lv_obj_t *scr, *host, *caption, *clock, *ring, *credit, *tab;
+    lv_obj_t *scr, *host, *clock, *ring, *credit, *tab;
     uint32_t ms; /* played so far */
     int shown_s; /* the second the clock shows */
     const char *speaking_now; /* the section's speaker, from the card's parts.txt */
     bool playing, finished;
-    int lit;
-    int words;
-    uint32_t lights_at[MAX_WORDS]; /* when each word lights, in the caption's cycle */
     lv_timer_t *timer;
 } narration_state_t;
-
-/** Each word lights after the last, longer words taking a little longer to say. */
-static void time_words(narration_state_t *st)
-{
-    const char *s = st->n->caption;
-    uint32_t t = 0;
-    st->words = 0;
-    while (*s && st->words < MAX_WORDS) {
-        size_t len = strcspn(s, " ");
-        st->lights_at[st->words++] = t;
-        t += 180 + 35 * (uint32_t)len;
-        s += len;
-        while (*s == ' ') s++;
-    }
-}
-
-/** The caption with its first `lit` words inked, the rest faint (LVGL recolour). */
-static void show_caption(narration_state_t *st)
-{
-    char buf[400];
-    const char *s = st->n->caption;
-    size_t pos = 0;
-    if (st->lit > 0) pos += snprintf(buf, sizeof buf, "#2E2A27 ");
-    for (int i = 0; i < st->words && pos < sizeof buf - 2; i++) {
-        size_t len = strcspn(s, " ");
-        pos += snprintf(buf + pos, sizeof buf - pos, "%s%.*s%s", i ? " " : "", (int)len, s, i == st->lit - 1 ? "#" : "");
-        s += len;
-        while (*s == ' ') s++;
-    }
-    lv_label_set_text(st->caption, buf);
-}
 
 static void show_clock(narration_state_t *st)
 {
@@ -162,16 +122,6 @@ static void tick(lv_timer_t *t)
         st->ms += TICK_MS;
     }
 
-    uint32_t in_cycle = st->ms % CAPTION_MS;
-    int lit = 0;
-    if (in_cycle < CAPTION_MS * LIT_UNTIL / 1000) {
-        while (lit < st->words && st->lights_at[lit] <= in_cycle) lit++;
-    }
-    if (lit != st->lit) {
-        st->lit = lit;
-        show_caption(st);
-    }
-
     int32_t total = st->n->total_s * 1000;
     int32_t at = LV_MIN((int32_t)st->ms, total);
     rim_progress_set(st->ring, (int32_t)((int64_t)at * 3600 / total));
@@ -211,7 +161,6 @@ static void toggle_state(narration_state_t *st)
     if (st->finished) {
         st->finished = false;
         st->ms = 0;
-        st->lit = -1;
         st->speaking_now = NULL;
         if (st->n->real) player_play(st->n->part, 0);
         st->playing = true;
@@ -248,7 +197,6 @@ static void back15(lv_event_t *e)
     }
     st->ms = st->ms > 15000 ? st->ms - 15000 : 0;
     st->ms -= st->ms % TICK_MS;
-    st->lit = -1;
     if (st->n->real) player_seek(st->ms);
     rim_progress_set(st->ring, (int32_t)((int64_t)st->ms * 3600 / ((int64_t)st->n->total_s * 1000)));
     show_clock(st);
@@ -292,7 +240,6 @@ static lv_obj_t *narration_screen(narration_state_t *st)
     st->ms = LV_MIN(walk_heard_ms(), (uint32_t)n->total_s * 1000 - 1000);
     st->ms -= st->ms % TICK_MS;
     st->shown_s = -1;
-    time_words(st);
     if (n->real) {
         /* Back from the menu or the map, the voice has played on: take it up where it is. */
         if (player_is(n->part)) {
@@ -322,34 +269,27 @@ static lv_obj_t *narration_screen(narration_state_t *st)
     back_button(scr, st, pal.dark);
 
     lv_obj_t *card = slip(scr, 0, 0, CARD_W, LV_SIZE_CONTENT);
-    lv_obj_align(card, LV_ALIGN_BOTTOM_LEFT, CARD_X, CARD_BOTTOM - SCREEN_H);
+    lv_obj_align(card, LV_ALIGN_BOTTOM_MID, 0, CARD_BOTTOM - SCREEN_H);
     lv_obj_set_flex_flow(card, LV_FLEX_FLOW_COLUMN);
     lv_obj_set_flex_align(card, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
-    lv_obj_set_style_pad_ver(card, 13, 0);
-    lv_obj_set_style_pad_row(card, 6, 0);
-    /* The title on one line and the caption on three at most, so the slip stays clear of "15". */
+    lv_obj_set_style_pad_ver(card, 8, 0);
+    lv_obj_set_style_pad_row(card, 0, 0);
     if (n->title) {
         lv_obj_t *t = text_in(card, &jost_light_25, C_CHARCOAL, n->title);
         lv_obj_set_size(t, CARD_W - 28, jost_light_25.line_height);
         lv_label_set_long_mode(t, LV_LABEL_LONG_MODE_DOTS);
         lv_obj_set_style_text_align(t, LV_TEXT_ALIGN_CENTER, 0);
     }
-    st->caption = text_in(card, &jost_regular_20, lv_color_mix(C_CHARCOAL, C_SLIP, 140), "");
-    lv_label_set_recolor(st->caption, true);
-    lv_obj_set_width(st->caption, CARD_W - 28);
-    lv_obj_set_height(st->caption, 3 * 26); /* wrapped, and cut at the third line */
-    lv_obj_set_style_text_align(st->caption, LV_TEXT_ALIGN_CENTER, 0);
-    lv_obj_set_style_text_line_space(st->caption, 26 - jost_regular_20.line_height, 0);
-    show_caption(st);
-
-    /* The credit and the clock, the clock going under when a long name needs the room. */
-    lv_obj_t *row = box(card, 0, 0, CARD_W - 24, LV_SIZE_CONTENT);
-    lv_obj_set_flex_flow(row, LV_FLEX_FLOW_ROW_WRAP);
-    lv_obj_set_flex_align(row, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
-    lv_obj_set_style_pad_column(row, 12, 0);
-    lv_obj_set_style_pad_row(row, 2, 0);
-    st->credit = text_in(row, &jost_light_italic_18, C_SEPIA, n->credit);
-    st->clock = text_in(row, &jost_regular_16, C_SEPIA, "");
+    /* Who's speaking, on one line. */
+    st->credit = text_in(card, &jost_light_italic_15, C_SEPIA, n->credit);
+    lv_obj_set_size(st->credit, CARD_W - 20, jost_light_italic_15.line_height);
+    lv_label_set_long_mode(st->credit, LV_LABEL_LONG_MODE_DOTS);
+    lv_obj_set_style_text_align(st->credit, LV_TEXT_ALIGN_CENTER, 0);
+    /* The clock under "15", with the other things for the voice. */
+    st->clock = text_at(scr, &jost_regular_16, pal.kick, 0, 0, "");
+    lv_obj_set_width(st->clock, 96);
+    lv_obj_set_style_text_align(st->clock, LV_TEXT_ALIGN_CENTER, 0);
+    lv_obj_set_pos(st->clock, 18, 222);
     show_clock(st);
     follow_speaker(st);
 
@@ -358,8 +298,8 @@ static lv_obj_t *narration_screen(narration_state_t *st)
         char top[12], mid[4];
         snprintf(top, sizeof top, "WALK %02d", ui_walk + 1);
         snprintf(mid, sizeof mid, "%02d", walk_at() + 1);
-        lv_obj_t *s = stamp(scr, 386, 236, 104, top, mid, &jost_light_54, NULL, true, -80);
-        if (walk_stamp_due()) stamp_press(scr, s, 386, 236, 104, -80, 300);
+        lv_obj_t *s = stamp(scr, 382, 268, 88, top, mid, &jost_light_32, NULL, true, -80);
+        if (walk_stamp_due()) stamp_press(scr, s, 382, 268, 88, -80, 300);
     }
 
     st->timer = lv_timer_create(tick, TICK_MS, st);

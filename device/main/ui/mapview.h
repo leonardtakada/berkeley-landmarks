@@ -31,6 +31,9 @@ void mapview_set(mapview_t *m, double lat, double lon, int zoom);
  */
 void mapview_fit(mapview_t *m, const int32_t *e6, int n, const lv_area_t *box, int max_zoom);
 
+/** The zoom the map is at (after mapview_fit, the one it chose). */
+int mapview_zoom(const mapview_t *m);
+
 /** Where (lat, lon) falls on the screen, in px, standing on its terrace. */
 void mapview_project(const mapview_t *m, double lat, double lon, float *x, float *y);
 

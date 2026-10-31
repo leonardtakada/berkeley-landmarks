@@ -36,6 +36,7 @@ extern const lv_image_dsc_t art_pt_ratcliff_eye;
 extern const lv_image_dsc_t art_pt_ratcliff_mouth;
 extern const lv_image_dsc_t art_pt_ratcliff_smile;
 extern const lv_image_dsc_t art_cameo_ratcliff;
+extern const lv_image_dsc_t art_bust_ratcliff;
 extern const lv_image_dsc_t art_pt_plachek_body;
 extern const lv_image_dsc_t art_pt_plachek_head;
 extern const lv_image_dsc_t art_pt_plachek_eye;
@@ -43,6 +44,7 @@ extern const lv_image_dsc_t art_pt_plachek_brow;
 extern const lv_image_dsc_t art_pt_plachek_mouth;
 extern const lv_image_dsc_t art_pt_plachek_smile;
 extern const lv_image_dsc_t art_cameo_plachek;
+extern const lv_image_dsc_t art_bust_plachek;
 extern const lv_image_dsc_t art_pt_maybeck_body;
 extern const lv_image_dsc_t art_pt_maybeck_head;
 extern const lv_image_dsc_t art_pt_maybeck_eye;
@@ -50,12 +52,14 @@ extern const lv_image_dsc_t art_pt_maybeck_brow;
 extern const lv_image_dsc_t art_pt_maybeck_mouth;
 extern const lv_image_dsc_t art_pt_maybeck_smile;
 extern const lv_image_dsc_t art_cameo_maybeck;
+extern const lv_image_dsc_t art_bust_maybeck;
 extern const lv_image_dsc_t art_pt_morgan_body;
 extern const lv_image_dsc_t art_pt_morgan_head;
 extern const lv_image_dsc_t art_pt_morgan_eye;
 extern const lv_image_dsc_t art_pt_morgan_mouth;
 extern const lv_image_dsc_t art_pt_morgan_smile;
 extern const lv_image_dsc_t art_cameo_morgan;
+extern const lv_image_dsc_t art_bust_morgan;
 extern const lv_image_dsc_t art_scene_0_base;
 extern const lv_image_dsc_t art_scene_0_sky0;
 extern const lv_image_dsc_t art_scene_0_sky0_front;
@@ -98,4 +102,9 @@ extern const art_portrait_t art_portrait_plachek;
 extern const art_portrait_t art_portrait_maybeck;
 extern const art_portrait_t art_portrait_morgan;
 #define ART_CAMEO_PX 88
+/** A host's bust: this big, its face's centre at (FACE_X, FACE_Y) in it. */
+#define ART_BUST_W 240
+#define ART_BUST_H 280
+#define ART_BUST_FACE_X 120
+#define ART_BUST_FACE_Y 132
 extern const art_scene_t art_scenes[12];

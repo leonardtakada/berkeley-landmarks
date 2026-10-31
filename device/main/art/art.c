@@ -23,6 +23,8 @@ extern const uint8_t _binary_pt_ratcliff_smile_bin_start[] asm("_binary_pt_ratcl
 const lv_image_dsc_t art_pt_ratcliff_smile = { .header = { .magic = LV_IMAGE_HEADER_MAGIC, .cf = LV_COLOR_FORMAT_RGB565A8, .w = 100, .h = 34, .stride = 200 }, .data_size = 10200, .data = _binary_pt_ratcliff_smile_bin_start };
 extern const uint8_t _binary_cameo_ratcliff_bin_start[] asm("_binary_cameo_ratcliff_bin_start");
 const lv_image_dsc_t art_cameo_ratcliff = { .header = { .magic = LV_IMAGE_HEADER_MAGIC, .cf = LV_COLOR_FORMAT_RGB565A8, .w = 88, .h = 88, .stride = 176 }, .data_size = 23232, .data = _binary_cameo_ratcliff_bin_start };
+extern const uint8_t _binary_bust_ratcliff_bin_start[] asm("_binary_bust_ratcliff_bin_start");
+const lv_image_dsc_t art_bust_ratcliff = { .header = { .magic = LV_IMAGE_HEADER_MAGIC, .cf = LV_COLOR_FORMAT_RGB565A8, .w = 240, .h = 280, .stride = 480 }, .data_size = 201600, .data = _binary_bust_ratcliff_bin_start };
 extern const uint8_t _binary_pt_plachek_body_bin_start[] asm("_binary_pt_plachek_body_bin_start");
 const lv_image_dsc_t art_pt_plachek_body = { .header = { .magic = LV_IMAGE_HEADER_MAGIC, .cf = LV_COLOR_FORMAT_RGB565A8, .w = 394, .h = 171, .stride = 788 }, .data_size = 202122, .data = _binary_pt_plachek_body_bin_start };
 extern const uint8_t _binary_pt_plachek_head_bin_start[] asm("_binary_pt_plachek_head_bin_start");
@@ -37,6 +39,8 @@ extern const uint8_t _binary_pt_plachek_smile_bin_start[] asm("_binary_pt_plache
 const lv_image_dsc_t art_pt_plachek_smile = { .header = { .magic = LV_IMAGE_HEADER_MAGIC, .cf = LV_COLOR_FORMAT_RGB565A8, .w = 96, .h = 35, .stride = 192 }, .data_size = 10080, .data = _binary_pt_plachek_smile_bin_start };
 extern const uint8_t _binary_cameo_plachek_bin_start[] asm("_binary_cameo_plachek_bin_start");
 const lv_image_dsc_t art_cameo_plachek = { .header = { .magic = LV_IMAGE_HEADER_MAGIC, .cf = LV_COLOR_FORMAT_RGB565A8, .w = 88, .h = 88, .stride = 176 }, .data_size = 23232, .data = _binary_cameo_plachek_bin_start };
+extern const uint8_t _binary_bust_plachek_bin_start[] asm("_binary_bust_plachek_bin_start");
+const lv_image_dsc_t art_bust_plachek = { .header = { .magic = LV_IMAGE_HEADER_MAGIC, .cf = LV_COLOR_FORMAT_RGB565A8, .w = 240, .h = 280, .stride = 480 }, .data_size = 201600, .data = _binary_bust_plachek_bin_start };
 extern const uint8_t _binary_pt_maybeck_body_bin_start[] asm("_binary_pt_maybeck_body_bin_start");
 const lv_image_dsc_t art_pt_maybeck_body = { .header = { .magic = LV_IMAGE_HEADER_MAGIC, .cf = LV_COLOR_FORMAT_RGB565A8, .w = 90, .h = 117, .stride = 180 }, .data_size = 31590, .data = _binary_pt_maybeck_body_bin_start };
 extern const uint8_t _binary_pt_maybeck_head_bin_start[] asm("_binary_pt_maybeck_head_bin_start");
@@ -51,6 +55,8 @@ extern const uint8_t _binary_pt_maybeck_smile_bin_start[] asm("_binary_pt_maybec
 const lv_image_dsc_t art_pt_maybeck_smile = { .header = { .magic = LV_IMAGE_HEADER_MAGIC, .cf = LV_COLOR_FORMAT_RGB565A8, .w = 168, .h = 29, .stride = 336 }, .data_size = 14616, .data = _binary_pt_maybeck_smile_bin_start };
 extern const uint8_t _binary_cameo_maybeck_bin_start[] asm("_binary_cameo_maybeck_bin_start");
 const lv_image_dsc_t art_cameo_maybeck = { .header = { .magic = LV_IMAGE_HEADER_MAGIC, .cf = LV_COLOR_FORMAT_RGB565A8, .w = 88, .h = 88, .stride = 176 }, .data_size = 23232, .data = _binary_cameo_maybeck_bin_start };
+extern const uint8_t _binary_bust_maybeck_bin_start[] asm("_binary_bust_maybeck_bin_start");
+const lv_image_dsc_t art_bust_maybeck = { .header = { .magic = LV_IMAGE_HEADER_MAGIC, .cf = LV_COLOR_FORMAT_RGB565A8, .w = 240, .h = 280, .stride = 480 }, .data_size = 201600, .data = _binary_bust_maybeck_bin_start };
 extern const uint8_t _binary_pt_morgan_body_bin_start[] asm("_binary_pt_morgan_body_bin_start");
 const lv_image_dsc_t art_pt_morgan_body = { .header = { .magic = LV_IMAGE_HEADER_MAGIC, .cf = LV_COLOR_FORMAT_RGB565A8, .w = 130, .h = 113, .stride = 260 }, .data_size = 44070, .data = _binary_pt_morgan_body_bin_start };
 extern const uint8_t _binary_pt_morgan_head_bin_start[] asm("_binary_pt_morgan_head_bin_start");
@@ -63,6 +69,8 @@ extern const uint8_t _binary_pt_morgan_smile_bin_start[] asm("_binary_pt_morgan_
 const lv_image_dsc_t art_pt_morgan_smile = { .header = { .magic = LV_IMAGE_HEADER_MAGIC, .cf = LV_COLOR_FORMAT_RGB565A8, .w = 62, .h = 27, .stride = 124 }, .data_size = 5022, .data = _binary_pt_morgan_smile_bin_start };
 extern const uint8_t _binary_cameo_morgan_bin_start[] asm("_binary_cameo_morgan_bin_start");
 const lv_image_dsc_t art_cameo_morgan = { .header = { .magic = LV_IMAGE_HEADER_MAGIC, .cf = LV_COLOR_FORMAT_RGB565A8, .w = 88, .h = 88, .stride = 176 }, .data_size = 23232, .data = _binary_cameo_morgan_bin_start };
+extern const uint8_t _binary_bust_morgan_bin_start[] asm("_binary_bust_morgan_bin_start");
+const lv_image_dsc_t art_bust_morgan = { .header = { .magic = LV_IMAGE_HEADER_MAGIC, .cf = LV_COLOR_FORMAT_RGB565A8, .w = 240, .h = 280, .stride = 480 }, .data_size = 201600, .data = _binary_bust_morgan_bin_start };
 extern const uint8_t _binary_scene_0_base_bin_start[] asm("_binary_scene_0_base_bin_start");
 const lv_image_dsc_t art_scene_0_base = { .header = { .magic = LV_IMAGE_HEADER_MAGIC, .cf = LV_COLOR_FORMAT_RGB565, .w = 466, .h = 466, .stride = 932 }, .data_size = 434312, .data = _binary_scene_0_base_bin_start };
 extern const uint8_t _binary_scene_0_sky0_bin_start[] asm("_binary_scene_0_sky0_bin_start");

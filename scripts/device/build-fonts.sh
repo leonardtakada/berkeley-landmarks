@@ -35,7 +35,7 @@ font jost_light_italic_18 $JOST/300Light_Italic/Jost_300Light_Italic.ttf 18 $TEX
 font jost_light_25    $JOST/300Light/Jost_300Light.ttf                 25 $TEXT
 font jost_light_28    $JOST/300Light/Jost_300Light.ttf                 28 $TEXT
 font jost_light_32    $JOST/300Light/Jost_300Light.ttf                 32 $TEXT
-font jost_light_58    $JOST/300Light/Jost_300Light.ttf                 58 0x20,0x30-0x39,0x6D
+font jost_light_58    $JOST/300Light/Jost_300Light.ttf                 58 0x20,0x2E,0x30-0x39,0x6B,0x6D
 font jost_light_54    $JOST/300Light/Jost_300Light.ttf                 54 0x20,0x30-0x39
 font jost_semibold_16 $JOST/600SemiBold/Jost_600SemiBold.ttf           16 $TEXT
 font jost_semibold_24 $JOST/600SemiBold/Jost_600SemiBold.ttf           24 0x20,0x30-0x39,0x41-0x5A
