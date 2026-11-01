@@ -17,6 +17,7 @@ typedef enum {
     SCR_HARDWARE,
     SCR_ENDWALK,
     SCR_EXPLORE,
+    SCR_BEGIN,
     SCR_COUNT,
 } screen_id_t;
 
@@ -106,6 +107,7 @@ lv_obj_t *screen_walked(void);
 lv_obj_t *screen_hardware(void);
 lv_obj_t *screen_endwalk(void);
 lv_obj_t *screen_explore(void);
+lv_obj_t *screen_begin(void);
 
 /** The free map's upper button: go to the landmark picked, or stop going. */
 void explore_go(void);
@@ -113,6 +115,12 @@ void explore_go(void);
 /** The story's upper button: pause, resume, or once it's told, go on. */
 void story_upper(void);
 
-/** The walks' upper button: sets out on the walk showing, from the stop chosen; and that stop. */
+/** The walks' upper button: sets out on the walk showing from its first stop, or asks where to begin. */
 void walks_start(void);
-int walks_begin_stop(void);
+
+/* Where to begin asks only when a stop is this much nearer you than the walk's first. */
+#define BEGIN_ASK_M 200
+/** True if one of the walk showing's stops is that much nearer than its first (and so it's worth asking). */
+bool begin_worth_asking(void);
+/** Where to begin's upper button: from the stop nearest you. */
+void begin_here(void);

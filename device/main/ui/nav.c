@@ -131,6 +131,10 @@ void ui_button(button_t b)
         if (upper) explore_go();
         else ui_show(SCR_COVER);
         break;
+    case SCR_BEGIN:
+        if (upper) begin_here();
+        else ui_show(SCR_WALKS);
+        break;
     default:
         break;
     }

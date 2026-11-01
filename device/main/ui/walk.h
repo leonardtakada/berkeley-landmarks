@@ -77,6 +77,10 @@ typedef struct {
     float way;          /* the bearing to head on, degrees from north */
     float turn;         /* that, against your course: −180 (back left) to 180, while moving */
     double aim_lat, aim_lon; /* the point the way heads for */
+    const char *street;       /* on the route, the street you're along (NULL: none known) */
+    const char *street_ahead; /* and the one the way heads for, a few steps on */
+    const char *street_via;   /* the first street further along the way to the stop, if neither is known */
+    const char *stop_street;  /* the street the stop is on */
 } walk_nav_t;
 
 /** Where you are now; also collects the label of any stop you're standing at. Off a walk, not located. */
@@ -87,6 +91,26 @@ void walk_pretend_step(double metres);
 
 /** The turn in words: "Straight on", "Bear left", "Turn right", "Turn around". */
 const char *walk_turn_words(const walk_nav_t *n);
+
+/**
+ * The way in words, in two lines. `head`: walking, the turn ("Turn left");
+ * standing, which way by the hills ("Head toward the hills"), as the guide has
+ * no compass. `street`: the street to take and the minutes ("along Center St ·
+ * 4 min", "onto", "via"; off the route, or with no street known, "It's on
+ * Center St · 4 min").
+ */
+void walk_way_words(const walk_nav_t *n, char *head, size_t head_len, char *street, size_t street_len);
+
+/**
+ * The way ahead to the stop you're making for, for the map: up to `max`
+ * points (lat, lon pairs in e6) from where you are. On the route, along it to
+ * where it passes the stop (`along_route` true); off it, just you and the
+ * stop. 0 if you're not located.
+ */
+int walk_way(int32_t *e6, int max, bool *along_route);
+
+/** A distance as the guide gives it: "300 m", "1.4 km"; "" if not known (below 0). */
+void walk_distance_words(int metres, char *buf, size_t len);
 
 /** Metres from (lat, lon) to a walk's first stop. */
 int walk_metres_from_start(const walk_t *w, double lat, double lon);

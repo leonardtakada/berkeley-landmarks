@@ -12,7 +12,8 @@ and parts.txt, a line per file: its name, its length in ms, and who speaks from 
 portrait's mood when the speaker does. The names are 8.3, for the card's FAT.
 
 Also the map (device/main/ui/mapview.c): the app's isometric city painted into
-iso.bin and iso.idx by scripts/device/pack-iso.ts.
+iso.bin and iso.idx by scripts/device/pack-iso.ts; and the walks' buildings
+(device/main/ui/prints.c), printed as pr<N>.jpg by scripts/device/pack-prints.ts.
 """
 import argparse
 import json
@@ -68,3 +69,6 @@ print(f"{len(index)} narration files, {total / 1e6:.1f} MB → {out}")
 
 # The map: the app's isometric city, painted into tiles the guide can show.
 subprocess.run(["npx", "--silent", "tsx", "scripts/device/pack-iso.ts", str(out)], check=True)
+
+# The walks' buildings, printed round as the app prints its plates.
+subprocess.run(["npx", "--silent", "tsx", "scripts/device/pack-prints.ts", str(out)], check=True)

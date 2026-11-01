@@ -14,7 +14,8 @@ typedef struct {
     const char *caption;     /* the narration's opening lines */
     int32_t lat_e6, lon_e6;  /* the building, millionths of a degree */
     int16_t passing;         /* where the route passes it: an index into the walk's route (−1: no route) */
-    int16_t lm;              /* its landmark (lm-N): its narration on the card is lm<N>.caf */
+    int16_t lm;              /* its landmark (lm-N): its narration on the card is lm<N>.caf, its print pr<N>.jpg */
+    uint8_t street;          /* the street it's on, in street_names (0: none known) */
 } stop_t;
 
 typedef struct {
@@ -26,7 +27,11 @@ typedef struct {
     int stop_count;
     const int32_t *route; /* the way a walker takes (the app's routeCoordinates): lat, lon pairs in e6 */
     int route_len;        /* points */
+    const uint8_t *streets; /* the street each stretch of it runs along (route_len − 1 of them), in street_names (0: none) */
 } walk_t;
+
+/** The streets the walks go along, as a sign has them ("Center St"); [0] is NULL, for none. */
+extern const char *const street_names[];
 
 typedef struct {
     const char *key, *name;

@@ -1,13 +1,12 @@
 /**
- * Choosing a walk, and where to begin it (design canvas, "Walks"). Each
- * walk's label scene fills the circle, its slip laid over the foot of it:
- * the walk, and where to begin. With a fix the walks come nearest first, by
- * whichever of their stops is nearest, and each opens on that stop as where
- * to begin, saying how far it is; the slip's ‹ › choose another. Map, at the
- * top, shows the walk's route with where you'd begin and where you are, and
- * comes back to just this. The arrows either side turn to the next walk (or
- * swipe). A walk begun part way goes on to its end, then round to the stops
- * it skipped. The upper button (START) sets out; the lower goes back.
+ * Choosing a walk (design canvas, "Walks"). Each walk's label scene fills the
+ * circle, its slip laid in the middle, between the tabs: the walk, and how
+ * far it is from you. With a fix the walks come nearest first, by whichever
+ * of their stops is nearest. The arrows either side turn to the next walk (or
+ * swipe); Map, at the top, shows the whole walk and where you are, and comes
+ * back to just this. Only the walk is chosen here: the upper button (START)
+ * sets out from its first stop, or, if one of its stops is much nearer, asks
+ * where to begin (screen_begin.c). The lower goes back.
  */
 #include <stdio.h>
 #include <stdlib.h>
@@ -33,61 +32,31 @@ static const lv_point_t spots[WALK_COUNT] = {
 static struct {
     lv_obj_t *scr, *layer; /* layer: what's rebuilt for each walk */
     lv_obj_t *dots[WALK_COUNT];
-    lv_obj_t *begin_kick, *begin_name, *begin_meta;
     lv_point_t pressed_at;
 } ch;
 
 /* The walks in the order shown (nearest first, with a fix), where you are in it, and for each walk
- * its nearest stop and how far that is (−1: not known). */
+ * how far its nearest stop is (−1: not known). */
 static int order[WALK_COUNT], shown;
-static int nearest[WALK_COUNT], away[WALK_COUNT];
-static int begin_at;       /* the stop chosen to begin at, on the walk showing */
-static bool back_from_map; /* the chooser comes back from its map just as it was */
+static int away[WALK_COUNT];
+static bool returning; /* the chooser comes back from its map, or from where to begin, just as it was */
 
-static void show_walk(int pos, bool keep_begin);
-
-/* --- Where to begin ----------------------------------------------------------------- */
-
-static int metres_to(const stop_t *s)
-{
-    position_t p = position_now();
-    return p.known ? (int)position_metres(p.lat, p.lon, s->lat_e6 / 1e6, s->lon_e6 / 1e6) : -1;
-}
-
-static void show_begin(void)
-{
-    const stop_t *s = &walks[ui_walk].stops[begin_at];
-    lv_label_set_text_fmt(ch.begin_kick, "BEGIN AT STOP %d", begin_at + 1);
-    lv_label_set_text(ch.begin_name, s->name);
-    int m = metres_to(s);
-    char buf[48];
-    if (m < 0) snprintf(buf, sizeof buf, "Finding you");
-    else if (m < 1000) snprintf(buf, sizeof buf, "%d m from you", m < 50 ? m : m / 10 * 10);
-    else snprintf(buf, sizeof buf, "%d.%d km from you", m / 1000, m % 1000 / 100);
-    lv_label_set_text(ch.begin_meta, buf);
-}
-
-static void step_begin(lv_event_t *e)
-{
-    int n = walks[ui_walk].stop_count;
-    begin_at = (begin_at + (int)(intptr_t)lv_event_get_user_data(e) + n) % n;
-    show_begin();
-}
+static void show_walk(int pos);
 
 void walks_start(void)
 {
-    ui_start_walk(begin_at);
-}
-
-int walks_begin_stop(void)
-{
-    return begin_at;
+    if (begin_worth_asking()) {
+        returning = true;
+        ui_show(SCR_BEGIN);
+    } else {
+        ui_start_walk(0);
+    }
 }
 
 static void map_clicked(lv_event_t *e)
 {
     LV_UNUSED(e);
-    back_from_map = true;
+    returning = true;
     ui_open_map();
 }
 
@@ -110,7 +79,7 @@ static void page_clicked(lv_event_t *e)
     lv_point_t at;
     lv_indev_get_point(lv_indev_active(), &at);
     int32_t dx = at.x - ch.pressed_at.x, dy = at.y - ch.pressed_at.y;
-    if (LV_ABS(dx) >= TURN_PX && LV_ABS(dx) > LV_ABS(dy)) show_walk(shown + (dx < 0 ? 1 : -1), false);
+    if (LV_ABS(dx) >= TURN_PX && LV_ABS(dx) > LV_ABS(dy)) show_walk(shown + (dx < 0 ? 1 : -1));
 }
 
 static void swiped(lv_event_t *e)
@@ -120,12 +89,12 @@ static void swiped(lv_event_t *e)
     lv_dir_t d = lv_indev_get_gesture_dir(indev);
     if (d != LV_DIR_LEFT && d != LV_DIR_RIGHT) return;
     lv_indev_wait_release(indev);
-    show_walk(shown + (d == LV_DIR_LEFT ? 1 : -1), false);
+    show_walk(shown + (d == LV_DIR_LEFT ? 1 : -1));
 }
 
 static void arrow_clicked(lv_event_t *e)
 {
-    show_walk(shown + (int)(intptr_t)lv_event_get_user_data(e), false);
+    show_walk(shown + (int)(intptr_t)lv_event_get_user_data(e));
 }
 
 /** A round arrow button, `d` across, ringed in blue on a slip. */
@@ -152,42 +121,40 @@ static lv_obj_t *line(lv_obj_t *parent, const lv_font_t *font, lv_color_t color,
     return l;
 }
 
-/** Walk `order[pos]`: its scene, its slip, where to begin (its nearest stop, unless `keep_begin`). */
-static void show_walk(int pos, bool keep_begin)
+/** Walk `order[pos]`: its scene, and its slip. */
+static void show_walk(int pos)
 {
     shown = (pos + WALK_COUNT) % WALK_COUNT;
     ui_walk = order[shown];
     const walk_t *w = &walks[ui_walk];
-    if (!keep_begin) begin_at = nearest[ui_walk];
 
     lv_obj_clean(ch.layer);
     scene_create(ch.layer, &art_scenes[ui_walk]);
 
-    /* The walk and where to begin, on a slip over the foot of the scene, clear of the lower tab. */
-    lv_obj_t *s = slip(ch.layer, 0, 0, 266, LV_SIZE_CONTENT);
-    lv_obj_align(s, LV_ALIGN_BOTTOM_LEFT, 54, 404 - SCREEN_H);
+    /* The walk and how far, on a slip in the middle, between the tabs' bands and the arrows. */
+    lv_obj_t *s = slip(ch.layer, 0, 0, 300, LV_SIZE_CONTENT);
+    lv_obj_align(s, LV_ALIGN_BOTTOM_MID, 0, 316 - SCREEN_H);
     lv_obj_set_style_pad_ver(s, 10, 0);
-    lv_obj_set_style_pad_row(s, 0, 0);
+    lv_obj_set_style_pad_row(s, 1, 0);
     lv_obj_set_flex_flow(s, LV_FLEX_FLOW_COLUMN);
     lv_obj_set_flex_align(s, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
-    char buf[48];
+    char buf[48], far[16];
     snprintf(buf, sizeof buf, "WALK %02d \xC2\xB7 %d STOPS \xC2\xB7 %s", ui_walk + 1, w->stop_count, w->distance);
-    lv_obj_set_style_text_letter_space(line(s, &jost_medium_14, C_BLUE, 246, buf), 1, 0);
-    line(s, &jost_light_25, C_CHARCOAL, 246, w->name);
-    lv_obj_t *rule = box(s, 0, 0, 200, 1);
-    lv_obj_set_style_bg_color(rule, C_BLUE_TINT, 0);
-    lv_obj_set_style_bg_opa(rule, LV_OPA_COVER, 0);
-    lv_obj_set_style_margin_ver(rule, 6, 0);
-    lv_obj_t *row = box(s, 0, 0, 250, 64);
-    lv_obj_t *mid = box(row, 38, 0, 174, 64);
-    lv_obj_set_flex_flow(mid, LV_FLEX_FLOW_COLUMN);
-    lv_obj_set_flex_align(mid, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
-    ch.begin_kick = line(mid, &jost_medium_14, C_BLUE, 174, "");
-    ch.begin_name = line(mid, &jost_regular_18, C_CHARCOAL, 174, "");
-    ch.begin_meta = line(mid, &jost_regular_15, C_SEPIA, 174, "");
-    arrow(row, 0, 14, 36, -1, step_begin);
-    arrow(row, 214, 14, 36, 1, step_begin);
-    show_begin();
+    lv_obj_set_style_text_letter_space(line(s, &jost_medium_14, C_BLUE, 276, buf), 1, 0);
+    line(s, &jost_light_25, C_CHARCOAL, 276, w->name);
+    /* How far: to its first stop, or, if one of its stops is much nearer, to that. */
+    position_t p = position_now();
+    int first = p.known ? walk_metres_from_start(w, p.lat, p.lon) : -1;
+    if (first < 0) {
+        snprintf(buf, sizeof buf, "Starts at %s", w->stops[0].name);
+    } else if (first - away[ui_walk] >= BEGIN_ASK_M) {
+        walk_distance_words(away[ui_walk], far, sizeof far);
+        snprintf(buf, sizeof buf, "A stop %s from you", far);
+    } else {
+        walk_distance_words(first, far, sizeof far);
+        snprintf(buf, sizeof buf, "Starts %s from you", far);
+    }
+    line(s, &jost_regular_16, C_SEPIA, 276, buf);
 
     for (int k = 0; k < WALK_COUNT; k++) lv_obj_set_style_bg_color(ch.dots[k], k == shown ? C_BLUE : C_BLUE_TINT, 0);
     motion_once(s, 0, 255, 400, 80, m_opa);
@@ -200,19 +167,18 @@ static int nearer(const void *a, const void *b)
     return away[i] != away[j] ? away[i] - away[j] : i - j;
 }
 
-/** Each walk's nearest stop, and the walks in order: nearest first if the guide knows where it is. */
+/** How far each walk's nearest stop is, and the walks in order: nearest first if the guide knows where it is. */
 static void put_in_order(void)
 {
     position_t p = position_now();
     for (int i = 0; i < WALK_COUNT; i++) {
         order[i] = i;
-        nearest[i] = 0;
         away[i] = -1;
         if (!p.known) continue;
         const walk_t *w = &walks[i];
         for (int k = 0; k < w->stop_count; k++) {
             int m = (int)position_metres(p.lat, p.lon, w->stops[k].lat_e6 / 1e6, w->stops[k].lon_e6 / 1e6);
-            if (away[i] < 0 || m < away[i]) away[i] = m, nearest[i] = k;
+            if (away[i] < 0 || m < away[i]) away[i] = m;
         }
     }
     if (p.known) qsort(order, WALK_COUNT, sizeof order[0], nearer);
@@ -248,12 +214,12 @@ lv_obj_t *screen_walks(void)
         lv_obj_set_style_outline_color(ch.dots[k], C_SLIP, 0);
         lv_obj_set_style_outline_opa(ch.dots[k], 180, 0);
     }
-    if (back_from_map) {
-        back_from_map = false;
-        show_walk(shown, true);
+    if (returning) {
+        returning = false;
+        show_walk(shown);
     } else {
         put_in_order();
-        show_walk(0, false);
+        show_walk(0);
     }
     ui_hints(scr, 0xFAF6EC, "START", "BACK");
 

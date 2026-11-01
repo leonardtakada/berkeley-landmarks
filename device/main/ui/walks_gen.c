@@ -2,16 +2,16 @@
 #include "data.h"
 
 static const stop_t walk_01[] = {
-    {"Berkeley City Hall", NULL, "Berkeley City Hall. The town's first hall was a wooden building, and it burned in 1904.", 37869220, -122273306, 0, 7},
-    {"Veterans Memorial Building", NULL, "The Veterans Memorial Building, by Henry H. Meyers, finished in 1928.", 37870065, -122271843, 6, 24},
-    {"Golden Sheaf Bakery", NULL, "The Golden Sheaf Bakery.", 37871244, -122269072, 9, 12},
-    {"The Studio Building", NULL, "The Studio Building, 1905. Nobody recorded who designed it.", 37871448, -122267454, 10, 19},
-    {"Chamber of Commerce Building", "ratcliff", "I was Berkeley's first city architect, and I spent most of my working life in this town.", 37870448, -122268729, 12, 18},
-    {"Shattuck Hotel", NULL, "The Shattuck Hotel stands on the homestead of Francis Kittredge Shattuck, the man who built\xE2\x80\xA6""", 37869183, -122268488, 16, 22},
-    {"United States Post Office", NULL, "The United States Post Office, finished in 1914.", 37868692, -122270042, 17, 28},
-    {"Berkeley Public Library", "plachek", "If you've walked around downtown, you've walked past my work: the annex behind the old City Hall,\xE2\x80\xA6""", 37868022, -122268688, 20, 17},
-    {"Tupper & Reed Building", "yelland", "I grew up in Saratoga, studied architecture at the University here, and then the war sent me to\xE2\x80\xA6""", 37868158, -122267408, 22, 16},
-    {"Masonic Temple", NULL, "The Masonic Temple, at Bancroft and Shattuck, completed in April 1907.", 37867733, -122267382, 24, 15},
+    {"Berkeley City Hall", NULL, "Berkeley City Hall. The town's first hall was a wooden building, and it burned in 1904.", 37869220, -122273306, 0, 7, 1},
+    {"Veterans Memorial Building", NULL, "The Veterans Memorial Building, by Henry H. Meyers, finished in 1928.", 37870065, -122271843, 6, 24, 2},
+    {"Golden Sheaf Bakery", NULL, "The Golden Sheaf Bakery.", 37871244, -122269072, 9, 12, 3},
+    {"The Studio Building", NULL, "The Studio Building, 1905. Nobody recorded who designed it.", 37871448, -122267454, 10, 19, 3},
+    {"Chamber of Commerce Building", "ratcliff", "I was Berkeley's first city architect, and I spent most of my working life in this town.", 37870448, -122268729, 12, 18, 4},
+    {"Shattuck Hotel", NULL, "The Shattuck Hotel stands on the homestead of Francis Kittredge Shattuck, the man who built\xE2\x80\xA6""", 37869183, -122268488, 16, 22, 5},
+    {"United States Post Office", NULL, "The United States Post Office, finished in 1914.", 37868692, -122270042, 17, 28, 5},
+    {"Berkeley Public Library", "plachek", "If you've walked around downtown, you've walked past my work: the annex behind the old City Hall,\xE2\x80\xA6""", 37868022, -122268688, 20, 17, 6},
+    {"Tupper & Reed Building", "yelland", "I grew up in Saratoga, studied architecture at the University here, and then the war sent me to\xE2\x80\xA6""", 37868158, -122267408, 22, 16, 4},
+    {"Masonic Temple", NULL, "The Masonic Temple, at Bancroft and Shattuck, completed in April 1907.", 37867733, -122267382, 24, 15, 7},
 };
 
 static const int32_t walk_01_route[] = {
@@ -24,14 +24,19 @@ static const int32_t walk_01_route[] = {
     37867730, -122267381,
 };
 
+static const uint8_t walk_01_streets[] = {
+    0, 0, 0, 2, 1, 2, 2, 8, 3, 3, 3, 4, 4, 4, 4, 5,
+    5, 5, 9, 6, 6, 4, 4, 7,
+};
+
 static const stop_t walk_02[] = {
-    {"Anna Head School", "ratcliff", "The oldest building here isn't mine.", 37866670, -122256832, 0, 32},
-    {"First Church of Christ, Scientist", "maybeck", "The Christian Scientists asked me for a church in 1910.", 37865763, -122255844, 3, 1},
-    {"Town and Gown Club", "maybeck", "In 1899 I was teaching drawing at the university, and the Town and Gown Club asked me for a\xE2\x80\xA6""", 37865100, -122260582, 4, 6},
-    {"Berkeley City Club", "morgan", "In 1927 the women of Berkeley decided they needed a club for all of them, not one circle or another.", 37867642, -122262717, 7, 5},
-    {"First Unitarian Church", NULL, "The First Unitarian Church, by Albert Schweinfurth, 1898.", 37868696, -122261188, 10, 33},
-    {"Bancroft Hotel", NULL, "The Bancroft Hotel began in 1928 as the College Women's Club.", 37868978, -122255069, 11, 14},
-    {"Thorsen House", NULL, "The Thorsen House, by the brothers Charles and Henry Greene.", 37869045, -122251847, 14, 8},
+    {"Anna Head School", "ratcliff", "The oldest building here isn't mine.", 37866670, -122256832, 0, 32, 10},
+    {"First Church of Christ, Scientist", "maybeck", "The Christian Scientists asked me for a church in 1910.", 37865763, -122255844, 3, 1, 11},
+    {"Town and Gown Club", "maybeck", "In 1899 I was teaching drawing at the university, and the Town and Gown Club asked me for a\xE2\x80\xA6""", 37865100, -122260582, 4, 6, 11},
+    {"Berkeley City Club", "morgan", "In 1927 the women of Berkeley decided they needed a club for all of them, not one circle or another.", 37867642, -122262717, 7, 5, 12},
+    {"First Unitarian Church", NULL, "The First Unitarian Church, by Albert Schweinfurth, 1898.", 37868696, -122261188, 10, 33, 7},
+    {"Bancroft Hotel", NULL, "The Bancroft Hotel began in 1928 as the College Women's Club.", 37868978, -122255069, 11, 14, 7},
+    {"Thorsen House", NULL, "The Thorsen House, by the brothers Charles and Henry Greene.", 37869045, -122251847, 14, 8, 13},
 };
 
 static const int32_t walk_02_route[] = {
@@ -41,14 +46,18 @@ static const int32_t walk_02_route[] = {
     37869602, -122252188, 37869425, -122252161, 37869051, -122252158,
 };
 
+static const uint8_t walk_02_streets[] = {
+    10, 14, 11, 11, 11, 15, 12, 12, 15, 7, 7, 7, 13, 13,
+};
+
 static const stop_t walk_03[] = {
-    {"Normandy Village", "yelland", "Jack Thornburg was twenty-five when he brought me this job, in 1926.", 37875139, -122265037, 0, 20},
-    {"Cloyne Court Hotel", "howard", "In 1904 a company of the university's friends decided the neighborhood north of campus needed a\xE2\x80\xA6""", 37876095, -122257895, 13, 21},
-    {"Rose Walk", "maybeck", "Rose Walk is a staircase, a garden and a shortcut, all at once.", 37882998, -122261443, 28, 9},
-    {"John Galen Howard House", "howard", "This was my own house.", 37883024, -122260607, 45, 11},
-    {"Andrew Cowper Lawson House", "maybeck", "Andrew Lawson was a geologist, the man who first mapped the San Andreas fault.", 37881237, -122258058, 61, 26},
-    {"Temple of Wings", "maybeck", "Florence Boynton grew up in Oakland with Isadora Duncan, and she believed in living out of doors:\xE2\x80\xA6""", 37880739, -122256130, 72, 57},
-    {"Samuel Hume House", "thomas", "I designed houses, mostly, and I liked to mix things that weren't supposed to go together: Arts and\xE2\x80\xA6""", 37882992, -122256662, 84, 25},
+    {"Normandy Village", "yelland", "Jack Thornburg was twenty-five when he brought me this job, in 1926.", 37875139, -122265037, 0, 20, 16},
+    {"Cloyne Court Hotel", "howard", "In 1904 a company of the university's friends decided the neighborhood north of campus needed a\xE2\x80\xA6""", 37876095, -122257895, 13, 21, 17},
+    {"Rose Walk", "maybeck", "Rose Walk is a staircase, a garden and a shortcut, all at once.", 37882998, -122261443, 28, 9, 18},
+    {"John Galen Howard House", "howard", "This was my own house.", 37883024, -122260607, 45, 11, 19},
+    {"Andrew Cowper Lawson House", "maybeck", "Andrew Lawson was a geologist, the man who first mapped the San Andreas fault.", 37881237, -122258058, 61, 26, 20},
+    {"Temple of Wings", "maybeck", "Florence Boynton grew up in Oakland with Isadora Duncan, and she believed in living out of doors:\xE2\x80\xA6""", 37880739, -122256130, 72, 57, 21},
+    {"Samuel Hume House", "thomas", "I designed houses, mostly, and I liked to mix things that weren't supposed to go together: Arts and\xE2\x80\xA6""", 37882992, -122256662, 84, 25, 21},
 };
 
 static const int32_t walk_03_route[] = {
@@ -76,17 +85,26 @@ static const int32_t walk_03_route[] = {
     37883141, -122256733,
 };
 
+static const uint8_t walk_03_streets[] = {
+    16, 22, 22, 22, 22, 23, 23, 23, 24, 17, 17, 17, 17, 17, 19, 25,
+    18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 0,
+    26, 26, 26, 26, 27, 28, 27, 26, 26, 26, 26, 0, 19, 19, 19, 19,
+    19, 19, 0, 0, 0, 21, 21, 21, 21, 21, 21, 20, 20, 20, 20, 21,
+    21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21,
+    21, 21, 21, 21,
+};
+
 static const stop_t walk_04[] = {
-    {"Sather Gate", "howard", "Jane Sather gave this gate in memory of her husband, Peder Sather, who had been a trustee of the\xE2\x80\xA6""", 37870240, -122259509, 0, 40},
-    {"Wheeler Hall", "howard", "This hall carries the name of Benjamin Ide Wheeler, president of the university for twenty years.", 37871308, -122259168, 6, 63},
-    {"South Hall", NULL, "South Hall, 1873, the oldest building on the campus and the only one left from the university's\xE2\x80\xA6""", 37871341, -122258533, 13, 62},
-    {"California Hall", "howard", "California Hall was among the first buildings I put up under the Hearst plan, and it set the\xE2\x80\xA6""", 37871884, -122260367, 25, 64},
-    {"Doe Memorial Library", "howard", "A library is the center of a university, so I put this one at the center of the campus.", 37872187, -122259513, 34, 39},
-    {"Sather Tower (Campanile)", "howard", "I wanted this tower to \"rise with a slender stem, bursting into bloom at the summit.\"", 37872060, -122257832, 44, 37},
-    {"Faculty Club", "maybeck", "The professors organized their club in 1902, and they wanted somewhere to talk, not somewhere to be\xE2\x80\xA6""", 37871812, -122255858, 56, 65},
-    {"Hearst Greek Theatre", "howard", "This was the first building I designed for the university.", 37873692, -122254251, 83, 38},
-    {"Hearst Memorial Mining Building", "howard", "Phoebe Hearst built this in memory of her husband, George Hearst, a miner who made his fortune in\xE2\x80\xA6""", 37874454, -122257265, 102, 61},
-    {"Founders Rock", NULL, "Founders Rock.", 37875314, -122256916, 112, 41},
+    {"Sather Gate", "howard", "Jane Sather gave this gate in memory of her husband, Peder Sather, who had been a trustee of the\xE2\x80\xA6""", 37870240, -122259509, 0, 40, 29},
+    {"Wheeler Hall", "howard", "This hall carries the name of Benjamin Ide Wheeler, president of the university for twenty years.", 37871308, -122259168, 6, 63, 30},
+    {"South Hall", NULL, "South Hall, 1873, the oldest building on the campus and the only one left from the university's\xE2\x80\xA6""", 37871341, -122258533, 13, 62, 30},
+    {"California Hall", "howard", "California Hall was among the first buildings I put up under the Hearst plan, and it set the\xE2\x80\xA6""", 37871884, -122260367, 25, 64, 29},
+    {"Doe Memorial Library", "howard", "A library is the center of a university, so I put this one at the center of the campus.", 37872187, -122259513, 34, 39, 29},
+    {"Sather Tower (Campanile)", "howard", "I wanted this tower to \"rise with a slender stem, bursting into bloom at the summit.\"", 37872060, -122257832, 44, 37, 30},
+    {"Faculty Club", "maybeck", "The professors organized their club in 1902, and they wanted somewhere to talk, not somewhere to be\xE2\x80\xA6""", 37871812, -122255858, 56, 65, 0},
+    {"Hearst Greek Theatre", "howard", "This was the first building I designed for the university.", 37873692, -122254251, 83, 38, 0},
+    {"Hearst Memorial Mining Building", "howard", "Phoebe Hearst built this in memory of her husband, George Hearst, a miner who made his fortune in\xE2\x80\xA6""", 37874454, -122257265, 102, 61, 31},
+    {"Founders Rock", NULL, "Founders Rock.", 37875314, -122256916, 112, 41, 32},
 };
 
 static const int32_t walk_04_route[] = {
@@ -121,16 +139,26 @@ static const int32_t walk_04_route[] = {
     37875324, -122256890,
 };
 
+static const uint8_t walk_04_streets[] = {
+    29, 33, 33, 0, 30, 30, 30, 30, 30, 0, 0, 0, 0, 0, 0, 0,
+    34, 0, 35, 35, 35, 0, 0, 0, 0, 0, 0, 0, 0, 0, 29, 0,
+    0, 0, 0, 0, 0, 0, 0, 36, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 30, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    37, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 32, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 32,
+};
+
 static const stop_t walk_05[] = {
-    {"Fox Court", NULL, "Fox Court, built in stages between 1927 and 1930.", 37869973, -122282632, 0, 13},
-    {"Finnish Hall (Toverii Tuppa)", NULL, "Finnish Hall. Its Finnish name is Toverii Tuppa, but most people just call it Finn Hall.", 37870703, -122293603, 11, 43},
-    {"Church of the Good Shepherd", NULL, "The Church of the Good Shepherd, 1878.", 37870250, -122294690, 16, 2},
-    {"Westminster Presbyterian Church", NULL, "Westminster Presbyterian Church, 1879, the second-oldest church standing in Berkeley, a year\xE2\x80\xA6""", 37869563, -122295708, 20, 3},
-    {"Davis-Harmes House", NULL, "The Davis-Harmes House, a Victorian built around 1890 by C. W.", 37869206, -122299612, 28, 96},
-    {"Silva House", NULL, "The Silva House, built around 1870 by Joseph Alphonso.", 37869355, -122299556, 30, 188},
-    {"Shellmound", NULL, "You're standing near the West Berkeley Shellmound. There's little to see.", 37868520, -122300480, 33, 192},
-    {"Spenger's Fresh Fish Grotto", NULL, "Spenger's Fresh Fish Grotto.", 37868135, -122299745, 34, 97},
-    {"Berkeley Day Nursery", "ratcliff", "In 1908 a group of Berkeley women started the Berkeley Day Nursery, to look after the children of\xE2\x80\xA6""", 37866441, -122297136, 40, 10},
+    {"Fox Court", NULL, "Fox Court, built in stages between 1927 and 1930.", 37869973, -122282632, 0, 13, 38},
+    {"Finnish Hall (Toverii Tuppa)", NULL, "Finnish Hall. Its Finnish name is Toverii Tuppa, but most people just call it Finn Hall.", 37870703, -122293603, 11, 43, 39},
+    {"Church of the Good Shepherd", NULL, "The Church of the Good Shepherd, 1878.", 37870250, -122294690, 16, 2, 40},
+    {"Westminster Presbyterian Church", NULL, "Westminster Presbyterian Church, 1879, the second-oldest church standing in Berkeley, a year\xE2\x80\xA6""", 37869563, -122295708, 20, 3, 22},
+    {"Davis-Harmes House", NULL, "The Davis-Harmes House, a Victorian built around 1890 by C. W.", 37869206, -122299612, 28, 96, 41},
+    {"Silva House", NULL, "The Silva House, built around 1870 by Joseph Alphonso.", 37869355, -122299556, 30, 188, 41},
+    {"Shellmound", NULL, "You're standing near the West Berkeley Shellmound. There's little to see.", 37868520, -122300480, 33, 192, 42},
+    {"Spenger's Fresh Fish Grotto", NULL, "Spenger's Fresh Fish Grotto.", 37868135, -122299745, 34, 97, 42},
+    {"Berkeley Day Nursery", "ratcliff", "In 1908 a group of Berkeley women started the Berkeley Day Nursery, to look after the children of\xE2\x80\xA6""", 37866441, -122297136, 40, 10, 43},
 };
 
 static const int32_t walk_05_route[] = {
@@ -147,14 +175,20 @@ static const int32_t walk_05_route[] = {
     37866431, -122297184,
 };
 
+static const uint8_t walk_05_streets[] = {
+    38, 44, 45, 46, 22, 22, 22, 47, 22, 22, 39, 39, 22, 22, 22, 40,
+    40, 22, 40, 22, 22, 22, 22, 22, 22, 22, 22, 41, 41, 41, 41, 22,
+    42, 42, 42, 38, 38, 38, 38, 43,
+};
+
 static const stop_t walk_06[] = {
-    {"William E. Colby House", "morgan", "William Colby was a young mountaineer, and the Sierra Club was his life.", 37868109, -122250464, 0, 50},
-    {"Arthur Ayers House", NULL, "The Arthur Ayers House, a Queen Anne Victorian from 1899. Nobody recorded its architect.", 37864391, -122255344, 10, 94},
-    {"Berkeley Tennis Club", "ratcliff", "The Berkeley Tennis Club started here in 1906, with two courts of rolled earth.", 37862486, -122256546, 13, 68},
-    {"Julia Morgan Center for the Arts", "morgan", "This was St. John's Presbyterian Church.", 37862248, -122254047, 16, 4},
-    {"Elmwood Theater", NULL, "The Elmwood Theater opened in 1914 as the Strand, a neighborhood cinema of about 740 seats.", 37856665, -122253306, 17, 48},
-    {"John Muir School", "plachek", "For a good many years I was Berkeley's city architect in all but name: libraries, fire stations,\xE2\x80\xA6""", 37857375, -122244862, 27, 45},
-    {"Claremont Hotel", NULL, "The Claremont Hotel. It was part of a bigger scheme.", 37859410, -122242066, 45, 36},
+    {"William E. Colby House", "morgan", "William Colby was a young mountaineer, and the Sierra Club was his life.", 37868109, -122250464, 0, 50, 10},
+    {"Arthur Ayers House", NULL, "The Arthur Ayers House, a Queen Anne Victorian from 1899. Nobody recorded its architect.", 37864391, -122255344, 10, 94, 48},
+    {"Berkeley Tennis Club", "ratcliff", "The Berkeley Tennis Club started here in 1906, with two courts of rolled earth.", 37862486, -122256546, 13, 68, 49},
+    {"Julia Morgan Center for the Arts", "morgan", "This was St. John's Presbyterian Church.", 37862248, -122254047, 16, 4, 50},
+    {"Elmwood Theater", NULL, "The Elmwood Theater opened in 1914 as the Strand, a neighborhood cinema of about 740 seats.", 37856665, -122253306, 17, 48, 50},
+    {"John Muir School", "plachek", "For a good many years I was Berkeley's city architect in all but name: libraries, fire stations,\xE2\x80\xA6""", 37857375, -122244862, 27, 45, 0},
+    {"Claremont Hotel", NULL, "The Claremont Hotel. It was part of a bigger scheme.", 37859410, -122242066, 45, 36, 0},
 };
 
 static const int32_t walk_06_route[] = {
@@ -172,19 +206,25 @@ static const int32_t walk_06_route[] = {
     37859361, -122242403, 37859328, -122242352,
 };
 
+static const uint8_t walk_06_streets[] = {
+    10, 13, 13, 13, 51, 51, 51, 50, 11, 48, 48, 52, 49, 49, 53, 50,
+    50, 50, 54, 54, 54, 54, 55, 0, 0, 0, 0, 0, 0, 0, 56, 56,
+    56, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+};
+
 static const stop_t walk_07[] = {
-    {"Thorsen House", NULL, "The Thorsen House, by the brothers Charles and Henry Greene.", 37869045, -122251847, 0, 8},
-    {"First Church of Christ, Scientist", "maybeck", "The Christian Scientists asked me for a church in 1910.", 37865763, -122255844, 7, 1},
-    {"Berkeley City Club", "morgan", "In 1927 the women of Berkeley decided they needed a club for all of them, not one circle or another.", 37867642, -122262717, 16, 5},
-    {"Corder Building", "plachek", "In 1921 I was asked for a building to fill this whole block of Shattuck Avenue, from Bancroft Way\xE2\x80\xA6""", 37867253, -122268292, 18, 46},
-    {"Masonic Temple", NULL, "The Masonic Temple, at Bancroft and Shattuck, completed in April 1907.", 37867733, -122267382, 22, 15},
-    {"Tupper & Reed Building", "yelland", "I grew up in Saratoga, studied architecture at the University here, and then the war sent me to\xE2\x80\xA6""", 37868158, -122267408, 24, 16},
-    {"Berkeley Public Library", "plachek", "If you've walked around downtown, you've walked past my work: the annex behind the old City Hall,\xE2\x80\xA6""", 37868022, -122268688, 26, 17},
-    {"Chamber of Commerce Building", "ratcliff", "I was Berkeley's first city architect, and I spent most of my working life in this town.", 37870448, -122268729, 31, 18},
-    {"The Studio Building", NULL, "The Studio Building, 1905. Nobody recorded who designed it.", 37871448, -122267454, 33, 19},
-    {"Normandy Village", "yelland", "Jack Thornburg was twenty-five when he brought me this job, in 1926.", 37875139, -122265037, 42, 20},
-    {"Cloyne Court Hotel", "howard", "In 1904 a company of the university's friends decided the neighborhood north of campus needed a\xE2\x80\xA6""", 37876095, -122257895, 55, 21},
-    {"Founders Rock", NULL, "Founders Rock.", 37875314, -122256916, 62, 41},
+    {"Thorsen House", NULL, "The Thorsen House, by the brothers Charles and Henry Greene.", 37869045, -122251847, 0, 8, 13},
+    {"First Church of Christ, Scientist", "maybeck", "The Christian Scientists asked me for a church in 1910.", 37865763, -122255844, 7, 1, 11},
+    {"Berkeley City Club", "morgan", "In 1927 the women of Berkeley decided they needed a club for all of them, not one circle or another.", 37867642, -122262717, 16, 5, 12},
+    {"Corder Building", "plachek", "In 1921 I was asked for a building to fill this whole block of Shattuck Avenue, from Bancroft Way\xE2\x80\xA6""", 37867253, -122268292, 18, 46, 7},
+    {"Masonic Temple", NULL, "The Masonic Temple, at Bancroft and Shattuck, completed in April 1907.", 37867733, -122267382, 22, 15, 7},
+    {"Tupper & Reed Building", "yelland", "I grew up in Saratoga, studied architecture at the University here, and then the war sent me to\xE2\x80\xA6""", 37868158, -122267408, 24, 16, 4},
+    {"Berkeley Public Library", "plachek", "If you've walked around downtown, you've walked past my work: the annex behind the old City Hall,\xE2\x80\xA6""", 37868022, -122268688, 26, 17, 6},
+    {"Chamber of Commerce Building", "ratcliff", "I was Berkeley's first city architect, and I spent most of my working life in this town.", 37870448, -122268729, 31, 18, 4},
+    {"The Studio Building", NULL, "The Studio Building, 1905. Nobody recorded who designed it.", 37871448, -122267454, 33, 19, 3},
+    {"Normandy Village", "yelland", "Jack Thornburg was twenty-five when he brought me this job, in 1926.", 37875139, -122265037, 42, 20, 16},
+    {"Cloyne Court Hotel", "howard", "In 1904 a company of the university's friends decided the neighborhood north of campus needed a\xE2\x80\xA6""", 37876095, -122257895, 55, 21, 17},
+    {"Founders Rock", NULL, "Founders Rock.", 37875314, -122256916, 62, 41, 32},
 };
 
 static const int32_t walk_07_route[] = {
@@ -206,22 +246,29 @@ static const int32_t walk_07_route[] = {
     37875417, -122257068, 37875383, -122257072, 37875324, -122256890,
 };
 
+static const uint8_t walk_07_streets[] = {
+    13, 12, 12, 12, 12, 50, 11, 11, 14, 10, 0, 0, 0, 0, 0, 12,
+    12, 0, 0, 7, 4, 7, 7, 4, 4, 6, 6, 4, 4, 4, 4, 4,
+    3, 3, 57, 38, 57, 0, 0, 22, 22, 16, 16, 22, 22, 22, 22, 23,
+    23, 23, 24, 17, 17, 17, 17, 17, 20, 22, 32, 22, 22, 0,
+};
+
 static const stop_t walk_08[] = {
-    {"Town and Gown Club", "maybeck", "In 1899 I was teaching drawing at the university, and the Town and Gown Club asked me for a\xE2\x80\xA6""", 37865100, -122260582, 0, 6},
-    {"First Church of Christ, Scientist", "maybeck", "The Christian Scientists asked me for a church in 1910.", 37865763, -122255844, 1, 1},
-    {"Hearst Gymnasium for Women", "maybeck", "Years ago I designed Hearst Hall for Phoebe Hearst, a hall she gave the university as a gymnasium\xE2\x80\xA6""", 37869591, -122256920, 6, 92},
-    {"Faculty Club", "maybeck", "The professors organized their club in 1902, and they wanted somewhere to talk, not somewhere to be\xE2\x80\xA6""", 37871812, -122255858, 21, 65},
-    {"Charles Keeler Studio", "maybeck", "Charles Keeler was my first client and my friend: a poet, a naturalist, a man who knew the birds of\xE2\x80\xA6""", 37876999, -122256294, 52, 221},
-    {"Charles Keeler Place", "maybeck", "I first noticed Charles Keeler on the five o'clock ferry from San Francisco.", 37876858, -122256118, 53, 222},
-    {"Oscar Maurer Studio", "maybeck", "Oscar Maurer was a photographer, one of the best of his day.", 37876754, -122258787, 57, 55},
-    {"Kennedy-Nixon House (Maybeck Studio)", "maybeck", "In 1914 the Kennedys wanted a studio for music here, at the corner of Euclid and Buena Vista: a\xE2\x80\xA6""", 37880611, -122261360, 63, 52},
-    {"Rose Walk", "maybeck", "Rose Walk is a staircase, a garden and a shortcut, all at once.", 37882998, -122261443, 71, 9},
-    {"Andrew Cowper Lawson House", "maybeck", "Andrew Lawson was a geologist, the man who first mapped the San Andreas fault.", 37881237, -122258058, 93, 26},
-    {"Mathewson House", "maybeck", "Gertrude Mathewson was the librarian at Berkeley High School.", 37881677, -122258002, 96, 366},
-    {"Tuft's House #3", "maybeck", "By 1931 I had been building on this hill for a quarter of a century, and I was nearly seventy.", 37881686, -122257236, 98, 146},
-    {"Maybeck Cottage", "maybeck", "The fire of 1923 burned our house to the ground.", 37882075, -122257342, 103, 242},
-    {"Kerna Maybeck Gannon House", "maybeck", "By 1932 the Depression had set in.", 37880992, -122256873, 108, 58},
-    {"Temple of Wings", "maybeck", "Florence Boynton grew up in Oakland with Isadora Duncan, and she believed in living out of doors:\xE2\x80\xA6""", 37880739, -122256130, 113, 57},
+    {"Town and Gown Club", "maybeck", "In 1899 I was teaching drawing at the university, and the Town and Gown Club asked me for a\xE2\x80\xA6""", 37865100, -122260582, 0, 6, 11},
+    {"First Church of Christ, Scientist", "maybeck", "The Christian Scientists asked me for a church in 1910.", 37865763, -122255844, 1, 1, 11},
+    {"Hearst Gymnasium for Women", "maybeck", "Years ago I designed Hearst Hall for Phoebe Hearst, a hall she gave the university as a gymnasium\xE2\x80\xA6""", 37869591, -122256920, 6, 92, 0},
+    {"Faculty Club", "maybeck", "The professors organized their club in 1902, and they wanted somewhere to talk, not somewhere to be\xE2\x80\xA6""", 37871812, -122255858, 21, 65, 0},
+    {"Charles Keeler Studio", "maybeck", "Charles Keeler was my first client and my friend: a poet, a naturalist, a man who knew the birds of\xE2\x80\xA6""", 37876999, -122256294, 52, 221, 58},
+    {"Charles Keeler Place", "maybeck", "I first noticed Charles Keeler on the five o'clock ferry from San Francisco.", 37876858, -122256118, 53, 222, 58},
+    {"Oscar Maurer Studio", "maybeck", "Oscar Maurer was a photographer, one of the best of his day.", 37876754, -122258787, 57, 55, 19},
+    {"Kennedy-Nixon House (Maybeck Studio)", "maybeck", "In 1914 the Kennedys wanted a studio for music here, at the corner of Euclid and Buena Vista: a\xE2\x80\xA6""", 37880611, -122261360, 63, 52, 18},
+    {"Rose Walk", "maybeck", "Rose Walk is a staircase, a garden and a shortcut, all at once.", 37882998, -122261443, 71, 9, 18},
+    {"Andrew Cowper Lawson House", "maybeck", "Andrew Lawson was a geologist, the man who first mapped the San Andreas fault.", 37881237, -122258058, 93, 26, 20},
+    {"Mathewson House", "maybeck", "Gertrude Mathewson was the librarian at Berkeley High School.", 37881677, -122258002, 96, 366, 21},
+    {"Tuft's House #3", "maybeck", "By 1931 I had been building on this hill for a quarter of a century, and I was nearly seventy.", 37881686, -122257236, 98, 146, 21},
+    {"Maybeck Cottage", "maybeck", "The fire of 1923 burned our house to the ground.", 37882075, -122257342, 103, 242, 59},
+    {"Kerna Maybeck Gannon House", "maybeck", "By 1932 the Depression had set in.", 37880992, -122256873, 108, 58, 21},
+    {"Temple of Wings", "maybeck", "Florence Boynton grew up in Oakland with Isadora Duncan, and she believed in living out of doors:\xE2\x80\xA6""", 37880739, -122256130, 113, 57, 21},
 };
 
 static const int32_t walk_08_route[] = {
@@ -256,13 +303,24 @@ static const int32_t walk_08_route[] = {
     37880894, -122256392, 37880933, -122256331,
 };
 
+static const uint8_t walk_08_streets[] = {
+    11, 11, 14, 7, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 37, 0, 0,
+    0, 0, 0, 32, 32, 32, 32, 32, 0, 0, 0, 0, 0, 0, 0, 0,
+    58, 58, 58, 58, 58, 58, 58, 17, 19, 19, 25, 18, 18, 18, 18, 18,
+    18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 60, 60, 60,
+    60, 19, 0, 0, 0, 21, 21, 21, 21, 21, 21, 20, 20, 20, 20, 21,
+    21, 21, 21, 59, 59, 59, 59, 59, 59, 59, 21, 21, 21, 21, 21, 21,
+    21,
+};
+
 static const stop_t walk_09[] = {
-    {"Julia Morgan Center for the Arts", "morgan", "This was St. John's Presbyterian Church.", 37862248, -122254047, 0, 4},
-    {"Hobart Hall", "morgan", "This was the Baptist Divinity School, and I designed it in 1918 and 1919, here at the corner of\xE2\x80\xA6""", 37865494, -122255113, 4, 181},
-    {"William E. Colby House", "morgan", "William Colby was a young mountaineer, and the Sierra Club was his life.", 37868109, -122250464, 15, 50},
-    {"Hearst Gymnasium for Women", "maybeck", "Years ago I designed Hearst Hall for Phoebe Hearst, a hall she gave the university as a gymnasium\xE2\x80\xA6""", 37869591, -122256920, 24, 92},
-    {"Fred Turner Building", "morgan", "By 1940 I had been in practice for thirty-six years, and fashions had changed more than once.", 37868702, -122257963, 25, 47},
-    {"Berkeley City Club", "morgan", "In 1927 the women of Berkeley decided they needed a club for all of them, not one circle or another.", 37867642, -122262717, 28, 5},
+    {"Julia Morgan Center for the Arts", "morgan", "This was St. John's Presbyterian Church.", 37862248, -122254047, 0, 4, 50},
+    {"Hobart Hall", "morgan", "This was the Baptist Divinity School, and I designed it in 1918 and 1919, here at the corner of\xE2\x80\xA6""", 37865494, -122255113, 4, 181, 11},
+    {"William E. Colby House", "morgan", "William Colby was a young mountaineer, and the Sierra Club was his life.", 37868109, -122250464, 15, 50, 10},
+    {"Hearst Gymnasium for Women", "maybeck", "Years ago I designed Hearst Hall for Phoebe Hearst, a hall she gave the university as a gymnasium\xE2\x80\xA6""", 37869591, -122256920, 24, 92, 7},
+    {"Fred Turner Building", "morgan", "By 1940 I had been in practice for thirty-six years, and fashions had changed more than once.", 37868702, -122257963, 25, 47, 7},
+    {"Berkeley City Club", "morgan", "In 1927 the women of Berkeley decided they needed a club for all of them, not one circle or another.", 37867642, -122262717, 28, 5, 12},
 };
 
 static const int32_t walk_09_route[] = {
@@ -276,14 +334,19 @@ static const int32_t walk_09_route[] = {
     37867342, -122262655,
 };
 
+static const uint8_t walk_09_streets[] = {
+    50, 52, 48, 11, 11, 48, 11, 50, 51, 51, 51, 13, 13, 13, 10, 10,
+    13, 13, 13, 13, 13, 13, 13, 7, 7, 7, 0, 12,
+};
+
 static const stop_t walk_10[] = {
-    {"Allanoke (Freeman-Sibley House)", "coxhead", "I trained in England as an architect of churches.", 37876587, -122258249, 0, 53},
-    {"Oscar Maurer Studio", "maybeck", "Oscar Maurer was a photographer, one of the best of his day.", 37876754, -122258787, 1, 55},
-    {"Weltevreden (Tellefsen Hall)", NULL, "Weltevreden.", 37877102, -122258312, 2, 71},
-    {"Greenwood Common", NULL, "Greenwood Common.", 37883214, -122259385, 30, 56},
-    {"Kerna Maybeck Gannon House", "maybeck", "By 1932 the Depression had set in.", 37880992, -122256873, 43, 58},
-    {"Temple of Wings", "maybeck", "Florence Boynton grew up in Oakland with Isadora Duncan, and she believed in living out of doors:\xE2\x80\xA6""", 37880739, -122256130, 48, 57},
-    {"Samuel Hume House", "thomas", "I designed houses, mostly, and I liked to mix things that weren't supposed to go together: Arts and\xE2\x80\xA6""", 37882992, -122256662, 60, 25},
+    {"Allanoke (Freeman-Sibley House)", "coxhead", "I trained in England as an architect of churches.", 37876587, -122258249, 0, 53, 19},
+    {"Oscar Maurer Studio", "maybeck", "Oscar Maurer was a photographer, one of the best of his day.", 37876754, -122258787, 1, 55, 19},
+    {"Weltevreden (Tellefsen Hall)", NULL, "Weltevreden.", 37877102, -122258312, 2, 71, 19},
+    {"Greenwood Common", NULL, "Greenwood Common.", 37883214, -122259385, 30, 56, 61},
+    {"Kerna Maybeck Gannon House", "maybeck", "By 1932 the Depression had set in.", 37880992, -122256873, 43, 58, 21},
+    {"Temple of Wings", "maybeck", "Florence Boynton grew up in Oakland with Isadora Duncan, and she believed in living out of doors:\xE2\x80\xA6""", 37880739, -122256130, 48, 57, 21},
+    {"Samuel Hume House", "thomas", "I designed houses, mostly, and I liked to mix things that weren't supposed to go together: Arts and\xE2\x80\xA6""", 37882992, -122256662, 60, 25, 21},
 };
 
 static const int32_t walk_10_route[] = {
@@ -305,13 +368,20 @@ static const int32_t walk_10_route[] = {
     37883141, -122256733,
 };
 
+static const uint8_t walk_10_streets[] = {
+    19, 19, 19, 25, 25, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20,
+    20, 20, 20, 20, 20, 20, 21, 21, 21, 61, 61, 61, 61, 61, 61, 61,
+    61, 61, 61, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21,
+    21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21,
+};
+
 static const stop_t walk_11[] = {
-    {"Cooper Woodworking Building", NULL, "The Cooper Woodworking Building, designed by Walter Crapo and built in 1912.", 37868315, -122286792, 0, 77},
-    {"H.J. Heinz Co. Factory", NULL, "The H. J. Heinz factory.", 37854256, -122287556, 35, 72},
-    {"J.J. Pfister Knitting Mill", NULL, "The J. J. Pfister Knitting Mill.", 37858531, -122292462, 38, 87},
-    {"Kawneer Manufacturing Co.", NULL, "The Kawneer factory, built in 1913.", 37859613, -122292608, 39, 86},
-    {"West Berkeley Macaroni Factory", NULL, "The West Berkeley Macaroni Factory.", 37864539, -122297538, 46, 100},
-    {"Manasse-Block Tanning Co.", NULL, "The Manasse-Block Tanning Company. Tanners were working on this block in the 1890s.", 37878727, -122303643, 50, 78},
+    {"Cooper Woodworking Building", NULL, "The Cooper Woodworking Building, designed by Walter Crapo and built in 1912.", 37868315, -122286792, 0, 77, 62},
+    {"H.J. Heinz Co. Factory", NULL, "The H. J. Heinz factory.", 37854256, -122287556, 35, 72, 63},
+    {"J.J. Pfister Knitting Mill", NULL, "The J. J. Pfister Knitting Mill.", 37858531, -122292462, 38, 87, 64},
+    {"Kawneer Manufacturing Co.", NULL, "The Kawneer factory, built in 1913.", 37859613, -122292608, 39, 86, 64},
+    {"West Berkeley Macaroni Factory", NULL, "The West Berkeley Macaroni Factory.", 37864539, -122297538, 46, 100, 41},
+    {"Manasse-Block Tanning Co.", NULL, "The Manasse-Block Tanning Company. Tanners were working on this block in the 1890s.", 37878727, -122303643, 50, 78, 42},
 };
 
 static const int32_t walk_11_route[] = {
@@ -330,14 +400,21 @@ static const int32_t walk_11_route[] = {
     37867431, -122299836, 37868074, -122300054, 37878759, -122303481,
 };
 
+static const uint8_t walk_11_streets[] = {
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 62, 11, 65, 66, 65, 66,
+    66, 65, 65, 65, 65, 65, 65, 65, 65, 65, 65, 67, 68, 68, 69, 63,
+    70, 63, 70, 63, 70, 64, 64, 64, 11, 71, 43, 43, 10, 41, 41, 38,
+    42, 42,
+};
+
 static const stop_t walk_12[] = {
-    {"Sigma Pi Chapter House", NULL, "The Sigma Pi Chapter House, designed by Frederick Reimers in 1928 in the Mediterranean Revival\xE2\x80\xA6""", 37868088, -122251483, 0, 70},
-    {"Piedmont Way", NULL, "Piedmont Avenue.", 37868000, -122253000, 3, 69},
-    {"Thorsen House", NULL, "The Thorsen House, by the brothers Charles and Henry Greene.", 37869045, -122251847, 6, 8},
-    {"Kappa Sigma House", NULL, "Look around for a fraternity house from 1922, and you won't find it.", 37871074, -122252875, 16, 255},
-    {"California Memorial Stadium", "howard", "This stadium is a war memorial, built \"in thankful memory of those Californians who in the War of\xE2\x80\xA6""", 37870998, -122250739, 23, 130},
-    {"Bowles Hall", NULL, "Bowles Hall, 1928, the university's first residence hall, and the first residence hall owned by the\xE2\x80\xA6""", 37873355, -122253031, 38, 60},
-    {"Phi Delta Theta Chapter House", NULL, "The Phi Delta Theta Chapter House, at Hearst Avenue and Highland Place, designed in 1914 by John\xE2\x80\xA6""", 37875904, -122256002, 60, 34},
+    {"Sigma Pi Chapter House", NULL, "The Sigma Pi Chapter House, designed by Frederick Reimers in 1928 in the Mediterranean Revival\xE2\x80\xA6""", 37868088, -122251483, 0, 70, 10},
+    {"Piedmont Way", NULL, "Piedmont Avenue.", 37868000, -122253000, 3, 69, 13},
+    {"Thorsen House", NULL, "The Thorsen House, by the brothers Charles and Henry Greene.", 37869045, -122251847, 6, 8, 13},
+    {"Kappa Sigma House", NULL, "Look around for a fraternity house from 1922, and you won't find it.", 37871074, -122252875, 16, 255, 13},
+    {"California Memorial Stadium", "howard", "This stadium is a war memorial, built \"in thankful memory of those Californians who in the War of\xE2\x80\xA6""", 37870998, -122250739, 23, 130, 13},
+    {"Bowles Hall", NULL, "Bowles Hall, 1928, the university's first residence hall, and the first residence hall owned by the\xE2\x80\xA6""", 37873355, -122253031, 38, 60, 72},
+    {"Phi Delta Theta Chapter House", NULL, "The Phi Delta Theta Chapter House, at Hearst Avenue and Highland Place, designed in 1914 by John\xE2\x80\xA6""", 37875904, -122256002, 60, 34, 22},
 };
 
 static const int32_t walk_12_route[] = {
@@ -359,19 +436,103 @@ static const int32_t walk_12_route[] = {
     37875633, -122255946,
 };
 
+static const uint8_t walk_12_streets[] = {
+    0, 13, 13, 13, 12, 13, 13, 13, 7, 13, 13, 13, 13, 13, 13, 13,
+    13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 72, 72,
+    72, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 72, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 73, 73, 73, 22, 22,
+};
+
 const walk_t walks[WALK_COUNT] = {
-    {"Downtown Berkeley", "1.0 mi", "1.5 hrs", "ratcliff", walk_01, 10, walk_01_route, 25},
-    {"South of Campus", "1.4 mi", "1 hr", "maybeck", walk_02, 7, walk_02_route, 15},
-    {"Northside & Hills", "2.0 mi", "1.5 hrs", "maybeck", walk_03, 7, walk_03_route, 85},
-    {"UC Berkeley Campus", "1.3 mi", "1.5 hrs", "howard", walk_04, 10, walk_04_route, 113},
-    {"West Berkeley Heritage", "1.6 mi", "1.5 hrs", "ratcliff", walk_05, 9, walk_05_route, 41},
-    {"Elmwood & Claremont", "2.2 mi", "1.5 hrs", "morgan", walk_06, 7, walk_06_route, 46},
-    {"Historic Landmarks Walk", "2.9 mi", "2.5 hrs", "plachek", walk_07, 12, walk_07_route, 63},
-    {"Bernard Maybeck Trail", "2.7 mi", "2.5 hrs", "maybeck", walk_08, 15, walk_08_route, 114},
-    {"Julia Morgan Legacy", "1.6 mi", "1 hr", "morgan", walk_09, 6, walk_09_route, 29},
-    {"Buena Vista & Hilltop", "1.1 mi", "1 hr", "maybeck", walk_10, 7, walk_10_route, 61},
-    {"Industrial Heritage", "3.4 mi", "2 hrs", NULL, walk_11, 6, walk_11_route, 51},
-    {"Piedmont Avenue Stroll", "1.0 mi", "1 hr", "hays", walk_12, 7, walk_12_route, 61},
+    {"Downtown Berkeley", "1.0 mi", "1.5 hrs", "ratcliff", walk_01, 10, walk_01_route, 25, walk_01_streets},
+    {"South of Campus", "1.4 mi", "1 hr", "maybeck", walk_02, 7, walk_02_route, 15, walk_02_streets},
+    {"Northside & Hills", "2.0 mi", "1.5 hrs", "maybeck", walk_03, 7, walk_03_route, 85, walk_03_streets},
+    {"UC Berkeley Campus", "1.3 mi", "1.5 hrs", "howard", walk_04, 10, walk_04_route, 113, walk_04_streets},
+    {"West Berkeley Heritage", "1.6 mi", "1.5 hrs", "ratcliff", walk_05, 9, walk_05_route, 41, walk_05_streets},
+    {"Elmwood & Claremont", "2.2 mi", "1.5 hrs", "morgan", walk_06, 7, walk_06_route, 46, walk_06_streets},
+    {"Historic Landmarks Walk", "2.9 mi", "2.5 hrs", "plachek", walk_07, 12, walk_07_route, 63, walk_07_streets},
+    {"Bernard Maybeck Trail", "2.7 mi", "2.5 hrs", "maybeck", walk_08, 15, walk_08_route, 114, walk_08_streets},
+    {"Julia Morgan Legacy", "1.6 mi", "1 hr", "morgan", walk_09, 6, walk_09_route, 29, walk_09_streets},
+    {"Buena Vista & Hilltop", "1.1 mi", "1 hr", "maybeck", walk_10, 7, walk_10_route, 61, walk_10_streets},
+    {"Industrial Heritage", "3.4 mi", "2 hrs", NULL, walk_11, 6, walk_11_route, 51, walk_11_streets},
+    {"Piedmont Avenue Stroll", "1.0 mi", "1 hr", "hays", walk_12, 7, walk_12_route, 61, walk_12_streets},
+};
+
+const char *const street_names[] = {
+    NULL,
+    "Martin Luther King Jr Way",
+    "Center St",
+    "Addison St",
+    "Shattuck Ave",
+    "Allston Way",
+    "Kittredge St",
+    "Bancroft Way",
+    "Milvia St",
+    "Harold Way",
+    "Channing Way",
+    "Dwight Way",
+    "Durant Ave",
+    "Piedmont Ave",
+    "Bowditch St",
+    "Dana St",
+    "Spruce St",
+    "Ridge Road",
+    "Euclid Ave",
+    "Le Roy Ave",
+    "La Loma Ave",
+    "Buena Vista Way",
+    "Hearst Ave",
+    "Le Conte Ave",
+    "Scenic Ave",
+    "Virginia St",
+    "Rose St",
+    "Tamalpais Road",
+    "Shasta Road",
+    "Sather Road",
+    "South Drive",
+    "Bechtel Drive",
+    "Gayley Road",
+    "Dwinelle Plaza",
+    "South Hall Road",
+    "Campanile Way",
+    "University Drive",
+    "Chemistry Plaza",
+    "University Ave",
+    "Tenth St",
+    "Ninth St",
+    "Fifth St",
+    "Fourth St",
+    "Sixth St",
+    "Acton St",
+    "Berkeley Way",
+    "Chestnut St",
+    "Curtis St",
+    "Benvenue Ave",
+    "Hillegass Ave",
+    "College Ave",
+    "Haste St",
+    "Parker St",
+    "Derby St",
+    "Webster St",
+    "Claremont Ave",
+    "Domingo Ave",
+    "Oxford St",
+    "Highland Place",
+    "Maybeck Twin Drive",
+    "Hawthorne Terrace",
+    "Greenwood Terrace",
+    "Bonar St",
+    "San Pablo Ave",
+    "Eighth St",
+    "Mathews St",
+    "Blake St",
+    "Ward St",
+    "Wallace St",
+    "Oregon St",
+    "Heinz Ave",
+    "Dwight Crescent",
+    "Stadium Rim Way",
+    "Cyclotron Road",
 };
 
 const architect_t architects[] = {

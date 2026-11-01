@@ -14,6 +14,8 @@
 /* On it, the way points this far ahead along it, so it bends with the streets. */
 #define AHEAD_M 30
 #define M_PER_DEG 111195.0 /* as position.c reckons the earth */
+/* About 80 m a minute on foot, as the app reckons it. */
+#define METRES_PER_MIN 80
 
 static int at;
 static int start; /* the stop the walk was begun at: it goes on round to the stops before it */
@@ -26,12 +28,12 @@ static uint32_t heard_ms;
 /* On your own: the landmark picked on the free map, as a walk of one stop with no host. */
 static bool free_mode;
 static stop_t free_stop;
-static const walk_t free_walk = {"On your own", "", "", NULL, &free_stop, 1, NULL, 0};
+static const walk_t free_walk = {"On your own", "", "", NULL, &free_stop, 1, NULL, 0, NULL};
 static uint32_t free_heard_ms;
 
 void walk_free(const landmark_t *l)
 {
-    free_stop = (stop_t){l->name, l->speaker, l->caption ? l->caption : "", l->lat_e6, l->lon_e6, -1, l->lm};
+    free_stop = (stop_t){l->name, l->speaker, l->caption ? l->caption : "", l->lat_e6, l->lon_e6, -1, l->lm, 0};
     free_mode = true;
     free_heard_ms = 0;
 }
@@ -208,6 +210,7 @@ static double to_stop(const walk_t *w, const stop_t *s, double lat, double lon)
 
 typedef struct {
     int from, to;  /* the route's points between the stop before and this one */
+    int seg;       /* the stretch of it you're nearest: from point seg to seg + 1 */
     double off;    /* how far you are from the leg */
     double along;  /* how far along it you are, from its start */
     double length; /* its length */
@@ -220,7 +223,7 @@ static bool on_leg(const walk_t *w, double lat, double lon, leg_t *leg)
     leg->from = at > 0 ? w->stops[at - 1].passing : 0;
     leg->to = s->passing;
     if (w->route_len < 2 || leg->from < 0 || leg->to <= leg->from || leg->to >= w->route_len) return false;
-    leg->off = 1e9, leg->along = 0;
+    leg->off = 1e9, leg->along = 0, leg->seg = leg->from;
     double run = 0, ax, ay, bx, by;
     local(lat, lon, route_lat(w, leg->from), route_lon(w, leg->from), &ax, &ay);
     for (int i = leg->from; i < leg->to; i++) {
@@ -228,7 +231,7 @@ static bool on_leg(const walk_t *w, double lat, double lon, leg_t *leg)
         double dx = bx - ax, dy = by - ay, seg = hypot(dx, dy);
         double t = seg > 0 ? LV_CLAMP(0.0, -(ax * dx + ay * dy) / (seg * seg), 1.0) : 0;
         double d = hypot(ax + t * dx, ay + t * dy);
-        if (d < leg->off) leg->off = d, leg->along = run + t * seg;
+        if (d < leg->off) leg->off = d, leg->along = run + t * seg, leg->seg = i;
         run += seg;
         ax = bx, ay = by;
     }
@@ -236,8 +239,8 @@ static bool on_leg(const walk_t *w, double lat, double lon, leg_t *leg)
     return true;
 }
 
-/** The point `along` metres down the leg. */
-static void leg_point(const walk_t *w, const leg_t *leg, double along, double *lat, double *lon)
+/** The point `along` metres down the leg; returns the stretch it's on. */
+static int leg_point(const walk_t *w, const leg_t *leg, double along, double *lat, double *lon)
 {
     for (int i = leg->from; i < leg->to; i++) {
         double la = route_lat(w, i), lo = route_lon(w, i), lb = route_lat(w, i + 1), ob = route_lon(w, i + 1);
@@ -245,11 +248,18 @@ static void leg_point(const walk_t *w, const leg_t *leg, double along, double *l
         if (along <= seg || i == leg->to - 1) {
             double t = seg > 0 ? LV_CLAMP(0.0, along / seg, 1.0) : 1;
             *lat = la + (lb - la) * t, *lon = lo + (ob - lo) * t;
-            return;
+            return i;
         }
         along -= seg;
     }
     *lat = route_lat(w, leg->to), *lon = route_lon(w, leg->to);
+    return leg->to - 1;
+}
+
+/** The street a stretch of the route runs along, or NULL. */
+static const char *street_of(const walk_t *w, int seg)
+{
+    return w->streets && seg >= 0 && seg < w->route_len - 1 ? street_names[w->streets[seg]] : NULL;
 }
 
 walk_nav_t walk_nav(void)
@@ -261,6 +271,7 @@ walk_nav_t walk_nav(void)
     const stop_t *s = &w->stops[at];
     n.located = true;
     n.moving = p.moving;
+    n.stop_street = street_names[s->street];
     n.sure = p.accuracy <= STOP_FIX_M;
 
     /* Labels: every stop you stand at, the one you're making for or not (as the app does). */
@@ -282,7 +293,10 @@ walk_nav_t walk_nav(void)
     if (on_leg(w, p.lat, p.lon, &leg) && leg.off <= OFF_ROUTE_M) {
         n.on_route = true;
         n.metres = (int)lround(fmax(0, leg.length - leg.along));
-        leg_point(w, &leg, fmin(leg.along + AHEAD_M, leg.length), &aim_lat, &aim_lon);
+        int ahead = leg_point(w, &leg, fmin(leg.along + AHEAD_M, leg.length), &aim_lat, &aim_lon);
+        n.street = street_of(w, leg.seg);
+        n.street_ahead = street_of(w, ahead);
+        for (int i = ahead + 1; i < leg.to && !n.street_via; i++) n.street_via = street_of(w, i);
     } else {
         n.metres = (int)lround(straight);
     }
@@ -295,6 +309,50 @@ walk_nav_t walk_nav(void)
     return n;
 }
 
+/* Berkeley's hills run along its east side, in sight from nearly every street: the way, without a compass. */
+static const char *by_the_hills(float way)
+{
+    if (way >= 45 && way < 135) return "Head toward the hills";
+    if (way >= 135 && way < 225) return "Keep the hills on your left";
+    if (way >= 225 && way < 315) return "Head toward the Bay";
+    return "Keep the hills on your right";
+}
+
+void walk_way_words(const walk_nav_t *n, char *head, size_t head_len, char *street, size_t street_len)
+{
+    snprintf(head, head_len, "%s", n->moving ? walk_turn_words(n) : by_the_hills(n->way));
+    int min = LV_MAX(1, (n->metres + METRES_PER_MIN / 2) / METRES_PER_MIN);
+    const char *now = n->street, *ahead = n->street_ahead;
+    if (n->on_route && ahead && now != ahead) snprintf(street, street_len, "onto %s \xC2\xB7 %d min", ahead, min);
+    else if (n->on_route && now) snprintf(street, street_len, "along %s \xC2\xB7 %d min", now, min);
+    else if (n->on_route && n->street_via) snprintf(street, street_len, "via %s \xC2\xB7 %d min", n->street_via, min);
+    else if (n->stop_street) snprintf(street, street_len, "It's on %s \xC2\xB7 %d min", n->stop_street, min);
+    else snprintf(street, street_len, "%d min", min);
+}
+
+int walk_way(int32_t *e6, int max, bool *along_route)
+{
+    *along_route = false;
+    position_t p = position_now();
+    if (free_mode || !p.known || max < 2) return 0;
+    const walk_t *w = walk_now();
+    const stop_t *s = &w->stops[at];
+    leg_t leg;
+    int n = 0;
+    if (on_leg(w, p.lat, p.lon, &leg) && leg.off <= OFF_ROUTE_M) {
+        /* Along the route: from the point on it nearest you, to where it passes the stop. */
+        double lat, lon;
+        leg_point(w, &leg, leg.along, &lat, &lon);
+        e6[n++] = (int32_t)lround(lat * 1e6), e6[n++] = (int32_t)lround(lon * 1e6);
+        for (int i = leg.seg + 1; i <= leg.to && n + 2 <= max * 2; i++) e6[n++] = w->route[i * 2], e6[n++] = w->route[i * 2 + 1];
+        *along_route = true;
+    } else {
+        e6[n++] = (int32_t)lround(p.lat * 1e6), e6[n++] = (int32_t)lround(p.lon * 1e6);
+        e6[n++] = s->lat_e6, e6[n++] = s->lon_e6;
+    }
+    return n / 2;
+}
+
 const char *walk_turn_words(const walk_nav_t *n)
 {
     float t = fabsf(n->turn);
@@ -303,6 +361,13 @@ const char *walk_turn_words(const walk_nav_t *n)
     if (t < 70) return left ? "Bear left" : "Bear right";
     if (t < 140) return left ? "Turn left" : "Turn right";
     return "Turn around";
+}
+
+void walk_distance_words(int metres, char *buf, size_t len)
+{
+    if (metres < 0) snprintf(buf, len, "%s", "");
+    else if (metres < 1000) snprintf(buf, len, "%d m", metres);
+    else snprintf(buf, len, "%d.%d km", metres / 1000, metres % 1000 / 100);
 }
 
 int walk_metres_from_start(const walk_t *w, double lat, double lon)

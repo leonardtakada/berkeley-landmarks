@@ -452,6 +452,90 @@ The card loader now gives `stat` time to read a big file back (the map's
 37 MB takes most of a minute). `snap.py` takes a picture line whose base64
 begins "OK" as part of the picture, and skips an earlier snapshot's tail.
 
+### The way, and the building (2026-10-31)
+
+A review walking Walk 01 as a first-timer found the guide couldn't answer
+the walker's questions: which way, and what am I looking for. Choose also
+asked two things at once.
+
+- **The way, standing still.** The way was only given as a turn while you
+  walked, so you set off guessing. Now, standing, it's given by the hills,
+  which Berkeley can see from nearly every street: "Head toward the hills",
+  "Head toward the Bay", "Keep the hills on your right" (or left). It's
+  given with the street to take, so the walk screen has two lines under the
+  distance: the way (20 px), then the street and minutes (18 px, sepia).
+  Walking, the first line is the turn as before.
+  - **Street lines:** "along Center St · 4 min" while on the route, "onto
+    Shattuck Ave" where the way ahead turns into another street, "via Center
+    St" when the stretch you're on has no name, and "It's on Martin Luther
+    King Jr Way" off the route or with no street known.
+  - **Where the names come from:** `export-walks.ts` matches each stretch of
+    a route to the OpenStreetMap street it runs along (`data/osm-streets.json`,
+    as the map letters them). It takes the nearest named one within 20 m that
+    runs within 30° of it. Each stop gets the street the walk passes it on,
+    or else the nearest within 60 m.
+  - **Exported tables:** `walk_NN_streets` and `street_names`, with names cut
+    as a sign has them (St, Ave, Blvd, Jr). The functions are `walk_nav`'s
+    `street`, `street_ahead`, `street_via` and `stop_street`, and
+    `walk_way_words`.
+- **The building, at the foot of the walk screen.** The walk screen showed
+  the host, so you never saw the building you were looking for. Now it
+  shows the building's print, as the app prints its plates: a one-ink
+  duotone (shadows in the logo blue, highlights in cream), round, with the
+  vermilion second plate behind it out of register.
+  - **The print:** the credit is lettered round its foot, for example
+    "SANFRANMAN59 · CC BY-SA 3.0". The 24 stops with no photograph get the
+    app's drawn plate, lettered "An impression · Arts & Crafts", since it's
+    not a likeness.
+  - **Arrival:** the print's ring turns vermilion at the stop. On Maybeck's
+    vermilion ground the plate is blue and the ring cream.
+  - **On the card:** `scripts/device/pack-prints.ts` writes them as
+    `pr<N>.jpg`, 160 px baseline JPEGs of about 11 KB each, 867 KB for the 77
+    stops. `pack_guide.py` runs it. They go on the card because the app
+    partition has only 19% left. `prints.c` decodes them as the map decodes
+    its tiles, keeping the last two.
+  - **Fallback:** without the print, the host's bust rides along as before.
+    The faces stay in the stories.
+  - **Redraws:** nothing on the walk screen moves now, so it redraws once a
+    second.
+- **The walk's map frames you and the stop.** It used to centre on you at a
+  fixed zoom, with the stop at the edge and no line from you to it. Now it
+  frames you and the stop together, closing in as you near it.
+  - **The way ahead:** `walk_way` draws it strong, in vermilion 7 px over a
+    faint route, along the route while you're on it. Off the route it's a
+    line of dots straight to the stop (LVGL dashes only level lines). The
+    guide knows no streets off its routes, so it doesn't draw a street
+    route there.
+  - **Zooming:** + or − hands the zoom back to you, and the map keeps to you
+    at that zoom.
+  - **Opened from Choose:** it shows the whole walk, with you if you're
+    within 1.5 km of a stop, and "Starts 308 m from you".
+- **Choose chooses the walk; Start asks where to begin.** The card had two
+  pairs of identical arrows: one turned the walk, the other the stop to
+  begin at. Now the card holds the walk only. It's centred between the tabs'
+  bands: "Walk 01 · 10 stops · 1.0 mi / Downtown Berkeley / Starts 308 m
+  from you", or "A stop 25 m from you" when one is much nearer.
+  - **Where to begin?** *Start* sets out from stop 1, unless one of the
+    walk's stops is 200 m or more nearer than its first (`BEGIN_ASK_M`).
+    Then it asks on the blue board, as "End the walk?" does
+    (`screen_begin.c`).
+  - **The two answers:** *Begin here* is filled beside the upper button,
+    which takes it ("Stop 6 · Shattuck Hotel · 25 m"). *From the start* is
+    ringed below it. Under them: "Begun here, stops 1 to 5 come at the end."
+    *Back* returns to the same walk.
+
+Checked on the guide with pretend positions:
+
+- Choose and its map.
+- Start with no nearer stop (straight to the introduction), and with one
+  (the question, Begin here, then Back).
+- The walk screen standing and walking, off and on the route, arriving, and
+  with no fix.
+- Maybeck's vermilion walk, and a drawn plate.
+- The map off the route (dots) and on it (the way along the route).
+
+Not yet walked outdoors.
+
 ### Motion and the companion (2026-10-21, second pass)
 
 Everything moves, the way the app's living illustrations do: paper-toy
