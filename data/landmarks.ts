@@ -3475,9 +3475,13 @@ export const landmarks: Landmark[] = [
     style: 'Arts & Crafts',
     nationalRegister: false,
     neighborhood: 'Berkeley Hills',
+    photoUrl: 'https://berkeleyplaques.org/wp-content/uploads/2018/03/Maybeck-Cottage-plaque.jpg',
+    photos: [
+      { url: "upload:u-8f3f0333cde3.jpg", caption: "City of Berkeley Landmark plaque, designated 2002", credit: "Leo" },
+      { url: "upload:u-c4ce584f046b.jpg", caption: "Shingle-clad wall and rustic gate at the entry", credit: "Leo" },
+    ],
     designationType: 'Landmark',
-      photoUrl: 'https://berkeleyplaques.org/wp-content/uploads/2018/03/Maybeck-Cottage-plaque.jpg',
-},
+  },
   {
     id: 'lm-243',
     name: 'Whittier School',
