@@ -26,6 +26,7 @@ import { useColorScheme } from "react-native";
 import {
   Camera,
   GeoJSONSource,
+  Images,
   Layer,
   Map as MLMap,
   UserLocation,
@@ -34,13 +35,23 @@ import type { CameraRef, GeoJSONSourceRef, MapRef } from "@maplibre/maplibre-rea
 import { useReducedMotion, useSharedValue } from "react-native-reanimated";
 import { Asset } from "expo-asset";
 import { Directory, File, Paths } from "expo-file-system";
+import { IsoGrass } from "@/components/iso-grass";
+import { IsoTreeSway } from "@/components/iso-tree-sway";
 import { IsoWalkers, type MapView } from "@/components/iso-walkers";
+import { WalkOutlines } from "@/components/walk-outlines";
 import { useColors } from "@/hooks/use-colors";
 import type { Fix } from "@/lib/arrival";
 import { isoBounds, isoGroundShape, isoLine, isoPoint, onDrawing } from "@/lib/iso-map";
 import { isoStyle } from "@/lib/iso-style";
 import { ISO_TILES_BYTES, ISO_TILES_VERSION } from "@/lib/iso-terrain.generated";
 import { GLYPH_ASSETS } from "@/lib/map-glyphs.generated";
+
+/** The lawns' painted grass, seamless tiles: at rest, pressed over in a gust, springing back (scripts/iso/grass-texture.ts). */
+const GRASS_TEXTURES = {
+  grass: require("@/assets/map/grass.png"),
+  "grass-bent": require("@/assets/map/grass-bent.png"),
+  "grass-back": require("@/assets/map/grass-back.png"),
+};
 
 /* ------------------------------------------------------------------ */
 /* Shared prop shapes (mirror map-view-wrapper)                        */
@@ -137,6 +148,8 @@ interface MapLibreViewProps {
   onFollowChange?: (following: boolean) => void;
   /** Hears when the map has first drawn, tiles and all. */
   onLoaded?: () => void;
+  /** Every walk outlined on the map, its label pressed to open it (the city map before a walk is chosen). */
+  walks?: { onPress: (tourId: string) => void } | null;
   children?: React.ReactNode;
 }
 
@@ -416,6 +429,7 @@ const MapLibreMapView = forwardRef<MapCameraHandle | null, MapLibreViewProps>(
       iso = false,
       onFollowChange,
       onLoaded,
+      walks,
       children,
     },
     ref
@@ -823,8 +837,10 @@ const MapLibreMapView = forwardRef<MapCameraHandle | null, MapLibreViewProps>(
               clusterMaxZoom={clusterMaxZoom}
               onPress={handleShapePress}
             >
-              {/* Individual landmark pins; numbered when they are tour stops. */}
+              {/* Individual landmark pins; numbered when they are tour stops. (Keyed: the source drops
+                  a missing layer from its children, which would shift the rest onto each other's ids.) */}
               <Layer
+                key="landmark-pins"
                 id="landmark-pins"
                 beforeId={under}
                 type="circle"
@@ -839,6 +855,7 @@ const MapLibreMapView = forwardRef<MapCameraHandle | null, MapLibreViewProps>(
               />
               {labelled ? (
                 <Layer
+                  key="landmark-pin-labels"
                   id="landmark-pin-labels"
                 beforeId={under}
                   type="symbol"
@@ -858,6 +875,7 @@ const MapLibreMapView = forwardRef<MapCameraHandle | null, MapLibreViewProps>(
               ) : null}
               {/* Cluster bubble */}
               <Layer
+                key="landmark-clusters"
                 id="landmark-clusters"
                 beforeId={under}
                 type="circle"
@@ -882,6 +900,7 @@ const MapLibreMapView = forwardRef<MapCameraHandle | null, MapLibreViewProps>(
               />
               {/* Cluster count */}
               <Layer
+                key="landmark-cluster-count"
                 id="landmark-cluster-count"
                 beforeId={under}
                 type="symbol"
@@ -903,7 +922,22 @@ const MapLibreMapView = forwardRef<MapCameraHandle | null, MapLibreViewProps>(
             </GeoJSONSource>
           )}
 
-          {/* The architects out walking, among the houses. */}
+          {/* The walks, outlined over the drawing (under its walkers, as a route is) and labelled over the pins. */}
+          {walks ? (
+            <WalkOutlines
+              iso={iso}
+              onPress={walks.onPress}
+              outlinesBefore={underWalkers}
+              labelsOver={markerGeoJSON ? "landmark-cluster-count" : undefined}
+              labelsBefore={under}
+            />
+          ) : null}
+
+          {/* The lawns' painted grass (lib/iso-style.ts's "lawn-texture"), the wind over it; Berkeley out walking, among the houses. */}
+          {iso && <Images images={GRASS_TEXTURES} />}
+          {iso && <IsoGrass view={view} map={mapRef} />}
+          {/* The trees with nothing in front of them, swaying with the same wind. */}
+          {iso && <IsoTreeSway view={view} />}
           {iso && <IsoWalkers view={view} />}
           {/* Last, so it's drawn over everything else laid on the map. */}
           {iso && <ReaderOnDrawing fix={reader.fix} heading={reader.heading} />}

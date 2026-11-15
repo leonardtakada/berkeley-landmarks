@@ -30,6 +30,8 @@ import {
   type Pt,
   type Ring,
 } from "./geom";
+import { chalkLines, greenAreas, greenIndex, lakeWaves, onTerraces, type GreenArea, type Terraces } from "./greens";
+import { landmarkPieces } from "./models";
 import { CELL, elevationAt, loadTerrain, type Terrain } from "./terrain";
 
 export type P3 = [number, number, number];
@@ -47,6 +49,8 @@ export type Role =
   | "path"
   | "trunk"
   | "crown"
+  | "crownLit"
+  | "shadow"
   | "bldTop"
   | "bldLit"
   | "bldShade"
@@ -58,12 +62,121 @@ export type Role =
   | "lmRoofLit"
   | "lmRoofShade"
   | "lmWindowLit"
-  | "lmWindowShade";
+  | "lmWindowShade"
+  // The landmarks' models (scripts/iso/models.ts): brick, tile and copper, open bays and cornices.
+  | "lmBrickLit"
+  | "lmWindowBrick"
+  | "lmTileLit"
+  | "lmTileShade"
+  | "lmCopperLit"
+  | "lmCopperShade"
+  | "lmOpen"
+  | "lmTrimLit"
+  | "lmTrimShade"
+  | "lmSlateDeck"
+  // The green (scripts/iso/greens.ts): lawns, hard courts, chalk lines, lakes, creeks — and the green's own trees.
+  | "lawn"
+  | "court"
+  | "chalk"
+  | "lake"
+  | "creek"
+  | "greenTrunk"
+  | "green"
+  | "greenLit"
+  // Not drawn: where the city map's wind blows over the grass (a lawn's part in sight, its own alone).
+  | "grassMask";
 
 export type Piece =
   | { kind: "poly"; role: Role; rings: P3[][]; level?: number }
   | { kind: "line"; role: Role; pts: P3[]; width: number }
-  | { kind: "dot"; role: Role; at: P3; r: number };
+  | { kind: "dot"; role: Role; at: P3; r: number }
+  /** Shapes standing square to the viewer, like a crown's disc: each part's points across and up the drawing (metres) from `at`. */
+  | { kind: "flat"; role: Role; at: P3; parts: [number, number][][] };
+
+/** Where a building's shadow falls, per metre of its height: east-south-east, and not quite as long. */
+const SHADOW: Pt = [0.5, -0.17];
+/** Buildings lower than this (true metres) cast no shadow worth drawing. */
+const SHADOW_MIN = 8;
+
+/**
+ * What grows where: a street's or garden's tree, round, in the map's blue; a
+ * park's, round, in green; the wild hills' pines, eucalyptus and oaks, in
+ * green; a cemetery's cypress.
+ */
+export type TreeKind = "street" | "park" | "wild" | "cypress";
+
+/**
+ * A tree of its kind, `k` (0–1) its size, `pick` (0–1) which of the wild
+ * hills' trees it is: a trunk and a crown, flat as cut paper, its western
+ * half (or a highlight there) lit.
+ */
+export function treePieces(u: number, v: number, z: number, k: number, kind: TreeKind, pick: number): Piece[] {
+  const r = 3.3 + k * 2.4;
+  const trunk = 3.5 + k * 2;
+  const at: P3 = [u, v, z];
+  const round = kind === "street" || kind === "park" || (kind === "wild" && pick < 0.3);
+  if (round) {
+    const [t, c, l]: Role[] = kind === "street" ? ["trunk", "crown", "crownLit"] : ["greenTrunk", "green", "greenLit"];
+    const top = z + trunk + r * 0.75;
+    const a = r * 0.2;
+    return [
+      { kind: "line", role: t, pts: [[u, v, z], [u, v, z + trunk + r * 0.3]], width: 1.1 },
+      { kind: "dot", role: c, at: [u, v, top], r },
+      { kind: "dot", role: l, at: [u - a, v + a, top + r * 0.18], r: r * 0.6 },
+    ];
+  }
+  /** A shape and its western half, lit: points (across, up) from the left round to the right, the middle ones on the axis. */
+  const halves = (pts: [number, number][]): Piece[] => [
+    { kind: "flat", role: "green", at, parts: [pts] },
+    { kind: "flat", role: "greenLit", at, parts: [pts.filter(([x]) => x <= 1e-9)] },
+  ];
+  const trunkTo = (h: number): Piece => ({ kind: "line", role: "greenTrunk", pts: [[u, v, z], [u, v, z + h]], width: 1 });
+  if (kind === "cypress") {
+    // A cypress: a tall flame.
+    const [w, b, h] = [r * 0.4, 1.2, r * 3.3];
+    return [trunkTo(b + 1), ...halves([[0, b], [-w * 0.8, b + h * 0.12], [-w, b + h * 0.4], [-w * 0.6, b + h * 0.78], [0, b + h], [w * 0.6, b + h * 0.78], [w, b + h * 0.4], [w * 0.8, b + h * 0.12]])];
+  }
+  if (pick < 0.68) {
+    // A pine: three tiers, each narrower, the higher over the lower — drawn as one silhouette,
+    // and the western half of each tier lit up to where the tier above covers it.
+    const tiers = [0, 1, 2].map((i) => ({ w: r * (1.02 - 0.24 * i), y: r * (0.7 + 0.78 * i) }));
+    const h = r * 1.25;
+    const left: [number, number][] = [];
+    tiers.forEach(({ w, y }, i) => {
+      left.push([-w, y]);
+      const next = tiers[i + 1];
+      left.push(next ? [-w * (1 - (next.y - y) / h), next.y] : [0, y + h]);
+    });
+    const outline: [number, number][] = [[0, tiers[0].y], ...left, ...[...left].reverse().slice(1).map(([x, y]) => [-x, y] as [number, number])];
+    const lit = tiers.map(({ w, y }, i) => {
+      const top = tiers[i + 1]?.y ?? y + h;
+      const x = -w * (1 - (top - y) / h);
+      return (top < y + h ? [[0, y], [-w, y], [x, top], [0, top]] : [[0, y], [-w, y], [0, top]]) as [number, number][];
+    });
+    return [trunkTo(r * 0.9), { kind: "flat", role: "green", at, parts: [outline] }, { kind: "flat", role: "greenLit", at, parts: lit }];
+  }
+  // A eucalyptus: a tall, ragged crown on a long bare trunk.
+  const [w, b] = [r * 0.62, r * 1.1];
+  return [
+    trunkTo(b + r * 0.6),
+    ...halves([[0, b], [-w * 0.5, b + r * 0.1], [-w, b + r * 0.6], [-w * 0.85, b + r * 1.3], [-w, b + r * 1.8], [-w * 0.55, b + r * 2.45], [0, b + r * 2.6], [w * 0.5, b + r * 2.3], [w * 0.95, b + r * 1.7], [w * 0.8, b + r * 1.1], [w, b + r * 0.55], [w * 0.5, b + r * 0.12]]),
+  ];
+}
+
+/** The convex hull of some points (monotone chain), counter-clockwise. */
+function hull(pts: Pt[]): Ring {
+  const p = [...pts].sort((a, b) => a[0] - b[0] || a[1] - b[1]);
+  const cross = (o: Pt, a: Pt, b: Pt) => (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0]);
+  const half = (list: Pt[]) => {
+    const out: Pt[] = [];
+    for (const q of list) {
+      while (out.length >= 2 && cross(out[out.length - 2], out[out.length - 1], q) <= 0) out.pop();
+      out.push(q);
+    }
+    return out.slice(0, -1);
+  };
+  return [...half(p), ...half([...p].reverse())];
+}
 
 /** Height of one terrace of the land, metres. */
 export const LEVEL = 25;
@@ -85,6 +198,8 @@ export interface SceneOptions {
 export interface Building {
   id: number;
   ring: Ring;
+  /** Courtyards and light wells: holes in the plan, run clockwise. */
+  holes?: Ring[];
   c: Pt;
   height: number;
   gable: { corners: Ring; rise: number } | null;
@@ -178,10 +293,38 @@ function onEdge(a: Pt, b: Pt, box: Box) {
 
 // ── OpenStreetMap ────────────────────────────────────────────────────────
 type OsmWay = { type: string; id: number; tags?: Record<string, string>; geometry?: { lat: number; lon: number }[] };
+/** A multipolygon building: one with a courtyard, or in several pieces. */
+type OsmRelation = {
+  type: string;
+  id: number;
+  tags?: Record<string, string>;
+  members?: { type: string; role: string; geometry?: { lat: number; lon: number }[] }[];
+};
 let features: OsmWay[] | null = null;
+let relations: OsmRelation[] | null = null;
 let streets: OsmWay[] | null = null;
+let waterways: OsmWay[] | null = null;
 const load = (f: string): OsmWay[] => JSON.parse(fs.readFileSync(f, "utf8")).elements;
 const localRing = (g: { lat: number; lon: number }[]): Ring => g.map(({ lat, lon }) => toLocal(lat, lon)).map(({ u, v }) => [u, v] as Pt);
+
+/** A relation's member ways joined end to end into closed rings. */
+function assemble(parts: Ring[]): Ring[] {
+  const same = (a: Pt, b: Pt) => Math.abs(a[0] - b[0]) < 1e-3 && Math.abs(a[1] - b[1]) < 1e-3;
+  const left = parts.filter((p) => p.length >= 2);
+  const rings: Ring[] = [];
+  while (left.length) {
+    let cur = left.shift()!;
+    while (!same(cur[0], cur[cur.length - 1])) {
+      const end = cur[cur.length - 1];
+      const i = left.findIndex((p) => same(p[0], end) || same(p[p.length - 1], end));
+      if (i < 0) break;
+      const next = left.splice(i, 1)[0];
+      cur = cur.concat((same(next[0], end) ? next : [...next].reverse()).slice(1));
+    }
+    if (cur.length >= 4 && same(cur[0], cur[cur.length - 1])) rings.push(cur);
+  }
+  return rings;
+}
 
 const HOUSE = new Set(["house", "detached", "residential", "semidetached_house", "bungalow", "terrace", "church", "chapel", "cabin"]);
 
@@ -235,6 +378,38 @@ export async function buildings(): Promise<Building[]> {
       base: levelZ(Math.max(0, levelAt(t, c[0], c[1]))),
     });
   }
+  // Buildings drawn as multipolygons in OpenStreetMap: those around a
+  // courtyard (Doe Library, Hearst Gym, the City Club…) and those in pieces.
+  // (data/osm-building-relations.json; the features extract has none.)
+  relations ??= JSON.parse(fs.readFileSync("data/osm-building-relations.json", "utf8")).elements as OsmRelation[];
+  const ways = out.slice();
+  for (const r of relations) {
+    if (r.type !== "relation" || !r.tags?.building || !r.members) continue;
+    const ringsOf = (role: string) =>
+      assemble(r.members!.filter((m) => m.type === "way" && m.role === role && m.geometry).map((m) => localRing(m.geometry!)));
+    const inners = ringsOf("inner").map((h) => orient(open(h), false));
+    for (const o of ringsOf("outer")) {
+      const ring = orient(open(o), true);
+      const c = centroid(ring);
+      if (c[0] < umin || c[0] > umax || c[1] < vmin || c[1] > vmax) continue;
+      const holes = inners.filter((h) => pointInRing(h[0], ring) && area(h) > 4);
+      const a = area(ring) - holes.reduce((s, h) => s + area(h), 0);
+      if (a < 12) continue;
+      // Already drawn from a way of its own.
+      if (ways.some((w) => Math.abs(w.c[0] - c[0]) < 150 && Math.abs(w.c[1] - c[1]) < 150 && pointInRing(w.c, ring) && area(w.ring) > a * 0.5)) continue;
+      out.push({
+        id: r.id,
+        ring: simplify(ring, 0.6),
+        holes: holes.map((h) => simplify(h, 0.6)),
+        c,
+        height: heightOf(r.tags, a),
+        gable: null,
+        landmark: null,
+        base: levelZ(Math.max(0, levelAt(t, c[0], c[1]))),
+      });
+    }
+  }
+
   // The catalogue's landmarks: the building each one stands in.
   const grid = new Map<string, Building[]>();
   const key = (u: number, v: number) => `${Math.floor(u / 100)},${Math.floor(v / 100)}`;
@@ -269,9 +444,12 @@ export function buildingPieces(b: Building, hs: number, landmark = !!b.landmark)
     : { top: "bldTop", lit: "bldLit", shade: "bldShade", roofLit: "roofLit", roofShade: "roofShade" };
   const out: Piece[] = [];
   const wallPieces: Piece[] = [];
-  for (const w of walls(b.ring, z0, z0 + h)) {
-    wallPieces.push({ kind: "poly", role: (w.west ? R.lit : R.shade) as Role, rings: [w.quad] });
-    if (b.windows) wallPieces.push(...windowsIn(w.quad, b.windows, w.west));
+  // A courtyard's far walls first: the building's own front stands before them.
+  for (const ring of [...(b.holes ?? []), b.ring]) {
+    for (const w of walls(ring, z0, z0 + h)) {
+      wallPieces.push({ kind: "poly", role: (w.west ? R.lit : R.shade) as Role, rings: [w.quad] });
+      if (b.windows) wallPieces.push(...windowsIn(w.quad, b.windows, w.west));
+    }
   }
   if (b.site) {
     const ring = b.ring.map(([u, v]) => [u, v, z0 + 0.6] as P3);
@@ -331,7 +509,7 @@ export function buildingPieces(b: Building, hs: number, landmark = !!b.landmark)
   }
   if (!b.gable) {
     out.push(...wallPieces);
-    out.push({ kind: "poly", role: R.top as Role, rings: [b.ring.map(([u, v]) => [u, v, z0 + h] as P3)] });
+    out.push({ kind: "poly", role: R.top as Role, rings: [b.ring, ...(b.holes ?? [])].map((r) => r.map(([u, v]) => [u, v, z0 + h] as P3)) });
     return out;
   }
   const [c0, c1, c2, c3] = b.gable.corners;
@@ -435,13 +613,81 @@ export async function buildScene(
     }
   }
 
-  // The land, a sheet of paper for each terrace, lowest first.
-  for (const { level, polys } of terraceRings(t)) {
+  // Shadows, cast to the east-south-east (the light is from the west-north-west), each on the
+  // terrace its building stands on: drawn after that terrace's paper, before the next one up.
+  const shadows = new Map<number, Piece[]>();
+  for (const b of await buildings()) {
+    // (The same buildings as are drawn below: none cut by the edge.)
+    if (b.c[0] < box.u0 || b.c[0] > box.u1 || b.c[1] < box.v0 || b.c[1] > box.v1) continue;
+    if (b.ring.some(([u, v]) => u < box.u0 || u > box.u1 || v < box.v0 || v > box.v1)) continue;
+    if (b.site || (b.landmark && o.omit?.has(b.landmark)) || o.clear?.(b)) continue;
+    // A house's shadow is a sliver hidden behind it: not worth its place in the tiles.
+    if (b.height < SHADOW_MIN) continue;
+    const h = b.height * hs + (b.gable ? b.gable.rise : 0);
+    const [du, dv] = [SHADOW[0] * h, SHADOW[1] * h];
+    const ring = hull([...b.ring, ...b.ring.map(([u, v]) => [u + du, v + dv] as Pt)])
+      .map(([u, v]) => [Math.min(box.u1, Math.max(box.u0, u)), Math.min(box.v1, Math.max(box.v0, v))] as Pt);
+    const level = Math.max(0, levelAt(t, b.c[0], b.c[1]));
+    const list = shadows.get(level) ?? [];
+    list.push({ kind: "poly", role: "shadow", rings: [ring.map(([u, v]) => [u, v, b.base] as P3)], level });
+    shadows.set(level, list);
+  }
+
+  // The land as drawn: each terrace's sheets, cut to the box.
+  const sheets = terraceRings(t).map(({ level, polys }) => ({
+    level,
+    polys: polys
+      .map((poly) => poly.map((r) => clipRing(r, box)).filter((r) => r.length >= 3))
+      .filter((rings) => rings.length && rings[0].length >= 3 && area(rings[0]) >= 1),
+  }));
+  const terraces: Terraces = new Map(sheets.map(({ level, polys }) => [level, polys.flat()]));
+
+  // The green and the lakes, on the terraces they lie across: largest first, so a field lies on its park.
+  features ??= load("data/osm-features.json");
+  const greens = greenAreas(features, box);
+  const greenOn = new Map<number, Piece[]>();
+  const boxOf = (r: Ring) => {
+    let [u0, v0, u1, v1] = [Infinity, Infinity, -Infinity, -Infinity];
+    for (const [u, v] of r) [u0, v0, u1, v1] = [Math.min(u0, u), Math.min(v0, v), Math.max(u1, u), Math.max(v1, v)];
+    return { u0, v0, u1, v1 };
+  };
+  const greenBox = new Map(greens.map((g) => [g, boxOf(g.ring)]));
+  const lawnish = (g: GreenArea) => g.kind !== "court" && g.kind !== "water";
+  for (const g of greens) {
+    // Where the grass grows on it: not on the smaller lawns over it (they have their own), nor its courts and lakes.
+    const b = greenBox.get(g)!;
+    const minus = lawnish(g)
+      ? greens
+          .filter((o) => o !== g && (!lawnish(o) || o.area < g.area))
+          .filter((o) => {
+            const q = greenBox.get(o)!;
+            return q.u1 > b.u0 && q.u0 < b.u1 && q.v1 > b.v0 && q.v0 < b.v1;
+          })
+          .map((o) => o.ring)
+      : [];
+    for (const { level, polys, open: seen } of onTerraces(g.ring, box, terraces, (u, v) => levelAt(t, u, v), minus)) {
+      const z = levelZ(level);
+      const list = greenOn.get(level) ?? greenOn.set(level, []).get(level)!;
+      const lift = (rs: Ring[]) => rs.map((r) => r.map(([u, v]) => [u, v, z] as P3));
+      const role: Role = g.kind === "water" ? "lake" : g.kind === "court" ? "court" : "lawn";
+      for (const rings of polys) {
+        list.push({ kind: "poly", role, rings: lift(rings), level });
+        if (g.kind === "water") for (const w of lakeWaves(rings, z)) list.push({ kind: "line", role: "wave", pts: w, width: 3 });
+      }
+      // A field's chalk lines, where it lies whole on one terrace.
+      if ((g.kind === "pitch" || g.kind === "court") && polys.length === 1 && polys[0].length === 1 && area(polys[0][0]) > 0.95 * g.area) {
+        for (const c of chalkLines(g.ring, g.kind === "court")) list.push({ kind: "poly", role: "chalk", rings: lift(c), level });
+      }
+      // Where the map's wind blows over the grass: a lawn's part in sight, its own alone.
+      if (role === "lawn") for (const rings of seen) list.push({ kind: "poly", role: "grassMask", rings: lift(rings), level });
+    }
+  }
+
+  // The land, a sheet of paper for each terrace, lowest first: its green, then the shadows on it.
+  for (const { level, polys } of sheets) {
     const z1 = levelZ(level);
     const z0 = level === 0 ? -SHORE : levelZ(level - 1);
-    for (const poly of polys) {
-      const rings = poly.map((r) => clipRing(r, box)).filter((r) => r.length >= 3);
-      if (!rings.length || rings[0].length < 3 || area(rings[0]) < 1) continue;
+    for (const rings of polys) {
       for (const r of rings) {
         for (const w of walls(r, z0, z1, o.plate ? box : undefined)) {
           pieces.push({ kind: "poly", role: level === 0 ? "shore" : "wall", rings: [w.quad], level });
@@ -449,6 +695,9 @@ export async function buildScene(
       }
       pieces.push({ kind: "poly", role: "top", rings: rings.map((r) => r.map(([u, v]) => [u, v, z1] as P3)), level });
     }
+    pieces.push(...(greenOn.get(level) ?? []));
+    pieces.push(...(shadows.get(level) ?? []));
+    shadows.delete(level);
   }
 
   // A plate's cut faces, to the south and west: the terraces in section.
@@ -481,6 +730,28 @@ export async function buildScene(
     });
   }
 
+  // The creeks, where they run in the open (not in a culvert), laid on the terraces as the streets are.
+  waterways ??= load("data/osm-waterways.json");
+  for (const w of waterways) {
+    const kind = w.tags?.waterway;
+    if (!kind || !["stream", "river", "canal"].includes(kind) || w.tags?.tunnel || !w.geometry) continue;
+    for (const run of clipLine(localRing(w.geometry), box)) {
+      if (run.every(([u, v]) => levelAt(t, u, v) < 0)) continue;
+      // A run for each terrace it crosses: over a terrace's edge, the creek falls out of sight.
+      let pts: P3[] = [];
+      const flush = () => {
+        if (pts.length > 1) pieces.push({ kind: "line", role: "creek", pts, width: kind === "stream" ? 3 : 6 });
+        pts = [];
+      };
+      for (const [u, v] of densify(run, 5)) {
+        const z = Math.max(0, zAt(u, v));
+        if (pts.length && pts[pts.length - 1][2] !== z) flush();
+        pts.push([u, v, z]);
+      }
+      flush();
+    }
+  }
+
   // Streets, laid on the terraces.
   streets ??= load("data/osm-streets.json");
   for (const w of streets) {
@@ -493,28 +764,8 @@ export async function buildScene(
     }
   }
 
-  // Trees in the parks and gardens, and along the creeks' green.
-  features ??= load("data/osm-features.json");
-  const GREEN = new Set(["park", "garden", "recreation_ground", "forest", "wood", "cemetery", "meadow", "nature_reserve"]);
-  const trees: P3[] = [];
-  for (const w of features) {
-    const kind = w.tags?.leisure ?? w.tags?.landuse ?? w.tags?.natural;
-    if (!kind || !GREEN.has(kind) || !w.geometry || w.geometry.length < 4) continue;
-    const ring = open(localRing(w.geometry));
-    const c = centroid(ring);
-    if (c[0] < box.u0 - 300 || c[0] > box.u1 + 300 || c[1] < box.v0 - 300 || c[1] > box.v1 + 300) continue;
-    let [a, b, cc, d] = [Infinity, Infinity, -Infinity, -Infinity];
-    for (const p of ring) [a, b, cc, d] = [Math.min(a, p[0]), Math.min(b, p[1]), Math.max(cc, p[0]), Math.max(d, p[1])];
-    const step = kind === "forest" || kind === "wood" || kind === "nature_reserve" ? 22 : 30;
-    for (let u = a + step / 2; u < cc; u += step) {
-      for (let v = b + step / 2; v < d; v += step) {
-        const jitter: Pt = [u + ((Math.sin(u * 12.9898 + v * 78.233) * 43758.5453) % 1) * 9, v + ((Math.sin(u * 39.3 + v * 11.1) * 9131.7) % 1) * 9];
-        if (jitter[0] < box.u0 || jitter[0] > box.u1 || jitter[1] < box.v0 || jitter[1] > box.v1) continue;
-        if (!pointInRing(jitter, ring) || levelAt(t, jitter[0], jitter[1]) < 0) continue;
-        trees.push([jitter[0], jitter[1], zAt(jitter[0], jitter[1])]);
-      }
-    }
-  }
+  const greenAt = greenIndex(greens);
+  const trees: [number, number, number, TreeKind][] = [];
 
   // And trees wherever there's room: along the blocks of houses, and
   // thick on the hills.
@@ -575,36 +826,71 @@ export async function buildScene(
     }
     return true;
   };
+  /** High on the hills, with no house near: the wild land, wooded. */
+  const wild = (p: Pt, k: number) => {
+    if (k < 3) return false;
+    const [cu, cv] = [Math.floor(p[0] / 40), Math.floor(p[1] / 40)];
+    for (let du = -1; du <= 1; du++) for (let dv = -1; dv <= 1; dv++) if (near.get(`${cu + du},${cv + dv}`)?.length) return false;
+    return true;
+  };
+  // Trees in the parks, gardens and the cemetery (not on their fields, nor in their lakes): a park's
+  // round, in green, gathered in groves with open lawn between; the wild hill parks' pines,
+  // eucalyptus and oaks, thicker; the cemetery's cypresses, in rows.
+  for (const g of greens) {
+    if (!(["park", "garden", "cemetery"] as GreenArea["kind"][]).includes(g.kind) && !(g.kind === "lawn" && g.area > 3000)) continue;
+    let [a, b, cc, d] = [Infinity, Infinity, -Infinity, -Infinity];
+    for (const p of g.ring) [a, b, cc, d] = [Math.min(a, p[0]), Math.min(b, p[1]), Math.max(cc, p[0]), Math.max(d, p[1])];
+    if (cc < box.u0 || a > box.u1 || d < box.v0 || b > box.v1) continue;
+    const hill = levelAt(t, (a + cc) / 2, (b + d) / 2) >= 2;
+    const step = hill ? 20 : 30;
+    for (let u = a + step / 2; u < cc; u += step) {
+      for (let v = b + step / 2; v < d; v += step) {
+        // (Rows for the cemetery's cypresses; anywhere about its place for the rest.)
+        const loose = g.kind === "cemetery" ? 0.15 : 0.9;
+        const jitter: Pt = [u + (rand(u, v, 21) - 0.5) * step * loose, v + (rand(u, v, 22) - 0.5) * step * loose];
+        if (jitter[0] < box.u0 || jitter[0] > box.u1 || jitter[1] < box.v0 || jitter[1] > box.v1) continue;
+        if (!pointInRing(jitter, g.ring) || levelAt(t, jitter[0], jitter[1]) < 0) continue;
+        const under = greenAt(jitter);
+        if (under && (under.kind === "pitch" || under.kind === "court" || under.kind === "water")) continue;
+        if (g.kind !== "cemetery" && grove(jitter[0], jitter[1]) < (hill ? 0.3 : 0.6)) continue;
+        trees.push([jitter[0], jitter[1], zAt(jitter[0], jitter[1]), g.kind === "cemetery" ? "cypress" : hill ? "wild" : "park"]);
+      }
+    }
+  }
+
   for (let u = box.u0 + 6; u < box.u1 - 6; u += 16) {
     for (let v = box.v0 + 6; v < box.v1 - 6; v += 16) {
       const p: Pt = [u + (rand(u, v, 1) - 0.5) * 12, v + (rand(u, v, 2) - 0.5) * 12];
       const k = levelAt(t, p[0], p[1]);
       if (k < 0) continue;
       const g = grove(p[0], p[1]);
-      const odds = (k >= 4 ? 0.9 : k >= 2 ? 0.55 : 0.4) * Math.max(0, g * 1.6 - 0.45);
+      const woods = wild(p, k);
+      const odds = (woods ? 1.1 : k >= 4 ? 0.9 : k >= 2 ? 0.55 : 0.4) * Math.max(0, g * 1.6 - 0.45);
       if (rand(u, v, 3) > odds || !clearOf(p)) continue;
-      trees.push([p[0], p[1], zAt(p[0], p[1])]);
+      // Not in the green: its own trees are above.
+      const under = greenAt(p);
+      if (under) continue;
+      const kind: TreeKind = woods ? "wild" : "street";
+      trees.push([p[0], p[1], zAt(p[0], p[1]), kind]);
+      // The woods, thicker: another tree between.
+      const q: Pt = [p[0] + 8 + (rand(u, v, 4) - 0.5) * 6, p[1] + 8 + (rand(u, v, 5) - 0.5) * 6];
+      if (woods && rand(u, v, 6) < odds * 0.8 && levelAt(t, q[0], q[1]) === k && clearOf(q)) trees.push([q[0], q[1], zAt(q[0], q[1]), "wild"]);
     }
   }
 
-  // Buildings and trees, back to front.
+  // Buildings and trees, back to front: the landmarks modelled after their photographs or styles.
+  const byId = new Map(landmarks.map((l) => [l.id, l]));
   const solids: Solid[] = [];
   for (const b of await buildings()) {
     if (b.c[0] < box.u0 || b.c[0] > box.u1 || b.c[1] < box.v0 || b.c[1] > box.v1) continue;
     if (b.ring.some(([u, v]) => u < box.u0 || u > box.u1 || v < box.v0 || v > box.v1)) continue;
     if (b.landmark && o.omit?.has(b.landmark)) continue;
     if (o.clear?.(b)) continue;
-    solids.push({ d: b.c[0] + b.c[1], pieces: buildingPieces(b, hs) });
+    const l = b.landmark ? byId.get(b.landmark) : undefined;
+    solids.push({ d: b.c[0] + b.c[1], pieces: l ? landmarkPieces(l, b, hs) : buildingPieces(b, hs) });
   }
-  for (const [u, v, z] of trees) {
-    solids.push({
-      d: u + v,
-      pieces: [
-        { kind: "line", role: "trunk", pts: [[u, v, z], [u, v, z + 6]], width: 1.4 },
-        { kind: "dot", role: "crown", at: [u, v, z + 8.5], r: 4.2 },
-      ],
-    });
-  }
+  // Each tree its own size and kind, lit on the west, where the light comes from.
+  for (const [u, v, z, kind] of trees) solids.push({ d: u + v, pieces: treePieces(u, v, z, rand(u, v, 7), kind, rand(u, v, 11)) });
   solids.sort((a, b) => b.d - a.d);
   for (const s of solids) pieces.push(...s.pieces);
   return { pieces, zAt, solids };

@@ -115,9 +115,20 @@ void walk_distance_words(int metres, char *buf, size_t len);
 /** Metres from (lat, lon) to a walk's first stop. */
 int walk_metres_from_start(const walk_t *w, double lat, double lon);
 
-/** How much of the story has played, so it picks up where it was. */
+/** The story now (the introduction's, the stop's, or on your own the landmark's): its part on the card ("lm17"). */
+void walk_story_part(char *buf, size_t len);
+
+/** How much of the story now has played, so it picks up where it was (0 if another was left since). */
 uint32_t walk_heard_ms(void);
-void walk_set_heard_ms(uint32_t ms);
+
+/** True if the story now was left part way: the walk screen's Listen says Resume. */
+bool walk_story_begun(void);
+
+/** True if the story `part` ("lm17") was the last left, and left part way. */
+bool walk_part_begun(const char *part);
+
+/** A story leaving: how much of `part` was heard, and whether it was told to the end. */
+void walk_set_heard(const char *part, uint32_t ms, bool told);
 
 /**
  * On your own (the free map): one landmark as if it were a walk of one stop,

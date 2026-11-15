@@ -257,6 +257,18 @@ export default function MapScreen() {
     setSelectedLandmark(null);
   }, []);
 
+  // A walk's label pressed on the map: the walk laid out whole, ready to begin.
+  const walks = useMemo(
+    () => ({
+      onPress: (tourId: string) => {
+        setSelectedLandmark(null);
+        setWalking(false);
+        setActiveTourId(tourId);
+      },
+    }),
+    [],
+  );
+
   const clearTour = useCallback(() => {
     setActiveTourId(null);
     setSelectedLandmark(null);
@@ -287,6 +299,7 @@ export default function MapScreen() {
         showsUserLocation
         onFollowChange={setFollowingReader}
         onLoaded={unfold.onMapLoaded}
+        walks={activeTour ? null : walks}
         highlight={
           selectedLandmark
             ? {

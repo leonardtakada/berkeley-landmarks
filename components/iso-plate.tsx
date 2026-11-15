@@ -40,6 +40,8 @@ export interface PlateData {
   labels: { text: string; x: number; y: number; ax: number; ay: number; bx: number; by: number }[];
   /** The direction of north on the plate, degrees clockwise from the right. */
   north: number;
+  /** Pixels to a metre of the ground, level across the plate: for its scale. */
+  metre?: number;
 }
 
 const RIBBON = 12;
@@ -60,7 +62,7 @@ export function IsoPlate({
   const height = plate.height * k;
 
   // The route cut into runs, each laid just behind the first model in front of it.
-  const { layers, whole, order } = useMemo(() => {
+  const { layers, whole, order, ends } = useMemo(() => {
     const pts: [number, number][] = [];
     for (let i = 0; i < plate.route.length; i += 2) pts.push([plate.route[i], plate.route[i + 1]]);
     const byDepth = [...plate.stops].sort((a, b) => b.depth - a.depth);
@@ -78,6 +80,7 @@ export function IsoPlate({
       layers: runs.map((r) => r.join("")),
       whole: pts.map(([x, y], i) => `${i ? "L" : "M"}${x} ${y}`).join(""),
       order: byDepth,
+      ends: { start: pts[0], finish: pts[pts.length - 1] },
     };
   }, [plate]);
 
@@ -98,6 +101,13 @@ export function IsoPlate({
       <Svg {...size} viewBox={view} style={StyleSheet.absoluteFill}>
         {/* The way, dotted over everything, so it can be followed behind the buildings. */}
         <Path d={whole} stroke={PAPER.slip} strokeWidth={3.2} strokeDasharray="1 11" strokeLinecap="round" fill="none" />
+        {/* Its ends, marked as a line's stations are. */}
+        {[ends.start, ends.finish].map(([x, y], i) => (
+          <G key={i}>
+            <Circle cx={x} cy={y} r={11} fill={INK.vermilion} stroke={PAPER.slip} strokeWidth={3} />
+            <Circle cx={x} cy={y} r={4} fill={PAPER.slip} />
+          </G>
+        ))}
         {plate.labels.map((l) => {
           const n1 = Math.hypot(l.ax, l.ay);
           const n2 = Math.hypot(l.bx, l.by);
@@ -115,7 +125,8 @@ export function IsoPlate({
             </SvgText>
           );
         })}
-        <NorthPoint angle={plate.north} x={46} y={60} />
+        <Compass angle={plate.north} x={52} y={58} />
+        {plate.metre ? <ScaleBar metre={plate.metre} x={24} y={plate.height - 30} /> : null}
         <SvgText
           x={plate.width - 12}
           y={plate.height - 12}
@@ -220,22 +231,54 @@ function Model({
   );
 }
 
-/** A north point: an arrow toward north as the plate is turned, and its N. */
-function NorthPoint({ angle, x, y }: { angle: number; x: number; y: number }) {
+/**
+ * A compass rose, as the plate is turned: a ring, a needle split in two
+ * (vermilion toward north, blue toward south), its east–west cross in a
+ * fine line, and the N beyond its point.
+ */
+function Compass({ angle, x, y }: { angle: number; x: number; y: number }) {
+  const R = 30;
+  const rad = (angle * Math.PI) / 180;
   return (
     <G transform={`translate(${x} ${y})`}>
+      <Circle r={R} fill={PAPER.slip} stroke={INK.blue} strokeWidth={2.5} />
+      <Circle r={R - 6} fill="none" stroke={INK.blue} strokeWidth={1} />
       <G transform={`rotate(${angle})`}>
-        <Path d="M22 0 L-10 -8 L-4 0 L-10 8 Z" fill={INK.charcoal} />
+        <Path d={`M${-R + 8} 0 L${R - 8} 0 M0 ${-R + 8} L0 ${R - 8}`} stroke={INK.blue} strokeWidth={1} />
+        <Path d={`M${R - 4} 0 L0 -7 L0 7 Z`} fill={INK.vermilion} />
+        <Path d={`M${-R + 4} 0 L0 -7 L0 7 Z`} fill={INK.blue} />
+        <Circle r={3} fill={PAPER.slip} stroke={INK.blue} strokeWidth={1.5} />
       </G>
       <SvgText
-        x={Math.cos((angle * Math.PI) / 180) * 38}
-        y={Math.sin((angle * Math.PI) / 180) * 38 + 8}
+        x={Math.cos(rad) * (R + 16)}
+        y={Math.sin(rad) * (R + 16) + 8}
         fontFamily={FONT.medium}
-        fontSize={24}
-        fill={INK.charcoal}
+        fontSize={22}
+        letterSpacing={1}
+        fill={INK.blue}
         textAnchor="middle"
       >
         N
+      </SvgText>
+    </G>
+  );
+}
+
+/** A scale: two lengths of ground, blue and paper, with the metres they come to — as long as reads well. */
+function ScaleBar({ metre, x, y }: { metre: number; x: number; y: number }) {
+  // A round length to each half, the bar 150–300 pixels in all.
+  const step = [25, 50, 100, 200, 250, 500].find((m) => m * metre * 2 >= 150) ?? 500;
+  const w = step * metre;
+  const h = 8;
+  return (
+    <G transform={`translate(${x} ${y})`}>
+      <Path d={`M0 0 H${w} V${h} H0 Z`} fill={INK.blue} />
+      <Path d={`M${w} 0 H${w * 2} V${h} H${w} Z`} fill={PAPER.slip} stroke={INK.blue} strokeWidth={1.5} />
+      <SvgText x={0} y={-9} fontFamily={FONT.medium} fontSize={16} letterSpacing={1.2} fill={INK.sepia}>
+        0
+      </SvgText>
+      <SvgText x={w * 2} y={-9} fontFamily={FONT.medium} fontSize={16} letterSpacing={1.2} fill={INK.sepia} textAnchor="end">
+        {`${step * 2} M`}
       </SvgText>
     </G>
   );

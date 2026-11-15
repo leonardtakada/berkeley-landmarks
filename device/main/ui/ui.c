@@ -37,6 +37,8 @@ lv_obj_t *ui_screen(lv_color_t bg)
 void ui_show_anim(screen_id_t id, lv_screen_load_anim_t anim, uint32_t ms)
 {
     if (id >= SCR_COUNT) return;
+    /* The story going out is only deleted once the next is in: its place is kept first, for the next to see. */
+    if (current == SCR_STORY && id != SCR_STORY) story_leaving();
     current = id;
     /* A story plays on under the menu and the map (and what opens from them), and the walk's end under
      * its stamp; shown anything else, it stops. */

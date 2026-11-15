@@ -45,6 +45,37 @@ export function isoStyle(source: { pmtilesUri: string; glyphsUrl: string }) {
         paint: { "line-color": ["get", "c"], "line-width": 1.2 },
       },
       {
+        // The lawns' painted grass, close in: fine blades leaning east (the "grass" image, components/maplibre-view.tsx).
+        id: "lawn-texture",
+        type: "fill",
+        source: "iso",
+        "source-layer": "lawns",
+        minzoom: 16,
+        paint: { "fill-pattern": "grass", "fill-opacity": ["interpolate", ["linear"], ["zoom"], 16, 0, 16.5, 1] },
+      },
+      {
+        // Where the wind blows over the grass (components/iso-grass.tsx asks for it): not to be seen.
+        id: "lawns",
+        type: "fill",
+        source: "iso",
+        "source-layer": "lawns",
+        minzoom: 16,
+        paint: { "fill-color": "#000000", "fill-opacity": 0 },
+      },
+      {
+        // The creeks, where they run in the open: a ribbon of the water's blue, screened.
+        id: "creeks",
+        type: "line",
+        source: "iso",
+        "source-layer": "creeks",
+        minzoom: 13,
+        layout: { "line-cap": "round", "line-join": "round" },
+        paint: {
+          "line-color": "#3A55A4",
+          "line-width": ["interpolate", ["exponential", 2], ["zoom"], 13, 0.8, 16, ["*", ["get", "w"], (0.9 * 65536) / 78271.5], 20, ["*", ["get", "w"], (0.9 * 1048576) / 78271.5]],
+        },
+      },
+      {
         id: "minor",
         type: "line",
         source: "iso",

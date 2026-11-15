@@ -86,6 +86,7 @@ void ui_print_touches(void);
 /* Moving through a walk, for the screens' own buttons as well as the side ones. */
 void ui_start_walk(int first); /* the walk chosen (ui_walk), from stop `first`: its introduction, then that stop */
 void ui_listen(void);         /* the stop's story */
+void ui_story_back(void);     /* from a story to where it was opened from, keeping its place */
 void ui_next_stop(void);      /* on to the next stop (the first, after the introduction), or the walk's end */
 void ui_last_stop(void);      /* back to the stop before */
 void ui_open_controls(void);  /* the menu comes down over this screen */
@@ -109,14 +110,18 @@ lv_obj_t *screen_endwalk(void);
 lv_obj_t *screen_explore(void);
 lv_obj_t *screen_begin(void);
 
-/** The free map's upper button: go to the landmark picked, or stop going. */
+/** The free map's upper button: go to the landmark picked, or stop going; at its door, hear its story. */
 void explore_go(void);
 
 /** The story's upper button: pause, resume, or once it's told, go on. */
 void story_upper(void);
+/** The story is being left: its place is kept now, before the next screen asks for it. */
+void story_leaving(void);
 
 /** The walks' upper button: sets out on the walk showing from its first stop, or asks where to begin. */
 void walks_start(void);
+/** Choose again, on the walk last showing (back from its introduction). */
+void walks_show_again(void);
 
 /* Where to begin asks only when a stop is this much nearer you than the walk's first. */
 #define BEGIN_ASK_M 200

@@ -1,4 +1,4 @@
-import { BODY, CAST, HEAD, HEAD_INK, LEGS, WALKERS, type Figure } from "./walker-cast";
+import { BODY, CAST, HEAD, HEAD_INK, LEGS, TOWNSFOLK, WALKERS, type Figure } from "./walker-cast";
 
 /**
  * The architects as flat shapes for the city map, where they're drawn as
@@ -140,5 +140,7 @@ function shapesOf(fig: Figure): Part[] {
   return parts;
 }
 
-/** Every walker's parts, in the order of WALKERS. */
-export const WALKER_SHAPES: Part[][] = WALKERS.map((k) => shapesOf(CAST[k]));
+/** Every walker's parts: the architects in the order of WALKERS, then the townsfolk. */
+export const WALKER_SHAPES: Part[][] = [...WALKERS.map((k) => shapesOf(CAST[k])), ...TOWNSFOLK.map(shapesOf)];
+/** The first of WALKER_SHAPES that isn't an architect. */
+export const FIRST_TOWNSFOLK = WALKERS.length;

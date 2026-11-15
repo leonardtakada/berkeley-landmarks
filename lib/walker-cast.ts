@@ -15,8 +15,10 @@ export const WALKER_INK = {
   blueTint: "#C9D0E4",
   vermilionTint: "#F4CDB9",
   grey: "#D9D2C4",
+  blue: "#0B2E8C",
+  vermilion: "#E4592B",
 };
-const { charcoal: C, paper: P, blueTint: BT, vermilionTint: VT, grey: GREY } = WALKER_INK;
+const { charcoal: C, paper: P, blueTint: BT, vermilionTint: VT, grey: GREY, blue: B, vermilion: V } = WALKER_INK;
 
 /** A shape of one ink, as an SVG path in the figure's box. */
 export type Mark = { d: string; fill: string };
@@ -113,3 +115,57 @@ export const CAST: Record<ArchitectKey, Figure> = {
 };
 
 export const WALKERS = Object.keys(CAST) as ArchitectKey[];
+
+/**
+ * The city map's crowd: Berkeley out and about today, in the same cut paper,
+ * in the guide's own blue and vermilion — so the architects, sprinkled
+ * among them in the dark suits, beards and hats of their day, stand out.
+ */
+export const TOWNSFOLK: Figure[] = [
+  // A student with a backpack.
+  {
+    coat: BT,
+    marks: [
+      { d: "M3.4 7.4 Q3.6 3.8 7 3.8 Q10.4 3.8 10.6 7.4 Q9 5.6 7 5.6 Q5 5.6 3.4 7.4 Z", fill: C },
+      { d: "M1.4 12.6 Q1.4 12 2 12 H4.4 V20 H2 Q1.4 20 1.4 19.4 Z", fill: V },
+    ],
+  },
+  // In a dress, her hair in a ponytail.
+  {
+    coat: P,
+    skirt: true,
+    marks: [
+      { d: "M3.2 8 Q3.4 3.4 7 3.4 Q10.6 3.4 10.8 8 Q9.6 5.6 7 5.6 Q4.4 5.6 3.2 8 Z", fill: C },
+      { d: ellipse(2.4, 7.6, 1.5, 2.6), fill: C },
+    ],
+  },
+  // A man in a flat cap.
+  {
+    coat: B,
+    marks: [{ d: "M3.2 6.8 Q3.6 3.4 7 3.4 Q10.2 3.4 10.6 5.8 L12.6 6.6 L10.6 6.9 Z", fill: C }],
+  },
+  // A bob, and a tote bag.
+  {
+    coat: V,
+    marks: [
+      { d: "M3 9.4 Q3 3.4 7 3.4 Q11 3.4 11 9.4 H10 Q10 5.8 7 5.6 Q4 5.8 4 9.4 Z", fill: C },
+      { d: rect(9.4, 15.6, 3.4, 4.4), fill: P },
+    ],
+  },
+  // A beanie with a bobble.
+  {
+    coat: VT,
+    marks: [
+      { d: "M3.4 7 Q3.4 2.8 7 2.8 Q10.6 2.8 10.6 7 Z", fill: B },
+      { d: circle(7, 2.4, 1.1), fill: B },
+    ],
+  },
+  // Grey-haired, with a stick.
+  {
+    coat: B,
+    marks: [
+      { d: "M3.4 7.6 Q3.6 3.8 7 3.8 Q10.4 3.8 10.6 7.6 Q9.4 5.8 7 5.8 Q4.6 5.8 3.4 7.6 Z", fill: GREY },
+      { d: "M11.2 17 L12 17 L12.9 34 L12.1 34 Z", fill: C },
+    ],
+  },
+];

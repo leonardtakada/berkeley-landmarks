@@ -11,7 +11,8 @@
  * collects the label, rings the print in vermilion and says you're here;
  * nothing moves on by itself.
  *
- * Listen (the upper button, or its tab) plays the stop's story, there or not;
+ * Listen (the upper button, or its tab) plays the stop's story, there or not
+ * (Resume, if it was left part way: Back on the story comes here);
  * Map (low on the left, across from the menu's tab) shows the walk's map; the
  * lower button is the menu.
  */
@@ -196,7 +197,7 @@ lv_obj_t *screen_follow(void)
     lv_obj_t *map = pill(scr, 44, LOWER_CY - 22, 104, 44, false, C_BLUE, C_BLUE, "Map", open_map);
     lv_obj_move_to_index(map_mark(map, C_BLUE), 0);
 
-    f->listen = ui_hints(scr, walk_ground(walk_host()), "LISTEN", "MENU");
+    f->listen = ui_hints(scr, walk_ground(walk_host()), walk_story_begun() ? "RESUME" : "LISTEN", "MENU");
     /* Back here from the menu or the map, already at the stop: no second chime. */
     f->here = walk_here();
     if (f->here) mark_listen(f);

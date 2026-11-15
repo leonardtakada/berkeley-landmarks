@@ -41,7 +41,7 @@ Auto Indicator LLC — in the Appendix only, never on the cover.
   aspect-fills it; Android shows the cut-out logo on flat blue).
 - **Ribbons** (`components/bookmark-ribbons.tsx`): flat, square-cut tapes
   (54pt wide) under a thin solid blue head-band, in book order: Tours,
-  Landmarks, Appendix. The open section is solid blue and drawn out further;
+  Landmarks, Appendix, all hanging the same length. The open section is solid blue;
   the rest are blue tint. Eased motion, no bounce. They lie over the open
   page, so a turn clears them first: all of them fade out quickly, change
   while they're away, and fade back as the leaf lands — nothing moves but the
@@ -103,12 +103,19 @@ Auto Indicator LLC — in the Appendix only, never on the cover.
   be hidden under it. Pressing a cluster draws in on it; pressing the
   ground puts the entry away. (A pin's press stops there: the map would
   otherwise hear it too and put the entry straight away again.)
-  The guide's architects walk its streets from z15.6, as on the cover
-  (`components/iso-walkers.tsx`): a few in view, strolling on the right of
-  the street, turning at corners, stopping, hidden where a house or rise
-  stands in front of them. New ones arrive only out of view or from behind
-  something, and leave the same way — nobody pops up or vanishes in plain
-  sight. Each is drawn as flat shapes on the drawing (`lib/walker-shapes.ts`:
+  Berkeley walks its streets from z15.6 (`components/iso-walkers.tsx`):
+  townsfolk of today in the guide's blue and vermilion (`TOWNSFOLK` in
+  `lib/walker-cast.ts`: a student with a backpack, a flat cap, a bobble hat,
+  a tote, a stick…), and now and then — one at most, only within a few
+  hundred metres of one of their own buildings, and unlabelled: an easter
+  egg for those who know the cover — an architect in a period suit, beard
+  or hat. A few in view, strolling on the right of the street, turning at
+  corners, stopping; cut off along the line of whatever stands in front of
+  them — a roof's sloping eave, a gable's peak, a corner, a tree's crown
+  (`scripts/iso/walks.ts` says where; `lib/walker-cover.ts` cuts the figure
+  along it) — and hidden where all of it is. New ones arrive
+  only out of view or from behind something, and leave the same way —
+  nobody pops up or vanishes in plain sight. Each is drawn as flat shapes on the drawing (`lib/walker-shapes.ts`:
   keyline, coat, head, hat), the legs swinging and the body sinking as
   they part, with the stride matched to the pace so the feet don't slide.
   The stroll runs on the UI thread and hands the map GeoJSON 30 times a
@@ -149,13 +156,75 @@ one sheet per 25 m terrace (USGS 3DEP elevation via the AWS terrain tiles,
 `scripts/iso/terrain.ts`), its risers a deeper tint; the Bay flat blue with
 ruled waves; streets paper on a pale blue ground; every OpenStreetMap
 building raised from its outline (houses under gables, heights from tags or
-guessed from kind and size), flat-shaded in two tones lit from the west;
-the catalogue's landmarks in vermilion; lollipop trees in the parks and
-groves. The pieces are laid back to front (`scripts/iso/scene.ts`).
+guessed from kind and size), flat-shaded in two tones lit from the west,
+casting a flat shadow east-south-east onto their own terrace (buildings of
+8 m and more: a house's shadow is a sliver hidden behind it, not worth its
+bytes); ordinary flat roofs a step darker than the street, houses' roofs a
+tint of their own; lollipop trees of varied size, each crown lit on the
+west. Buildings OpenStreetMap draws as multipolygons (courtyards: Doe,
+Hearst Gym, the City Club…) come from `data/osm-building-relations.json`
+(Overpass; it refuses a request without a User-Agent). The pieces are laid
+back to front (`scripts/iso/scene.ts`).
+- **Landmark models** (`scripts/iso/models.ts`): every catalogue landmark is
+  built as a model rather than a vermilion box — walls, storeys of windows
+  (plain, arched, two-storey colonnade bays, open bays, modern bands), a
+  cornice, and a roof (gable, hip, mansard, pyramid, spire, dome; a big
+  hipped roof becomes a band of slopes round a deck). Materials stay in the
+  two inks: stone, stucco and painted wood in paper; brick and brown shingle
+  in a vermilion tint; red tile in vermilion; slate in blue; copper pale
+  blue. The landmark's mark is its vermilion shade wall. The photographed
+  ones are described part by part in `scripts/iso/landmark-models.ts`, each
+  with a line on what its photographs show (the Campanile's shaft, belfry,
+  pinnacles and copper spire; City Hall's cupola; South Hall's brick and
+  mansard; Doe's colonnade; the Stadium's ring of arches…); the rest are
+  modelled from their style (`fromStyle`). The same models stand on the
+  city map and, enlarged, on the walk plates. Edit a model, then re-run
+  `city.ts`, `walks.ts` and `plates.ts`.
+- **The catalogue's icons**: `npx tsx scripts/iso/icons.ts` bakes each
+  landmark's model (the same as the city map's: after its photographs where
+  it has them, else after its style) standing on a little plinth cut from
+  the city — a lawn for a house, the ground's tint for the rest — to
+  `assets/icons/<id>.png` (132 px, 44 pt at 3×; palette PNGs via sharp, ~1.2
+  MB for all 392), listed in `components/landmark-icons.generated.ts` and
+  shown beside each entry in the Landmarks list. An entry with no footprint
+  of its own takes its twin entry's building (and model), else the building
+  it stands in, else one of a size for its kind; the few sites that aren't
+  buildings are vignettes (a rock and an oak, a shellmound, a park's trees,
+  a tree-lined way). Re-run it after editing a model.
+- **The green, and the inland water** (`scripts/iso/greens.ts`): the one
+  touch of a third ink, kept to the green alone — a sea green, with enough
+  blue in it to sit among the map's blues (`INKS.lawn`, `SOFT_TREES` in
+  `scripts/iso/paint.ts`, shared by the map, the plates and the icons). Parks, lawns, gardens and
+  the cemetery are a pale green ground (a shade deeper on alternate
+  terraces); playing fields carry chalk lines (touchline, halfway line,
+  centre circle), hard courts are a deeper green with their outline and net;
+  lakes and lagoons (Anza, Temescal) are the Bay's blue with its ruled
+  waves. Each is laid on the terraces it lies across — on one level, whole;
+  across several, cut on a fine grid to the terraces as drawn, a little
+  inside their edges — so none floats over a lower one. Creeks
+  (`data/osm-waterways.json`, where they run in the open, not culverted)
+  are a ribbon of the blue's shade, broken where they fall over a terrace's
+  edge.
+- **Trees by where they grow** (`treePieces` in `scene.ts`): the streets'
+  and gardens' stay round in the map's blue; a park's are round and green,
+  gathered in groves with open lawn between (the meadows stay meadows); the
+  wild land — high on the hills with no house near, and the hill parks — is
+  wooded with pines (three tiers, one silhouette, each tier's western half
+  lit), tall ragged eucalyptus and oaks, all green and a little thicker; the
+  cemetery has cypresses in rows. None on a field or in a lake.
 - **Walk plates**: `npx tsx scripts/iso/plates.ts [walk…]` bakes each walk's
   block to `assets/plates/<walk>.png` and writes
-  `components/walk-plates.generated.ts` (route, models, flags, labels);
-  `scripts/iso/proof.ts` proofs one as the app draws it.
+  `components/walk-plates.generated.ts` (route, models, flags, labels,
+  pixels to a metre); `scripts/iso/proof.ts` proofs one as the app draws it.
+  The walk stands out of its block: the buildings, trees and shadows within
+  55 m of the route print in full ink, and recede into the ground's tint
+  the further off they lie (most of the way by 230 m; the catalogue's
+  landmarks less so); the trees are the city map's soft blue and green, not
+  specks of ink. Over the plate (`components/iso-plate.tsx`): the route's
+  ends marked as a line's stations, a compass rose (its needle vermilion to
+  the north), and a scale of round metres, blue and paper. (In a dev build
+  with Metro stopped, the plate's image goes and only the route and models
+  are left: start Metro before judging it.)
 - **The city map**: `npx tsx scripts/iso/city.ts` writes
   `assets/map/iso.pmtiles` — the scene laid out on MapLibre's globe as if its
   metres were at 0°, 0° — and `lib/iso-terrain.generated.ts`, the terraces
@@ -163,14 +232,88 @@ groves. The pieces are laid back to front (`scripts/iso/scene.ts`).
   `lib/iso-style.ts`, one fill layer in the drawing's order (fill sort key,
   no anti-aliasing, so no edge of a face behind shows through); buildings
   and trees from z14, trees from z15, street names from z14 (main) and z15.5,
-  districts out to z14.
-- **Walkers**: `npx tsx scripts/iso/walks.ts` writes
+  districts out to z14; creeks from z13; `lawns` (z16, never drawn; also
+  textured by `lawn-texture`) is each lawn's own part in sight, where the
+  wind blows.
+- The city tiles are ~22 MB: shadows, the trees' highlights, the landmarks'
+  detail and the wooded hills each cost a megabyte or two, so check
+  `city.ts`'s size line after adding anything drawn many times.
+- **Grass in the wind**, as an animated film paints a meadow — the field,
+  not blade by blade (single tufts read as stamped icons, and were dropped).
+  The lawns carry a painted texture from z16 (`lawn-texture` in
+  `lib/iso-style.ts`: a seamless tile of fine tapered blades leaning east,
+  from `scripts/iso/grass-texture.ts`, which paints the same blades three
+  ways — `grass` at rest, `grass-bent` pressed over, `grass-back` springing
+  back — registered as images in `components/maplibre-view.tsx`). Over it
+  the wind (`components/iso-grass.tsx`, `lib/grass.ts`), never even: it
+  rises and falls (`gustiness`: its speed a sum of slow sines, the waves'
+  travel its integral, so they hurry in a gust and dawdle in a lull); its
+  crests are unevenly spaced and each builds and dies as it goes, broken into
+  patches that drift along it; small quick flurries run between in a gust.
+  Each crest is cel-shaded in three hard-edged steps — a shadow in its wake
+  showing the grass springing back, a band of light showing it pressed over
+  (the grass-back and grass-bent textures, which line up with the grass at
+  rest, so the same grass seems to bend), a brighter core — with bright
+  streaks streaming through, long white wind lines riding it, and leaves
+  tumbling ahead. The bands are cut to the lawns on the UI thread fifteen
+  times a second (as a film draws on twos), from the tiles' unseen `lawns`
+  the map reports in view when it comes to rest — each lawn's own visible
+  part, no two overlapping (a smaller lawn, a court or a lake is cut out of
+  the one it lies in; the layer has no tile buffer, so its pieces meet edge
+  to edge). The wind's time is the wall clock's (`windTime`), shared with the
+  trees. With Reduce Motion the light lies still.
+- **Trees in the wind** (`scripts/iso/sway.ts`, `components/iso-tree-sway.tsx`):
+  the crowns with nothing drawn in front of them — as far as they may lean,
+  0.8 m — go into the tiles' `sway` layer (about one crown in two), dealt
+  into four groups and drawn over everything standing, so each group can be
+  moved whole by its `fill-translate` without the drawing's order coming
+  wrong. A few times a second each group leans east with the wind's strength
+  and flutters in its own time; the map glides between (a 260 ms
+  transition). Trunks stay put. Still with Reduce Motion.
+- **The walks on the city map** (before one is chosen): each walk's ground
+  outlined and labelled. `npx tsx scripts/iso/walk-outlines.ts` traces the
+  outline: everywhere within 60 m of the route and its stops, bays narrower
+  than about 440 m filled in and corners rounded (a 220 m closing on a 5 m
+  grid), the outer edge only (a loop's middle is the walk's too). It then
+  smooths and simplifies the outline and writes it anticlockwise to
+  `lib/walk-outlines.generated.ts`. Each walk is inked blue or vermilion,
+  chosen so the walks that overlap most differ, so crossing outlines can be
+  followed. The outline is a fine line with a screened band along its
+  inside (`line-offset`), printed over the drawing under the walkers
+  (`components/walk-outlines.tsx`). The label is baked to
+  `assets/map/walks/<id>.png` (@2x, @3x) in Jost: the walk's travel label
+  from the Tours page laid over the end of a paper slip with "WALK 07" and
+  the name, hung on a fine line in the walk's ink down to a dot on the
+  outline. Each label is pinned where it covers least of the other labels,
+  the other outlines and the pins at the map's opening zoom, preferring the
+  top of its own outline. On the map the labels sit over the pins
+  (`afterId` the cluster counts). Where labels collide further out, the
+  earlier walks' win (`symbol-sort-key`). Pressing a label lays out its
+  walk. Re-run the script after a walk's route or stops change (the test
+  checks every route point and stop lies inside its outline).
+- **Walkers**: `npx tsx scripts/iso/walks.ts` (about a minute) writes
   `lib/iso-walks.generated.ts` — the streets the map draws, as a network on
-  the terraces, with the stretches where a walker would be out of sight
-  (something nearer in the drawing covers both their middle and head; a climb up
-  a terrace wall is always out of sight); glimpses under 8 m and cover under
-  6 m are smoothed away so no one blinks. The figures are the cover's
-  (`lib/walker-cast.ts`), turned into polygons by `lib/walker-shapes.ts`.
+  the terraces, and for each lane (either side of a stretch, where walkers
+  keep right) how much of a walker there something nearer covers, found
+  exactly along each ray toward the reader: trees by the shapes the map
+  draws, buildings as solids with their true roofs (a house's gable, a
+  model's hip, mansard, spire or dome), nearer terraces. Most lanes get a
+  *skyline* — how far up the line over each point along the lane is covered
+  (every 0.2 m across the drawing, in 0.3 m levels) — which each walker
+  reads across the width of their figure, so a cut slopes with an eave and
+  steps at a corner. That's exact at the figure's middle and slightly off
+  at its edges (the edges stand a little nearer or further than the lane's
+  point there), so lanes whose depth changes more than 2.5 m per metre
+  across the drawing — those running toward the reader — are told cover by
+  cover instead (11 columns across the figure, 24 levels up it, every
+  metre). Every line is rounded to cover more, never less. Covered all the
+  way up is out of sight (a climb up a terrace wall always is); glimpses
+  under 8 m and cover under 6 m are smoothed away so no one blinks. The
+  covers are packed as base-64 strings (≈1.4 MB with the network); a check
+  against the slow ray-by-ray truth found 0.3% of covered figure left
+  showing, all of it slivers by a tree or a corner at the walker's own
+  depth. The figures are the cover's (`lib/walker-cast.ts`), turned into
+  polygons by `lib/walker-shapes.ts`.
 - `scripts/iso/preview.ts` and `city-proof.ts` proof the scene as a PNG.
 - `__tests__/iso.test.ts` checks the projection and that every walk has a
   plate with a model and flag for each stop.

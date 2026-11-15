@@ -4,7 +4,10 @@
  * nearest within reach is taken) and the slip at the top names it with how far
  * it is; the upper button, or a tap on the slip, goes there (and stops),
  * drawing your way, and at its door the guide tells it (the ringed ones have
- * a story on the card) or gives its architect and year. Seen from the
+ * a story on the card) or gives its architect and year. Back from its story
+ * (or told), it's still there at its door, named with its architect and
+ * year, and the upper button (Listen, or Resume) hears it again, until you
+ * pick another or walk on. Seen from the
  * south-west, north up to the left, following you as you walk; + and − to see
  * more or less of town. Without a fix it says so and shows downtown. The
  * lower button goes back.
@@ -23,6 +26,7 @@
 #include "widgets.h"
 
 #define AT_THE_DOOR_M 25
+#define LEFT_DOOR_M 60 /* walked this far on from the door, you've left it: Go is offered again */
 #define WALK_MPS 1.4 /* how fast a pretend position walks */
 #define METRES_PER_MIN 80
 #define TICK_MS 1000
@@ -185,13 +189,19 @@ static lv_obj_t *you_mark(lv_obj_t *scr)
 
 /* --- Going, and getting there ---------------------------------------------------------------- */
 
+/** The picked landmark's story on the card ("lm17"), or false if it has none. */
+static bool story_part(const landmark_t *l, char *part, size_t len)
+{
+    snprintf(part, len, "lm%d", l->lm);
+    return l->caption && player_part(part);
+}
+
 static void tell(void)
 {
     const landmark_t *l = picked_landmark();
     if (!l) return;
     walk_free(l);
-    picked = -1; /* told: back on the map, the next one is yours to pick */
-    ui_show(SCR_STORY);
+    ui_show(SCR_STORY); /* and back here at its door after */
 }
 
 static void arrive(void)
@@ -201,14 +211,19 @@ static void arrive(void)
     at_door = true;
     if (ui_volume() > 0) sound_chime_async(player_codec_volume(ui_volume()));
     char part[8];
-    snprintf(part, sizeof part, "lm%d", l->lm);
-    if (l->caption && player_part(part)) ui_after(ex->scr, DOOR_MS, tell);
+    if (story_part(l, part, sizeof part)) ui_after(ex->scr, DOOR_MS, tell);
 }
 
 void explore_go(void)
 {
-    /* Nothing picked, or already at its door (where GO isn't offered): nowhere to go. */
-    if (!ex || !picked_landmark() || at_door) return;
+    const landmark_t *l = picked_landmark();
+    if (!ex || !l) return;
+    char part[8];
+    /* At its door, the upper button hears its story (if it has one); elsewhere it goes there, or stops. */
+    if (at_door) {
+        if (story_part(l, part, sizeof part)) tell();
+        return;
+    }
     going = !going;
     refresh(true);
 }
@@ -223,12 +238,16 @@ static void slip_tapped(lv_event_t *e)
 static void show_go(void)
 {
     if (!ex->go) return;
-    if (!picked_landmark() || at_door) {
+    const landmark_t *l = picked_landmark();
+    char part[8];
+    if (!l || (at_door && !story_part(l, part, sizeof part))) {
         lv_obj_add_flag(ex->go, LV_OBJ_FLAG_HIDDEN);
         return;
     }
     lv_obj_remove_flag(ex->go, LV_OBJ_FLAG_HIDDEN);
-    lv_label_set_text(lv_obj_get_child(ex->go, 0), going ? "STOP" : "GO");
+    const char *word = going ? "STOP" : "GO";
+    if (at_door) word = walk_part_begun(part) ? "RESUME" : "LISTEN";
+    lv_label_set_text(lv_obj_get_child(ex->go, 0), word);
 }
 
 /** Brings everything up to date with where you are: the map, the dots, your way, the slip. */
@@ -272,6 +291,13 @@ static void refresh(bool relay)
     show_slip(&p);
     show_go();
 
+    /* Walked on from the door: it's yours to go back to, or not. */
+    if (at_door && l && p.known && position_metres(p.lat, p.lon, lat_of(l), lon_of(l)) > LEFT_DOOR_M) {
+        at_door = false;
+        show_slip(&p);
+        show_go();
+    }
+
     if (going && l && p.known && position_metres(p.lat, p.lon, lat_of(l), lon_of(l)) <= AT_THE_DOOR_M) {
         arrive();
         show_slip(&p);
@@ -306,8 +332,10 @@ static void gone(lv_event_t *e)
 
 lv_obj_t *screen_explore(void)
 {
-    walk_end_free(); /* back from a landmark's story, if that's where we were */
-    at_door = false;
+    /* Back from a landmark's story (or told), it's still at its door; come any other way, it's not. */
+    bool from_story = walk_is_free();
+    walk_end_free();
+    if (!from_story) at_door = false;
     explore_t *x = lv_malloc(sizeof(explore_t));
     lv_memzero(x, sizeof(*x));
     ex = x;

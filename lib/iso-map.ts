@@ -4,19 +4,24 @@
  * longitude/latitude for that point of the drawing. Pins, walk routes and
  * the reader's own position all go through here.
  */
-import { ISO_BOUNDS, ISO_LEVELS, ISO_TERRAIN } from "@/lib/iso-terrain.generated";
-import { iso, lngLatToPlane, planeToLngLat, toLatLon, toLocal } from "@/lib/iso";
+import { ISO_BOUNDS, ISO_LEVELS, ISO_TERRAIN } from "./iso-terrain.generated";
+import { iso, lngLatToPlane, planeToLngLat, toLatLon, toLocal } from "./iso";
 
 type LatLng = { latitude: number; longitude: number };
 
-/** The height of the terrace under a point, metres of the drawing. */
-function terraceZ(u: number, v: number): number {
+/** The terrace under a point (local metres): -1 in the Bay, 0 the shore's, and up. */
+export function terraceLevel(u: number, v: number): number {
   const t = ISO_TERRAIN;
   const c = Math.round((u - t.u0) / t.cell);
   const r = Math.round((v - t.v0) / t.cell);
   if (c < 0 || r < 0 || c >= t.cols || r >= t.rows) return 0;
-  const level = ISO_LEVELS.charCodeAt(r * t.cols + c) - 64;
-  return level < 0 ? t.shore : level * t.level;
+  return ISO_LEVELS.charCodeAt(r * t.cols + c) - 64;
+}
+
+/** The height of the terrace under a point, metres of the drawing. */
+function terraceZ(u: number, v: number): number {
+  const level = terraceLevel(u, v);
+  return level < 0 ? ISO_TERRAIN.shore : level * ISO_TERRAIN.level;
 }
 
 /** A place's position on the map, standing `above` metres over its terrace. */

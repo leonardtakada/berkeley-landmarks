@@ -5,10 +5,13 @@
  *
  * Layers, each shown from the zoom where it can be seen:
  *   ground   the Bay and the terraces of land              (z11+)
- *   waves    the Bay's ruled waves                         (z14+)
+ *   waves    the Bay's ruled waves, and the lakes'          (z14+)
+ *   creeks   the creeks, where they run in the open         (z13+)
+ *   lawns    where the app's wind blows (not drawn)         (z16)
  *   major    main streets; minor, the rest                 (z11+ / z13+)
  *   lm       the catalogue's landmarks alone, for far out   (z11–13)
  *   solids   every building and tree, back to front        (z14+)
+ *   sway     the crowns that sway, nothing in front of them  (z15+)
  *   names    street names, along the streets               (z15+)
  *   places   the districts                                 (z11–15)
  * Each piece carries its colour (c) and its place in the drawing order (s),
@@ -25,10 +28,14 @@ import vtPbfMod from "vt-pbf";
 import { landmarks } from "../../data/landmarks";
 import { iso, planeToLngLat, toLocal } from "../../lib/iso";
 import { centroid, clipLine, densify, type Pt } from "./geom";
-import { PALETTE, topColor } from "./paint";
+import { lawnColor, PALETTE, shadowColor, SOFT_TREES, topColor } from "./paint";
 import { tileId, writePmtiles } from "./pmtiles";
 import { buildScene, levelAt, LEVEL, terrain, type P3, type Piece } from "./scene";
 import { CITY_BOX } from "./city-proof";
+import { swayingCrowns } from "./sway";
+
+/** How far a crown may lean in the wind, metres (components/iso-tree-sway.tsx keeps within it). */
+const SWAY_REACH = 0.8;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const geojsonVt = ((geojsonVtMod as any).default ?? geojsonVtMod) as any;
@@ -44,13 +51,20 @@ const HEIGHT_SCALE = 1.4;
 /** The grid the app lifts its pins and routes onto the terraces with, metres. */
 const GRID = 20;
 
-const LAYERS: Record<string, { min: number; max: number; tolerance: number }> = {
+const LAYERS: Record<string, { min: number; max: number; tolerance: number; buffer?: number }> = {
   ground: { min: 11, max: 16, tolerance: 1.5 },
+  /** The ground again with the buildings' shadows laid on it, for z14 and in (where the buildings are). */
+  shaded: { min: 14, max: 16, tolerance: 1.5 },
   waves: { min: 14, max: 16, tolerance: 1 },
+  creeks: { min: 13, max: 16, tolerance: 1 },
+  /** Not drawn: where the app's wind blows over the grass, close in — each lawn's own part in sight, cut at the tiles' edges with no margin, so no two pieces overlap. */
+  lawns: { min: 16, max: 16, tolerance: 1, buffer: 0 },
   major: { min: 11, max: 16, tolerance: 1.5 },
   minor: { min: 13, max: 16, tolerance: 1.5 },
   lm: { min: 11, max: 13, tolerance: 1 },
   solids: { min: 14, max: 16, tolerance: 0.4 },
+  /** The crowns that sway with the wind (scripts/iso/sway.ts), in groups (w): drawn over everything standing. */
+  sway: { min: 14, max: 16, tolerance: 0.4 },
   names: { min: 14, max: 16, tolerance: 2 },
   places: { min: 11, max: 16, tolerance: 1 },
 };
@@ -70,35 +84,77 @@ const ring = (r: P3[]) => {
 async function main() {
   const t0 = Date.now();
   const box = CITY_BOX;
-  const { pieces, zAt } = await buildScene({ box, heightScale: HEIGHT_SCALE, plate: { depth: 30 } });
+  const { pieces, zAt, solids } = await buildScene({ box, heightScale: HEIGHT_SCALE, plate: { depth: 30 } });
   console.log(`scene: ${pieces.length} pieces, ${((Date.now() - t0) / 1000).toFixed(1)}s`);
+  // The crowns with nothing in front of them, as far as they lean: to sway with the wind.
+  const sway = swayingCrowns(pieces, solids, SWAY_REACH);
+  console.log(`swaying: ${sway.size} crowns' pieces, ${((Date.now() - t0) / 1000).toFixed(1)}s`);
+  /** A tree's crown into the sway layer if it may sway, else among everything standing. */
+  const standing = (p: Piece, properties: Record<string, string | number>, geometry: Feature["geometry"]) => {
+    const w = sway.get(p);
+    if (w === undefined) layers.solids.push({ type: "Feature", properties: { ...properties, t: 1 }, geometry });
+    else layers.sway.push({ type: "Feature", properties: { ...properties, w }, geometry });
+  };
 
   const layers: Record<string, Feature[]> = Object.fromEntries(Object.keys(LAYERS).map((k) => [k, []]));
-  const GROUND = new Set(["water", "shore", "top", "wall", "cutSouth", "cutWest"]);
-  // On the city map the trees are a softer blue, so the landmarks' pins stand out from them.
-  const TREE = "#6E84C2";
+  const GROUND = new Set(["water", "shore", "top", "wall", "cutSouth", "cutWest", "lawn", "court", "chalk", "lake"]);
+  // On the city map the trees are a softer blue, so the landmarks' pins stand out from them —
+  // and the green's trees a softer green, as light.
+  const [TREE, TREE_LIT, GREEN, GREEN_LIT] = [SOFT_TREES.crown, SOFT_TREES.crownLit, SOFT_TREES.green, SOFT_TREES.greenLit];
+  /** A landmark's small parts (windows, cornices, open bays): left out far off, where they'd be a pixel. */
+  const DETAIL = /^lm(Window|Open|Trim)/;
+  let shadowRun = 0;
   pieces.forEach((p: Piece, s) => {
+    const level = p.kind === "poly" ? p.level : undefined;
     const color =
-      p.role === "top" && p.kind === "poly" ? topColor(p.level) : p.role === "trunk" || p.role === "crown" ? TREE : PALETTE[p.role];
+      p.role === "top"
+        ? topColor(level)
+        : p.role === "shadow"
+          ? shadowColor(level)
+          : p.role === "lawn"
+            ? lawnColor(level)
+            : p.role === "trunk" || p.role === "crown"
+              ? TREE
+              : p.role === "crownLit"
+                ? TREE_LIT
+                : p.role === "greenTrunk" || p.role === "green"
+                  ? GREEN
+                  : p.role === "greenLit"
+                    ? GREEN_LIT
+                    : PALETTE[p.role];
     if (p.kind === "poly") {
       const geometry = { type: "Polygon", coordinates: p.rings.map(ring) };
+      if (p.role === "shadow") {
+        // One terrace's shadows share a colour and a place in the order (the first one's), so
+        // the tiles keep one value for them all; they're one ink, so their order among themselves is moot.
+        if (pieces[s - 1]?.role !== "shadow") shadowRun = s;
+        layers.shaded.push({ type: "Feature", properties: { c: color, s: shadowRun }, geometry });
+        return;
+      }
+      if (p.role === "grassMask") {
+        layers.lawns.push({ type: "Feature", properties: { k: level ?? 0 }, geometry });
+        return;
+      }
       if (GROUND.has(p.role)) {
         layers.ground.push({ type: "Feature", properties: { c: color, s }, geometry });
+        layers.shaded.push({ type: "Feature", properties: { c: color, s }, geometry });
         return;
       }
       const lm = p.role.startsWith("lm");
       layers.solids.push({ type: "Feature", properties: { c: color, s, t: lm ? 2 : 0 }, geometry });
-      if (lm) layers.lm.push({ type: "Feature", properties: { c: color, s }, geometry });
+      if (lm && !DETAIL.test(p.role)) layers.lm.push({ type: "Feature", properties: { c: color, s }, geometry });
     } else if (p.kind === "line") {
       if (p.role === "wave") {
         layers.waves.push({ type: "Feature", properties: { c: color }, geometry: { type: "LineString", coordinates: p.pts.map(ll) } });
+      } else if (p.role === "creek") {
+        layers.creeks.push({ type: "Feature", properties: { w: p.width }, geometry: { type: "LineString", coordinates: p.pts.map(ll) } });
       } else if (p.role === "street") {
         layers[p.width >= 12 ? "major" : "minor"].push({
           type: "Feature",
           properties: { w: p.width },
           geometry: { type: "LineString", coordinates: p.pts.map(ll) },
         });
-      } else if (p.role === "trunk") {
+      } else if (p.role === "trunk" || p.role === "greenTrunk") {
         // A trunk: a thin upright strip.
         const [a, b] = p.pts;
         const w = 0.7;
@@ -111,14 +167,25 @@ async function main() {
           },
         });
       }
-    } else {
-      // A crown: a disc, as an octagon standing square to the viewer.
+    } else if (p.kind === "flat") {
+      // A pine's tier, a eucalyptus or a cypress: a shape standing square to the viewer.
       const c = iso(p.at[0], p.at[1], p.at[2]);
-      const pts = Array.from({ length: 17 }, (_, i) => {
-        const a = ((i % 16) / 16) * Math.PI * 2;
+      const polys = p.parts.map((part) => {
+        const pts = part.map(([dx, dy]) => planeToLngLat(c.x + dx, c.y + dy));
+        pts.push(pts[0]);
+        return [pts];
+      });
+      const geometry = polys.length === 1 ? { type: "Polygon", coordinates: polys[0] } : { type: "MultiPolygon", coordinates: polys };
+      standing(p, { c: color, s }, geometry);
+    } else {
+      // A crown: a disc standing square to the viewer (its highlight, smaller, with fewer sides).
+      const c = iso(p.at[0], p.at[1], p.at[2]);
+      const n = p.role === "crownLit" || p.role === "greenLit" ? 10 : 16;
+      const pts = Array.from({ length: n + 1 }, (_, i) => {
+        const a = ((i % n) / n) * Math.PI * 2;
         return planeToLngLat(c.x + Math.cos(a) * p.r, c.y + Math.sin(a) * p.r);
       });
-      layers.solids.push({ type: "Feature", properties: { c: color, s, t: 1 }, geometry: { type: "Polygon", coordinates: [pts] } });
+      standing(p, { c: color, s }, { type: "Polygon", coordinates: [pts] });
     }
   });
 
@@ -164,7 +231,7 @@ async function main() {
   const indexes = Object.fromEntries(
     Object.entries(layers).map(([k, features]) => [
       k,
-      new geojsonVt({ type: "FeatureCollection", features }, { maxZoom: Z_MAX, indexMaxZoom: 5, buffer: 64, extent: 4096, tolerance: LAYERS[k].tolerance }),
+      new geojsonVt({ type: "FeatureCollection", features }, { maxZoom: Z_MAX, indexMaxZoom: 5, buffer: LAYERS[k].buffer ?? 64, extent: 4096, tolerance: LAYERS[k].tolerance }),
     ]),
   );
   // The drawing's extent, as the engine sees it.
@@ -186,8 +253,10 @@ async function main() {
         const out: Record<string, unknown> = {};
         for (const [k, idx] of Object.entries(indexes)) {
           if (z < LAYERS[k].min || z > LAYERS[k].max) continue;
+          // From z14 the ground comes with its shadows: the same layer, so they keep their place in its order.
+          if (k === "ground" && z >= LAYERS.shaded.min) continue;
           const t = idx.getTile(z, x, y);
-          if (t && t.features.length) out[k] = t;
+          if (t && t.features.length) out[k === "shaded" ? "ground" : k] = t;
         }
         if (!Object.keys(out).length) continue;
         tiles.set(tileId(z, x, y), zlib.gzipSync(vtPbf(out, { version: 2, extent: 4096 }), { level: 9 }));
@@ -203,7 +272,9 @@ async function main() {
       name: "berkeley-iso",
       description: "Berkeley, isometric, for the guide's city map",
       attribution: "© OpenStreetMap contributors; elevation USGS 3DEP",
-      vector_layers: Object.entries(LAYERS).map(([id, c]) => ({ id, minzoom: c.min, maxzoom: c.max, fields: {} })),
+      vector_layers: Object.entries(LAYERS)
+        .filter(([id]) => id !== "shaded")
+        .map(([id, c]) => ({ id, minzoom: c.min, maxzoom: c.max, fields: {} })),
     },
   });
   console.log(`${OUT}: ${(bytes / 1e6).toFixed(1)} MB, ${tiles.size} tiles`);

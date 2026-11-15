@@ -1,5 +1,6 @@
 import React, { useCallback, useMemo, useRef, useState } from "react";
 import {
+  Image,
   Pressable,
   ScrollView,
   SectionList,
@@ -16,6 +17,7 @@ import Svg, { Path, SvgXml } from "react-native-svg";
 import { ArchitectPortrait } from "@/components/architect-portrait";
 import { ChapterOpener, Folio, Leader, SectionPage } from "@/components/book-page";
 import { CheckStamp } from "@/components/copy-marks";
+import { LANDMARK_ICONS } from "@/components/landmark-icons.generated";
 import { CATALOGUE_FRIEZE_SVG } from "@/components/print-art.generated";
 import { Annotation, Arrow, Rule } from "@/components/print";
 import { ScrollClock, useScrollClockHandler } from "@/components/scroll-clock";
@@ -634,22 +636,28 @@ function IndexEntry({
         .filter(Boolean)
         .join(", ")}
     >
-      <View style={styles.entryLine}>
-        <Text style={styles.entryName} numberOfLines={2}>
-          {landmark.name}
-          {landmark.nationalRegister ? <Text style={styles.nrMark}>{" ※"}</Text> : null}
-        </Text>
-        {visited ? <CheckStamp size={13} style={styles.mark} /> : null}
-        {corner ? <View style={[styles.cornerMark, !visited && styles.mark]} /> : null}
-        {watched ? <View style={[styles.watchMark, !visited && !corner && styles.mark]} /> : null}
-        <Leader />
-        <Text style={styles.entryNo}>{number ? `No. ${number}` : "—"}</Text>
+      <View style={styles.entryBody}>
+        {/* The building in miniature, as the city map models it (scripts/iso/icons.ts). */}
+        {LANDMARK_ICONS[landmark.id] ? <Image source={LANDMARK_ICONS[landmark.id]} style={styles.entryIcon} accessible={false} /> : null}
+        <View style={styles.entryText}>
+          <View style={styles.entryLine}>
+            <Text style={styles.entryName} numberOfLines={2}>
+              {landmark.name}
+              {landmark.nationalRegister ? <Text style={styles.nrMark}>{" ※"}</Text> : null}
+            </Text>
+            {visited ? <CheckStamp size={13} style={styles.mark} /> : null}
+            {corner ? <View style={[styles.cornerMark, !visited && styles.mark]} /> : null}
+            {watched ? <View style={[styles.watchMark, !visited && !corner && styles.mark]} /> : null}
+            <Leader />
+            <Text style={styles.entryNo}>{number ? `No. ${number}` : "—"}</Text>
+          </View>
+          {meta ? (
+            <Text style={styles.entryMeta} numberOfLines={1}>
+              {meta}
+            </Text>
+          ) : null}
+        </View>
       </View>
-      {meta ? (
-        <Text style={styles.entryMeta} numberOfLines={1}>
-          {meta}
-        </Text>
-      ) : null}
       {!last ? <Rule style={styles.entryRule} /> : null}
     </Pressable>
   );
@@ -811,6 +819,18 @@ const styles = StyleSheet.create({
   },
   entryPressed: {
     opacity: 0.5,
+  },
+  entryBody: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+  },
+  entryIcon: {
+    width: 46,
+    height: 46,
+  },
+  entryText: {
+    flex: 1,
   },
   entryLine: {
     flexDirection: "row",

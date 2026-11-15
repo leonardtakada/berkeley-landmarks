@@ -80,6 +80,13 @@ screen_id_t ui_map_over(void)
     return under;
 }
 
+void ui_story_back(void)
+{
+    if (walk_is_free()) ui_show(SCR_EXPLORE);   /* the landmark, at its door on the map */
+    else if (walk_in_intro()) walks_show_again(); /* not set out yet: the walk, on Choose */
+    else ui_show(SCR_FOLLOW);                     /* the stop */
+}
+
 void ui_ask_end(void)
 {
     asked_over = ui_current();
@@ -108,8 +115,7 @@ void ui_button(button_t b)
         break;
     case SCR_STORY:
         if (upper) story_upper();
-        else if (walk_is_free()) ui_show(SCR_EXPLORE); /* on your own, the lower is Back, to the map */
-        else ui_open_controls();
+        else ui_story_back();
         break;
     case SCR_MAP:
         if (!upper) ui_close_map();

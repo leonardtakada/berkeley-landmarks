@@ -53,6 +53,12 @@ void walks_start(void)
     }
 }
 
+void walks_show_again(void)
+{
+    returning = true;
+    ui_show(SCR_WALKS);
+}
+
 static void map_clicked(lv_event_t *e)
 {
     LV_UNUSED(e);

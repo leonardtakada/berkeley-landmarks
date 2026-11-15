@@ -22,9 +22,9 @@ const LAYDOWN = require("@/assets/textures/ink-laydown.png");
  * Bookmark ribbons hanging from the head of the book.
  *
  * Flat tapes of ink, square-cut, tucked under a solid band of logo blue at
- * the top edge. The open section's ribbon is drawn out further and printed
- * in solid blue; the others rest in a blue tint, like a screened plate
- * beside a solid one. Tapping the open section's ribbon closes the book.
+ * the top edge, all hanging the same length. The open section's ribbon is
+ * printed in solid blue; the others rest in a blue tint, like a screened
+ * plate beside a solid one. Tapping the open section's ribbon closes the book.
  *
  * Each ribbon is drawn at full length and slid out from under the band, so
  * the band hides whatever is still tucked in.
@@ -40,7 +40,8 @@ const RIBBON_W = 54;
 const GAP = 8;
 const RIGHT_MARGIN = 20;
 const LEN = 160;
-const EXTEND = 22;
+/** How far each ribbon hangs below the band: all alike, long enough for the longest label. */
+const HANG = 128;
 const EASE = Easing.bezier(0.3, 0, 0.1, 1);
 
 const FADE_OUT_MS = 120;
@@ -50,13 +51,12 @@ const FADE_IN_MS = 200;
 /** Width of the column the ribbons occupy at the head of a page. */
 export const RIBBON_COLUMN = RIGHT_MARGIN + RIBBON_W * 3 + GAP * 2 + 12;
 
-type Section = { name: string; label: string; rest: number };
+type Section = { name: string; label: string };
 
 export const SECTIONS: Section[] = [
-  // Each ribbon hangs long enough to show its whole label.
-  { name: "tours", label: "Tours", rest: 100 },
-  { name: "catalogue", label: "Landmarks", rest: 128 },
-  { name: "profile", label: "Appendix", rest: 116 },
+  { name: "tours", label: "Tours" },
+  { name: "catalogue", label: "Landmarks" },
+  { name: "profile", label: "Appendix" },
 ];
 
 /** Offset of the page content so it begins under the head-band. */
@@ -101,16 +101,14 @@ function Ribbon({
     );
   }, [turn, shown, reduceMotion]);
 
-  // A new section: each ribbon changes while it's away, so it comes back
-  // already drawn out (or in) and in its new ink.
+  // A new section: each ribbon changes while it's away, so it comes back in its new ink.
   useEffect(() => {
     focus.value = withDelay(turn === 0 || reduceMotion ? 0 : FADE_OUT_MS, withTiming(selected ? 1 : 0, { duration: 0 }));
   }, [selected, turn, focus, reduceMotion]);
 
-  const rest = section.rest;
   const fade = useAnimatedStyle(() => ({ opacity: shown.value }));
   const slide = useAnimatedStyle(() => ({
-    transform: [{ translateY: HEAD_BAND_H + drop.value * (rest + EXTEND * focus.value) - LEN }],
+    transform: [{ translateY: HEAD_BAND_H + drop.value * HANG - LEN }],
   }));
   const tape = useAnimatedStyle(() => ({
     backgroundColor: interpolateColor(focus.value, [0, 1], [INK.blueTint, INK.blue]),
@@ -119,7 +117,7 @@ function Ribbon({
     color: interpolateColor(focus.value, [0, 1], [INK.blue, PAPER.cover]),
   }));
   const hit = useAnimatedStyle(() => ({
-    height: Math.max(0, drop.value * (rest + EXTEND * focus.value)),
+    height: Math.max(0, drop.value * HANG),
   }));
 
   return (

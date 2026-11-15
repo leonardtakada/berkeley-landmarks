@@ -25,7 +25,35 @@ export const INKS = {
   terrace: "#9EAED6",
   /** A roof in shade, the blue a little screened. */
   blueShade: "#3A55A4",
+  /** Red tile in shade: the vermilion with a little blue over it. */
+  vermilionShade: "#BC4520",
+  /** An ordinary building's flat roof: a step down from the street's paper. */
+  roof: "#ECE8DB",
+  /** A house's pitched roof, lit and in shade. */
+  houseRoof: "#C9D1EA",
+  houseRoofShade: "#AEBBDE",
+  /** A building's shadow on the land (and on the alternate terrace, `shadow2`). */
+  shadow: "#CBD3E9",
+  shadow2: "#C3CBE3",
+  /**
+   * A touch of green, for the green alone — a sea green, with enough blue in
+   * it to sit among the map's blues: a pale tint for lawns (`lawn2` on the
+   * alternate terrace), a deeper one for hard courts, and a deep one for the
+   * parks' and the wild hills' trees, lit with a lighter one.
+   */
+  lawn: "#CFE5DA",
+  lawn2: "#C7DFD3",
+  court: "#AFD3C3",
+  green: "#2A7366",
+  greenLit: "#4E9A8C",
 };
+
+/**
+ * The trees as the city map, the walk plates and the icons print them: the
+ * streets' and gardens' a soft blue, the green's a soft sea green, each with
+ * the lighter tint its lit side takes.
+ */
+export const SOFT_TREES = { trunk: "#7389C6", crown: "#7389C6", crownLit: "#9DAEDD", greenTrunk: "#4F9A8C", green: "#4F9A8C", greenLit: "#8CC4B6" };
 
 export const PALETTE: Record<Role, string> = {
   water: INKS.blue,
@@ -40,23 +68,57 @@ export const PALETTE: Record<Role, string> = {
   path: INKS.blueTint2,
   trunk: INKS.blue,
   crown: INKS.blue,
-  bldTop: INKS.slip,
+  crownLit: INKS.blueShade,
+  shadow: INKS.shadow,
+  // A roof a step darker than the street beside it, so the blocks read; houses' roofs a tint of their own.
+  bldTop: INKS.roof,
   bldLit: INKS.paper,
   bldShade: INKS.blueTint,
-  roofLit: INKS.blueTint2,
-  roofShade: INKS.blueTint,
+  roofLit: INKS.houseRoof,
+  roofShade: INKS.houseRoofShade,
   lmTop: INKS.vermilionTint,
   lmLit: INKS.paper,
   lmShade: INKS.vermilion,
-  lmRoofLit: INKS.blue,
-  lmRoofShade: INKS.blueShade,
+  // Slate: the screened blue where the light falls, the full blue in shade.
+  lmRoofLit: INKS.blueShade,
+  lmRoofShade: INKS.blue,
   lmWindowLit: INKS.blueTint,
   lmWindowShade: INKS.vermilionTint,
+  lmBrickLit: INKS.vermilionTint,
+  lmWindowBrick: INKS.paper,
+  lmTileLit: INKS.vermilion,
+  lmTileShade: INKS.vermilionShade,
+  lmCopperLit: INKS.blueTint,
+  lmCopperShade: INKS.terrace,
+  lmOpen: INKS.blue,
+  lmTrimLit: INKS.slip,
+  lmTrimShade: INKS.vermilionTint,
+  // Many slate roofs seen as one (over a plan too irregular for a roof of its own): a lighter blue than one slope.
+  lmSlateDeck: "#7D90C9",
+  lawn: INKS.lawn,
+  court: INKS.court,
+  chalk: INKS.slip,
+  lake: INKS.blue,
+  creek: INKS.blueShade,
+  greenTrunk: INKS.green,
+  green: INKS.green,
+  greenLit: INKS.greenLit,
+  grassMask: "transparent",
 };
+
+/** A lawn, alternating with its terrace's paper. */
+export function lawnColor(level: number | undefined): string {
+  return level !== undefined && level % 2 ? INKS.lawn2 : INKS.lawn;
+}
 
 /** A terrace's top, alternating papers so each sheet reads against the next. */
 export function topColor(level: number | undefined): string {
   return level !== undefined && level % 2 ? INKS.ground2 : INKS.ground;
+}
+
+/** A shadow on a terrace: a step darker than its paper. */
+export function shadowColor(level: number | undefined): string {
+  return level !== undefined && level % 2 ? INKS.shadow2 : INKS.shadow;
 }
 
 export interface Frame {
@@ -91,11 +153,22 @@ export function fit(pieces: Piece[], width: number, height: number, margin = 0):
   };
 }
 
-export function paint(ctx: SKRSContext2D, pieces: Piece[], f: Frame, palette = PALETTE) {
+/** A colour mixed toward another: `w` 0 is the first, 1 the second. */
+export function mix(a: string, b: string, w: number): string {
+  const [p, q] = [a, b].map((h) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16)));
+  return `#${p.map((x, i) => Math.round(x + (q[i] - x) * w).toString(16).padStart(2, "0")).join("")}`;
+}
+
+/** Paints the pieces in order, each in its role's colour — or as `tint` would have it, piece by piece. */
+export function paint(ctx: SKRSContext2D, pieces: Piece[], f: Frame, palette = PALETTE, tint?: (p: Piece, color: string) => string) {
   ctx.lineJoin = "round";
   ctx.lineCap = "round";
   for (const p of pieces) {
-    const color = p.role === "top" ? topColor(p.kind === "poly" ? p.level : undefined) : palette[p.role];
+    // (Where the city map's grass grows: not drawn.)
+    if (p.role === "grassMask") continue;
+    const level = p.kind === "poly" ? p.level : undefined;
+    const plain = p.role === "top" ? topColor(level) : p.role === "shadow" ? shadowColor(level) : p.role === "lawn" ? lawnColor(level) : palette[p.role];
+    const color = tint ? tint(p, plain) : plain;
     if (p.kind === "poly") {
       ctx.beginPath();
       for (const r of p.rings) {
@@ -121,6 +194,21 @@ export function paint(ctx: SKRSContext2D, pieces: Piece[], f: Frame, palette = P
       ctx.strokeStyle = color;
       ctx.lineWidth = Math.max(0.8, p.width * f.scale * (p.role === "street" ? 0.8 : 1));
       if (p.role === "wave") ctx.lineWidth = Math.max(1, 1.4 * Math.min(2, f.scale));
+      ctx.stroke();
+    } else if (p.kind === "flat") {
+      const [x, y] = toPx(f, p.at);
+      ctx.beginPath();
+      for (const part of p.parts) {
+        part.forEach(([dx, dy], i) => {
+          if (i) ctx.lineTo(x + dx * f.scale, y - dy * f.scale);
+          else ctx.moveTo(x + dx * f.scale, y - dy * f.scale);
+        });
+        ctx.closePath();
+      }
+      ctx.fillStyle = color;
+      ctx.fill();
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 0.5;
       ctx.stroke();
     } else {
       const [x, y] = toPx(f, p.at);

@@ -18,11 +18,19 @@ import { WALK_STREETS } from "../../data/walk-streets.generated";
 import { iso, toLocal } from "../../lib/iso";
 import { stopIndices } from "../../lib/route-legs";
 import { area, centroid, clipLine, densify, minRect, orient, simplify, type Box, type Pt, type Ring } from "./geom";
-import { canvas, fit, paint, PALETTE, toPx, type Frame } from "./paint";
+import { canvas, fit, INKS, mix, paint, PALETTE, SOFT_TREES, toPx, type Frame } from "./paint";
+import { landmarkPieces } from "./models";
 import { buildScene, buildingPieces, buildings, terrain, levelAt, levelZ, type Building, type P3, type Piece } from "./scene";
 
 /** The plate's width in pixels: three times a phone's column. */
 const WIDTH = 1080;
+/** The city's buildings, trees and shadows print in full ink this near the walk (metres)… */
+const NEAR = 55;
+/** …and recede into the ground's tint (most of the way) by this far. */
+const FAR = 230;
+const RECEDE = new Set(["bldTop", "bldLit", "bldShade", "roofLit", "roofShade", "trunk", "crown", "crownLit", "greenTrunk", "green", "greenLit", "shadow", "chalk"]);
+/** The plates' inks: the city map's, the trees a soft blue (and the green's a soft green). */
+const PLATE_PALETTE = { ...PALETTE, ...SOFT_TREES };
 const OUT_DIR = "assets/plates";
 const MODULE = "components/walk-plates.generated.ts";
 
@@ -43,6 +51,10 @@ type Model = {
   pass: Pt;
   building: Building;
   radius: number;
+  /** Drawn this many times its true height, and its plan this many times its true size. */
+  hs: number;
+  enlarge: number;
+  trueH: number;
 };
 
 /** A stop's building as a model: enlarged, cleaned to its outline, roofed after its style. */
@@ -147,7 +159,13 @@ async function plate(tourId: string) {
     const seen = 15 / (r0 * pxPerM);
     const scale = Math.min(5, Math.max(0.55, seen, Math.min(2.4, 36 / r0, (nearest * 0.45) / r0)));
     const b = model(s.landmark, found, scale);
-    return { landmark: s.landmark, order: s.order, pass: routeLocal[passAt[i]], building: b, radius: Math.sqrt(area(b.ring)) / 2 };
+    // The model's own heights (scripts/iso/models.ts), scaled as model() scales the building's.
+    const trueH = HEIGHTS[s.landmark.name] ?? found?.height ?? 9;
+    const tower = TOWER.test(s.landmark.name) && trueH > 25;
+    // (A tower stands as tall as the city map draws it, so it rises clear of the flags round it.)
+    const hs = tower ? 1.4 : (Math.max(8, trueH) * Math.min(scale, 2.2) * 0.8) / trueH;
+    const enlarge = tower ? Math.max(scale, 20 / Math.max(1, minRect(found?.ring ?? b.ring).short)) : scale;
+    return { landmark: s.landmark, order: s.order, pass: routeLocal[passAt[i]], building: b, radius: Math.sqrt(area(b.ring)) / 2, hs, enlarge, trueH };
   });
   for (const md of models) {
     // Stood back from the route, on the side the building stands.
@@ -182,7 +200,10 @@ async function plate(tourId: string) {
   for (const md of models) md.building = { ...md.building, base: levelZ(Math.max(0, levelAt(t, md.building.c[0], md.building.c[1]))) };
 
   // Their pieces, and the ground they stand on cleared of whatever would stand in front of them.
-  const modelPieces = models.map((md) => buildingPieces(md.building, 1, true));
+  // Each modelled after its photographs, or its style, as on the city map: a plaque for a site.
+  const modelPieces = models.map((md) =>
+    md.building.site ? buildingPieces(md.building, 1, true) : landmarkPieces(md.landmark, { ...md.building, height: md.trueH, gable: null }, md.hs, md.enlarge),
+  );
   const screenBox = (ps: Piece[]) => {
     let [x0, y0, x1, y1] = [Infinity, Infinity, -Infinity, -Infinity];
     for (const p of ps) {
@@ -230,8 +251,30 @@ async function plate(tourId: string) {
   // Room above for the flags on the tallest models.
   f.y0 += 30 / f.scale;
 
+  // The walk's own blocks in full ink; the city round them printed paler the further off it lies,
+  // so the walk stands out of it — and the trees soft, as on the city map, not specks of ink.
+  const corridor = densify(routeLocal, 8);
+  const away = ([u, v]: Pt) => {
+    let d = Infinity;
+    for (const [a, b] of corridor) d = Math.min(d, (a - u) * (a - u) + (b - v) * (b - v));
+    return Math.sqrt(d);
+  };
+  const anchor = (p: Piece): Pt => {
+    if (p.kind === "poly") {
+      const r = p.rings[0];
+      return [r.reduce((x, q) => x + q[0], 0) / r.length, r.reduce((y, q) => y + q[1], 0) / r.length];
+    }
+    if (p.kind === "line") return [(p.pts[0][0] + p.pts[p.pts.length - 1][0]) / 2, (p.pts[0][1] + p.pts[p.pts.length - 1][1]) / 2];
+    return [p.at[0], p.at[1]];
+  };
+  const tint = (p: Piece, color: string) => {
+    const landmark = p.role.startsWith("lm");
+    if (!landmark && !RECEDE.has(p.role)) return color;
+    const t = Math.min(1, Math.max(0, (away(anchor(p)) - NEAR) / (FAR - NEAR)));
+    return mix(color, INKS.ground, t * t * (3 - 2 * t) * (landmark ? 0.4 : 0.62));
+  };
   const { c, ctx } = canvas(WIDTH, height);
-  paint(ctx, pieces, f);
+  paint(ctx, pieces, f, PLATE_PALETTE, tint);
   fs.mkdirSync(OUT_DIR, { recursive: true });
   fs.writeFileSync(`${OUT_DIR}/${tourId}.png`, await c.encode("png"));
 
@@ -293,6 +336,8 @@ async function plate(tourId: string) {
       };
     }),
     labels: streetLabels(tourId, routeLocal, box, f, zAt),
+    // Pixels to a metre of the ground across the plate (south-east to north-west, which the drawing lays level), for its scale.
+    metre: Math.round(Math.SQRT2 * Math.cos(Math.PI / 6) * f.scale * 1000) / 1000,
     north: (() => {
       const a = toPx(f, [0, 0, 0]);
       const b = toPx(f, [0, 100, 0]);

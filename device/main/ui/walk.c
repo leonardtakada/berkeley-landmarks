@@ -23,19 +23,21 @@ static bool intro;
 static bool arrived;       /* at the stop you're making for, on foot */
 static uint32_t collected; /* bit i: stop i's label, earned on the spot */
 static uint32_t stamped;   /* bit i: its stamp already pressed on the story */
+/* The story last left part way or told: its part on the card ("lm17"), how much was heard, whether all.
+ * Kept by its part, so a story leaving after the next has begun can't hand its place to the next. */
+static char heard_part[8];
 static uint32_t heard_ms;
+static bool heard_told;
 
 /* On your own: the landmark picked on the free map, as a walk of one stop with no host. */
 static bool free_mode;
 static stop_t free_stop;
 static const walk_t free_walk = {"On your own", "", "", NULL, &free_stop, 1, NULL, 0, NULL};
-static uint32_t free_heard_ms;
 
 void walk_free(const landmark_t *l)
 {
     free_stop = (stop_t){l->name, l->speaker, l->caption ? l->caption : "", l->lat_e6, l->lon_e6, -1, l->lm, 0};
     free_mode = true;
-    free_heard_ms = 0;
 }
 
 void walk_end_free(void)
@@ -122,13 +124,14 @@ void walk_to(int i)
     at = LV_CLAMP(0, i, walk_now()->stop_count - 1);
     intro = false;
     arrived = false;
-    heard_ms = 0;
 }
 
 void walk_begin(int first)
 {
     char part[8];
     walk_intro_part(part, sizeof part);
+    /* Set out again on the walk whose introduction was left part way, and it picks up there; else afresh. */
+    if (strcmp(heard_part, part) != 0 || heard_told) heard_part[0] = '\0';
     collected = stamped = 0;
     walk_to(first);
     start = at;
@@ -168,15 +171,39 @@ bool walk_here(void)
     return !free_mode && arrived;
 }
 
-uint32_t walk_heard_ms(void)
+void walk_story_part(char *buf, size_t len)
 {
-    return free_mode ? free_heard_ms : heard_ms;
+    if (walk_in_intro()) walk_intro_part(buf, len);
+    else snprintf(buf, len, "lm%d", walk_stop()->lm);
 }
 
-void walk_set_heard_ms(uint32_t ms)
+static bool heard_is_now(void)
 {
-    if (free_mode) free_heard_ms = ms;
-    else heard_ms = ms;
+    char part[8];
+    walk_story_part(part, sizeof part);
+    return strcmp(part, heard_part) == 0;
+}
+
+uint32_t walk_heard_ms(void)
+{
+    return heard_is_now() ? heard_ms : 0;
+}
+
+bool walk_story_begun(void)
+{
+    return heard_is_now() && heard_ms > 0 && !heard_told;
+}
+
+bool walk_part_begun(const char *part)
+{
+    return strcmp(part, heard_part) == 0 && heard_ms > 0 && !heard_told;
+}
+
+void walk_set_heard(const char *part, uint32_t ms, bool told)
+{
+    snprintf(heard_part, sizeof heard_part, "%s", part);
+    heard_ms = ms;
+    heard_told = told;
 }
 
 /* --- Where you are on the walk --------------------------------------------------------- */

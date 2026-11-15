@@ -536,6 +536,50 @@ Checked on the guide with pretend positions:
 
 Not yet walked outdoors.
 
+### Skipping, and going back (2026-11-14)
+
+The user asked for two things. One was to skip forward in a story. The
+other was to get back from a story to the landmark it's about: on a walk,
+the story's lower button opened the menu, and nothing led back to the stop.
+
+- **Forward 15 seconds.** It mirrors back 15 on the right of the face (both
+  64 px, at y 156, below the upper tab's band), and past the end it tells the
+  story. The stamp moved down to (384, 276) to stay clear of it and of the
+  lower tab's band.
+- **The story's lower button is Back**, on a walk as on your own. It goes
+  to where the story was opened from:
+  - a stop's story, to the walk screen;
+  - the walk's introduction, to the walk on Choose;
+  - a landmark on your own, to the free map.
+
+  The story stops and keeps its place. The walk screen's upper tab says
+  *Resume* when its story was left part way, and *Listen* plays it from
+  there.
+- **On the free map, the landmark stays.** Back from a landmark's story, or
+  told, it stays picked at its door: "AT THE DOOR / Berkeley City Hall /
+  Bakewell & Brown · 1908". The upper button is *Listen* (or *Resume*) there,
+  until you pick another or walk 60 m on. A landmark told on your own starts
+  again from the top.
+- **The menu comes from the walk screen only now.** That's the volume,
+  the map, last and next stop, and End walk. During a story it's *Back*,
+  then *Menu*.
+- **Each story keeps its place by its part on the card** (`walk_set_heard`,
+  "lm17"). It's kept as the story is left (`story_leaving`, from
+  `ui_show_anim`), not when its screen is deleted after the next is in.
+  Before, a story going out wrote its place after *Next stop* had already
+  moved on, so the next stop's story could open at the old one's position,
+  even told. Setting out again on a walk whose introduction was left part
+  way picks it up there.
+
+Checked on the guide with a pretend position:
+
+- Forward 15 twice (0:02 to 0:36).
+- *Back* to the stop with *Resume*, and *Resume* (0:37).
+- Forward past the end (*Next stop*), and stop 2's story from the top.
+- *Back* from the introduction to Choose.
+- On the free map: Berkeley City Hall's story, *Back* to it at its door with
+  *Resume*, and *Resume* (0:23).
+
 ### Motion and the companion (2026-10-21, second pass)
 
 Everything moves, the way the app's living illustrations do: paper-toy
