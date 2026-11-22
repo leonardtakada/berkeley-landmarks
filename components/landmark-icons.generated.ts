@@ -196,6 +196,7 @@ export const LANDMARK_ICONS: Record<string, ImageRequireSource> = {
   "lm-27": require("../assets/icons/lm-27.png"),
   "lm-270": require("../assets/icons/lm-270.png"),
   "lm-271": require("../assets/icons/lm-271.png"),
+  "lm-2711bv": require("../assets/icons/lm-2711bv.png"),
   "lm-272": require("../assets/icons/lm-272.png"),
   "lm-273": require("../assets/icons/lm-273.png"),
   "lm-274": require("../assets/icons/lm-274.png"),

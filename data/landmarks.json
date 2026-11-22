@@ -3511,6 +3511,35 @@
     "photoUrl": null
   },
   {
+    "id": "lm-2711bv",
+    "name": "Maybeck Studio",
+    "address": "2711 Buena Vista Way",
+    "latitude": 37.881833,
+    "longitude": -122.2576447,
+    "architect": "Bernard Maybeck",
+    "yearBuilt": "1924",
+    "category": "residential",
+    "landmarkNumber": null,
+    "description": "After the 1923 Berkeley Fire destroyed the Maybeck family's 1907 home on this site, Bernard Maybeck rebuilt with a compact experimental one-room studio (1924–25) set directly on the surviving concrete slab. Its signature walls are Bubblestone — a waterproof, aerated “bubble” concrete invented by a friend of the architect — giving the studio its distinctive pink, pocked texture. At a back corner of the house, scorched timber beams salvaged from the pre-fire home remain visible. Inside, the main room's carved wood brackets, paneling, and loft stair show the handcrafted detailing of Maybeck's circle; the studio stands at the heart of the family compound, near the Bubblestone-clad Maybeck Cottage on Maybeck Twin Drive.",
+    "style": "Bubblestone concrete / First Bay Tradition",
+    "nationalRegister": false,
+    "neighborhood": "Berkeley Hills",
+    "designationType": "Notable",
+    "photoUrl": "upload:u-85cfd11e1037.jpg",
+    "photos": [
+      {
+        "url": "upload:u-56e1c7243d16.jpg",
+        "caption": "The main room, with carved timberwork and the stair to the loft",
+        "credit": "Leo"
+      },
+      {
+        "url": "upload:u-6cd0fa789d3e.jpg",
+        "caption": "Carved wood brackets below the sleeping loft",
+        "credit": "Leo"
+      }
+    ]
+  },
+  {
     "id": "lm-272",
     "name": "Captain Maury House",
     "address": "1335 Shattuck Avenue",
@@ -4369,14 +4398,21 @@
     "longitude": -122.259613,
     "architect": "John Galen Howard",
     "yearBuilt": "1906",
-    "category": "residential",
+    "category": "educational",
     "landmarkNumber": "#367",
     "description": "Completed in 1906 as part of John Galen Howard's Hearst Plan for the UC Berkeley campus, Northgate Hall is a modest Classical Revival building near the campus's north entrance. It has served various academic departments over the decades and exemplifies Howard's vision of a unified campus architecture in the Beaux-Arts tradition.",
     "style": "Classical Revival",
     "nationalRegister": false,
     "neighborhood": "UC Campus",
     "designationType": "Landmark",
-    "photoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/7c/North_Gate_Hall%2C_UC_Berkeley.jpg/960px-North_Gate_Hall%2C_UC_Berkeley.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail"
+    "photoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/7c/North_Gate_Hall%2C_UC_Berkeley.jpg/960px-North_Gate_Hall%2C_UC_Berkeley.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "photos": [
+      {
+        "url": "upload:u-2ee6ff5101a2.jpg",
+        "caption": "Dusk light on the shingled street facade",
+        "credit": "Leo"
+      }
+    ]
   },
   {
     "id": "lm-313",
