@@ -6720,6 +6720,11 @@ export const landmarks: Landmark[] = [
     style: 'Brown Shingle / Italian Renaissance',
     nationalRegister: false,
     neighborhood: 'La Loma Historic District',
+    photoUrl: 'upload:u-07db6c6963f1.jpg',
+    photos: [
+      { url: "upload:u-6b5a32ba9d6c.jpg", caption: "Evening view from the garden steps", credit: "Leo" },
+      { url: "upload:u-c44960b975e7.jpg", caption: "The front elevation lit at night", credit: "Leo" },
+    ],
     designationType: 'Notable',
   }
 ];
