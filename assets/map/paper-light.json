@@ -503,7 +503,7 @@
     "text-padding": 6,
     "text-offset": [
      0,
-     1.1
+     0
     ]
    },
    "paint": {
@@ -549,7 +549,7 @@
     "text-padding": 4,
     "text-offset": [
      0,
-     1.1
+     0
     ]
    },
    "paint": {

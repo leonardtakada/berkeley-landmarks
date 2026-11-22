@@ -38,7 +38,7 @@ import { Directory, File, Paths } from "expo-file-system";
 import { IsoGrass } from "@/components/iso-grass";
 import { IsoTreeSway } from "@/components/iso-tree-sway";
 import { IsoWalkers, type MapView } from "@/components/iso-walkers";
-import { WalkOutlines } from "@/components/walk-outlines";
+import { WALK_TAG_LAYERS, WalkTrails } from "@/components/walk-trails";
 import { useColors } from "@/hooks/use-colors";
 import type { Fix } from "@/lib/arrival";
 import { isoBounds, isoGroundShape, isoLine, isoPoint, onDrawing } from "@/lib/iso-map";
@@ -148,8 +148,12 @@ interface MapLibreViewProps {
   onFollowChange?: (following: boolean) => void;
   /** Hears when the map has first drawn, tiles and all. */
   onLoaded?: () => void;
-  /** Every walk outlined on the map, its label pressed to open it (the city map before a walk is chosen). */
-  walks?: { onPress: (tourId: string) => void } | null;
+  /**
+   * The walks' trails on the map, tagged with their numbers and names, a tag
+   * pressed to open its walk; shown while `shown` (the city map before a walk
+   * is chosen). Pass it for the map's whole life, so the layers stay in place.
+   */
+  walks?: { shown: boolean; onPress: (tourId: string) => void };
   children?: React.ReactNode;
 }
 
@@ -206,6 +210,9 @@ async function stage(mod: number, dest: File, bytes?: number) {
   await part.move(dest);
 }
 
+/** Where the glyphs are copied to: renamed whenever assets/map/glyphs change (scripts/build_glyphs.mjs), the earlier names cleared. */
+const GLYPHS_DIR = "map-glyphs-2";
+
 /** Copy bundled map assets into real files so maplibre-native can mmap them. */
 async function stageOfflineAssets(kind: "flat" | "iso"): Promise<{ pmtilesUri: string; glyphsUrl: string }> {
   const tiles = new File(Paths.cache, TILES[kind].name);
@@ -215,8 +222,13 @@ async function stageOfflineAssets(kind: "flat" | "iso"): Promise<{ pmtilesUri: s
     if (f instanceof File && /^iso-.*\.pmtiles$/.test(f.name) && f.name !== TILES.iso.name) f.delete();
   }
 
-  // Glyph PBFs, in their fontstack/range.pbf folders.
-  const glyphs = new Directory(Paths.cache, "map-glyphs");
+  // Glyph PBFs, in their fontstack/range.pbf folders: a new folder when they change (a copy the same size is
+  // kept, and a glyph moved within its file needn't change its size), the old one gone.
+  const glyphs = new Directory(Paths.cache, GLYPHS_DIR);
+  for (const old of ["map-glyphs"]) {
+    const d = new Directory(Paths.cache, old);
+    if (d.exists) d.delete();
+  }
   await Promise.all(
     Object.entries(GLYPH_ASSETS).map(async ([key, mod]) => {
       const [stack, range] = key.split("/");
@@ -629,6 +641,22 @@ const MapLibreMapView = forwardRef<MapCameraHandle | null, MapLibreViewProps>(
         event?.stopPropagation?.();
         const feature = event?.nativeEvent?.features?.[0];
         if (!feature) return;
+        // The pins answer a press anywhere near them, before the walks' tags under them: but a press right on a
+        // tag and not right on a pin is the tag's.
+        const point = event?.nativeEvent?.point as [number, number] | undefined;
+        if (walks?.shown && point && mapRef.current) {
+          try {
+            const [tag] = await mapRef.current.queryRenderedFeatures(point, { layers: WALK_TAG_LAYERS });
+            const pin = tag
+              ? (await mapRef.current.queryRenderedFeatures(point, { layers: ["landmark-pins", "landmark-clusters"] })).length > 0
+              : false;
+            const id = tag?.properties?.id;
+            if (typeof id === "string" && !pin) {
+              walks.onPress(id);
+              return;
+            }
+          } catch {}
+        }
         if (feature.properties?.cluster) {
           try {
             const zoom = await shapeRef.current?.getClusterExpansionZoom(
@@ -645,7 +673,7 @@ const MapLibreMapView = forwardRef<MapCameraHandle | null, MapLibreViewProps>(
         const cb = pressById.get(feature.properties?.id);
         cb?.();
       },
-      [pressById, minZoomLevel]
+      [pressById, minZoomLevel, walks]
     );
 
     /**
@@ -853,6 +881,25 @@ const MapLibreMapView = forwardRef<MapCameraHandle | null, MapLibreViewProps>(
                   "circle-stroke-color": CREAM,
                 }}
               />
+              {/* Close in, each pin's room, unseen: the streets' names make way for it rather than run under it. (Not
+                  further out, where the pins are thick: the walks' tags and the districts' names are set clear of them.) */}
+              <Layer
+                key="landmark-pin-room"
+                id="landmark-pin-room"
+                beforeId={under}
+                type="symbol"
+                minzoom={15}
+                filter={["!", ["has", "point_count"]]}
+                layout={{
+                  "text-field": "o",
+                  "text-font": ["Noto Sans Bold"],
+                  "text-size": 16,
+                  "text-allow-overlap": true,
+                  "text-ignore-placement": false,
+                  "text-padding": 0,
+                }}
+                paint={{ "text-opacity": 0 }}
+              />
               {labelled ? (
                 <Layer
                   key="landmark-pin-labels"
@@ -867,8 +914,7 @@ const MapLibreMapView = forwardRef<MapCameraHandle | null, MapLibreViewProps>(
                     "text-anchor": "center",
                     "text-allow-overlap": true,
                     "text-ignore-placement": true,
-                    // The baked glyphs sit high; same correction as the cluster counts.
-                    "text-offset": [0.05, 1.1],
+                    "text-offset": [0.05, 0],
                   }}
                   paint={{ "text-color": CREAM, "text-opacity": ["step", ["zoom"], 0, 12.8, 1] as any }}
                 />
@@ -915,21 +961,51 @@ const MapLibreMapView = forwardRef<MapCameraHandle | null, MapLibreViewProps>(
                   "text-rotation-alignment": "viewport",
                   "text-allow-overlap": true,
                   "text-ignore-placement": true,
-                  "text-offset": [0.05, 1.1],
+                  "text-offset": [0.05, 0],
                 }}
                 paint={{ "text-color": "#423F3B" }}
+              />
+              {/* Each bubble's middle kept clear, unseen: a letter about the size of the bubble's core, which the walks' tags and the
+                  map's names make way for. (The districts' names are set clear of the bubbles where they can be: scripts/iso/city.ts.) */}
+              <Layer
+                key="landmark-cluster-room"
+                id="landmark-cluster-room"
+                beforeId={under}
+                type="symbol"
+                filter={["has", "point_count"]}
+                layout={{
+                  "text-field": "O",
+                  "text-font": ["Noto Sans Bold"],
+                  // (Its box is about 0.7 of the size wide and 1.1 high: so about the middle two thirds of the bubble — far
+                  // out, where the bubbles crowd the whole city and a name across one can't be read, all of it.)
+                  "text-size": (iso
+                    ? [
+                        "interpolate",
+                        ["linear"],
+                        ["zoom"],
+                        12.4,
+                        ["step", ["get", "point_count"], 23, 5, 27, 15, 32, 40, 38, 100, 43],
+                        12.8,
+                        ["step", ["get", "point_count"], 16, 5, 19, 15, 22, 40, 27, 100, 30],
+                      ]
+                    : ["step", ["get", "point_count"], 22, 5, 27, 15, 34, 40, 43, 100, 52]) as any,
+                  "text-allow-overlap": true,
+                  "text-ignore-placement": false,
+                  "text-padding": 0,
+                }}
+                paint={{ "text-opacity": 0 }}
               />
             </GeoJSONSource>
           )}
 
-          {/* The walks, outlined over the drawing (under its walkers, as a route is) and labelled over the pins. */}
+          {/* The walks' dotted trails, on the ground under what stands, and their tags along them, making way for the pins. */}
           {walks ? (
-            <WalkOutlines
+            <WalkTrails
               iso={iso}
+              shown={walks.shown}
               onPress={walks.onPress}
-              outlinesBefore={underWalkers}
-              labelsOver={markerGeoJSON ? "landmark-cluster-count" : undefined}
-              labelsBefore={under}
+              trailsBefore={iso ? "solids" : undefined}
+              tagsBefore={markerGeoJSON ? "landmark-pins" : under}
             />
           ) : null}
 

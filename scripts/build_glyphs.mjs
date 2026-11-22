@@ -112,7 +112,7 @@ async function main() {
         if (!g) continue;
         // MapLibre glyph convention: width/height = INK dims, bitmap includes
         // `buffer` px padding on all sides, top = ink top relative to the
-        // alphabetic baseline (negative = above), left = ink left of pen.
+        // line's top-of-em reference (see below), left = ink left of pen.
         const gw = g.glyphWidth, gh = g.glyphHeight;
         if (gw === 0 || gh === 0) {
           // advance-only glyph (space etc.): empty bitmap, zero ink metrics
@@ -121,7 +121,10 @@ async function main() {
         }
         if (g.data.length < (gw + 6) * (gh + 6)) continue;
         const buf = Buffer.from(g.data.subarray(0, (gw + 6) * (gh + 6)));
-        const gl = Math.round(g.glyphLeft), gt = Math.round(g.glyphTop);
+        // (MapLibre's `top` is measured from 27 px under the ink's baseline at a 24 px em — the em and the
+        // 3 px buffer — as maplibre-gl does for its own TinySDF glyphs; TinySDF's glyphTop is from the baseline.
+        // Without it, every label drew 1.1 em above where it's laid out and collides.)
+        const gl = Math.round(g.glyphLeft), gt = Math.round(g.glyphTop) - 27;
         const gm = { id: cp, bitmap: buf, advance: Math.round(g.glyphAdvance) };
         // omit zero-valued fields (proto2 convention; maplibre's generic reader
         // treats absent as 0 but present-0 breaks its bitmap size check)

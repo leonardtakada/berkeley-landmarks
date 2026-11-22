@@ -18,6 +18,31 @@ const metres = (m: number | unknown[]) => [
   ["*", m, 1048576 / 78271.5],
 ];
 
+/** From this zoom the streets are named only where they're in sight (the tiles' `names-seen`). */
+const STREET_NAMES_IN_SIGHT = 16.5;
+
+/** The streets' names, small tracked capitals along them: the main streets first, the rest once there's room. */
+function streetNames(id: string, sourceLayer: string, zooms: { minzoom: number; maxzoom?: number }) {
+  return {
+    id,
+    type: "symbol",
+    source: "iso",
+    "source-layer": sourceLayer,
+    ...zooms,
+    filter: ["any", ["==", ["get", "major"], 1], [">=", ["zoom"], 15.5]],
+    layout: {
+      "symbol-placement": "line",
+      "text-field": ["upcase", ["get", "name"]],
+      "text-font": FONT_STACK.regular,
+      "text-size": 9.5,
+      "text-letter-spacing": 0.18,
+      "symbol-spacing": 320,
+      "text-max-angle": 30,
+    },
+    paint: { "text-color": "#6E6252", "text-halo-color": "#FDFAF2", "text-halo-width": 1.4 },
+  };
+}
+
 export function isoStyle(source: { pmtilesUri: string; glyphsUrl: string }) {
   return {
     version: 8,
@@ -130,25 +155,10 @@ export function isoStyle(source: { pmtilesUri: string; glyphsUrl: string }) {
         // so the edges of faces behind would show through the ones in front.
         paint: { "fill-color": ["get", "c"], "fill-antialias": false },
       },
-      {
-        id: "street-names",
-        type: "symbol",
-        source: "iso",
-        "source-layer": "names",
-        minzoom: 14,
-        // The main streets named first; the rest once there's room.
-        filter: ["any", ["==", ["get", "major"], 1], [">=", ["zoom"], 15.5]],
-        layout: {
-          "symbol-placement": "line",
-          "text-field": ["upcase", ["get", "name"]],
-          "text-font": FONT_STACK.regular,
-          "text-size": 9.5,
-          "text-letter-spacing": 0.18,
-          "symbol-spacing": 320,
-          "text-max-angle": 30,
-        },
-        paint: { "text-color": "#6E6252", "text-halo-color": "#FDFAF2", "text-halo-width": 1.4 },
-      },
+      // The streets' names over everything, as a map's lettering is: close in, only along the stretches in
+      // sight, so a street behind a building isn't named across its roof.
+      streetNames("street-names", "names", { minzoom: 14, maxzoom: STREET_NAMES_IN_SIGHT }),
+      streetNames("street-names-close", "names-seen", { minzoom: STREET_NAMES_IN_SIGHT }),
       {
         id: "places",
         type: "symbol",

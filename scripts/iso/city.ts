@@ -13,6 +13,7 @@
  *   solids   every building and tree, back to front        (z14+)
  *   sway     the crowns that sway, nothing in front of them  (z15+)
  *   names    street names, along the streets               (z15+)
+ *   names-seen  the same, where the street is in sight      (close in)
  *   places   the districts                                 (z11–15)
  * Each piece carries its colour (c) and its place in the drawing order (s),
  * which the style uses as the fill sort key.
@@ -33,6 +34,8 @@ import { tileId, writePmtiles } from "./pmtiles";
 import { buildScene, levelAt, LEVEL, terrain, type P3, type Piece } from "./scene";
 import { CITY_BOX } from "./city-proof";
 import { swayingCrowns } from "./sway";
+import { occlusion } from "./walks";
+import { landmarkMarks, overlap, screenAt, type Box } from "./clusters";
 
 /** How far a crown may lean in the wind, metres (components/iso-tree-sway.tsx keeps within it). */
 const SWAY_REACH = 0.8;
@@ -46,6 +49,10 @@ const OUT = "assets/map/iso.pmtiles";
 const MODULE = "lib/iso-terrain.generated.ts";
 const Z_MIN = 11;
 const Z_MAX = 16;
+/** How far from the middle of its landmarks a district's name may go to be clear of their pins, metres. */
+const DISTRICT_REACH = 900;
+/** How finely a street is checked for being in sight, metres; how long a gap (a tree) may be and the stretch still count as one; how short a stretch in sight is too short to name. */
+const [SIGHT_STEP, SIGHT_GAP, SIGHT_RUN] = [3, 7, 25];
 /** Buildings are drawn this many times their height, so the houses read. */
 const HEIGHT_SCALE = 1.4;
 /** The grid the app lifts its pins and routes onto the terraces with, metres. */
@@ -66,6 +73,8 @@ const LAYERS: Record<string, { min: number; max: number; tolerance: number; buff
   /** The crowns that sway with the wind (scripts/iso/sway.ts), in groups (w): drawn over everything standing. */
   sway: { min: 14, max: 16, tolerance: 0.4 },
   names: { min: 14, max: 16, tolerance: 2 },
+  /** The same, only where the street is in sight (nothing nearer stands over it): close in, where a name laid along a street behind a building would lie across its roof. */
+  "names-seen": { min: 16, max: 16, tolerance: 1 },
   places: { min: 11, max: 16, tolerance: 1 },
 };
 
@@ -189,6 +198,39 @@ async function main() {
     }
   });
 
+  // What stands in front of each point of the streets (as the walkers are hidden by: scripts/iso/walks.ts).
+  const sight = await occlusion(box);
+  /** The stretches of a line (points SIGHT_STEP apart) where the street is in sight; a gap shorter than SIGHT_GAP (a tree's crown) doesn't break one. */
+  const inSight = (pts: Pt[]): Pt[][] => {
+    const hidden = pts.map(([u, v]) => {
+      const z = Math.max(0, zAt(u, v));
+      const [lo, hi] = sight.columnAt(u, v, z, 0.3, 3, sight.nearOf(u, v, z, 1));
+      return lo < hi;
+    });
+    // (Short gaps bridged.)
+    for (let i = 0; i < hidden.length; ) {
+      if (!hidden[i]) {
+        i++;
+        continue;
+      }
+      let j = i;
+      while (j < hidden.length && hidden[j]) j++;
+      if (i > 0 && j < hidden.length && (j - i) * SIGHT_STEP < SIGHT_GAP) for (let k = i; k < j; k++) hidden[k] = false;
+      i = j;
+    }
+    const runs: Pt[][] = [];
+    let cur: Pt[] = [];
+    pts.forEach((p, i) => {
+      if (!hidden[i]) cur.push(p);
+      else if (cur.length) {
+        runs.push(cur);
+        cur = [];
+      }
+    });
+    if (cur.length) runs.push(cur);
+    return runs;
+  };
+
   // Street names, along the streets (lifted onto their terraces).
   const osm: { tags?: Record<string, string>; geometry?: { lat: number; lon: number }[] }[] = JSON.parse(
     fs.readFileSync("data/osm-streets.json", "utf8"),
@@ -204,10 +246,33 @@ async function main() {
       const pts = densify(run, 10).map(([u, v]) => ll([u, v, Math.max(0, zAt(u, v)) + 0.5]));
       const major = ["primary", "secondary", "tertiary"].includes(w.tags.highway ?? "") ? 1 : 0;
       layers.names.push({ type: "Feature", properties: { name: w.tags.name, major }, geometry: { type: "LineString", coordinates: pts } });
+      // Close in, only the stretches in sight.
+      for (const seen of inSight(densify(run, SIGHT_STEP))) {
+        if (seen.length < 2 || (seen.length - 1) * SIGHT_STEP < SIGHT_RUN) continue;
+        const coordinates = seen.map(([u, v]) => ll([u, v, Math.max(0, zAt(u, v)) + 0.5]));
+        layers["names-seen"].push({ type: "Feature", properties: { name: w.tags.name, major }, geometry: { type: "LineString", coordinates } });
+      }
     }
   }
+  console.log(`names in sight: ${((Date.now() - t0) / 1000).toFixed(1)}s`);
 
-  // The districts, named where their landmarks gather.
+  // The districts, named where their landmarks gather — but not over their pins: the map clusters those (and its
+  // names make way for the clusters), so each name goes where it's clear of them, as near the middle as it may.
+  const marks = landmarkMarks();
+  /** A district's name on the screen at zoom z (lib/iso-style.ts "places": bold capitals, tracked 0.3, 8 ems a line at most). */
+  const nameBox = (name: string, at: number[], z: number): Box => {
+    const size = 10 + (Math.min(15, Math.max(11, z)) - 11);
+    const lines: string[] = [];
+    for (const word of name.split(/\s+/)) {
+      if (lines.length && (lines[lines.length - 1] + " " + word).length <= 9) lines[lines.length - 1] += " " + word;
+      else lines.push(word);
+    }
+    const [w, h] = [Math.max(...lines.map((l) => l.length)) * 0.95 * size, lines.length * 1.2 * size];
+    const [x, y] = screenAt(at, z);
+    return [x - w / 2, y - h / 2, x + w / 2, y + h / 2];
+  };
+  const named: { name: string; at: number[] }[] = [];
+  const DISTRICT_ZOOMS = [12, 13, 13.6];
   const districts = new Map<string, Pt[]>();
   for (const l of landmarks) {
     const d = l.neighborhood?.trim();
@@ -215,14 +280,38 @@ async function main() {
     const q = toLocal(l.latitude, l.longitude);
     districts.set(d, [...(districts.get(d) ?? []), [q.u, q.v]]);
   }
-  for (const [name, pts] of districts) {
+  // (The districts with most landmarks first: their names have first choice.)
+  for (const [name, pts] of [...districts].sort((a, b) => b[1].length - a[1].length)) {
     if (pts.length < 3) continue;
-    const [u, v] = centroid(pts);
-    if (u < box.u0 || u > box.u1 || v < box.v0 || v > box.v1) continue;
+    const [cu, cv] = centroid(pts);
+    if (cu < box.u0 || cu > box.u1 || cv < box.v0 || cv > box.v1) continue;
+    const label = name.toUpperCase();
+    let best = { at: ll([cu, cv, Math.max(0, zAt(cu, cv)) + 20]), cost: Infinity };
+    for (let du = -DISTRICT_REACH; du <= DISTRICT_REACH; du += 40) {
+      for (let dv = -DISTRICT_REACH; dv <= DISTRICT_REACH; dv += 40) {
+        const off = Math.hypot(du, dv);
+        if (off > DISTRICT_REACH) continue;
+        const [u, v] = [cu + du, cv + dv];
+        if (u < box.u0 || u > box.u1 || v < box.v0 || v > box.v1) continue;
+        const at = ll([u, v, Math.max(0, zAt(u, v)) + 20]);
+        let cost = off * 0.5;
+        for (const z of DISTRICT_ZOOMS) {
+          const b = nameBox(label, at, z);
+          for (const m of marks(z)) {
+            const o = overlap(b, m.box);
+            // (Under a bubble's middle it goes unseen; under a pin, the pin lies over its letters.)
+            if (o > 0) cost += m.cluster ? 400 + o * 4 : 150 + o * 3;
+          }
+          for (const o of named) if (overlap(b, nameBox(o.name, o.at, z)) > 0) cost += 2000;
+        }
+        if (cost < best.cost) best = { at, cost };
+      }
+    }
+    named.push({ name: label, at: best.at });
     layers.places.push({
       type: "Feature",
-      properties: { name: name.toUpperCase(), n: pts.length },
-      geometry: { type: "Point", coordinates: ll([u, v, Math.max(0, zAt(u, v)) + 20]) },
+      properties: { name: label, n: pts.length },
+      geometry: { type: "Point", coordinates: best.at },
     });
   }
   for (const [k, fs2] of Object.entries(layers)) console.log(`  ${k}: ${fs2.length}`);

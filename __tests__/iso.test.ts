@@ -81,38 +81,91 @@ describe("the catalogue's icons", () => {
   });
 });
 
-describe("the walks' outlines on the city map", () => {
-  it("go round every walk, route and stops, each with its label hung on it", async () => {
-    const { WALK_OUTLINES } = await import("../lib/walk-outlines.generated");
-    const listed = fs.readFileSync(path.join(__dirname, "../components/walk-labels.generated.ts"), "utf8");
-    const inside = (p: { u: number; v: number }, ring: [number, number][]) => {
-      const r = ring.map(([lat, lon]) => toLocal(lat, lon));
-      let n = false;
-      for (let i = 0, j = r.length - 1; i < r.length; j = i++) {
-        if (r[i].v > p.v !== r[j].v > p.v && p.u < ((r[j].u - r[i].u) * (p.v - r[i].v)) / (r[j].v - r[i].v) + r[i].u) n = !n;
-      }
-      return n;
-    };
+describe("the walks' trails on the city map", () => {
+  it("run along every walk's way, each stretch drawn once, and every walk has its tag", async () => {
+    const { WALK_TRAILS } = await import("../lib/walk-trails.generated");
+    const listed = fs.readFileSync(path.join(__dirname, "../components/walk-tags.generated.ts"), "utf8");
+    const segs = WALK_TRAILS.flatMap((t) => t.slice(1).map((p, i) => [toLocal(t[i][0], t[i][1]), toLocal(p[0], p[1])]));
+    const near = (p: { u: number; v: number }) =>
+      segs.some(([a, b]) => {
+        const [dx, dy] = [b.u - a.u, b.v - a.v];
+        const k = Math.max(0, Math.min(1, ((p.u - a.u) * dx + (p.v - a.v) * dy) / (dx * dx + dy * dy || 1)));
+        return Math.hypot(p.u - a.u - k * dx, p.v - a.v - k * dy) < 5;
+      });
     const stale = tours.filter((t) => {
-      const w = WALK_OUTLINES[t.id];
-      if (!w || !listed.includes(`"walk-${t.id}"`) || !fs.existsSync(path.join(__dirname, `../assets/map/walks/${t.id}@3x.png`))) return true;
-      const stops = t.stops.map((s) => landmarks.find((l) => l.id === s.landmarkId)!).filter(Boolean);
-      const places = [...t.routeCoordinates, ...stops].map((c) => toLocal(c.latitude, c.longitude));
-      // Its label's foot on the outline itself.
-      const onIt = w.outline.some(([lat, lon]) => lat === w.label[0] && lon === w.label[1]);
-      return !onIt || places.some((p) => !inside(p, w.outline));
+      if (!listed.includes(`"walk-${t.id}"`) || !fs.existsSync(path.join(__dirname, `../assets/map/walks/${t.id}@3x.png`))) return true;
+      const r = t.routeCoordinates.map((c) => toLocal(c.latitude, c.longitude));
+      // Every corner of the way, and the middle of every stretch, on a trail.
+      return r.some((p, i) => !near(p) || (i > 0 && !near({ u: (p.u + r[i - 1].u) / 2, v: (p.v + r[i - 1].v) / 2 })));
     });
-    expect(stale.map((t) => t.id), "run npx tsx scripts/iso/walk-outlines.ts").toEqual([]);
-    expect(Object.keys(WALK_OUTLINES).sort()).toEqual(tours.map((t) => t.id).sort());
+    expect(stale.map((t) => t.id), "run npx tsx scripts/iso/walk-trails.ts").toEqual([]);
+    // Shared streets drawn once: less trail than way.
+    const length = (pts: { u: number; v: number }[]) => pts.slice(1).reduce((s, p, i) => s + Math.hypot(p.u - pts[i].u, p.v - pts[i].v), 0);
+    const trail = WALK_TRAILS.reduce((s, t) => s + length(t.map(([a, b]) => toLocal(a, b))), 0);
+    const way = tours.reduce((s, t) => s + length(t.routeCoordinates.map((c) => toLocal(c.latitude, c.longitude))), 0);
+    expect(trail).toBeLessThan(way * 0.85);
   });
 
-  it("run anticlockwise, so the band along each one lies inside it", async () => {
-    const { WALK_OUTLINES } = await import("../lib/walk-outlines.generated");
-    for (const w of Object.values(WALK_OUTLINES)) {
-      const r = w.outline.map(([lat, lon]) => toLocal(lat, lon));
-      const area = r.reduce((s, a, i) => s + a.u * r[(i + 1) % r.length].v - r[(i + 1) % r.length].u * a.v, 0) / 2;
-      expect(area).toBeGreaterThan(0);
+  it("tag every walk a few times, each tag on its own walk's way", async () => {
+    const { WALK_TAGS } = await import("../lib/walk-trails.generated");
+    const listed = fs.readFileSync(path.join(__dirname, "../components/walk-tags.generated.ts"), "utf8");
+    for (const t of tours) {
+      const mine = WALK_TAGS.filter(([id]) => id === t.id);
+      expect(mine.length, t.id).toBeGreaterThanOrEqual(1);
+      expect(listed.includes(`"walk-no-${t.id}"`), t.id).toBe(true);
+      const r = t.routeCoordinates.map((c) => toLocal(c.latitude, c.longitude));
+      for (const [, lat, lon] of mine) {
+        const p = toLocal(lat, lon);
+        const d = Math.min(
+          ...r.slice(1).map((b, i) => {
+            const a = r[i];
+            const [dx, dy] = [b.u - a.u, b.v - a.v];
+            const k = Math.max(0, Math.min(1, ((p.u - a.u) * dx + (p.v - a.v) * dy) / (dx * dx + dy * dy || 1)));
+            return Math.hypot(p.u - a.u - k * dx, p.v - a.v - k * dy);
+          }),
+        );
+        expect(d, t.id).toBeLessThan(1);
+      }
     }
+  });
+});
+
+describe("the map's lettering", () => {
+  it("is set where the map lays it out: each glyph's top measured as MapLibre measures it", () => {
+    // (A glyph's `top` runs from 27 px under the baseline at the glyphs' 24 px em, as maplibre-gl's own are;
+    // measured from the baseline, every label draws a line above its place and collides with the wrong things.)
+    const buf = fs.readFileSync(path.join(__dirname, "../assets/map/glyphs/Noto Sans Bold/0-255.pbf"));
+    const read = (b: Buffer) => {
+      const out: { tag: number; v?: number; b?: Buffer }[] = [];
+      let pos = 0;
+      const varint = () => {
+        let [n, s, x] = [0, 0, 0];
+        do {
+          x = b[pos++];
+          n += (x & 0x7f) * 2 ** s;
+          s += 7;
+        } while (x & 0x80);
+        return n;
+      };
+      while (pos < b.length) {
+        const key = varint();
+        if ((key & 7) === 0) out.push({ tag: key >> 3, v: varint() });
+        else {
+          const len = varint();
+          out.push({ tag: key >> 3, b: b.subarray(pos, pos + len) });
+          pos += len;
+        }
+      }
+      return out;
+    };
+    const glyphs = read(read(buf)[0].b!).filter((f) => f.tag === 3).map((f) => read(f.b!));
+    const top = (ch: string) => {
+      const g = glyphs.find((f) => f.find((x) => x.tag === 1)?.v === ch.codePointAt(0))!;
+      const z = g.find((x) => x.tag === 6)!.v!;
+      return z % 2 ? -(z + 1) / 2 : z / 2;
+    };
+    expect(top("H")).toBe(-10);
+    expect(top("x")).toBe(-14);
   });
 });
 

@@ -231,7 +231,10 @@ back to front (`scripts/iso/scene.ts`).
   the app lifts pins, routes and the reader onto (`lib/iso-map.ts`). Style:
   `lib/iso-style.ts`, one fill layer in the drawing's order (fill sort key,
   no anti-aliasing, so no edge of a face behind shows through); buildings
-  and trees from z14, trees from z15, street names from z14 (main) and z15.5,
+  and trees from z14, trees from z15, street names from z14 (main) and z15.5
+  (from z16.5 only along the stretches of street in sight — the tiles'
+  `names-seen`, found with the walkers' occlusion — so a street behind a
+  building isn't named across its roof),
   districts out to z14; creeks from z13; `lawns` (z16, never drawn; also
   textured by `lawn-texture`) is each lawn's own part in sight, where the
   wind blows.
@@ -270,27 +273,56 @@ back to front (`scripts/iso/scene.ts`).
   wrong. A few times a second each group leans east with the wind's strength
   and flutters in its own time; the map glides between (a 260 ms
   transition). Trunks stay put. Still with Reduce Motion.
-- **The walks on the city map** (before one is chosen): each walk's ground
-  outlined and labelled. `npx tsx scripts/iso/walk-outlines.ts` traces the
-  outline: everywhere within 60 m of the route and its stops, bays narrower
-  than about 440 m filled in and corners rounded (a 220 m closing on a 5 m
-  grid), the outer edge only (a loop's middle is the walk's too). It then
-  smooths and simplifies the outline and writes it anticlockwise to
-  `lib/walk-outlines.generated.ts`. Each walk is inked blue or vermilion,
-  chosen so the walks that overlap most differ, so crossing outlines can be
-  followed. The outline is a fine line with a screened band along its
-  inside (`line-offset`), printed over the drawing under the walkers
-  (`components/walk-outlines.tsx`). The label is baked to
-  `assets/map/walks/<id>.png` (@2x, @3x) in Jost: the walk's travel label
-  from the Tours page laid over the end of a paper slip with "WALK 07" and
-  the name, hung on a fine line in the walk's ink down to a dot on the
-  outline. Each label is pinned where it covers least of the other labels,
-  the other outlines and the pins at the map's opening zoom, preferring the
-  top of its own outline. On the map the labels sit over the pins
-  (`afterId` the cluster counts). Where labels collide further out, the
-  earlier walks' win (`symbol-sort-key`). Pressing a label lays out its
-  walk. Re-run the script after a walk's route or stops change (the test
-  checks every route point and stop lies inside its outline).
+- **The walks on the city map** (before one is chosen), as a pictorial guide
+  map marks its walking courses (`components/walk-trails.tsx`). Each walk is
+  a dotted vermilion trail along the streets it takes, on the ground under
+  what stands. Its tag is the number in cream on a vermilion roundel set on
+  the trail, over the end of a flat, square-cut slip bearing the name in
+  tracked blue capitals (Jost, baked to `assets/map/walks/<id>.png`, and
+  `<id>-no.png` for the roundel alone, @2x/@3x). Between z14 and z16 the
+  tag carries the name. Further out (among the clusters) and closer in
+  (over the buildings), it's the roundel alone.
+  Tags come in ranks, each its own layer, since a layer's minzoom keeps its
+  fraction and a filter's zoom doesn't. Rank 0 is one tag per walk, at every
+  zoom. Then come tags at least 2000, 1000 and 500 m apart *on the map*,
+  from z15.3, 16.3 and 17.3. The screen's height covers about that much
+  ground there, so there's about one of a walk's tags to a screen; a route
+  that winds back doesn't repeat it. Each tag is placed by judging it on the
+  screen at the zooms it shows at: off the landmarks' clusters (reproduced
+  with supercluster as the map makes them: `scripts/iso/clusters.ts`) and
+  pins, off other walks' tags, where the walk has the street to itself. A
+  walk that passes through the map's opening view has its first tag there.
+  The tags lie under the landmarks' pins and give way to an unseen "room"
+  over each cluster bubble (its middle two thirds; all of it below z12.8,
+  where a name across a bubble can't be read). The earlier walks' tags win
+  among themselves. A press is the pins' first, within the 44-pt touch box,
+  but a press right on a tag and not right on a pin opens the walk. While a
+  walk is open, the trails and tags are hidden, but kept mounted so the
+  layer order holds.
+  `npx tsx scripts/iso/walk-trails.ts` merges the walks' ways so each
+  stretch is drawn once (about a quarter of the 36 km is shared, and
+  overlapping dotted lines fall out of step) and places the tags. Re-run it
+  after a route changes; the tests check every route lies on a trail and
+  every tag on its walk.
+  Tried and dropped: area outlines round each walk (crossing blocks,
+  tangled, labelled at one point: hard to read and out of style); tags
+  repeated along the line every 240 pt (too many, worst close in); and
+  tags that also gave way to every single pin further out (the scattered
+  pins crowded out the tags and the district names). From z15 each pin does
+  have an unseen room, which the street names step around.
+- **The map's lettering** (glyphs baked by `scripts/build_glyphs.mjs`): a
+  glyph's `top` is measured from 27 px under the baseline at the 24 px em,
+  as maplibre-gl's own are. Until 2026-11-15 it was measured from the
+  baseline, so every label drew about one line above where it was laid out
+  and collided with the wrong things: district names ran under the bubbles
+  beside them, and the counts needed a `text-offset` of 1.1 em to look
+  centred. The copied glyphs live in a renamed cache folder (`GLYPHS_DIR`)
+  so devices pick up the change. Change the name again whenever the glyphs
+  change, since the copy is kept when it's the same size.
+- **District names** (`scripts/iso/city.ts`): each is placed within 900 m of
+  the middle of its landmarks, where it's clear of their clusters and pins
+  at z12, 13 and 13.6, and of the names already placed. The districts with
+  the most landmarks choose first.
 - **Walkers**: `npx tsx scripts/iso/walks.ts` (about a minute) writes
   `lib/iso-walks.generated.ts` — the streets the map draws, as a network on
   the terraces, and for each lane (either side of a stretch, where walkers
