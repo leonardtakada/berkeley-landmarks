@@ -1087,6 +1087,8 @@ export const landmarks: Landmark[] = [
     photos: [
       { url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/64/Temple_of_Wings%2C_Berkeley%2C_area_leading_to_courtyard.png/960px-Temple_of_Wings%2C_Berkeley%2C_area_leading_to_courtyard.png?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", credit: "Richard Guy Wilson · CC BY 4.0 · Wikimedia Commons" },
       { url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/8f/Temple_of_Wings%2C_interior.png/960px-Temple_of_Wings%2C_interior.png?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", credit: "Unknown authorUnknown author · Public domain · Wikimedia Commons" },
+      { url: "upload:u-0765666f35cf.jpg", caption: "The semicircular colonnade above Buena Vista Way", credit: "Leo" },
+      { url: "upload:u-824339584c8e.jpg", caption: "A deer browsing beneath the Corinthian columns", credit: "Leo" },
     ],
     designationType: 'Landmark',
   },
